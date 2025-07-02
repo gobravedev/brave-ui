@@ -8,7 +8,7 @@ import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import Meta from "antd/es/card/Meta"
 import { colors } from '@/utils/utils'
 import { listPipeline } from '@/api/pipeline'
-import CreatePipeline from '@/components/create-pipeline'
+import { CreateOrUpdatePipelineComponent } from '@/components/create-pipeline'
 import axios from "axios"
 import { useModal } from "@/hooks/useModal"
 
@@ -24,7 +24,7 @@ const PipelineCard: FC<any> = () => {
     const { modal, openModal, closeModal } = useModal();
 
     // const menuItems = useSelector((state: any) => state.menu.items)
-    const sseData = useSelector((state: any) => state.global.sseData)
+    // const sseData = useSelector((state: any) => state.global.sseData)
 
     const menu1: any[] = [
         {
@@ -140,14 +140,14 @@ const PipelineCard: FC<any> = () => {
     // indivi
     return <div style={{ maxWidth: "1500px", margin: "1rem auto" }}>
         {contextHolder}
-        {JSON.stringify(sseData)}
+        {/* {JSON.stringify(sseData)} */}
         <Flex justify="flex-end" gap="small">
             <Button color="cyan" variant="solid" onClick={() => {
-                 openModal("modalA", {
+               
+                openModal("modalA", {
                     data: undefined,
-                    pipelineStructure: {
-                        pipeline_type: "wrap_pipeline",
-                        parent_pipeline_id: "0"
+                    structure: {
+                        component_type: "pipeline",
                     }
                 })
             }}>创建流程</Button>
@@ -199,9 +199,8 @@ const PipelineCard: FC<any> = () => {
                                         e.stopPropagation()
                                         openModal("modalA", {
                                             data: item,
-                                            pipelineStructure: {
-                                                pipeline_type: "wrap_pipeline",
-                                                parent_pipeline_id: "0"
+                                            structure: {
+                                                component_type: "pipeline",
                                             }
                                         })
                                         // setCreateOpen(true)
@@ -251,13 +250,13 @@ const PipelineCard: FC<any> = () => {
             setOpen={setCreateOpen}
             data={record}></CreatePipeline> */}
 
-        <CreatePipeline
+        <CreateOrUpdatePipelineComponent
             callback={loadPipeine}
             // pipelineStructure={pipelineStructure}
             // data={record}
             visible={modal.key == "modalA" && modal.visible}
             onClose={closeModal}
-            params={modal.params}></CreatePipeline>
+            params={modal.params}></CreateOrUpdatePipelineComponent>
         {import.meta.env.MODE == "development" &&
             <>
                 <br /><br /><br /><br /><br /><br />

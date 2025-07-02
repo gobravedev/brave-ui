@@ -2,9 +2,10 @@ import { Button, Collapse, Form, Input, message, Select, Typography } from "antd
 import axios from "axios";
 import { FC, useEffect, useState } from "react";
 import FormJsonComp from "../form-components";
-import { listAnalysisResult } from '@/api/analysis-result'
+import { listAnalysisFiles } from '@/api/analysis-software'
 
 export const AnalysisForm: FC<any> = ({
+    pipeline,
     form,
     resultTableList,
     // activeTabKey,
@@ -126,7 +127,7 @@ export const AnalysisForm: FC<any> = ({
                 imgType: imgType,
                 ...downstreamInput,
                 software: "python",
-                pipeline_key:rest.pipeline_key
+                component_id:rest.component_id
             }
             if(rest?.moduleDir){
                 reqParams['module_dir'] = rest.moduleDir
@@ -161,7 +162,7 @@ export const AnalysisForm: FC<any> = ({
     }
     const loadData = async (analysisMetnodNames: any) => {
 
-        const data = await listAnalysisResult({ project: project, analysisMethodValues: analysisMetnodNames })
+        const data = await listAnalysisFiles({ project: project, analysisFileNames: analysisMetnodNames })
         const groupedData = data.reduce((acc: any, item: any) => {
             const key = item.analysis_method;
             // const key = keyMap[item.analysis_method]
@@ -226,7 +227,7 @@ export const AnalysisForm: FC<any> = ({
     }, [JSON.stringify(resultTableList)])
     return <>
         {contextHolder}
-        {JSON.stringify(rest)}
+        {/* {JSON.stringify(rest)} */}
         <Form form={form}   >
             <Form.Item name={"id"} style={{ display: "none" }}>
                 <Input></Input>
