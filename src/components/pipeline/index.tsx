@@ -10,6 +10,7 @@ import { listPipeline } from "@/api/pipeline"
 import { CreateORUpdatePipelineCompnentRelation, CreateOrUpdatePipelineComponent } from "../create-pipeline"
 import ModuleEdit from "../module-edit"
 import { useModal } from '@/hooks/useModal'
+import Metadata from '@/components/metadata'
 const Pipeline: FC<any> = ({ }) => {
     const { pipelineId: name } = useParams()
     // console.log(pipelineId)
@@ -220,7 +221,9 @@ const Pipeline: FC<any> = ({ }) => {
                 </> : <Skeleton active></Skeleton>}
             </div>
             <Flex gap="small" wrap>
-
+                <Button color="cyan" variant="solid" onClick={() => {
+                    openModal("modalD")
+                }}>导入数据</Button>
                 <Button color="cyan" variant="solid" onClick={() => {
                     openModal("modalC", {
                         data: pipeline, structure: {
@@ -238,7 +241,7 @@ const Pipeline: FC<any> = ({ }) => {
         {pipeline && Array.isArray(pipeline?.items) ? <Tabs destroyInactiveTabPane={true} items={items}></Tabs> :
 
             <Empty>
-                <Button style={{marginRight:"0.5rem"}} color="cyan" variant="solid" onClick={() => {
+                <Button style={{ marginRight: "0.5rem" }} color="cyan" variant="solid" onClick={() => {
                     openModal("modalC", {
                         data: undefined, structure: {
                             component_type: "software",
@@ -286,6 +289,10 @@ const Pipeline: FC<any> = ({ }) => {
             visible={modal.key == "modalC" && modal.visible}
             onClose={closeModal}
             params={modal.params}></CreateOrUpdatePipelineComponent>
+
+        <Metadata
+            visible={modal.key == "modalD" && modal.visible}
+            onClose={closeModal}></Metadata>
 
     </div>
 }

@@ -1,12 +1,10 @@
 import { FC, useEffect, useState } from "react"
 import axios from "axios"
-import { Button, Drawer, Form, Input, Modal, Space, Table, TableProps, Tabs } from "antd"
+import { Button, Card, Drawer, Flex, Form, Input, Modal, Space, Table, TableProps, Tabs } from "antd"
 import { useOutletContext, useParams } from "react-router"
-import TextArea from "antd/es/input/TextArea"
-import ReactMarkdown from "react-markdown"
-import remarkGfm from 'remark-gfm'
-import remarkMath from 'remark-math'
 
+import { useModal } from "@/hooks/useModal"
+import ImportFile from '@/components/import-file'
 export const getSamples: any = (project: any) => axios.get(`/list-by-project?project=${project}`)
 const Sample: FC<any> = () => {
     const [sampleData, setSampleData] = useState([])
@@ -14,9 +12,9 @@ const Sample: FC<any> = () => {
     const [loading, setLoading] = useState(false)
     const { project } = useOutletContext<any>()
 
-    const [open, setOpen] = useState<any>(false)
-    const [form] = Form.useForm();
-    const [operatureUrl,setOperatureUrl] = useState<any>()
+  
+    const { modal, openModal, closeModal } = useModal();
+    
     const { Search } = Input;
     const loadSample = async () => {
         setLoading(true)
@@ -63,12 +61,12 @@ const Sample: FC<any> = () => {
             dataIndex: 'sample_group',
             key: 'sample_group',
             ellipsis: true,
-        },  {
+        }, {
             title: '样本分组名称',
             dataIndex: 'sample_group_name',
             key: 'sample_group_name',
             ellipsis: true,
-        },{
+        }, {
             title: '样本来源',
             dataIndex: 'sample_source',
             key: 'sample_source',
@@ -179,64 +177,39 @@ const Sample: FC<any> = () => {
             ),
         },
     ]
-    const markdown = `
-|project|library_name|sample_name|sequencing_target|sequencing_technique|sample_composition|fastq1                                                 |fastq2                                                     |
-|-------|------------|-----------|-----------------|--------------------|------------------|-------------------------------------------------------|-----------------------------------------------------------|
-|test   |R250506-21  |OL-RNA-1   |RNA              |NGS                 |single_genome     |/V350344603_L03_117_1.fq.gz                            |/V350344603_L03_117_2.fq.gz                                |
-|test   |R250506-22  |OCF-RNA-1  |RNA              |NGS                 |single_genome     |/V350344603_L03_118_1.fq.gz                            |/V350344603_L03_118_2.fq.gz                                |
-|test   |R250506-23  |OSP-RNA-1  |RNA              |NGS                 |single_genome     |/V350344603_L03_119_1.fq.gz                            |/V350344603_L03_119_2.fq.gz                                |
-
----
-project,library_name,sample_name,sequencing_target,sequencing_technique,sample_composition,fastq1,fastq2
-
-test,R250506-21,OL-RNA-1,RNA,NGS,single_genome,/V350344603_L03_117_1.fq.gz,/V350344603_L03_117_2.fq.gz
-
-`
+    
     useEffect(() => {
         loadSample()
     }, [])
     return <>
         {/* {sampleData && <>样本数量{sampleData.length}</>} */}
-        <Search
-            placeholder="input search text"
-            allowClear
-            onSearch={(value: any) => {
-                const sampleData = data.filter((it: any) => it.sample_name.includes(value))
-                setSampleData(sampleData)
-            }}
-            style={{ width: 304 }}
-        />
-        <Button onClick={loadSample} style={{ marginLeft: "1rem" }}>刷新</Button>
-        <Button onClick={() => { setOperatureUrl("import_sample_form_str");setOpen(true) }} style={{ marginLeft: "1rem" }}>导入样本</Button>
-        <Button onClick={() => { setOperatureUrl("update_sample_form_str");setOpen(true) }} style={{ marginLeft: "1rem" }}>更新样本</Button>
 
-        <Table
-            pagination={{ pageSize: 30 }}
-            loading={loading}
-            scroll={{ x: 'max-content', y: 55 * 5 }}
-            columns={columns}
-            footer={() => `一共${sampleData.length}条记录`}
-            dataSource={sampleData} />
-        <Modal
-            open={open}
-            title={`操作样本(${operatureUrl})`}
-            width={"100%"}
-            onCancel={() => setOpen(false)}
-            onOk={async () => {
-                const values = await form.validateFields()
-                // console.log(values)
-                const resp: any = await axios.post(`/fast-api/${operatureUrl}`, values)
-                console.log(resp)
-            }}
-        >
-            <Form form={form}>
-                <Form.Item name={"content"} >
-                    <TextArea rows={10}></TextArea>
-                </Form.Item>
-            </Form>
-            <ReactMarkdown children={markdown} remarkPlugins={[remarkGfm, remarkMath]}></ReactMarkdown>
+        {!(modal.key == "modalA" && modal.visible) ? <>
+            <Search
 
-        </Modal>
+                style={{ width: 304 }}
+            />
+
+            <Button onClick={loadSample} style={{ marginLeft: "1rem" }}>刷新</Button>
+            <Button onClick={() => { openModal("modalA",{operatureUrl:"import_sample_form_str"}) }} style={{ marginLeft: "1rem" }}>导入样本</Button>
+            <Button onClick={() => { openModal("modalA",{operatureUrl:"update_sample_form_str"}) }} style={{ marginLeft: "1rem" }}>更新样本</Button>
+
+            <Table
+                pagination={{ pageSize: 30 }}
+                loading={loading}
+                scroll={{ x: 'max-content', y: 55 * 5 }}
+                columns={columns}
+                footer={() => `一共${sampleData.length}条记录`}
+                dataSource={sampleData} />
+
+        </> : <>
+            <ImportFile 
+            visible={modal.key == "modalA" && modal.visible}
+            onClose={closeModal} 
+            params={modal.params}
+            > </ImportFile>
+        </>}
+
     </>
 }
 
@@ -244,19 +217,15 @@ test,R250506-21,OL-RNA-1,RNA,NGS,single_genome,/V350344603_L03_117_1.fq.gz,/V350
 const SampleResult = () => {
 
     return <>
-
-        <Tabs items={[
+        <Sample></Sample>
+        {/* <Tabs items={[
             {
                 key: "sample",
                 label: "样本信息",
-                children: <Sample></Sample>
+                children: 
             }
-            // , {
-            //     key:"metaphlan-abundance",
-            //     label:"物种丰度(metaphlan)",
-            //     children:<Abundance></Abundance>
-            // }
-        ]}></Tabs>
+          
+        ]}></Tabs> */}
     </>
 }
 
