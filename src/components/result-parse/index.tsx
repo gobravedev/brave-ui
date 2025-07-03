@@ -1,19 +1,26 @@
-import { Button, Modal, Spin, Typography } from "antd"
+import { Button, message, Modal, Spin, Typography } from "antd"
 import axios from "axios";
 import { FC, useEffect, useState } from "react"
+import { useOutletContext } from "react-router";
 export const parseAnalysisResultAPi = (id: any, save: boolean) => axios.post(`/fast-api/parse-analysis-result/${id}?save=${save}`)
 
 const ResultParse: FC<any> = ({ visible, onClose, params, callback }) => {
     if (!visible) return null;
     const [data, setData] = useState<any>()
     const [loading, setLoading] = useState<any>()
+    const {messageApi} = useOutletContext<any>()
     const loadData = async (save:boolean) => {
         setLoading(true)
-        const resp = await parseAnalysisResultAPi(params.analysis_id, save)
-        setData(resp.data)
-        setLoading(false)
-        if(callback && save){
-            callback()
+        try{
+            const resp = await parseAnalysisResultAPi(params.analysis_id, save)
+            setData(resp.data)
+            setLoading(false)
+            if(callback && save){
+                callback()
+            }
+        }catch(error:any){
+            setLoading(false)
+            messageApi.error(error.response.data.detail)
         }
     }
     useEffect(() => {

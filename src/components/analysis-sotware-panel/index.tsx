@@ -15,6 +15,7 @@ import AnalysisForm from '../analysis-form'
 import PipelineMonitor from '@/components/pipeline-monitor'
 import { listAnalysisFiles } from '@/api/analysis-software'
 import { useSelector } from "react-redux"
+import BioDatabaseForm from "@/components/bio-database-form"
 type AnalysisFile = {
     name: string,
     label: string
@@ -28,6 +29,7 @@ type AnalysisSoftware = {
     component_id?: any,
     parseAnalysisModule?: any,
     parseAnalysisResultModule?: any,
+    databases?: any,
 
 
     wrapAnalysisPipeline?: any,
@@ -327,6 +329,44 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
                     {/* {JSON.stringify(rest)} */}
                 </Flex>
 
+                <Flex gap={"small"} style={{ marginBottom: "1rem", flexWrap: "wrap" }}>
+                    <Button color="cyan" variant="solid" onClick={() => {
+                        operatePipeline.openModal("modalB", {
+                            module_type: "nextflow",
+                            file_type: "nf",
+                            module_name: analysisPipline,
+                            component_id: rest.component_id,
+                        })
+                    }}>软件脚本</Button>
+                    <Button color="cyan" variant="solid" onClick={() => {
+                        operatePipeline.openModal("modalB", {
+                            module_type: "py_parse_analysis",
+                            file_type: "py",
+                            module_name: rest.parseAnalysisModule,
+                            component_id: rest.component_id,
+                        })
+                    }}>输入解析模块</Button>
+
+                    <Button color="cyan" variant="solid" onClick={() => {
+                        operatePipeline.openModal("modalB", {
+                            module_type: "py_parse_analysis_result",
+                            file_type: "py",
+                            module_name: rest.parseAnalysisResultModule,
+                            component_id: rest.component_id,
+                        })
+                    }}>输出解析模块</Button>
+                    {/* {rest.parseAnalysisResultModule && <>
+                        {rest.parseAnalysisResultModule.map((item: any, index: any) =>
+                            
+                    </>} */}
+                </Flex>
+                {/* {JSON.stringify(rest)} */}
+                {rest.databases && <Flex gap={"small"} style={{ marginBottom: "1rem", flexWrap: "wrap" }}>
+                    <Button color="cyan" variant="solid" onClick={() => {
+                        operatePipeline.openModal("modalE", rest.databases)
+                    }}>配置数据库</Button>
+                </Flex>}
+
                 <Card title={`详细信息`}>
                     {record ? <>
                         <p>
@@ -357,6 +397,8 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, ope
     // const [currentAnalysisMethod, setCurrentAnalysisMethod] = useState<any>(analysisPipline ? analysisPipline : "")
     const [activeTabKey, setActiveTabKey] = useState<any>()
     const [currentAnalysisMethod, setCurrentAnalysisMethod] = useState<any>()
+    // const [analysisParams, setAnalysisParams] = useState<any>()
+    const [modal, modalContextHolder] = Modal.useModal();
 
     // const {    setPipelineStructure,setOperateOpen,setPipelineRecord,datelePipeline} = operatePipeline
     const tableRef = useRef<any>(null)
@@ -373,19 +415,24 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, ope
         }
         return requestParams
     }
-    const saveUpstreamAnalysis = async () => {
+    const saveUpstreamAnalysis = async (save: any) => {
         const values = await upstreamForm.validateFields()
         const requestParams = getrRequestParams(values)
         setLoading(true)
         try {
-            const resp: any = await axios.post(`/fast-api/save-analysis`, requestParams)
+            const resp: any = await axios.post(`/fast-api/save-analysis?save=${save}`, requestParams)
             // setFilePlot(resp.data)
+            // setAnalysisParams(resp.data)
             console.log(resp)
-            if (tableRef.current) {
-                tableRef.current.reload()
-            }
 
-            messageApi.success("执行成功!")
+            if (save) {
+                messageApi.success("执行成功!")
+                if (tableRef.current) {
+                    tableRef.current.reload()
+                }
+            } else {
+                operatePipeline.openModal("modalF", resp.data)
+            }
         } catch (error: any) {
             console.log(error)
             if (error.response?.data) {
@@ -423,7 +470,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, ope
     return <>
         {/* {JSON.stringify(software)} */}
         {contextHolder}
-
+        {modalContextHolder}
         <ResultList
             pipeline={pipeline}
             software={software}
@@ -458,7 +505,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, ope
                         key: '1',
                         label: `执行分析 (${rest.name})`,
                         children: <>
-                            <Flex gap={"small"} style={{ marginBottom: "1rem" }}>
+                            {/* <Flex gap={"small"} style={{ marginBottom: "1rem" }}>
                                 <Button color="cyan" variant="solid" onClick={() => {
                                     operatePipeline.openModal("modalB", {
                                         module_type: "nextflow",
@@ -473,7 +520,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, ope
                                         component_id: rest.component_id,
                                     })
                                 }}>输入解析模块</Button>
-                            </Flex>
+                            </Flex> */}
                             <Spin spinning={loading}>
 
                                 {/* {JSON.stringify(rest.parseAnalysisResultModule)} */}
@@ -483,6 +530,10 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, ope
                                 </Form.Item>
                                 {/* {JSON.stringify(inputAnalysisMethod)} */}
                                 <FormJsonComp formJson={inputAnalysisMethod} dataMap={resultTableList}></FormJsonComp>
+
+                                <BioDatabaseForm formJson={rest.databases}></BioDatabaseForm>
+                                {/* <FormJsonComp formJson={rest.databases} dataMap={resultTableList}></FormJsonComp> */}
+
                                 {/* {resultTableList && inputAnalysisMethod.map((it: any) => (<> */}
                                 {/* <Form.Item key={it.key} label={it.name} name={it.key}>
                                         <SelectComp it={it} resultTableList={resultTableList} ></SelectComp>
@@ -501,9 +552,13 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, ope
                                 {upstreamFormJson &&
                                     <FormJsonComp formJson={upstreamFormJson} dataMap={dataMap}></FormJsonComp>
                                 }
+                                <Button color="cyan" variant="solid" style={{ marginRight: "0.5rem" }} onClick={() => {
+                                    saveUpstreamAnalysis(false)
 
-                                <Button type="primary" onClick={saveUpstreamAnalysis}>{formId ? <>更新分析</> : <>保存分析</>}</Button>
-                                {formId && <Button onClick={() => upstreamForm.setFieldValue("id", undefined)}>取消更新</Button>}
+                                }}>查看参数</Button>
+
+                                <Button color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>{formId ? <>更新分析</> : <>保存分析</>}</Button>
+                                {formId && <Button color="cyan" variant="solid" onClick={() => upstreamForm.setFieldValue("id", undefined)}>取消更新</Button>}
                                 {/* <hr />
                                 
                                 <hr /> */}

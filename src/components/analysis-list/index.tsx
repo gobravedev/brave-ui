@@ -153,7 +153,7 @@ const ResultList = forwardRef<any, any>(({
                             </Typography> */}
                         {record.analysis_name}
                     </>} >
-                        <Button color="cyan" variant="solid" onClick={() => {
+                        <Button size="small" color="cyan" variant="solid" onClick={() => {
                             // record.content = JSON.parse(record.content)
                             setRecord(record)
                             setOpenMonitor(true)
@@ -168,15 +168,15 @@ const ResultList = forwardRef<any, any>(({
                         setRecord(record)
                         loadData()
                     }}>
-                        <Button color="cyan" variant="solid">运行</Button>
+                        <Button size="small" color="cyan" variant="solid">运行</Button>
                     </Popconfirm>
                     <Popconfirm title={"是否删除!"} onConfirm={async () => {
                         await deleteById(record.id)
                         loadData()
                     }}>
-                        <Button color="cyan" variant="solid">删除</Button>
+                        <Button size="small" color="cyan" variant="solid">删除</Button>
                     </Popconfirm>
-                    <Button color="cyan" variant="solid" onClick={() => {
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
                         openModal("modalA", record)
 
                     }}>结果解析</Button>
@@ -206,9 +206,9 @@ const ResultList = forwardRef<any, any>(({
         {contextHolder}
         <Card title={title} extra={
             <Flex gap={"small"}>
-                {software && <>
-                    {software.parseAnalysisResultModule && <>
-                        {software.parseAnalysisResultModule.map((item: any, index: any) =>
+                {/* {software && <>
+                    {software.outputFormat && <>
+                        {software.outputFormat.map((item: any, index: any) =>
                             <Button key={index} color="cyan" variant="solid" onClick={() => {
                                 operatePipeline.openModal("modalB", {
                                     module_type: "py_parse_analysis_result",
@@ -217,14 +217,14 @@ const ResultList = forwardRef<any, any>(({
                                 })
                             }}>输出解析模块({item.module})</Button>)}
                     </>}
-                </>}
+                </>} */}
                 <Button type="primary" onClick={loadData}>刷新</Button>
             </Flex>
         } >
             {software && <ul style={{ marginBottom: "0.5rem" }}>
-                {software.parseAnalysisResultModule && <>
-                    {software.parseAnalysisResultModule.map((item: any, index: any) => <li key={index}>
-                            模块: {item.module} 输出文件: {item.analysisMethod} 输出路径: {item.dir}
+                {software.outputFormat && <>
+                    {software.outputFormat.map((item: any, index: any) => <li key={index}>
+                            输出文件: {item.outputFile} 输出路径: {item.dir}
                     </li>
                     )}
                 </>}

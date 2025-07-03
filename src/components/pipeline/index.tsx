@@ -11,6 +11,8 @@ import { CreateORUpdatePipelineCompnentRelation, CreateOrUpdatePipelineComponent
 import ModuleEdit from "../module-edit"
 import { useModal } from '@/hooks/useModal'
 import Metadata from '@/components/metadata'
+import BioDatabases from '@/components/bio-databases'
+import ParamsView from "../params-view"
 const Pipeline: FC<any> = ({ }) => {
     const { pipelineId: name } = useParams()
     // console.log(pipelineId)
@@ -293,7 +295,14 @@ const Pipeline: FC<any> = ({ }) => {
         <Metadata
             visible={modal.key == "modalD" && modal.visible}
             onClose={closeModal}></Metadata>
-
+        <BioDatabases
+            visible={modal.key == "modalE" && modal.visible}
+            onClose={closeModal}
+            params={modal.params}></BioDatabases>
+        <ParamsView
+            visible={modal.key == "modalF" && modal.visible}
+            onClose={closeModal}
+            params={modal.params}></ParamsView>
     </div>
 }
 

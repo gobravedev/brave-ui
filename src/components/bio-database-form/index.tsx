@@ -1,0 +1,39 @@
+import { FC, useEffect, useState } from "react"
+import FormJsonComp from "../form-components"
+import axios from "axios"
+import { Button } from "antd"
+
+const BioDatabaseForm: FC<any> = ({ formJson }) => {
+    if(!formJson) return null
+    const [data,setData] = useState<any>([])
+
+    const loadData = async () => {
+        const dataKeyList = formJson.map((item: any) => item.dataKey)
+        const resp = await axios.post("/list-bio-database", {"type_list":dataKeyList})
+        const dataMap = (resp.data || []).reduce((acc: any, item: any) => {
+            const key = item.type
+            if (!acc[key]) acc[key] = []
+           const {name,database_id,...rest} = item
+            acc[key].push({
+                label:name,
+                value:database_id,
+                ...rest
+            })
+            return acc
+        }, {})
+        setData(dataMap)
+        console.log(dataMap)
+    }
+    useEffect(() => {
+        loadData()
+    }, [formJson])
+
+    return <>
+        {/* {JSON.stringify(formJson)} */}
+        <Button onClick={loadData} size="small" type="primary">刷新</Button>
+        <FormJsonComp formJson={formJson} dataMap={data}></FormJsonComp>
+
+    </>
+}
+
+export default BioDatabaseForm

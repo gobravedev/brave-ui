@@ -4,6 +4,7 @@ import axios from "axios";
 import { Component, FC, useEffect, useState, memo } from "react";
 import { data } from "react-router";
 const FormJsonComp: FC<any> = memo(({ formJson, dataMap }) => {
+    if(!formJson) return null 
     const componentMap: any = {
         GroupSelect: {
             Component: BaseSelect,
@@ -48,7 +49,7 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap }) => {
         }
     };
     const ComponentsRender = ({ type, dataMap, inputAnalysisMethod, dataKey: dataKey_, data: data_, name, inputKey, ...rest }: any) => {
-        if(!dataMap) return  (() => <div>加载中....</div>)
+        if(!dataMap) return  <div>加载中....</div> //(() => )
         const componentObj = componentMap[type] //|| (() => <div>未知类型</div>);
         // if (first_data_key in dataMap_)
         // if(!dataMap_ && !dataMap_.first_data_key){

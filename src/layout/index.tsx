@@ -1,13 +1,14 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import { LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Breadcrumb, Button, Layout, Menu, notification, Select, Skeleton, theme } from 'antd';
+import { Breadcrumb, Button, Layout, Menu, message, notification, Select, Skeleton, theme } from 'antd';
 import { NavLink, Outlet, useLocation, useNavigate, useParams } from 'react-router';
 import { Header } from 'antd/es/layout/layout';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import { setCurrenct } from '@/store/priojectSlice'
 import { setSseData } from '@/store/globalSlice'
+import useMessage from 'antd/es/message/useMessage';
 
 const { Content, Sider } = Layout;
 
@@ -48,6 +49,7 @@ const App: React.FC = () => {
     const [projectList, setProjectList] = useState<any>([])
     const dispatch = useDispatch()
     const [notificationApi, notificationContextHolder] = notification.useNotification();
+    const [messageApi, messageContextHolder] = message.useMessage();
 
     const openNotification = ({ type, message = "", description = "" }: { type: NotificationType, message: string, description?: string }) => {
         notificationApi[type]({
@@ -196,6 +198,7 @@ const App: React.FC = () => {
     return (
         <Layout>
             {notificationContextHolder}
+            {messageContextHolder}
             {/* <Header style={{ display: 'flex', alignItems: 'center' }}>
                 <div style={{ color: "#fff",marginRight:"1rem" }} >BRAVE</div>
                 <Menu
@@ -258,7 +261,7 @@ const App: React.FC = () => {
 
                 <Content style={{ padding: '0 24px', minHeight: "100vh" }}>
                     <Suspense key={location.key} fallback={<Test></Test>}>
-                        <Outlet context={{ project,eventSource }} />
+                        <Outlet context={{ project,eventSource,messageApi }} />
                     </Suspense>
                 </Content>
             </Layout>
