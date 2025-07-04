@@ -5,10 +5,14 @@ import { Component, FC, useEffect, useState, memo } from "react";
 import { data } from "react-router";
 const FormJsonComp: FC<any> = memo(({ formJson, dataMap }) => {
     if(!formJson) return null 
+    // console.log("dataMap",dataMap)
     const componentMap: any = {
         GroupSelect: {
             Component: BaseSelect,
             dataKey: "sample_group_list"
+        },
+        Input: {
+            Component: BaseTextArea,
         },
         GroupCompareSelect: {
             Component: GroupCompareSelect,
@@ -238,10 +242,17 @@ export const GroupCompareSelect: FC<any> = ({ label, name, data, initialValue, r
         </Form.Item>
     </>
 }
-const BaseInput: FC<any> = ({ label, name, data, initialValue, rules, ...rest }) => {
+const BaseTextArea: FC<any> = ({ label, name, data, initialValue, rules, ...rest }) => {
     return <>
         <Form.Item initialValue={initialValue} label={label} name={name} rules={rules}>
             <TextArea {...rest} />
+        </Form.Item>
+    </>
+}
+const BaseInput: FC<any> = ({ label, name, data, initialValue, rules, ...rest }) => {
+    return <>
+        <Form.Item initialValue={initialValue} label={label} name={name} rules={rules}>
+            <Input {...rest} />
         </Form.Item>
     </>
 }

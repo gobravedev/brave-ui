@@ -221,14 +221,14 @@ const ResultList = forwardRef<any, any>(({
                 <Button type="primary" onClick={loadData}>刷新</Button>
             </Flex>
         } >
-            {software && <ul style={{ marginBottom: "0.5rem" }}>
+            {/* {software && <ul style={{ marginBottom: "0.5rem" }}>
                 {software.outputFormat && <>
                     {software.outputFormat.map((item: any, index: any) => <li key={index}>
                             输出文件: {item.outputFile} 输出路径: {item.dir}
                     </li>
                     )}
                 </>}
-            </ul>}
+            </ul>} */}
 
             <Table
                 size="small"
@@ -242,7 +242,7 @@ const ResultList = forwardRef<any, any>(({
         </Card>
         <div style={{ marginBottom: "1rem" }}></div>
 
-        {record && openMonitor && <PipelineInfo analysisId={record.analysis_id} onClose={() => setOpenMonitor(false)}></PipelineInfo>}
+        {record && openMonitor && <PipelineInfo {...record} onClose={() => setOpenMonitor(false)}></PipelineInfo>}
 
         <ResultParse
             visible={modal.key == "modalA" && modal.visible}

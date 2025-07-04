@@ -45,6 +45,7 @@ export const AnalysisForm: FC<any> = ({ form,children }) => {
             <Form.Item label="分析id" name={"id"} style={{display:"none"}} >
                 <Input></Input>
             </Form.Item>
+            
             <Form.Item label="分析名称"  name={"analysisName"} rules={[{ required: true, message: '该字段不能为空!' }]}>
                 <Input></Input>
             </Form.Item>

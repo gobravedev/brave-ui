@@ -9,7 +9,7 @@ import { SyncOutlined, MinusCircleOutlined } from '@ant-design/icons';
 type SSEContextType = {
     eventSource: EventSource | null;
 };
-const PipelineMonitor: FC<any> = ({ data }) => {
+const PipelineMonitor: FC<any> = ({ data, ...rest }) => {
 
     return <>
         {/* {JSON.stringify(data)} */}
@@ -22,7 +22,13 @@ const PipelineMonitor: FC<any> = ({ data }) => {
                     <p>状态: {data.status == "running" ? <>运行中({data.process_id})<Tag icon={<SyncOutlined spin />} color="processing"></Tag></> :
                         <>运行结束<Tag icon={<MinusCircleOutlined />} color="processing"></Tag></>}
                     </p>
+
+
                 </Flex>
+                <div style={{ flexDirection: "column" }}>
+                    <div style={{textWrap:"wrap"}}>输出路径:{rest.output_dir}</div>
+                    <div>工作路径:{rest.work_dir}</div>
+                </div>
 
             </Card>
             <Table dataSource={data?.traceTable} rowKey={(row: any) => row.hash} columns={[
@@ -107,7 +113,7 @@ const PipelineParams: FC<any> = ({ data, type }) => {
 
             <Typography>
                 <pre>
-                    {data}
+                    {typeof data == "string" ? data : JSON.stringify(data, null, 2)}
                 </pre>
             </Typography>
 
@@ -115,7 +121,7 @@ const PipelineParams: FC<any> = ({ data, type }) => {
     }
 
 }
-const PipelineInfo: FC<any> = ({ analysisId ,onClose}) => {
+const PipelineInfo: FC<any> = ({ analysis_id: analysisId, onClose, ...rest }) => {
 
     if (!analysisId) return null
     const [data, setData] = useState<any>()
@@ -128,7 +134,7 @@ const PipelineInfo: FC<any> = ({ analysisId ,onClose}) => {
             const data = JSON.parse(event.data)
             console.log(data)
             if (data.analysis_id == analysisId) {
-                if ((data.msgType == "trace" || data.msgType == "process_end" ) && activeTabKey == "trace") {
+                if ((data.msgType == "trace" || data.msgType == "process_end") && activeTabKey == "trace") {
                     loadData(activeTabKey)
                     console.log('子组件监听trace || process_end:', data);
                 } else if (data.msgType == "workflow_log" && activeTabKey == "workflow_log") {
@@ -196,12 +202,12 @@ const PipelineInfo: FC<any> = ({ analysisId ,onClose}) => {
             activeTabKey={activeTabKey}
             onTabChange={onTabChange}
             extra={<>
-            <Button style={{marginRight:"0.5rem"}} onClick={() => loadData(activeTabKey)} type="primary">刷新</Button>
-            <Button onClick={onClose} type="primary">关闭</Button>
+                <Button style={{ marginRight: "0.5rem" }} onClick={() => loadData(activeTabKey)} type="primary">刷新</Button>
+                <Button onClick={onClose} type="primary">关闭</Button>
             </>}>
 
             {/* {JSON.stringify(data)} */}
-            <ComponentsRender data={data} type={activeTabKey}></ComponentsRender>
+            <ComponentsRender data={data} type={activeTabKey} {...rest}></ComponentsRender>
 
         </Card>
 

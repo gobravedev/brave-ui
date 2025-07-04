@@ -25,7 +25,7 @@ project,library_name,sample_name,sequencing_target,sequencing_technique,sample_c
 test,R250506-21,OL-RNA-1,RNA,NGS,single_genome,/V350344603_L03_117_1.fq.gz,/V350344603_L03_117_2.fq.gz
 
 `
-const ImportFile: FC<any> = ({ visible, onClose, params, callback }) => {
+const ImportMetadata: FC<any> = ({ visible, onClose, params, callback }) => {
     const [form] = Form.useForm();
     const [components, setComponents] = useState<any>([])
 
@@ -76,4 +76,4 @@ const ImportFile: FC<any> = ({ visible, onClose, params, callback }) => {
     </>
 }
 
-export default ImportFile
+export default ImportMetadata

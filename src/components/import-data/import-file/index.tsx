@@ -1,0 +1,248 @@
+import { FC, useEffect, useState } from "react"
+import TextArea from "antd/es/input/TextArea"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from 'remark-gfm'
+import remarkMath from 'remark-math'
+import { listPipelineComponents as listPipelineComponentsApi } from '@/api/pipeline'
+import { Button, Card, Collapse, Flex, Form, Input, Select, Table, Typography } from "antd"
+import axios from "axios"
+import FormJsonComp from "@/components/form-components"
+import { useOutletContext } from "react-router"
+
+const markdown = `
+|project|library_name|sample_name|sequencing_target|sequencing_technique|sample_composition|fastq1                                                 |fastq2                                                     |
+|-------|------------|-----------|-----------------|--------------------|------------------|-------------------------------------------------------|-----------------------------------------------------------|
+|test   |R250506-21  |OL-RNA-1   |RNA              |NGS                 |single_genome     |/V350344603_L03_117_1.fq.gz                            |/V350344603_L03_117_2.fq.gz                                |
+|test      placeholder="input search text"
+            allowClear
+            onSearch={(value: any) => {
+                const sampleData = data.filter((it: any) => it.sample_name.includes(value))
+                setSampleData(sampleData)
+            }}  |R250506-22  |OCF-RNA-1  |RNA              |NGS                 |single_genome     |/V350344603_L03_118_1.fq.gz                            |/V350344603_L03_118_2.fq.gz                                |
+|test   |R250506-23  |OSP-RNA-1  |RNA              |NGS                 |single_genome     |/V350344603_L03_119_1.fq.gz                            |/V350344603_L03_119_2.fq.gz                                |
+
+---
+project,library_name,sample_name,sequencing_target,sequencing_technique,sample_composition,fastq1,fastq2
+
+test,R250506-21,OL-RNA-1,RNA,NGS,single_genome,/V350344603_L03_117_1.fq.gz,/V350344603_L03_117_2.fq.gz
+
+`
+const ImportFile: FC<any> = (pipeline) => {
+    const [form] = Form.useForm();
+    const [components, setComponents] = useState<any>([])
+    // const [dataMap, setDataMap] = useState<any>({})
+    const componentId = Form.useWatch(["component_id"], form)
+    const [inputForm, setInputForm] = useState<any>([])
+    const { messageApi, project } = useOutletContext<any>()
+    const [parseData, setParseData] = useState<any>()
+
+    useEffect(() => {
+        setInputForm([])
+        setParseData(undefined)
+        if (componentId) {
+            findByComponentId(componentId)
+        }
+    }, [componentId])
+    // const [operatureUrl, setOperatureUrl] = useState<any>()
+    // const listPipelineComponents = async () => {
+    //     const resp = await listPipelineComponentsApi({
+    //         component_type: "file"
+    //     })
+    //     const dataMap = (resp.data || []).reduce((acc: any, item: any) => {
+    //         acc[item.component_id] = JSON.parse(item.content)
+    //         return acc
+    //     }, {})
+    //     setDataMap(dataMap)
+    //     const data = resp.data.map((item: any) => {
+    //         const content = JSON.parse(item.content)
+    //         return {
+    //             label: `${content.label}(${content.name})(${item.component_id})`,
+    //             value: item.component_id
+    //         }
+
+    //     })
+    //     setComponents(data)
+    //     console.log(resp)
+    // }
+
+    const findByComponentId = async (componentId: any) => {
+        const resp = await axios.get(`/find-by-component-id/${componentId}`)
+        console.log(resp)
+        const data = JSON.parse(resp.data.content)
+        if (data.inputForm) {
+            setInputForm(data.inputForm)
+        } else {
+            messageApi.error("该组件没有配置inputForm!")
+        }
+
+    }
+    const getPipelineComponents = async () => {
+        const options = pipeline.items.flatMap((item: any) => {
+
+            const inputFile = item.inputFile || []
+            const outputFile = item.outputFile || []
+            console.log(item)
+            const inputOptions = inputFile.map((it: any) => {
+                return {
+                    label: `${it.label}(${it.name})(${it.component_id})`,
+                    value: it.component_id
+                }
+            })
+            const outputOptions = outputFile.map((it: any) => {
+                return {
+                    label: `${it.label}(${it.name})(${it.component_id})`,
+                    value: it.component_id
+                }
+            })
+            return [
+                ...inputOptions,
+                ...outputOptions
+            ]
+        })
+
+        setComponents(options)
+    }
+    const getRequestParams = (values: any) => {
+        const { component_id, content, analysis_key } = values
+        if (parseData) {
+            return parseData.map((item: any) => {
+                const { analysis_key, ...rest } = item
+                return {
+                    ...values,
+                    project: project,
+                    component_id: component_id,
+                    content: JSON.stringify(rest),
+                    analysis_key: analysis_key
+                }
+            })
+        } else {
+            return [{
+                ...values,
+                project: project,
+                component_id: component_id,
+                content: JSON.stringify(content),
+                analysis_key: analysis_key
+            }]
+        }
+    }
+
+
+    const importData = async () => {
+        const values = await form.validateFields()
+
+        if (inputForm && inputForm.length == 0) {
+            messageApi.error("该组件没有配置inputForm!")
+            return
+        }
+        const requestParams = getRequestParams(values)
+        try {
+            const resp = await axios.post(`/import-data`, requestParams)
+            messageApi.success("导入成功")
+        } catch (error: any) {
+            messageApi.error(error.response.data.detail)
+            // console.log()
+        }
+
+
+    }
+
+    const parseImportData = async () => {
+        const values = await form.validateFields()
+        if (inputForm && inputForm.length == 0) {
+            messageApi.error("该组件没有配置inputForm!")
+            return
+        }
+        // const requestParams = getRequestParams(values)
+        const resp = await axios.post(`/parse-import-data`,
+            { content: JSON.stringify(values.content) })
+        console.log(resp)
+        setParseData(resp.data)
+    }
+
+
+    useEffect(() => {
+        // listPipelineComponents()
+        getPipelineComponents()
+    }, [])
+    return <>
+        <Card
+            title={`导入文件`}
+            extra={<Flex gap={"small"} >
+                <Button color="cyan" variant="solid" disabled={!parseData} onClick={() => setParseData(undefined)}>取消解析</Button>
+
+                <Button color="cyan" variant="solid" disabled={inputForm.length == 0} onClick={parseImportData}>解析</Button>
+            </Flex>}
+
+        >
+            <pre>
+                {/* {JSON.stringify(pipeline.items,null,2)} */}
+            </pre>
+
+            <Form form={form}>
+                <Form.Item name={"component_id"} label="组件" rules={[{ required: true, message: "请选择组件" }]} >
+                    <Select options={components} allowClear showSearch></Select>
+                </Form.Item>
+                {!parseData && <Form.Item name={"analysis_key"} label="分析key" rules={[{ required: false, message: "请输入分析key" }]} >
+                    <Input placeholder="样本名称, 与sample_key关联" allowClear></Input>
+                </Form.Item>}
+
+                <FormJsonComp formJson={inputForm} dataMap={{}} ></FormJsonComp>
+                {parseData ? <Table
+                    footer={() => (
+                        <div style={{ textAlign: 'right' }}>
+                            一共{parseData.length}条记录 &nbsp;&nbsp;
+                            <Button color="cyan" variant="solid" onClick={importData}>确认</Button>
+                        </div>
+                    )}
+                    dataSource={parseData} columns={Object.entries(parseData[0]).map(([key, value]) => ({
+                        title: key,
+                        dataIndex: key,
+                        key: key,
+                        render: (text: any) => <span>{text}</span>
+                    }))}></Table> :
+
+                    <div style={{ textAlign: 'right' }}>
+                        <Button color="cyan" variant="solid" disabled={inputForm.length == 0} onClick={importData}>确认</Button>
+                    </div>
+                }
+                <Collapse ghost items={[
+                    {
+                        key: "1",
+                        label: "更多",
+                        children: <>
+                            <Form.Item noStyle shouldUpdate>
+                                {() => (
+                                    <Typography>
+                                        <pre>{JSON.stringify(getRequestParams(form.getFieldsValue()), null, 2)}</pre>
+                                    </Typography>
+                                )}
+                            </Form.Item>
+                        </>
+                    }
+                ]} />
+                {/* <Form.Item name={"pattern"} label="匹配模式" rules={[{required:true,message:"请输入匹配模式"}]}    >
+                    <Input></Input>
+                </Form.Item> */}
+                {/* <Form.Item name={"suffix"} label="后缀" rules={[{required:true,message:"请输入后缀"}]} >
+                    <Input></Input>
+                </Form.Item> */}
+                {/* <Form.Item name={"content"} >
+                    <TextArea rows={10}></TextArea>
+                </Form.Item> */}
+            </Form>
+
+
+
+            {/* {JSON.stringify(Object.entries(parseData[0]).map(([key, value]) => ({
+                title: key,
+                dataIndex: key,
+                key: key,
+                render: (text: any) => <span>{text}</span>
+            })))} */}
+            {/* <ReactMarkdown children={markdown} remarkPlugins={[remarkGfm, remarkMath]}></ReactMarkdown> */}
+
+        </Card>
+    </>
+}
+
+export default ImportFile

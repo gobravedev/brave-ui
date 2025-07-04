@@ -1,5 +1,5 @@
 import { Venn } from "@ant-design/plots"
-import { Button, Card, Flex, message, Popconfirm, Popover, Space, Table, Tooltip } from "antd"
+import { Button, Card, Flex, message, Popconfirm, Popover, Space, Table, Tooltip, Typography } from "antd"
 import axios from "axios"
 import { FC, forwardRef, useEffect, useImperativeHandle, useState } from "react"
 import { useOutletContext, useParams } from "react-router"
@@ -65,9 +65,12 @@ const ResultList = forwardRef<any, any>(({
     const reload = () => {
         console.log(analysisMethod)
         if (analysisMethod && Array.isArray(analysisMethod)) {
+            
             const analysisMethodList = analysisMethod.flatMap((it: any) => it.name)
+            const componentIdList = analysisMethod.flatMap((it: any) => it.component_id)
+
             // console.log(analysisMethodList)
-            loadData({ analysisMethodValues: analysisMethodList })
+            loadData({ analysisMethodValues: undefined,componentIdList:componentIdList })
         } else {
             loadData({ params: params })
         }
@@ -114,7 +117,7 @@ const ResultList = forwardRef<any, any>(({
                 values.forEach((value: any) => {
                     result[value] = key;
                 });
-            }else{
+            } else {
                 result[values] = key;
             }
 
@@ -122,36 +125,39 @@ const ResultList = forwardRef<any, any>(({
         });
         return result
     }
-    const loadData = async ({ analysisMethodValues, params }: any) => {
+    const loadData = async ({ analysisMethodValues, params ,componentIdList}: any) => {
         setLoading(true)
         let resp: any = await axios.post(`/fast-api/find-analyais-result-by-analysis-method`, {
             project: project,
             analysis_method: analysisMethodValues,
+            component_ids: componentIdList,
             ...params
         })
 
-        if (analysisMethodValues) {
+        if (componentIdList || analysisMethodValues) {
             const keyMap = getKeyMap()
             // console.log(keyMap)
+           
             const groupedData = resp.data.reduce((acc: any, item: any) => {
                 const key = item.analysis_method;
                 // const key = keyMap[item.analysis_method]
                 if (!acc[key]) {
                     acc[key] = [];
                 }
-                const { sample_key, id, sample_group, ...rest } = item
+                const { analysis_key, id, sample_group, ...rest } = item
                 // debugger
                 acc[key].push({
-                    label: sample_key,
+                    label: analysis_key,
                     value: id,
                     sample_group: sample_group ? sample_group : "no_group",
-                    sample_key: sample_key,
+                    analysis_key: analysis_key,
                     id: id,
                     // "aaa":"1111",
                     ...rest
                 });
                 return acc;
             }, {});
+            console.log(groupedData)
             if (setResultTableList) {
                 // console.log(groupedData)
                 setResultTableList(groupedData)
@@ -225,6 +231,13 @@ const ResultList = forwardRef<any, any>(({
                 key: 'id',
                 ellipsis: true,
 
+            },
+            {
+                title: '分析Key',
+                dataIndex: 'analysis_key',
+                key: 'analysis_key',
+                ellipsis: true,
+
             }, {
                 title: '分析名称',
                 dataIndex: 'analysis_name',
@@ -245,39 +258,23 @@ const ResultList = forwardRef<any, any>(({
             //     ellipsis: true,
             // },
             {
-                title: '样本名称',
-                dataIndex: 'sample_name',
-                key: 'sample_name',
-                ellipsis: true,
-
-            }, {
                 title: '样本Key',
                 dataIndex: 'sample_key',
                 key: 'sample_key',
                 ellipsis: true,
 
-            }, {
-                title: '分析Key',
-                dataIndex: 'analysis_key',
-                key: 'analysis_key',
+            },
+            {
+                title: '样本名称',
+                dataIndex: 'sample_name',
+                key: 'sample_name',
                 ellipsis: true,
 
-            }, {
+            },
+            {
                 title: '样本分组',
                 dataIndex: 'sample_group',
                 key: 'sample_group',
-                ellipsis: true,
-
-            }, {
-                title: '样本来源',
-                dataIndex: 'sample_source',
-                key: 'sample_source',
-                ellipsis: true,
-
-            }, {
-                title: '疾病',
-                dataIndex: 'host_disease',
-                key: 'host_disease',
                 ellipsis: true,
 
             }, {
@@ -286,16 +283,37 @@ const ResultList = forwardRef<any, any>(({
                 key: 'sample_group_name',
                 ellipsis: true,
             }, {
-                title: "软件",
-                dataIndex: 'software',
-                key: 'software',
+                title: '组件id',
+                dataIndex: 'component_id',
+                key: 'component_id',
                 ellipsis: true,
-            }, {
+            },
+
+            // {
+            //     title: '样本来源',
+            //     dataIndex: 'sample_source',
+            //     key: 'sample_source',
+            //     ellipsis: true,
+
+            // }, {
+            //     title: '疾病',
+            //     dataIndex: 'host_disease',
+            //     key: 'host_disease',
+            //     ellipsis: true,
+
+            // },  {
+            //     title: "软件",
+            //     dataIndex: 'software',
+            //     key: 'software',
+            //     ellipsis: true,
+            // },
+            {
                 title: 'project',
                 dataIndex: 'project',
                 key: 'project',
                 ellipsis: true,
-            }, ...appendSampleColumns, {
+            },
+            ...appendSampleColumns, {
                 title: '操作',
                 key: 'action',
                 fixed: "right",
@@ -304,12 +322,13 @@ const ResultList = forwardRef<any, any>(({
                 render: (_: any, record: any) => (
                     <Space size="middle">
                         <Popover content={<>
+                            {record.component_id}
                             {/* <Typography >
                                     <pre>{JSON.stringify(JSON.parse(record.content), null, 2)}</pre>
                                 </Typography> */}
                             {/* {record.analysis_name} */}
                         </>} >
-                            <a onClick={() => {
+                            <Button size="small" color="cyan" variant="solid" onClick={() => {
                                 // record.content = JSON.parse(record.content)
                                 setRecord(record)
                                 if (cleanDom) {
@@ -324,15 +343,15 @@ const ResultList = forwardRef<any, any>(({
                                 //     form.setFieldValue("id", record?.id)
                                 // }
                                 // readHdfs(record.content)
-                            }}>查看</a>
+                            }}>查看</Button>
                         </Popover>
-                        {/* <a onClick={() => { downloadHdfs(record.content) }}>下载</a>
-                            <Popconfirm title="确定删除吗?" onConfirm={async ()=>{
-                                await deleteById(record.id)
-                            }}>
-                                <a href="javascript:;">删除</a>
-                            </Popconfirm>
-                            */}
+                        {/* <a onClick={() => { downloadHdfs(record.content) }}>下载</a> */}
+                        <Popconfirm title="确定删除吗?" onConfirm={async () => {
+                            await deleteById(record.id)
+                        }}>
+                            <Button size="small" color="danger" variant="solid">删除</Button>
+                        </Popconfirm>
+
                     </Space>
                 ),
             },
@@ -439,7 +458,7 @@ const ResultList = forwardRef<any, any>(({
 
 
     return <>
-        <Card title={title}
+        <Card title={`${title}(${currentAnalysisMethod?.component_id})`}
             extra={<>{cardExtra}
                 <Flex gap={"small"}>
                     {operatePipeline?.openModal && <>
@@ -532,6 +551,11 @@ const ResultList = forwardRef<any, any>(({
                 columns={columnsParamsALL ? columnsParamsALL : columns}
                 footer={() => `一共${data && Array.isArray(data) && data.length}条记录`}
                 dataSource={data} />
+            {currentAnalysisMethod?.parseFormat && currentAnalysisMethod?.relation_type == "software_output_file" && <Typography>
+                <pre>
+                    {JSON.stringify(currentAnalysisMethod.parseFormat, null, 2)}
+                </pre>
+            </Typography>}
 
         </Card>
         {/* <Card style={{ marginBottom: "1rem" }}>

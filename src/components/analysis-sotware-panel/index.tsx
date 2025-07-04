@@ -43,6 +43,7 @@ type AnalysisSoftware = {
     upstreamFormJson?: any,
     downstreamAnalysis?: any,
     operatePipeline?: any,
+    label?:any
 }
 
 const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
@@ -454,19 +455,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, ope
     const dataMap: any = {
         "host_genome_index": host_genome_index
     }
-    const setResultTableListHandle = (resultTableList: any) => {
-        // console.log(resultTableList)
-        // resultTableList[it.key].map((it: any) => {
-        //     const { sample_key, id, sample_group, ...rest } = it
-        //     return {
-        //         label: it.sample_key,
-        //         value: it.id,
-        //         sample_group: it.sample_group,
-        //         ...rest
-        //     }
-        // }
-        setResultTableList(resultTableList);
-    }
+   
     return <>
         {/* {JSON.stringify(software)} */}
         {contextHolder}
@@ -486,7 +475,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, ope
             analysisType={"sample"}
             analysisMethod={inputAnalysisMethod}
             setRecord={(record: any) => onClickItem(record)}
-            setResultTableList={setResultTableListHandle}></ResultList>
+            setResultTableList={setResultTableList}></ResultList>
 
 
         <div style={{ marginBottom: "1rem" }}></div>
@@ -528,7 +517,10 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, ope
                                 <Form.Item initialValue={`${rest.name}`} name={"analysis_name"} label={"分析名称"} rules={[{ required: true, message: '该字段不能为空!' }]}>
                                     <Input></Input>
                                 </Form.Item>
-                                {/* {JSON.stringify(inputAnalysisMethod)} */}
+                                {/* 查看datamap */}
+                                {/* <pre>
+                                {JSON.stringify(resultTableList,null,2)}
+                                </pre> */}
                                 <FormJsonComp formJson={inputAnalysisMethod} dataMap={resultTableList}></FormJsonComp>
 
                                 <BioDatabaseForm formJson={rest.databases}></BioDatabaseForm>

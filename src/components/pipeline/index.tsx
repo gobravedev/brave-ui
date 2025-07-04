@@ -10,7 +10,7 @@ import { listPipeline } from "@/api/pipeline"
 import { CreateORUpdatePipelineCompnentRelation, CreateOrUpdatePipelineComponent } from "../create-pipeline"
 import ModuleEdit from "../module-edit"
 import { useModal } from '@/hooks/useModal'
-import Metadata from '@/components/metadata'
+import ImportData from '@/components/import-data'
 import BioDatabases from '@/components/bio-databases'
 import ParamsView from "../params-view"
 const Pipeline: FC<any> = ({ }) => {
@@ -224,7 +224,7 @@ const Pipeline: FC<any> = ({ }) => {
             </div>
             <Flex gap="small" wrap>
                 <Button color="cyan" variant="solid" onClick={() => {
-                    openModal("modalD")
+                    openModal("modalD",pipeline)
                 }}>导入数据</Button>
                 <Button color="cyan" variant="solid" onClick={() => {
                     openModal("modalC", {
@@ -292,9 +292,10 @@ const Pipeline: FC<any> = ({ }) => {
             onClose={closeModal}
             params={modal.params}></CreateOrUpdatePipelineComponent>
 
-        <Metadata
+        <ImportData
             visible={modal.key == "modalD" && modal.visible}
-            onClose={closeModal}></Metadata>
+            params={modal.params}
+            onClose={closeModal}></ImportData>
         <BioDatabases
             visible={modal.key == "modalE" && modal.visible}
             onClose={closeModal}
