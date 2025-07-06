@@ -899,10 +899,10 @@ const UpstreamAnalysisOutput: FC<any> = ({ pipeline, software, operatePipeline, 
                 operatePipeline.openModal("modalC", {
                     data: undefined,
                     structure: {
-                        relation_type: "file_downstream",
+                        relation_type: "file_script",
                         pipeline_id: pipeline.component_id,
                         parent_component_id: currentAnalysisMethod.component_id,
-                        component_type: "downstream"
+                        component_type: "script"
                     }
                 })
             }}>新增分析</Button>
@@ -910,7 +910,7 @@ const UpstreamAnalysisOutput: FC<any> = ({ pipeline, software, operatePipeline, 
                 operatePipeline.openModal("modalA", {
                     data: undefined,
                     pipelineStructure: {
-                        relation_type: "file_downstream",
+                        relation_type: "file_script",
                         pipeline_id: pipeline.component_id,
                         parent_component_id: currentAnalysisMethod.component_id,
                     }
@@ -957,7 +957,7 @@ const UpstreamAnalysisOutput: FC<any> = ({ pipeline, software, operatePipeline, 
                                         <li>pipeline:{pipeline.component_id}</li>
                                         <li>software:{software.component_id}</li>
                                         <li>file:{currentAnalysisMethod?.component_id}</li>
-                                        <li>downstream:{downstreamData?.component_id}</li>
+                                        <li>script:{downstreamData?.component_id}</li>
                                         {JSON.stringify(downstreamData)}
                                     </ul>
                                 </>}
@@ -974,7 +974,7 @@ const UpstreamAnalysisOutput: FC<any> = ({ pipeline, software, operatePipeline, 
                                     <Button color="cyan" variant="solid" onClick={() => {
                                         operatePipeline.openModal("modalC", {
                                             data: downstreamData, structure: {
-                                                component_type: "downstream",
+                                                component_type: "script",
                                             }
                                         })
                                     }}>更新分析</Button>
@@ -983,7 +983,7 @@ const UpstreamAnalysisOutput: FC<any> = ({ pipeline, software, operatePipeline, 
                                         operatePipeline.openModal("modalA", {
                                             data: downstreamData,
                                             pipelineStructure: {
-                                                relation_type: "file_downstream",
+                                                relation_type: "file_script",
                                                 pipeline_id: pipeline.component_id
                                             }
                                         })

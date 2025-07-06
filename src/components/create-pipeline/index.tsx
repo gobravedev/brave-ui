@@ -18,7 +18,7 @@ export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClo
         pipeline_software: TextAreaContent,
         software_input_file: TextAreaContent,
         software_output_file: TextAreaContent,
-        file_downstream: TextAreaContent
+        file_script: TextAreaContent
     }
     const ComponentsRender = ({ relation_type, data, form }: any) => {
         const Component = componentMap[relation_type] || (() => <div>未知类型 {JSON.stringify(data)}</div>);
@@ -35,7 +35,7 @@ export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClo
                     label: `${content.name}`,
                     value: item.component_id
                 }
-            } else if(pipelineStructure.relation_type == "file_downstream"){
+            } else if(pipelineStructure.relation_type == "file_script"){
                 return {
                     label: `${content.name}(${content.moduleName})`,
                     value: item.component_id
@@ -74,8 +74,8 @@ export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClo
                 listPipelineComponents("software")
             } else if (pipelineStructure.relation_type == "software_input_file" || pipelineStructure.relation_type == "software_output_file") {
                 listPipelineComponents("file")
-            } else if (pipelineStructure.relation_type == "file_downstream") {
-                listPipelineComponents("downstream")
+            } else if (pipelineStructure.relation_type == "file_script") {
+                listPipelineComponents("script")
             }
             if (data) {
                 getPipeleineRelation(data.relation_id)
@@ -185,8 +185,7 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
         // pipeline: WrapPipeline,
         software: TextAreaContent,
         file: TextAreaContent,
-        downstream: TextAreaContent,
-        downstream_analysis: TextAreaContent
+        script: TextAreaContent,
     }
     const ComponentsRender = ({ component_type, data, form }: any) => {
         const Component = componentMap[component_type] || (() => <div>未知类型 {JSON.stringify(data)}</div>);

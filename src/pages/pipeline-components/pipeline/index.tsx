@@ -1,18 +1,18 @@
 import { Breadcrumb, Button, Empty, Flex, message, Modal, Skeleton, Tabs, Tag } from "antd"
 import { FC, useEffect, useState } from "react"
-import AnalysisPanel from '../analysis-sotware-panel'
+import AnalysisPanel from '../../../components/analysis-sotware-panel'
 import Meta from "antd/es/card/Meta"
 import { colors } from '@/utils/utils'
 
 import axios from "axios"
 import { useLocation, useNavigate, useOutletContext, useParams } from "react-router"
 import { listPipeline } from "@/api/pipeline"
-import { CreateORUpdatePipelineCompnentRelation, CreateOrUpdatePipelineComponent } from "../create-pipeline"
-import ModuleEdit from "../module-edit"
+import { CreateORUpdatePipelineCompnentRelation, CreateOrUpdatePipelineComponent } from "../../../components/create-pipeline"
+import ModuleEdit from "../../../components/module-edit"
 import { useModal } from '@/hooks/useModal'
 import ImportData from '@/components/import-data'
 import BioDatabases from '@/components/bio-databases'
-import ParamsView from "../params-view"
+import ParamsView from "../../../components/params-view"
 const Pipeline: FC<any> = ({ }) => {
     const { pipelineId: name } = useParams()
     // console.log(pipelineId)
@@ -226,6 +226,8 @@ const Pipeline: FC<any> = ({ }) => {
                 <Button color="cyan" variant="solid" onClick={() => {
                     openModal("modalD",pipeline)
                 }}>导入数据</Button>
+
+           
                 <Button color="cyan" variant="solid" onClick={() => {
                     openModal("modalC", {
                         data: pipeline, structure: {

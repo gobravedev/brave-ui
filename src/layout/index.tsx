@@ -111,13 +111,29 @@ const App: React.FC = () => {
         {
             key: "/",
             label: "项目介绍"
-        }, {
-            key: `/sample`,
-            label: "检测样本"
-        }, {
+        }, 
+        // {
+        //     key: `/sample`,
+        //     label: "检测样本"
+        // }, 
+        
+         {
             key: `/pipeline-card`,
             label: "分析管道"
-        }, {
+        }, 
+        {
+            key: `/software-card`,
+            label: "分析软件"
+        }, 
+        {
+            key: `/file-card`,
+            label: "分析文件"
+        }, 
+        {
+            key: `/script-card`,
+            label: "分析脚本"
+        }, 
+        {
             key: `/pipeline-monitor-panal`,
             label: "管道监控"
         }, {
@@ -126,7 +142,7 @@ const App: React.FC = () => {
         }, {
             key: `/literature`,
             label: "文献资料"
-        }
+        },
     ]
     const menu1: MenuProps['items'] = [
         {

@@ -45,11 +45,15 @@ const AbundanceMeta = lazy(() => import('@/pages/meta-analysis/abundance'));
 const RecoveringMag = lazy(() => import('@/pages/meta-analysis/recovering-mag'));
 const SampleQC = lazy(() => import('@/pages/sample/sample-qc'));
 const FunctionAnalysis = lazy(() => import('@/pages/meta-analysis/function-analysis'));
-const PipelineCard = lazy(() => import('@/pages/pipeline-card'));
+const PipelineCard = lazy(() => import('@/pages/pipeline-components/pipeline-card'));
 const AnalysisResult = lazy(() => import('@/pages/analysis-result'));
 const Literature = lazy(() => import('@/pages/literature'));
 const PielineMonitorPanal = lazy(() => import('@/pages/pipeline-monitor-panal'));
-import Pipeline from '@/components/pipeline'
+const AnalysisSoftware = lazy(() => import('@/pages/pipeline-components/software'));
+const AnalysisFile = lazy(() => import('@/pages/pipeline-components/file'));
+const Script = lazy(() => import('@/pages/pipeline-components/script'));
+import Pipeline from '@/pages/pipeline-components/pipeline'
+import PipelineComponentsCard from '@/components/pipeline-components-card'
 import axios from "axios";
 import { Skeleton } from "antd";
 import { useDispatch } from "react-redux";
@@ -59,10 +63,7 @@ const childern = [
     {
         path: "/",
         element: <Project />
-    }, {
-        path: "/pipeline-card",
-        element: <PipelineCard />
-    }, {
+    },{
         path: "/sample",
         element: <Sample />
     }, {
@@ -74,14 +75,81 @@ const childern = [
     }, {
         path: "/literature",
         element: <Literature />
-    }, {
-        path: "/pipeline/:pipelineId",
-        element: <Pipeline />
-    }, {
+    },  {
         path: "/pipeline-monitor-panal",
         element: <PielineMonitorPanal />
     },
+
     
+    {
+        path: "/pipeline-card",
+        element: <PipelineComponentsCard  params={{component_type:"pipeline"}}/>
+    }, 
+    {
+        path: "/software-card",
+        element: <PipelineComponentsCard  
+        map={(item: any) => ({
+            id: item.id,
+            component_id: item.component_id,
+            name: item.name,
+            category: item.category,
+            img: item.img,
+            tags: item.tags,
+            description: item.description,
+            order: item.order_index,
+            path: `/software/${item.component_id}`
+        })}
+        params={{component_type:"software"}}/>
+    },  {
+        path: "/file-card",
+        element: <PipelineComponentsCard 
+        map={(item: any) => ({
+            id: item.id,
+            component_id: item.component_id,
+            name: item.label,
+            category: item.category,
+            img: item.img,
+            tags: item.tags,
+            description: item.description,
+            order: item.order_index,
+            path: `/file/${item.component_id}`
+        })}
+        params={{component_type:"file"}}/>
+    },  {
+        path: "/script-card",
+        element: <PipelineComponentsCard 
+        map={(item: any) => ({
+            id: item.id,
+            component_id: item.component_id,
+            name: item.name,
+            category: item.category,
+            img: item.img,
+            tags: item.tags,
+            description: item.description,
+            order: item.order_index,
+            path: `/script/${item.component_id}`
+        })}
+        params={{component_type:"script"}}/> 
+    }, 
+
+    {
+        path: "/pipeline/:pipelineId",
+        element: <Pipeline />
+    },{
+        path: "/software/:softwareId",
+        element: <AnalysisSoftware />
+    },
+    {
+        path: "/file/:fileId",
+        element: <AnalysisFile />
+    },
+    {
+        path: "/script/:scriptId",
+        element: <Script />
+    },
+
+
+
     {
         path: "/:project/meta_genome/reads-based-abundance-analysis",
         element: <ReadsBasedAbundanceAnalysis />
