@@ -384,7 +384,7 @@ const NamespaceSelect: FC<any> = ({ value, onChange }) => {
     const [namespace, setNamespace] = useState<any>([])
     // const { modal, openModal, closeModal } = useModal();
     const loadNamespace = async () => {
-        const resp = await axios.get(`/list-context-by-type/namespace`)
+        const resp = await axios.get(`/list-namespace`)
         const data = resp.data
         setNamespace(data)
     }

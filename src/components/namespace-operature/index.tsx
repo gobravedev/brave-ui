@@ -8,7 +8,7 @@ export const CreateOrUpdateNamespace: FC<any> = ({ visible, onClose, params }) =
     if (!visible) return null;
     const [namespaceList, setNamespaceList] = useState<any>([])
     const loadNamespace = async () => {
-        const resp = await axios.get(`/list-context-by-type/namespace`)
+        const resp = await axios.get(`/list-namespace`)
         const data = resp.data
         setNamespaceList(data)
     }
@@ -18,23 +18,21 @@ export const CreateOrUpdateNamespace: FC<any> = ({ visible, onClose, params }) =
     const saveNamespace = async () => {
         const values = await form.validateFields()
         if (record) {
-            await axios.post("/save-or-update-context", {
+            await axios.post("/save-or-update-namespace", {
                 ...values,
-                type: "namespace",
-                context_id: record.context_id
+                namespace_id: record.namespace_id
             })
         } else {
-            await axios.post("/save-or-update-context", {
+            await axios.post("/save-or-update-namespace", {
                 ...values,
-                type: "namespace"
             })
         }
         loadNamespace()
         // onClose()
     }
-    const deleteNamespace = async (context_id: any) => {
+    const deleteNamespace = async (namespaceId: any) => {
         try {
-            await axios.delete(`/delete-namespace-by-context-id/${context_id}`)
+            await axios.delete(`/delete-namespace-by-id/${namespaceId}`)
             loadNamespace()
             messageApi.success("删除成功")
         } catch (error: any) {
@@ -62,8 +60,8 @@ export const CreateOrUpdateNamespace: FC<any> = ({ visible, onClose, params }) =
 
         </Flex>
         {namespaceList && namespaceList.map((item: any) => {
-            return <div style={{ display: "flex", marginBottom: "0.5rem", justifyContent: "space-between" }} key={item.context_id}>
-                <div>{item.name}({item.context_id})</div>
+            return <div style={{ display: "flex", marginBottom: "0.5rem", justifyContent: "space-between" }} key={item.namespace_id}>
+                <div>{item.name}({item.namespace_id})</div>
                 <Button type="primary" size="small" onClick={() => {
                     setRecord(item)
                     form.setFieldsValue({
@@ -72,7 +70,7 @@ export const CreateOrUpdateNamespace: FC<any> = ({ visible, onClose, params }) =
                 }}>更新</Button>
                 
                 <Popconfirm title="确定删除吗？" onConfirm={() => {
-                    deleteNamespace(item.context_id)
+                    deleteNamespace(item.namespace_id)
                 }}>
                     <Button danger size="small">删除</Button>
                 </Popconfirm>
@@ -106,10 +104,10 @@ export const InstallNamespace: FC<any> = ({ visible, onClose, params }) => {
     }
     return <Modal title="安装namespace" open={visible} onCancel={onClose} >
         {namespaceList && namespaceList.map((item: any) => {
-            return <Flex style={{ display: "flex", marginBottom: "0.5rem", justifyContent: "space-between" }} key={item.namespace}>
-                <div >{item.name}({item.namespace})</div>
+            return <Flex style={{ display: "flex", marginBottom: "0.5rem", justifyContent: "space-between" }} key={item.namespace_id}>
+                <div >{item.name}({item.namespace_id})</div>
                 <Popconfirm title="确定安装吗？" onConfirm={() => {
-                    installNamespace(item.namespace)
+                    installNamespace(item.namespace_id)
                 }}>
                     <Button  size="small">安装</Button>
                 </Popconfirm>

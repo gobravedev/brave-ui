@@ -13,7 +13,7 @@ import axios from "axios"
 import { useModal } from "@/hooks/useModal"
 import { usePagination } from "@/hooks/usePagination"
 import path from "path"
-import {CreateOrUpdateNamespace, InstallNamespace} from "../namespace-operature"
+import { CreateOrUpdateNamespace, InstallNamespace } from "../namespace-operature"
 const PipelineComponentsCard: FC<any> = ({ params, map }) => {
     // const [pipelineComponents, setPipelineComponents] = useState<any>([])
 
@@ -102,9 +102,11 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
 
 
             <Button color="cyan" variant="solid" onClick={() => {
-                openModal("modalB")}}>创建/更新namespace</Button>
-             <Button color="cyan" variant="solid" onClick={() => {
-                openModal("modalC")}}>安装namespace</Button>
+                openModal("modalB")
+            }}>创建/更新namespace</Button>
+            <Button color="cyan" variant="solid" onClick={() => {
+                openModal("modalC")
+            }}>安装namespace</Button>
             <Button color="primary" variant="solid" onClick={reload}>刷新</Button>
         </Flex>
         <Spin spinning={loading}>
@@ -146,7 +148,9 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
                                 color: "rgba(0,0,0,0.45)",
                                 cursor: "pointer",
                             }}>
-                                {item.namespace}
+                                <Tooltip title={item.namespace}>
+                                    {item.namespace.slice(-5)}
+                                </Tooltip>
                             </div>
                             {/* <EditOutlined
                                 onClick={(e) => {
