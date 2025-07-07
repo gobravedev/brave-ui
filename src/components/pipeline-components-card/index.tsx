@@ -13,6 +13,7 @@ import axios from "axios"
 import { useModal } from "@/hooks/useModal"
 import { usePagination } from "@/hooks/usePagination"
 import path from "path"
+import {CreateOrUpdateNamespace, InstallNamespace} from "../namespace-operature"
 const PipelineComponentsCard: FC<any> = ({ params, map }) => {
     // const [pipelineComponents, setPipelineComponents] = useState<any>([])
 
@@ -28,7 +29,8 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
             tags: item.tags,
             description: item.description,
             order: item.order_index,
-            path: `/pipeline/${item.component_id}`
+            path: `/pipeline/${item.component_id}`,
+            namespace: item.namespace
         })
     })
     // result = {
@@ -98,17 +100,11 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
             }}>创建管道</Button>
 
 
+
             <Button color="cyan" variant="solid" onClick={() => {
-
-            }}>导出管道</Button>
-            <Popconfirm title="是否安装?" onConfirm={async () => {
-                await axios.post("/import-pipeline")
-                messageApi.success("安装成功!")
-                reload()
-            }}>
-                <Button color="cyan" variant="solid">安装管道</Button>
-            </Popconfirm>
-
+                openModal("modalB")}}>创建/更新namespace</Button>
+             <Button color="cyan" variant="solid" onClick={() => {
+                openModal("modalC")}}>安装namespace</Button>
             <Button color="primary" variant="solid" onClick={reload}>刷新</Button>
         </Flex>
         <Spin spinning={loading}>
@@ -141,6 +137,17 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
                                 </Tooltip>
 
                             ))}
+                            {/* {JSON.stringify(item)} */}
+                            <div style={{
+                                position: "absolute",
+                                right: 40,
+                                bottom: 10,
+                                fontSize: 15,
+                                color: "rgba(0,0,0,0.45)",
+                                cursor: "pointer",
+                            }}>
+                                {item.namespace}
+                            </div>
                             {/* <EditOutlined
                                 onClick={(e) => {
                                     e.stopPropagation()
@@ -215,7 +222,14 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
             onClose={closeModal}
             params={modal.params}></CreateOrUpdatePipelineComponent>
 
-
+        <CreateOrUpdateNamespace
+            visible={modal.key == "modalB" && modal.visible}
+            onClose={closeModal}
+            params={modal.params}></CreateOrUpdateNamespace>
+        <InstallNamespace
+            visible={modal.key == "modalC" && modal.visible}
+            onClose={closeModal}
+            params={modal.params}></InstallNamespace>
     </div>
 }
 

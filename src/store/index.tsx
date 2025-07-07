@@ -1,13 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit'
 import menuReducer from './menuSlice'
-import projectReducer from './priojectSlice'
+import contextReducer from './contextSlice'
 import  globalReducer from './globalSlice'
 
 const store = configureStore({
   reducer: {
     menu: menuReducer,
-    project:projectReducer,
-    global:globalReducer
+    global:globalReducer,
+    context:contextReducer
   },
 })
 

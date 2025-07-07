@@ -3,7 +3,6 @@ import TextArea from "antd/es/input/TextArea"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
-import { listPipelineComponents as listPipelineComponentsApi } from '@/api/pipeline'
 import { Button, Card, Collapse, Flex, Form, Input, Select, Table, Typography } from "antd"
 import axios from "axios"
 import FormJsonComp from "@/components/form-components"

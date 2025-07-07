@@ -1,12 +1,15 @@
-import { Button, Collapse, Form, Input, Modal, Select, Typography } from "antd"
+import { Button, Card, Collapse, Divider, Flex, Form, Input, Modal, Popconfirm, Select, Space, Typography } from "antd"
 import TextArea from "antd/es/input/TextArea"
 import axios from "axios"
 import { FC, use, useEffect, useState } from "react"
 import { listPipelineComponents as listPipelineComponentsApi } from '@/api/pipeline'
+import { useModal } from "@/hooks/useModal"
+import { data } from "react-router"
+import { useForm } from "antd/es/form/Form"
 export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClose, params, callback }) => {
     if (!visible) return null;
 
-    const { data, pipelineStructure } = params
+    const { data, pipelineStructure, namespace } = params
     const [form] = Form.useForm()
     const [pipeline, setPipeline] = useState<any>()
     const [pipelineRelation, setPipelineRelation] = useState<any>()
@@ -26,21 +29,22 @@ export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClo
     }
     const listPipelineComponents = async (componentType: any) => {
         const resp = await listPipelineComponentsApi({
-            component_type: componentType
+            component_type: componentType,
+            namespace: namespace
         })
         const data = resp.data.map((item: any) => {
             const content = JSON.parse(item.content)
-            if (pipelineStructure.relation_type == "pipeline_software" ) {
+            if (pipelineStructure.relation_type == "pipeline_software") {
                 return {
                     label: `${content.name}`,
                     value: item.component_id
                 }
-            } else if(pipelineStructure.relation_type == "file_script"){
+            } else if (pipelineStructure.relation_type == "file_script") {
                 return {
                     label: `${content.name}(${content.moduleName})`,
                     value: item.component_id
                 }
-            }else {
+            } else {
                 return {
                     label: `${content.label}(${content.name})`,
                     value: item.component_id
@@ -334,6 +338,11 @@ const WrapPipeline: FC<any> = ({ data, form }) => {
         {/* <Form.Item name={"pipeline_key"} label="pipeline_key">
             <Input disabled={data ? true : false}></Input>
         </Form.Item> */}
+        <Form.Item name={"namespace"} label="namespace">
+            <NamespaceSelect
+
+            />
+        </Form.Item>
         <Form.Item name={["content", "name"]} label="name">
             <Input></Input>
         </Form.Item>
@@ -369,4 +378,74 @@ const WrapPipeline: FC<any> = ({ data, form }) => {
         </Form.Item> */}
         {/* {JSON.stringify(data)} */}
     </>
+}
+
+const NamespaceSelect: FC<any> = ({ value, onChange }) => {
+    const [namespace, setNamespace] = useState<any>([])
+    // const { modal, openModal, closeModal } = useModal();
+    const loadNamespace = async () => {
+        const resp = await axios.get(`/list-context-by-type/namespace`)
+        const data = resp.data
+        setNamespace(data)
+    }
+    useEffect(() => {
+        loadNamespace()
+    }, [])
+    return <>
+        <Flex justify="space-between">
+            <Select value={value} onChange={onChange} options={namespace.map((item: any) => ({ label: item.name, value: item.context_id }))}>
+            </Select>
+            {/* {modal.key == "namespaceOperation" && modal.visible ?
+                <Button onClick={() => {
+                    closeModal()
+                }}>取消</Button>
+                : <Button onClick={() => {
+                    openModal("namespaceOperation", namespace)
+                }}>新增</Button>} */}
+        </Flex>
+        {/* <NamespaceOperation style={{ marginTop: "0.5rem" }}
+            visible={modal.key == "namespaceOperation" && modal.visible}
+            callback={loadNamespace}
+            onClose={closeModal}
+            params={namespace} ></NamespaceOperation> */}
+    </>
+}
+
+const NamespaceOperation: FC<any> = ({ visible, onClose, params, callback }) => {
+    if (!visible) return null;
+    const [namespace, setNamespace] = useState<any>()
+    const [record, setRecord] = useState<any>()
+    // const [form] = useForm()
+    const saveNamespace = async () => {
+        // const values = await form.validateFields()
+        if (record) {
+            await axios.post("/save-or-update-context", {
+                name: namespace,
+                type: "namespace",
+                context_id: record.context_id
+            })
+        } else {
+            await axios.post("/save-or-update-context", {
+                name: namespace,
+                type: "namespace"
+            })
+        }
+        if (callback) {
+            callback()
+        }
+        // onClose()
+    }
+    const deleteNamespace = async (context_id: any) => {
+        await axios.delete(`/delete-namespace-by-context-id/${context_id}`)
+        if (callback) {
+            callback()
+        }
+    }
+
+
+    return <Card title="新增namespace">
+        {/* {JSON.stringify(params)} */}
+
+      
+    </Card>
 }

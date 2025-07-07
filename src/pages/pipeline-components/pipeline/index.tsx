@@ -13,6 +13,7 @@ import { useModal } from '@/hooks/useModal'
 import ImportData from '@/components/import-data'
 import BioDatabases from '@/components/bio-databases'
 import ParamsView from "../../../components/params-view"
+import InstallNamespace from "@/components/namespace-operature"
 const Pipeline: FC<any> = ({ }) => {
     const { pipelineId: name } = useParams()
     // console.log(pipelineId)
@@ -212,8 +213,10 @@ const Pipeline: FC<any> = ({ }) => {
         <Flex style={{ marginBottom: "1rem" }} justify={"space-between"} align={"center"} gap="small">
             <div >
                 {pipeline ? <>
-                    <h2 style={{ margin: 0 }}>{pipeline?.name}</h2>
+                    <h2 style={{ margin: 0 }}>{pipeline?.name} <span style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)" ,fontSize:"1rem"}}> {pipeline?.namespace}</span></h2>
                     <p style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)" }}>{pipeline?.description}</p>
+                   
+
                     {import.meta.env.MODE == "development" && <>
                         <p style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)" }}>{pipeline?.component_id}</p></>}
 
@@ -285,7 +288,7 @@ const Pipeline: FC<any> = ({ }) => {
             // data={record}
             visible={modal.key == "modalA" && modal.visible}
             onClose={closeModal}
-            params={modal.params}></CreateORUpdatePipelineCompnentRelation>
+            params={{...modal.params,namespace:pipeline?.namespace}}></CreateORUpdatePipelineCompnentRelation>
         <CreateOrUpdatePipelineComponent
             callback={loadData}
             // pipelineStructure={pipelineStructure}
@@ -306,6 +309,8 @@ const Pipeline: FC<any> = ({ }) => {
             visible={modal.key == "modalF" && modal.visible}
             onClose={closeModal}
             params={modal.params}></ParamsView>
+
+
     </div>
 }
 

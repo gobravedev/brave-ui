@@ -97,7 +97,8 @@ const childern = [
             tags: item.tags,
             description: item.description,
             order: item.order_index,
-            path: `/software/${item.component_id}`
+            path: `/software/${item.component_id}`,
+            namespace: item.namespace
         })}
         params={{component_type:"software"}}/>
     },  {
@@ -112,7 +113,8 @@ const childern = [
             tags: item.tags,
             description: item.description,
             order: item.order_index,
-            path: `/file/${item.component_id}`
+            path: `/file/${item.component_id}`,
+            namespace: item.namespace
         })}
         params={{component_type:"file"}}/>
     },  {
@@ -127,7 +129,8 @@ const childern = [
             tags: item.tags,
             description: item.description,
             order: item.order_index,
-            path: `/script/${item.component_id}`
+            path: `/script/${item.component_id}`,
+            namespace: item.namespace
         })}
         params={{component_type:"script"}}/> 
     }, 

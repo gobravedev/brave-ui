@@ -6,9 +6,11 @@ import { NavLink, Outlet, useLocation, useNavigate, useParams } from 'react-rout
 import { Header } from 'antd/es/layout/layout';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
-import { setCurrenct } from '@/store/priojectSlice'
+import { setProject } from '@/store/contextSlice'
 import { setSseData } from '@/store/globalSlice'
 import useMessage from 'antd/es/message/useMessage';
+import { useModal } from '@/hooks/useModal';
+import ContextModal from '@/components/context';
 
 const { Content, Sider } = Layout;
 
@@ -50,6 +52,7 @@ const App: React.FC = () => {
     const dispatch = useDispatch()
     const [notificationApi, notificationContextHolder] = notification.useNotification();
     const [messageApi, messageContextHolder] = message.useMessage();
+    const { modal, openModal, closeModal } = useModal();
 
     const openNotification = ({ type, message = "", description = "" }: { type: NotificationType, message: string, description?: string }) => {
         notificationApi[type]({
@@ -58,7 +61,7 @@ const App: React.FC = () => {
             placement: "bottomRight"
         });
     };
-    const { projectKey: project } = useSelector((state: any) => state.project.currenct)
+    const { project: {name:project,projectKey:projectKey}, namespace: {name:namespace,namespaceKey:namespaceKey} } = useSelector((state: any) => state.context)
     console.log(project)
     const onMenuClick = (key: string) => {
         console.log(key)
@@ -257,6 +260,11 @@ const App: React.FC = () => {
                         options={projectList}
                     >
                     </Select>
+                    {/* <Button color="primary"   onClick={() => {
+                      openModal("context")
+                    }}>
+                        {project}/{namespace}
+                    </Button> */}
                     {/* <Button>   {project}</Button> */}
                 </div>
             </Header>
@@ -281,6 +289,7 @@ const App: React.FC = () => {
                     </Suspense>
                 </Content>
             </Layout>
+            <ContextModal visible={modal.visible} onClose={closeModal} />
         </Layout>
 
     );
