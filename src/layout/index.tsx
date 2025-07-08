@@ -6,7 +6,7 @@ import { NavLink, Outlet, useLocation, useNavigate, useParams } from 'react-rout
 import { Header } from 'antd/es/layout/layout';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
-import { setProject } from '@/store/contextSlice'
+import {  setProject } from '@/store/contextSlice'
 import { setSseData } from '@/store/globalSlice'
 import useMessage from 'antd/es/message/useMessage';
 import { useModal } from '@/hooks/useModal';
@@ -80,11 +80,18 @@ const App: React.FC = () => {
     const [eventSource, setEventSource] = useState<EventSource | null>(null);
 
     useEffect(() => {
-        const eventSource = new EventSource('/brave-api/sse');
+        const eventSource = new EventSource('/brave-api/sse-group');
         setEventSource(eventSource);
         eventSource.addEventListener('message', (event) => {
-            console.log(event.data)
-            openNotification({ type: "info", message: event.data })
+            
+            const data = JSON.parse(event.data)
+            // console.log(data )
+            
+            if(data.msgType === "process_end"){
+                const analysis:any = data.analysis
+                const msg = `${analysis.analysis_name}(${analysis.analysis_id}) 分析完成`
+                openNotification({ type: "info", message: msg })
+            }
             dispatch(setSseData(event.data))
         });
 
@@ -249,7 +256,7 @@ const App: React.FC = () => {
                     <Select
                         onChange={(value: any) => {
                             console.log(value)
-                            dispatch(setCurrenct({
+                            dispatch(setProject({
                                 name: value,
                                 projectKey: value,
                             }))
@@ -283,7 +290,7 @@ const App: React.FC = () => {
 
                 </Sider> */}
 
-                <Content style={{ padding: '0 24px', minHeight: "100vh" }}>
+                <Content style={{ padding: '0 24px' }}>
                     <Suspense key={location.key} fallback={<Test></Test>}>
                         <Outlet context={{ project,eventSource,messageApi }} />
                     </Suspense>

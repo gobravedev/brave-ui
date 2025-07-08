@@ -1,4 +1,4 @@
-import { Breadcrumb, Button, Empty, Flex, message, Modal, Skeleton, Tabs, Tag } from "antd"
+import { Breadcrumb, Button, Empty, Flex, message, Modal, Skeleton, Tabs, Tag, Tooltip } from "antd"
 import { FC, useEffect, useState } from "react"
 import AnalysisPanel from '../../../components/analysis-sotware-panel'
 import Meta from "antd/es/card/Meta"
@@ -6,14 +6,16 @@ import { colors } from '@/utils/utils'
 
 import axios from "axios"
 import { useLocation, useNavigate, useOutletContext, useParams } from "react-router"
-import { listPipeline } from "@/api/pipeline"
+import { deletePipelineRelationApi, listPipeline } from "@/api/pipeline"
 import { CreateORUpdatePipelineCompnentRelation, CreateOrUpdatePipelineComponent } from "../../../components/create-pipeline"
 import ModuleEdit from "../../../components/module-edit"
 import { useModal } from '@/hooks/useModal'
 import ImportData from '@/components/import-data'
 import BioDatabases from '@/components/bio-databases'
 import ParamsView from "../../../components/params-view"
-import InstallNamespace from "@/components/namespace-operature"
+// import InstallNamespace from "@/components/namespace-operature"
+import DependComponent from "@/components/depend-component"
+import MonacoEditorModal from "@/components/react-monaco-editor"
 const Pipeline: FC<any> = ({ }) => {
     const { pipelineId: name } = useParams()
     // console.log(pipelineId)
@@ -186,7 +188,7 @@ const Pipeline: FC<any> = ({ }) => {
     }
     const deletePipelineRelation = async (realtionId: any) => {
         try {
-            const resp = await axios.delete(`/delete-pipeline-relation/${realtionId}`)
+            const resp = await deletePipelineRelationApi(realtionId)
             messageApi.success("删除成功!")
             loadData()
         } catch (error: any) {
@@ -213,9 +215,14 @@ const Pipeline: FC<any> = ({ }) => {
         <Flex style={{ marginBottom: "1rem" }} justify={"space-between"} align={"center"} gap="small">
             <div >
                 {pipeline ? <>
-                    <h2 style={{ margin: 0 }}>{pipeline?.name} <span style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)" ,fontSize:"1rem"}}> {pipeline?.namespace}</span></h2>
+                    <h2 style={{ margin: 0 }}>
+                        {pipeline?.name}
+                        <Tooltip title={pipeline?.namespace}>
+                            <span style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)" ,fontSize:"1rem"}}> {pipeline?.namespace_name}</span>
+                        </Tooltip>
+                    </h2>
                     <p style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)" }}>{pipeline?.description}</p>
-                   
+
 
                     {import.meta.env.MODE == "development" && <>
                         <p style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)" }}>{pipeline?.component_id}</p></>}
@@ -227,10 +234,10 @@ const Pipeline: FC<any> = ({ }) => {
             </div>
             <Flex gap="small" wrap>
                 <Button color="cyan" variant="solid" onClick={() => {
-                    openModal("modalD",pipeline)
+                    openModal("modalD", pipeline)
                 }}>导入数据</Button>
 
-           
+
                 <Button color="cyan" variant="solid" onClick={() => {
                     openModal("modalC", {
                         data: pipeline, structure: {
@@ -288,7 +295,7 @@ const Pipeline: FC<any> = ({ }) => {
             // data={record}
             visible={modal.key == "modalA" && modal.visible}
             onClose={closeModal}
-            params={{...modal.params,namespace:pipeline?.namespace}}></CreateORUpdatePipelineCompnentRelation>
+            params={{ ...modal.params, namespace: pipeline?.namespace }}></CreateORUpdatePipelineCompnentRelation>
         <CreateOrUpdatePipelineComponent
             callback={loadData}
             // pipelineStructure={pipelineStructure}
@@ -309,8 +316,15 @@ const Pipeline: FC<any> = ({ }) => {
             visible={modal.key == "modalF" && modal.visible}
             onClose={closeModal}
             params={modal.params}></ParamsView>
-
-
+        <DependComponent
+            visible={modal.key == "modalG" && modal.visible}
+            onClose={closeModal}
+            callback={loadData}
+            params={modal.params}></DependComponent>
+        <MonacoEditorModal
+            visible={modal.key == "modalH" && modal.visible}
+            onClose={closeModal}
+            value={modal.params}></MonacoEditorModal>
     </div>
 }
 

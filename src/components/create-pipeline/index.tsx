@@ -145,7 +145,7 @@ export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClo
 
 
                 <Form.Item name={"component_id"} label="组件">
-                    <Select options={components}></Select>
+                    <Select showSearch options={components}></Select>
                 </Form.Item>
 
                 {pipelineRelation && <>
@@ -262,6 +262,9 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
             onClose={() => onClose()}
             onCancel={() => onClose()}>
             <Form form={form}>
+                <Form.Item name={"name"} label="组件名称">
+                    <Input ></Input>
+                </Form.Item>
                 <ComponentsRender {...structure} data={component} form={form}></ComponentsRender>
                 <Collapse ghost items={[
                     {

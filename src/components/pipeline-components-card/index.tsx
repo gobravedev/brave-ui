@@ -3,7 +3,7 @@ import Item from "antd/es/list/Item"
 import { FC, useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate, useOutletContext, useParams } from "react-router"
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { ApartmentOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 
 import Meta from "antd/es/card/Meta"
 import { colors } from '@/utils/utils'
@@ -14,6 +14,7 @@ import { useModal } from "@/hooks/useModal"
 import { usePagination } from "@/hooks/usePagination"
 import path from "path"
 import { CreateOrUpdateNamespace, InstallNamespace } from "../namespace-operature"
+import DependComponent from "../depend-component"
 const PipelineComponentsCard: FC<any> = ({ params, map }) => {
     // const [pipelineComponents, setPipelineComponents] = useState<any>([])
 
@@ -30,7 +31,8 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
             description: item.description,
             order: item.order_index,
             path: `/pipeline/${item.component_id}`,
-            namespace: item.namespace
+            namespace: item.namespace,
+            namespace_name: item.namespace_name
         })
     })
     // result = {
@@ -109,6 +111,8 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
             }}>安装namespace</Button>
             <Button color="primary" variant="solid" onClick={reload}>刷新</Button>
         </Flex>
+        <div style={{ marginBottom: "2rem" }}>
+        </div>
         <Spin spinning={loading}>
             {Array.isArray(pipelineComponents) && pipelineComponents.length != 0 ? <Row gutter={16} style={{ position: "relative" }}>
 
@@ -124,7 +128,12 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
                             onClick={() => navigate(`${item.path}`)}>
 
 
-                            <Meta title={item.name} description={item?.description} style={{ marginBottom: "1rem" }} />
+                            <Meta title={<>
+                                {item.name}
+                                <Tooltip title={item?.namespace}>
+                                    <span style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)", fontSize: "0.5rem" }}> {item?.namespace_name}</span>
+                                </Tooltip>
+                            </>} description={item?.description} style={{ marginBottom: "1rem" }} />
                             {item.tags && Array.isArray(item.tags) && item.tags.map((tag: any, index: any) => (
                                 <Tooltip key={index} title={tag}>
                                     <Tag style={{
@@ -140,7 +149,23 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
 
                             ))}
                             {/* {JSON.stringify(item)} */}
-                            <div style={{
+                            <div onClick={(e) => {
+                                e.stopPropagation()
+                                openModal("modalG", item)
+                                // setCreateOpen(true)
+                                // console.log(item)
+                                // setRecord(item)
+                            }} style={{
+                                position: "absolute",
+                                right: 10,
+                                bottom: 10,
+                                fontSize: 15,
+                                color: "rgba(0,0,0,0.45)",
+                                cursor: "pointer",
+                            }}>
+                                <ApartmentOutlined />
+                            </div>
+                            {/* <div style={{
                                 position: "absolute",
                                 right: 40,
                                 bottom: 10,
@@ -149,9 +174,9 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
                                 cursor: "pointer",
                             }}>
                                 <Tooltip title={item.namespace}>
-                                    {item.namespace.slice(-5)}
+                                    {item.namespace_name}
                                 </Tooltip>
-                            </div>
+                            </div> */}
                             {/* <EditOutlined
                                 onClick={(e) => {
                                     e.stopPropagation()
@@ -234,6 +259,12 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
             visible={modal.key == "modalC" && modal.visible}
             onClose={closeModal}
             params={modal.params}></InstallNamespace>
+
+        <DependComponent
+            visible={modal.key == "modalG" && modal.visible}
+            onClose={closeModal}
+            callback={reload}
+            params={modal.params}></DependComponent>
     </div>
 }
 

@@ -2,10 +2,11 @@ import { Venn } from "@ant-design/plots"
 import { Button, Card, Flex, message, Popconfirm, Popover, Space, Table } from "antd"
 import axios from "axios"
 import { FC, forwardRef, useEffect, useImperativeHandle, useState } from "react"
-import { useParams } from "react-router"
+import { useLocation, useNavigate, useParams } from "react-router"
 import ResultParse from "../result-parse"
 import { useModal } from "@/hooks/useModal"
 import PipelineInfo from "../pipeline-monitor"
+import { runAnalysisApi } from "@/api/analysis"
 
 export const readHdfsAPi = (contentPath: any) => axios.get(`/api/read-hdfs?path=${contentPath}`)
 export const readJsonAPi = (contentPath: any) => axios.get(`/fast-api/read-json?path=${contentPath}`)
@@ -34,6 +35,8 @@ const ResultList = forwardRef<any, any>(({
     const [messageApi, contextHolder] = message.useMessage();
     const { modal, openModal, closeModal } = useModal();
     const [openMonitor, setOpenMonitor] = useState<any>(false)
+    const navigate = useNavigate()  
+    const location = useLocation()
 
     const setRecord = (record: any) => {
         if (setRecord_) {
@@ -147,13 +150,18 @@ const ResultList = forwardRef<any, any>(({
             width: 200,
             render: (_: any, record: any) => (
                 <Space size="middle">
-                    <Popover content={<>
-                        {/* <Typography >
-                                <pre>{JSON.stringify(JSON.parse(record.content), null, 2)}</pre>
-                            </Typography> */}
-                        {record.analysis_name}
-                    </>} >
-                        <Button size="small" color="cyan" variant="solid" onClick={() => {
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                         navigate(`/software-analysis-editor/${record.analysis_id}`, {
+                            state: {
+                                location: location.pathname,
+                            }
+                         })
+                    }}>编辑</Button>
+
+                    {openMonitor ? <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        setOpenMonitor(false)
+                    }}>关闭</Button> :
+                         <Button size="small" color="cyan" variant="solid" onClick={() => {
                             // record.content = JSON.parse(record.content)
                             setRecord(record)
                             setOpenMonitor(true)
@@ -161,15 +169,16 @@ const ResultList = forwardRef<any, any>(({
                             // if (cleanDom) {
                             //     cleanDom(undefined)
                             // }
-                        }}>查看</Button>
-                    </Popover>
-                    <Popconfirm title={"是否运行!"} onConfirm={async () => {
-                        await axios.post(`/run-analysis/${record.analysis_id}`)
+                        }}>查看/运行</Button>
+                    }
+                   
+                    {/* <Popconfirm title={"是否运行!"} onConfirm={async () => {
+                        await runAnalysisApi(record.analysis_id)
                         setRecord(record)
                         loadData()
                     }}>
                         <Button size="small" color="cyan" variant="solid">运行</Button>
-                    </Popconfirm>
+                    </Popconfirm> */}
                     <Popconfirm title={"是否删除!"} onConfirm={async () => {
                         await deleteById(record.id)
                         loadData()
@@ -204,6 +213,7 @@ const ResultList = forwardRef<any, any>(({
     }, [])
     return <>
         {contextHolder}
+        {/* {JSON.stringify(location.pathname)} */}
         <Card title={title} extra={
             <Flex gap={"small"}>
                 {/* {software && <>
@@ -242,7 +252,7 @@ const ResultList = forwardRef<any, any>(({
         </Card>
         <div style={{ marginBottom: "1rem" }}></div>
 
-        {record && openMonitor && <PipelineInfo {...record} onClose={() => setOpenMonitor(false)}></PipelineInfo>}
+        {record && openMonitor && <PipelineInfo {...record} onClose={() => setOpenMonitor(false)} callback={loadData}></PipelineInfo>}
 
         <ResultParse
             visible={modal.key == "modalA" && modal.visible}

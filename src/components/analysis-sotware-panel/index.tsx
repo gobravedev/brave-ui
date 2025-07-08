@@ -327,6 +327,9 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
                     }}>
                         <Button color="cyan" variant="solid" >移除软件</Button>
                     </Popconfirm>
+                    <Button color="cyan" variant="solid" onClick={() => {
+                        operatePipeline.openModal("modalG", rest)
+                    }}>查看依赖</Button>
                     {/* {JSON.stringify(rest)} */}
                 </Flex>
 
@@ -339,6 +342,9 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
                             component_id: rest.component_id,
                         })
                     }}>软件脚本</Button>
+
+
+                    
                     <Button color="cyan" variant="solid" onClick={() => {
                         operatePipeline.openModal("modalB", {
                             module_type: "py_parse_analysis",

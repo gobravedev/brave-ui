@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 // 自定义 hook：分页逻辑
-export const usePagination = ({ pageApi,params,map, initialPageSize = 10 }: any) => {
+export const usePagination = ({ pageApi,params,map, initialPageSize = 12 }: any) => {
     const [data, setData] = useState<any[]>([]);  // 存储数据
     const [pageNumber, setPageNumber] = useState(1); // 当前页码
     const [totalPage, setTotalPage] = useState(0); // 总页数

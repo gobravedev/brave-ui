@@ -65,12 +65,12 @@ const ResultList = forwardRef<any, any>(({
     const reload = () => {
         console.log(analysisMethod)
         if (analysisMethod && Array.isArray(analysisMethod)) {
-            
+
             const analysisMethodList = analysisMethod.flatMap((it: any) => it.name)
             const componentIdList = analysisMethod.flatMap((it: any) => it.component_id)
 
             // console.log(analysisMethodList)
-            loadData({ analysisMethodValues: undefined,componentIdList:componentIdList })
+            loadData({ analysisMethodValues: undefined, componentIdList: componentIdList })
         } else {
             loadData({ params: params })
         }
@@ -125,7 +125,7 @@ const ResultList = forwardRef<any, any>(({
         });
         return result
     }
-    const loadData = async ({ analysisMethodValues, params ,componentIdList}: any) => {
+    const loadData = async ({ analysisMethodValues, params, componentIdList }: any) => {
         setLoading(true)
         let resp: any = await axios.post(`/fast-api/find-analyais-result-by-analysis-method`, {
             project: project,
@@ -137,7 +137,7 @@ const ResultList = forwardRef<any, any>(({
         if (componentIdList || analysisMethodValues) {
             const keyMap = getKeyMap()
             // console.log(keyMap)
-           
+
             const groupedData = resp.data.reduce((acc: any, item: any) => {
                 const key = item.analysis_method;
                 // const key = keyMap[item.analysis_method]
@@ -458,7 +458,20 @@ const ResultList = forwardRef<any, any>(({
 
 
     return <>
-        <Card title={`${title}(${currentAnalysisMethod?.component_id})`}
+        <Card title={<>{title}(
+            <Tooltip title={<>
+                <ul>
+                    <li>namespace: {currentAnalysisMethod?.namespace_name}</li>
+                    <li>pipeline: {pipeline?.component_id}</li>
+                    <li>software: {software?.component_id}</li>
+                    <li>file: {currentAnalysisMethod?.component_id}</li>
+                    <li>name: {currentAnalysisMethod?.name}</li>
+                </ul>
+
+               
+                </>}>
+                {currentAnalysisMethod?.label}
+                </Tooltip>)</>}
             extra={<>{cardExtra}
                 <Flex gap={"small"}>
                     {operatePipeline?.openModal && <>
@@ -532,11 +545,7 @@ const ResultList = forwardRef<any, any>(({
             onTabChange={onTabChange}
         >
             {import.meta.env.MODE == "development" && <>
-                <ul>
-                    <li>pipeline:{pipeline?.component_id}</li>
-                    <li>software:{software?.component_id}</li>
-                    <li>file:{currentAnalysisMethod?.component_id}</li>
-                </ul>
+                
             </>}
 
 

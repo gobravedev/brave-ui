@@ -52,8 +52,10 @@ const PielineMonitorPanal = lazy(() => import('@/pages/pipeline-monitor-panal'))
 const AnalysisSoftware = lazy(() => import('@/pages/pipeline-components/software'));
 const AnalysisFile = lazy(() => import('@/pages/pipeline-components/file'));
 const Script = lazy(() => import('@/pages/pipeline-components/script'));
-import Pipeline from '@/pages/pipeline-components/pipeline'
-import PipelineComponentsCard from '@/components/pipeline-components-card'
+const Pipeline = lazy(() => import('@/pages/pipeline-components/pipeline'));
+const PipelineComponentsCard = lazy(() => import('@/components/pipeline-components-card'));
+const SoftwareAnalysisEditor = lazy(() => import('@/pages/software-analysis-editor'));
+
 import axios from "axios";
 import { Skeleton } from "antd";
 import { useDispatch } from "react-redux";
@@ -98,7 +100,8 @@ const childern = [
             description: item.description,
             order: item.order_index,
             path: `/software/${item.component_id}`,
-            namespace: item.namespace
+            namespace: item.namespace,
+            namespace_name: item.namespace_name
         })}
         params={{component_type:"software"}}/>
     },  {
@@ -114,7 +117,8 @@ const childern = [
             description: item.description,
             order: item.order_index,
             path: `/file/${item.component_id}`,
-            namespace: item.namespace
+            namespace: item.namespace,
+            namespace_name: item.namespace_name
         })}
         params={{component_type:"file"}}/>
     },  {
@@ -130,10 +134,15 @@ const childern = [
             description: item.description,
             order: item.order_index,
             path: `/script/${item.component_id}`,
-            namespace: item.namespace
+            namespace: item.namespace,
+            namespace_name: item.namespace_name
         })}
         params={{component_type:"script"}}/> 
     }, 
+    {
+        path: "/software-analysis-editor/:analysisId",
+        element: <SoftwareAnalysisEditor />
+    },
 
     {
         path: "/pipeline/:pipelineId",

@@ -1,13 +1,15 @@
-import { message, Modal } from "antd"
+import { Button, Drawer, Flex, message, Modal } from "antd"
 import axios from "axios"
-import { FC, useEffect, useState } from "react"
+import { FC, useEffect, useRef, useState } from "react"
 import { message as $message } from 'antd';
 import TextArea from "antd/es/input/TextArea";
 import Typography from "antd/es/typography/Typography";
+import { MonacoEditor } from "../react-monaco-editor"
 const ModuleEdit: FC<any> = ({ visible, onClose, params, callback }) => {
     if (!visible) return null;
     const [data, setData] = useState<any>()
     const [messageApi, contextHolder] = message.useMessage();
+    const editorRef = useRef<any>(null)
 
     const getModuleContent = async (params: any) => {
         try {
@@ -25,21 +27,33 @@ const ModuleEdit: FC<any> = ({ visible, onClose, params, callback }) => {
     }, [JSON.stringify(params)])
     return <>
         {contextHolder}
-        <Modal title="查看文件" open={visible} onClose={onClose} onCancel={onClose}>
+        <Drawer 
+        extra={
+            <Flex justify="flex-end" gap={"small"}>
+                <Button color="cyan" variant="solid" onClick={() => {
+                    editorRef.current.setValue(data?.content)
+                }}>保存</Button>
+            </Flex>
+        }
+        title="查看文件" 
+        open={visible} 
+        onClose={onClose} width={"50%"}>
             {/* {JSON.stringify(data)} */}
             <ul>
                 <li>module:{data?.module}</li>
                 <li>path:{data?.path}</li>
             </ul>
-            <Typography>
+            <hr />
+            {/* <Typography>
                 <pre>
                     {data?.content}
                 </pre>
-            </Typography>
-
+            </Typography> */}
+            <MonacoEditor value={data?.content} editorRef={editorRef} defaultLanguage="python"></MonacoEditor>
             {/* <TextArea value={data?.content} disabled rows={10}>
-            </TextArea> */}
-        </Modal>
+            </TextArea> */} 
+           
+            </Drawer>
     </>
 }
 

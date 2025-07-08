@@ -15,3 +15,13 @@ export const listPipelineComponents  = async (params:any)=>{
     const resp: any = await axios.post(`/list-pipeline-components`,params)
     return resp
 }
+
+
+export const deletePipelineRelationApi = async (realtionId:any)=>{
+    const resp: any = await axios.delete(`/delete-pipeline-relation/${realtionId}`)
+    return resp
+}
+export const deleteComponentApi = async (componentId:any)=>{
+    const resp: any = await axios.delete(`/delete-component/${componentId}`)
+    return resp
+}
