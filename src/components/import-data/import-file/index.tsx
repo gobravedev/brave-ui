@@ -3,7 +3,7 @@ import TextArea from "antd/es/input/TextArea"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
-import { Button, Card, Collapse, Flex, Form, Input, Select, Table, Typography } from "antd"
+import { Button, Card, Collapse, Empty, Flex, Form, Input, Select, Table, Typography } from "antd"
 import axios from "axios"
 import FormJsonComp from "@/components/form-components"
 import { useOutletContext } from "react-router"
@@ -158,6 +158,27 @@ const ImportFile: FC<any> = (pipeline) => {
         setParseData(resp.data)
     }
 
+    const renderTable = () => {
+        if (!Array.isArray(parseData)) return null;
+
+        if (parseData.length === 0) {
+            return <Empty description="没有解析数据" />;
+        }
+
+        const columns = Object.entries(parseData[0]).map(([key, value]) => ({
+            title: key,
+            dataIndex: key,
+            key: key,
+            render: (text: any) => <span>{text}</span>
+        }))
+
+        return <Table footer={() => (
+            <div style={{ textAlign: 'right' }}>
+                一共{parseData.length}条记录 &nbsp;&nbsp;
+                <Button color="cyan" variant="solid" onClick={importData}>确认</Button>
+            </div>
+        )} columns={columns} dataSource={parseData} />;
+    };
 
     useEffect(() => {
         // listPipelineComponents()
@@ -186,24 +207,20 @@ const ImportFile: FC<any> = (pipeline) => {
                 </Form.Item>}
 
                 <FormJsonComp formJson={inputForm} dataMap={{}} ></FormJsonComp>
-                {parseData ? <Table
-                    footer={() => (
-                        <div style={{ textAlign: 'right' }}>
-                            一共{parseData.length}条记录 &nbsp;&nbsp;
-                            <Button color="cyan" variant="solid" onClick={importData}>确认</Button>
-                        </div>
-                    )}
-                    dataSource={parseData} columns={Object.entries(parseData[0]).map(([key, value]) => ({
-                        title: key,
-                        dataIndex: key,
-                        key: key,
-                        render: (text: any) => <span>{text}</span>
-                    }))}></Table> :
-
+                {Array.isArray(parseData) ? (
+                    renderTable()
+                ) : (
                     <div style={{ textAlign: 'right' }}>
-                        <Button color="cyan" variant="solid" disabled={inputForm.length == 0} onClick={importData}>确认</Button>
+                        <Button
+                            color="cyan"
+                            variant="solid"
+                            disabled={inputForm.length === 0}
+                            onClick={importData}
+                        >
+                            确认
+                        </Button>
                     </div>
-                }
+                )}
                 <Collapse ghost items={[
                     {
                         key: "1",
