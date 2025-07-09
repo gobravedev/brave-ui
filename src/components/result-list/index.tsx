@@ -79,7 +79,7 @@ const ResultList = forwardRef<any, any>(({
 
     const getCurrentAnalysisMenthod = (activeTabKey: any) => {
         const analysisMethodDict: any = analysisMethod.reduce((acc: any, item: any) => {
-            acc[item.name] = item;
+            acc[item?.name] = item;
             return acc;
         }, {});
         // const analysisMethodDict = analysisMethidtoDict(analysisMethod)
@@ -90,8 +90,8 @@ const ResultList = forwardRef<any, any>(({
         // const currentAnalysisMethod = analysisMethod[0]
         if (analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 0) {
             if (setActiveTabKey) {
-                setActiveTabKey(analysisMethod[0].name)
-                const currentAnalysisMethod = getCurrentAnalysisMenthod(analysisMethod[0].name)
+                setActiveTabKey(analysisMethod[0]?.name)
+                const currentAnalysisMethod = getCurrentAnalysisMenthod(analysisMethod[0]?.name)
                 setCurrentAnalysisMethod(currentAnalysisMethod)
             }
         }

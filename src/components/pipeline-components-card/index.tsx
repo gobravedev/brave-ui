@@ -17,11 +17,12 @@ import { CreateOrUpdateNamespace, InstallNamespace } from "../namespace-operatur
 import DependComponent from "../depend-component"
 const PipelineComponentsCard: FC<any> = ({ params, map }) => {
     // const [pipelineComponents, setPipelineComponents] = useState<any>([])
-
-    const { data: pipelineComponents, pageNumber, totalPage, loading, reload, pageSize, setPageNumber } = usePagination({
-        pageApi: pagePipelineComponents,
-        params: params || {},
-        map: map ? map : (item: any) => ({
+    const {component_type} = params
+    const mapFun = (item:any)=>{
+        if (map){
+            item  = map(item)
+        }
+        return {
             id: item.id,
             component_id: item.component_id,
             name: item.name,
@@ -30,10 +31,17 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
             tags: item.tags,
             description: item.description,
             order: item.order_index,
-            path: `/pipeline/${item.component_id}`,
+            path: `/component/${component_type}/${item.component_id}`,
             namespace: item.namespace,
             namespace_name: item.namespace_name
-        })
+        }
+       
+    }
+
+    const { data: pipelineComponents, pageNumber, totalPage, loading, reload, pageSize, setPageNumber } = usePagination({
+        pageApi: pagePipelineComponents,
+        params: params || {},
+        map: mapFun
     })
     // result = {
     //     "id":item.id,

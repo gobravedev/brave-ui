@@ -145,7 +145,7 @@ const childern = [
     },
 
     {
-        path: "/pipeline/:pipelineId",
+        path: "/component/:component_type/:component_id",
         element: <Pipeline />
     },{
         path: "/software/:softwareId",

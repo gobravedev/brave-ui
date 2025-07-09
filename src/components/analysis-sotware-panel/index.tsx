@@ -43,7 +43,7 @@ type AnalysisSoftware = {
     upstreamFormJson?: any,
     downstreamAnalysis?: any,
     operatePipeline?: any,
-    label?:any
+    label?: any
 }
 
 const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
@@ -165,7 +165,7 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
                 {JSON.stringify(outputFile)} */}
                 {import.meta.env.MODE == "development" && <>
                     <ul>
-                        <li>pipeline:{pipeline.component_id}</li>
+                        <li>pipeline:{pipeline?.component_id}</li>
                         <li>software:{rest.component_id}</li>
                     </ul>
                 </>}
@@ -281,17 +281,19 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
             </Col>
             <Col lg={4} sm={24} xs={24} style={{ paddingLeft: "1rem" }}>
                 <Flex gap="small" style={{ marginBottom: "1rem", flexWrap: "wrap" }}>
-                    <Button color="cyan" variant="solid" onClick={() => {
-                        operatePipeline.openModal("modalC", {
-                            data: undefined, structure: {
-                                component_type: "software",
-                                relation_type: "pipeline_software",
-                                parent_component_id: pipeline.component_id,
-                                pipeline_id: pipeline.component_id
-                            }
-                        })
-                    }}>新增软件</Button>
 
+                    {pipeline &&
+                        <Button color="cyan" variant="solid" onClick={() => {
+                            operatePipeline.openModal("modalC", {
+                                data: undefined, structure: {
+                                    component_type: "software",
+                                    relation_type: "pipeline_software",
+                                    parent_component_id: pipeline.component_id,
+                                    pipeline_id: pipeline.component_id
+                                }
+                            })
+                        }}>新增软件</Button>
+                    }
                     <Button color="cyan" variant="solid" onClick={() => {
                         operatePipeline.openModal("modalC", {
                             data: rest, structure: {
@@ -300,33 +302,38 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
                         })
                     }}>更新软件</Button>
 
-                    <Button color="cyan" variant="solid" onClick={() => {
-                        operatePipeline.openModal("modalA", {
-                            data: undefined, pipelineStructure: {
-                                relation_type: "pipeline_software",
-                                parent_component_id: pipeline.component_id,
-                                pipeline_id: pipeline.component_id
+                    {pipeline &&
 
-                            }
-                        })
-                    }}>添加软件</Button>
-                    <Button color="cyan" variant="solid" onClick={() => {
-                        operatePipeline.openModal("modalA", {
-                            data: rest,
-                            pipelineStructure: {
-                                relation_type: "pipeline_software",
-                                pipeline_id: pipeline.component_id,
+                        <>
+                            <Button color="cyan" variant="solid" onClick={() => {
+                                operatePipeline.openModal("modalA", {
+                                    data: undefined, pipelineStructure: {
+                                        relation_type: "pipeline_software",
+                                        parent_component_id: pipeline.component_id,
+                                        pipeline_id: pipeline.component_id
 
-                            }
-                        })
-                    }}>替换软件</Button>
+                                    }
+                                })
+                            }}>添加软件</Button>
+                            <Button color="cyan" variant="solid" onClick={() => {
+                                operatePipeline.openModal("modalA", {
+                                    data: rest,
+                                    pipelineStructure: {
+                                        relation_type: "pipeline_software",
+                                        pipeline_id: pipeline.component_id,
 
+                                    }
+                                })
+                            }}>替换软件</Button>
+                            <Popconfirm title="是否移除文件?" onConfirm={() => {
+                                operatePipeline.deletePipelineRelation(rest.relation_id)
+                            }}>
+                                <Button color="cyan" variant="solid" >移除软件</Button>
+                            </Popconfirm>
+                        </>
 
-                    <Popconfirm title="是否移除文件?" onConfirm={() => {
-                        operatePipeline.deletePipelineRelation(rest.relation_id)
-                    }}>
-                        <Button color="cyan" variant="solid" >移除软件</Button>
-                    </Popconfirm>
+                    }
+
                     <Button color="cyan" variant="solid" onClick={() => {
                         operatePipeline.openModal("modalG", rest)
                     }}>查看依赖</Button>
@@ -344,7 +351,7 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
                     }}>软件脚本</Button>
 
 
-                    
+
                     <Button color="cyan" variant="solid" onClick={() => {
                         operatePipeline.openModal("modalB", {
                             module_type: "py_parse_analysis",
@@ -461,7 +468,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, ope
     const dataMap: any = {
         "host_genome_index": host_genome_index
     }
-   
+
     return <>
         {/* {JSON.stringify(software)} */}
         {contextHolder}
@@ -688,7 +695,7 @@ export const SelectComp: FC<any> = ({ it, resultTableList, value, onChange }) =>
 
 
 
-const UpstreamAnalysisOutput: FC<any> = ({ pipeline, software, operatePipeline, children, project, onClickItem, analysisType, analysisMethod, appendSampleColumns, ...rest }) => {
+export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, software, operatePipeline, children, project, onClickItem, analysisType, analysisMethod, appendSampleColumns, ...rest }) => {
     const [form] = Form.useForm();
 
     // const [loading, setLoading] = useState(false)

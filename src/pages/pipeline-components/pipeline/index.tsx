@@ -1,6 +1,6 @@
 import { Breadcrumb, Button, Empty, Flex, message, Modal, Skeleton, Tabs, Tag, Tooltip } from "antd"
 import { FC, useEffect, useState } from "react"
-import AnalysisPanel from '../../../components/analysis-sotware-panel'
+import AnalysisPanel, { UpstreamAnalysisOutput } from '../../../components/analysis-sotware-panel'
 import Meta from "antd/es/card/Meta"
 import { colors } from '@/utils/utils'
 
@@ -16,13 +16,14 @@ import ParamsView from "../../../components/params-view"
 // import InstallNamespace from "@/components/namespace-operature"
 import DependComponent from "@/components/depend-component"
 import MonacoEditorModal from "@/components/react-monaco-editor"
+import React from "react"
 const Pipeline: FC<any> = ({ }) => {
-    const { pipelineId: name } = useParams()
+    const { component_type, component_id: name } = useParams()
     // console.log(pipelineId)
     const [pipeline, setPipeline] = useState<any>()
-    const [items, setItems] = useState<any>([])
     const navigate = useNavigate();
 
+    const [test, setTest] = useState<any>(true)
     const [messageApi, contextHolder] = message.useMessage();
     // const [editor, setEditor] = useState<any>({
     //     open: false,
@@ -77,52 +78,7 @@ const Pipeline: FC<any> = ({ }) => {
         })
     }
 
-    const getPipline: any = (pipeline: any) => {
-        // console.log(pipeline)
-        const softwareList: any[] = pipeline.items
-        // console.log(pipeline)
-        if (!softwareList) return []
-        return softwareList.map((item, index) => {
-            // const { downstreamAnalysis, appendSampleColumns, analysisType, ...rest } = item
-            return {
-                key: index + 1,
-                label: item.name,
-                children: <AnalysisPanel
 
-                    // inputAnalysisMethod={item.inputAnalysisMethod}
-                    // analysisPipline={item.analysisPipline}
-                    // analysisMethod={item.analysisMethod}
-                    // upstreamFormJson={item.upstreamFormJson}
-                    {...item}
-                    pipeline={{
-                        component_id: pipeline.component_id
-
-                    }}
-                    // editor={editor}
-                    // updateEditor={updateEditor}
-                    operatePipeline={
-                        {
-                            deletePipelineRelation: deletePipelineRelation,
-                            openModal: openModal
-                        }
-                    }
-                // datelePipeline={datelePipeline}
-                // setPipelineStructure={setPipelineStructure}
-                // setOperateOpen={setCreateOpen}
-                // setPipelineRecord={setRecord}
-                // openModal={openModal}
-                // wrapAnalysisPipeline={wrapAnalysisPipeline}
-                // downstreamAnalysis={loadFunction(downstreamAnalysis)}
-                // appendSampleColumns={loadColumnRender(appendSampleColumns)}
-                // parseAnalysisParams={{
-                //     parse_analysis_module: parseAnalysisModule,
-                //     parse_analysis_result_module: parseAnalysisResultModule
-                // }}
-                >
-                </AnalysisPanel>
-            }
-        })
-    }
     // [
     //     {
     //         name: "查看比对日志",
@@ -142,15 +98,16 @@ const Pipeline: FC<any> = ({ }) => {
     //     }
     // ]
     const loadData = async () => {
-        const resp = await axios.get(`/get-pipeline-v2/${name}`)
+        const resp = await axios.get(`/get-pipeline-v2/${name}?component_type=${component_type}`)
         // console.log(resp.data)
         const data = resp.data
         const content = JSON.parse(data['content'])
         const pipeline = { ...data, ...content }
         setPipeline(pipeline)
+        console.log(pipeline)
         // console.log(content)
-        const items = getPipline(data)
-        setItems(items)
+        // const items = getPipline(data)
+        // setItems(items)
         // if (resp.data.items && Array.isArray(resp.data.items) && resp.data.items.length > 1) {
         //     const item = data.items[0]
         //     const upstreamFormList = data.items
@@ -186,6 +143,9 @@ const Pipeline: FC<any> = ({ }) => {
 
 
     }
+
+
+
     const deletePipelineRelation = async (realtionId: any) => {
         try {
             const resp = await deletePipelineRelationApi(realtionId)
@@ -218,7 +178,7 @@ const Pipeline: FC<any> = ({ }) => {
                     <h2 style={{ margin: 0 }}>
                         {pipeline?.name}
                         <Tooltip title={pipeline?.namespace}>
-                            <span style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)" ,fontSize:"1rem"}}> {pipeline?.namespace_name}</span>
+                            <span style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)", fontSize: "1rem" }}> {pipeline?.namespace_name}</span>
                         </Tooltip>
                     </h2>
                     <p style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)" }}>{pipeline?.description}</p>
@@ -241,41 +201,33 @@ const Pipeline: FC<any> = ({ }) => {
                 <Button color="cyan" variant="solid" onClick={() => {
                     openModal("modalC", {
                         data: pipeline, structure: {
-                            component_type: "pipeline",
+                            component_type: component_type,
                         }
                     })
-                }}>更新流程</Button>
+                }}>更新{component_type}</Button>
 
                 <Button color="primary" variant="solid" onClick={loadData}>刷新</Button>
-                <Button color="primary" variant="solid" onClick={() => navigate(`/pipeline-card`)}>返回</Button>
+                <Button color="primary" variant="solid" onClick={() => navigate(`/${component_type}-card`)}>返回</Button>
             </Flex>
 
         </Flex>
+        {/* 111111 */}
+        {/* <ComponentsRender component_type={component_type || ""} operatePipeline={{
+            deletePipelineRelation: deletePipelineRelation,
+            openModal: openModal
+        }} component={pipeline} /> */}
+        <MemoizedComponentsRender
+            component_type={component_type || ""}
+            component={pipeline}
+            operatePipeline={{
+                deletePipelineRelation: deletePipelineRelation,
+                openModal: openModal
+            }} />
+        {/* <PipelineComponent /> */}
+        {/* <Button onClick={() => {
+            setTest(!test)
+        }}>测试</Button> */}
 
-        {pipeline && Array.isArray(pipeline?.items) ? <Tabs destroyInactiveTabPane={true} items={items}></Tabs> :
-
-            <Empty>
-                <Button style={{ marginRight: "0.5rem" }} color="cyan" variant="solid" onClick={() => {
-                    openModal("modalC", {
-                        data: undefined, structure: {
-                            component_type: "software",
-                            relation_type: "pipeline_software",
-                            parent_component_id: pipeline.component_id,
-                            pipeline_id: pipeline.component_id
-                        }
-                    })
-                }}>新增软件</Button>
-                <Button color="cyan" variant="solid" onClick={() => {
-                    openModal("modalA", {
-                        data: undefined, pipelineStructure: {
-                            relation_type: "pipeline_software",
-                            parent_component_id: pipeline.component_id,
-                            pipeline_id: pipeline.component_id
-
-                        }
-                    })
-                }}>添加软件</Button>
-            </Empty>}
 
         {/* {
                 pipeline_type: "wrap_pipeline",
@@ -330,3 +282,139 @@ const Pipeline: FC<any> = ({ }) => {
 
 
 export default Pipeline
+
+
+
+const ComponentsRender = ({ component_type, operatePipeline, component }: { component_type: string, operatePipeline: any, component: any }) => {
+    if (!component_type || !component) return null
+    const componentMap = {
+        "pipeline": PipelineComponent,
+        "software": SoftwareComponent,
+        "file": FileComponent,
+        "module": "module-card",
+    }
+    const Component = componentMap[component_type as keyof typeof componentMap]
+    if (!Component) return null
+    return <Component operatePipeline={operatePipeline} component={component} />
+}
+const MemoizedComponentsRender = React.memo(ComponentsRender, (prevProps, nextProps) => {
+    return JSON.stringify(prevProps) === JSON.stringify(nextProps)
+});
+
+const SoftwareComponent = ({ operatePipeline, component }: { operatePipeline: any, component: any }) => {
+
+    return <>
+        <AnalysisPanel
+
+            // inputAnalysisMethod={item.inputAnalysisMethod}
+            // analysisPipline={item.analysisPipline}
+            // analysisMethod={item.analysisMethod}
+            // upstreamFormJson={item.upstreamFormJson}
+            {...component}
+            // pipeline={{
+            //     component_id: component.component_id
+
+            // }}
+            // editor={editor}
+            // updateEditor={updateEditor}
+            operatePipeline={operatePipeline}
+
+        >
+        </AnalysisPanel>
+    </>
+
+}
+
+const FileComponent = ({ operatePipeline, component }: { operatePipeline: any, component: any }) => {
+    return <>
+        <UpstreamAnalysisOutput
+            analysisMethod={[component]}
+            operatePipeline={operatePipeline}
+        ></UpstreamAnalysisOutput>
+
+
+    </>
+
+}
+const PipelineComponent = ({ operatePipeline, component }: { operatePipeline: any, component: any }) => {
+    const [items, setItems] = useState<any>([])
+
+    const getPipline: any = (pipeline: any) => {
+        // console.log(pipeline)
+        const softwareList: any[] = pipeline.items
+        // console.log(pipeline)
+        if (!softwareList) return []
+        return softwareList.map((item, index) => {
+            // const { downstreamAnalysis, appendSampleColumns, analysisType, ...rest } = item
+            return {
+                key: index + 1,
+                label: item.name,
+                children: <AnalysisPanel
+
+                    // inputAnalysisMethod={item.inputAnalysisMethod}
+                    // analysisPipline={item.analysisPipline}
+                    // analysisMethod={item.analysisMethod}
+                    // upstreamFormJson={item.upstreamFormJson}
+                    {...item}
+                    pipeline={{
+                        component_id: pipeline.component_id
+
+                    }}
+                    // editor={editor}
+                    // updateEditor={updateEditor}
+                    operatePipeline={operatePipeline}
+                // datelePipeline={datelePipeline}
+                // setPipelineStructure={setPipelineStructure}
+                // setOperateOpen={setCreateOpen}
+                // setPipelineRecord={setRecord}
+                // openModal={openModal}
+                // wrapAnalysisPipeline={wrapAnalysisPipeline}
+                // downstreamAnalysis={loadFunction(downstreamAnalysis)}
+                // appendSampleColumns={loadColumnRender(appendSampleColumns)}
+                // parseAnalysisParams={{
+                //     parse_analysis_module: parseAnalysisModule,
+                //     parse_analysis_result_module: parseAnalysisResultModule
+                // }}
+                >
+                </AnalysisPanel>
+            }
+        })
+    }
+
+
+    useEffect(() => {
+        if (component) {
+            setItems(getPipline(component))
+        }
+    }, [JSON.stringify(component)])
+
+    console.log("--->PipelineComponent渲染")
+    return <>
+
+        {component && Array.isArray(component?.items) ? <Tabs destroyInactiveTabPane={true} items={items}></Tabs> :
+
+            <Empty>
+                <Button style={{ marginRight: "0.5rem" }} color="cyan" variant="solid" onClick={() => {
+                    operatePipeline.openModal("modalC", {
+                        data: undefined, structure: {
+                            component_type: "software",
+                            relation_type: "pipeline_software",
+                            parent_component_id: component.component_id,
+                            pipeline_id: component.component_id
+                        }
+                    })
+                }}>新增软件</Button>
+                <Button color="cyan" variant="solid" onClick={() => {
+                    operatePipeline.openModal("modalA", {
+                        data: undefined, pipelineStructure: {
+                            relation_type: "pipeline_software",
+                            parent_component_id: component.component_id,
+                            pipeline_id: component.component_id
+
+                        }
+                    })
+                }}>添加软件</Button>
+            </Empty>}
+
+    </>
+}
