@@ -46,7 +46,7 @@ const DependComponent = ({ visible, onClose, params, callback }: any) => {
     }, [component_id])
     return <div>
         <Modal
-            width={"50%"}
+            width={"70%"}
             title={`组件(${component_type},${name})`}
             open={visible} onCancel={onClose}
             footer={(_, { OkBtn, CancelBtn }) => (

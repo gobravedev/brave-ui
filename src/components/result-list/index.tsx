@@ -1,5 +1,5 @@
 import { Venn } from "@ant-design/plots"
-import { Button, Card, Flex, message, Popconfirm, Popover, Space, Table, Tooltip, Typography } from "antd"
+import { Button, Card, Flex, message, Modal, Popconfirm, Popover, Space, Table, Tooltip, Typography } from "antd"
 import axios from "axios"
 import { FC, forwardRef, useEffect, useImperativeHandle, useState } from "react"
 import { useOutletContext, useParams } from "react-router"
@@ -322,10 +322,10 @@ const ResultList = forwardRef<any, any>(({
                 render: (_: any, record: any) => (
                     <Space size="middle">
                         <Popover content={<>
-                            {record.component_id}
-                            {/* <Typography >
-                                    <pre>{JSON.stringify(JSON.parse(record.content), null, 2)}</pre>
-                                </Typography> */}
+                            {/* {record.component_id} */}
+                            <Typography >
+                                <pre>{JSON.stringify(record.content, null, 2)}</pre>
+                            </Typography>
                             {/* {record.analysis_name} */}
                         </>} >
                             <Button size="small" color="cyan" variant="solid" onClick={() => {
@@ -423,7 +423,9 @@ const ResultList = forwardRef<any, any>(({
                 render: (_: any, record: any) => (
                     <Space size="middle">
                         <Popover content={<>
-                            {/* {record.content} */}
+                            <Typography >
+                                <pre>{JSON.stringify(record.content, null, 2)}</pre>
+                            </Typography>
                         </>} >
                             <a onClick={() => {
                                 const param = JSON.parse(record.request_param)
@@ -468,10 +470,10 @@ const ResultList = forwardRef<any, any>(({
                     <li>name: {currentAnalysisMethod?.name}</li>
                 </ul>
 
-               
-                </>}>
+
+            </>}>
                 {currentAnalysisMethod?.label}
-                </Tooltip>)</>}
+            </Tooltip>)</>}
             extra={<>{cardExtra}
                 <Flex gap={"small"}>
                     {operatePipeline?.openModal && <>
@@ -482,7 +484,7 @@ const ResultList = forwardRef<any, any>(({
                                     structure: {
                                         relation_type: relationType, //"software_input_file",
                                         parent_component_id: software.component_id,
-                                        pipeline_id: pipeline.component_id,
+                                        // pipeline_id: pipeline.component_id,
                                         component_type: "file"
                                     }
                                 })
@@ -545,7 +547,7 @@ const ResultList = forwardRef<any, any>(({
             onTabChange={onTabChange}
         >
             {import.meta.env.MODE == "development" && <>
-                
+
             </>}
 
 
@@ -576,3 +578,14 @@ const ResultList = forwardRef<any, any>(({
 })
 
 export default ResultList
+
+
+export const AnalysisResultModal: FC<any> = ({ visible, onClose, params }) => {
+    if (!visible) return null
+    return <>
+        <Modal title="分析结果" open={visible} onCancel={onClose} width={"80%"} >
+            {/* {JSON.stringify(params)} */}
+            <ResultList {...params} ></ResultList>
+        </Modal>
+    </>
+}

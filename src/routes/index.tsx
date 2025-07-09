@@ -110,7 +110,7 @@ const childern = [
         map={(item: any) => ({
             id: item.id,
             component_id: item.component_id,
-            name: item.label,
+            name: item.name,
             category: item.category,
             img: item.img,
             tags: item.tags,

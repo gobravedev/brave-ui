@@ -7,6 +7,8 @@ import { readFileApi, writeFileApi } from "@/api/file-operation";
 import { current } from "@reduxjs/toolkit";
 import { SSEContextType } from '@/type/sse'
 import { FileMonitor } from "@/components/pipeline-monitor";
+import { CreateOrUpdatePipelineComponent } from "@/components/create-pipeline";
+import { useModal } from "@/hooks/useModal";
 
 const SoftwareAnalysisEditor: FC<any> = () => {
     const { analysisId } = useParams()
@@ -88,6 +90,7 @@ const SoftwareAnalysisEditor: FC<any> = () => {
         };
     }, []);
 
+    const { modal, openModal, closeModal } = useModal();
 
     useEffect(() => {
         loadAnalysis()
@@ -161,7 +164,16 @@ const SoftwareAnalysisEditor: FC<any> = () => {
             ]}></Tabs>
         <MonacoEditor format={format} value={content} editorRef={editorRef} defaultLanguage="python" height="50vh" />
 
-        <FileMonitor analysis={analysis} />
+        <FileMonitor analysis={analysis} operatePipeline={ {
+                            openModal: openModal
+                        }} />
+        {/* <CreateOrUpdatePipelineComponent
+            // callback={loadData}
+            // pipelineStructure={pipelineStructure}
+            // data={record}
+            visible={modal.key == "modalC" && modal.visible}
+            onClose={closeModal}
+            params={modal.params}></CreateOrUpdatePipelineComponent> */}
 
 
     </div>

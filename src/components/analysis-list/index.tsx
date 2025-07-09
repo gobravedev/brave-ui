@@ -35,7 +35,7 @@ const ResultList = forwardRef<any, any>(({
     const [messageApi, contextHolder] = message.useMessage();
     const { modal, openModal, closeModal } = useModal();
     const [openMonitor, setOpenMonitor] = useState<any>(false)
-    const navigate = useNavigate()  
+    const navigate = useNavigate()
     const location = useLocation()
 
     const setRecord = (record: any) => {
@@ -85,6 +85,10 @@ const ResultList = forwardRef<any, any>(({
         // setData(resp.datafv)
     }
 
+    const isSelected = (record: any, key: any) => {
+        if (!modal.params) return false
+        return record.analysis_id == modal.params.analysis_id && key == modal.key
+    }
 
     let columns: any = [
         {
@@ -151,27 +155,24 @@ const ResultList = forwardRef<any, any>(({
             render: (_: any, record: any) => (
                 <Space size="middle">
                     <Button size="small" color="cyan" variant="solid" onClick={() => {
-                         navigate(`/software-analysis-editor/${record.analysis_id}`, {
+                        navigate(`/software-analysis-editor/${record.analysis_id}`, {
                             state: {
                                 location: location.pathname,
                             }
-                         })
+                        })
                     }}>编辑</Button>
 
-                    {openMonitor ? <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        setOpenMonitor(false)
-                    }}>关闭</Button> :
-                         <Button size="small" color="cyan" variant="solid" onClick={() => {
-                            // record.content = JSON.parse(record.content)
-                            setRecord(record)
-                            setOpenMonitor(true)
+                    {isSelected(record, "modalB") ?
+                        <Button size="small" color={"cyan"} variant="solid" onClick={() => {
+                            closeModal()
+                        }}>关闭</Button> :
+                        <Button size="small" color={"cyan"} variant="solid" onClick={() => {
+                            openModal("modalB", record)
+                        }}>查看/运行/结果</Button>}
+                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        openModal("modalB", record)
+                    }}>查看/运行</Button> */}
 
-                            // if (cleanDom) {
-                            //     cleanDom(undefined)
-                            // }
-                        }}>查看/运行</Button>
-                    }
-                   
                     {/* <Popconfirm title={"是否运行!"} onConfirm={async () => {
                         await runAnalysisApi(record.analysis_id)
                         setRecord(record)
@@ -179,16 +180,21 @@ const ResultList = forwardRef<any, any>(({
                     }}>
                         <Button size="small" color="cyan" variant="solid">运行</Button>
                     </Popconfirm> */}
+                    {/* {isSelected(record, "modalA") ?
+                        <Button size="small" color={"cyan"} variant="solid" onClick={() => {
+                            closeModal()
+                        }}>关闭</Button> :
+                        <Button size="small" color={"cyan"} variant="solid" onClick={() => {
+                            openModal("modalA", record)
+                        }}>输出结果</Button>} */}
+
+
                     <Popconfirm title={"是否删除!"} onConfirm={async () => {
                         await deleteById(record.id)
                         loadData()
                     }}>
-                        <Button size="small" color="cyan" variant="solid">删除</Button>
+                        <Button size="small" color="danger" variant="solid">删除</Button>
                     </Popconfirm>
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        openModal("modalA", record)
-
-                    }}>结果解析</Button>
                     {/* <Popconfirm title={"是否解析!"} onConfirm={async () => {
                         try {
                             await parseAnalysisResultAPi(record.id, true)
@@ -252,14 +258,18 @@ const ResultList = forwardRef<any, any>(({
         </Card>
         <div style={{ marginBottom: "1rem" }}></div>
 
-        {record && openMonitor && <PipelineInfo {...record} onClose={() => setOpenMonitor(false)} callback={loadData}></PipelineInfo>}
+        <PipelineInfo
+            visible={modal.key == "modalB" && modal.visible}
+            params={modal.params}
+            onClose={closeModal}
+            callback={loadData}></PipelineInfo>
 
-        <ResultParse
+        {/* <ResultParse
             visible={modal.key == "modalA" && modal.visible}
             onClose={closeModal}
             // callback={loadData}
             params={modal.params}
-        ></ResultParse>
+        ></ResultParse> */}
 
     </>
 })

@@ -1,13 +1,18 @@
 import { Button, Card, Flex, Table, Tabs, Tag, Tooltip } from "antd"
 import Typography from "antd/es/typography/Typography";
 import axios from "axios"
-import { FC, useEffect, useState } from "react"
+import { FC, memo, useEffect, useState } from "react"
 import { useSelector } from "react-redux"
 import { useOutletContext } from "react-router";
 import { SyncOutlined, MinusCircleOutlined } from '@ant-design/icons';
-import {SSEContextType} from '@/type/sse'
+import { SSEContextType } from '@/type/sse'
 import { readFileApi } from "@/api/file-operation";
 import { findAnalysisById, runAnalysisApi } from "@/api/analysis";
+import FileBrowser from "../file-browser";
+import ResultParse from "../result-parse";
+import { useModal } from "@/hooks/useModal";
+import { CreateOrUpdatePipelineComponent } from "../create-pipeline";
+import React from "react";
 
 const PipelineMonitor: FC<any> = ({ data, ...rest }) => {
 
@@ -26,7 +31,7 @@ const PipelineMonitor: FC<any> = ({ data, ...rest }) => {
 
                 </Flex>
                 <div style={{ flexDirection: "column" }}>
-                    <div style={{textWrap:"wrap"}}>输出路径:{rest.output_dir}</div>
+                    <div style={{ textWrap: "wrap" }}>输出路径:{rest.output_dir}</div>
                     <div>工作路径:{rest.work_dir}</div>
                 </div>
 
@@ -122,8 +127,9 @@ const PipelineParams: FC<any> = ({ data, type }) => {
 
 }
 
-export const FileMonitor: FC<any> = ({ analysis,callback }) => {
+export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
     if (!analysis) return null
+    console.log("FileMonitor render")
     const { analysis_id } = analysis
     const [fileContent, setFileContent] = useState<any>("")
     const [fileTabKey, setFileTabKey] = useState<any>("workflow_log_file")
@@ -147,12 +153,12 @@ export const FileMonitor: FC<any> = ({ analysis,callback }) => {
     const readLogFile = async (currentLogFile: string, showMessage: boolean = false) => {
         // console.log(currentLogFile)
         if (currentLogFile) {
-             let res = await readFile(currentLogFile)
-             if(fileTabKey === "params_path"){
-                res = JSON.stringify(JSON.parse(res),null,2)
-             }
-             setFileContent(res)
-             if (showMessage) {
+            let res = await readFile(currentLogFile)
+            if (fileTabKey === "params_path") {
+                res = JSON.stringify(JSON.parse(res), null, 2)
+            }
+            setFileContent(res)
+            if (showMessage) {
                 messageApi.success(`日志加载成功: ${currentLogFile}`)
             }
         }
@@ -163,28 +169,28 @@ export const FileMonitor: FC<any> = ({ analysis,callback }) => {
             readLogFile(fileMap[fileTabKey])
         }
 
-    }, [JSON.stringify(fileMap),fileTabKey])
+    }, [JSON.stringify(fileMap), fileTabKey])
     useEffect(() => {
         if (!eventSource) return;
 
         const handler = (event: MessageEvent) => {
             const data = JSON.parse(event.data)
-            
+
             if (data.analysis_id == analysis_id) {
-                if(data.msgType === "workflow_log" ){
+                if (data.msgType === "workflow_log") {
                     setFileTabKey("workflow_log_file")
-                    console.log("workflow_log_file",data)
+                    console.log("workflow_log_file", data)
                     readLogFile(fileMap["workflow_log_file"])
-                }else if(data.msgType === "executor_log" ){
+                } else if (data.msgType === "executor_log") {
                     setFileTabKey("executor_log_file")
                     readLogFile(fileMap["executor_log_file"])
-                }else if(data.msgType === "trace" ){
+                } else if (data.msgType === "trace") {
                     setFileTabKey("trace_file")
                     readLogFile(fileMap["trace_file"])
-                }else if(data.msgType=="process_end"){
+                } else if (data.msgType == "process_end") {
                     setFileTabKey("workflow_log_file")
                     readLogFile(fileMap["workflow_log_file"])
-                    if(callback){
+                    if (callback) {
                         callback()
                     }
                 }
@@ -202,15 +208,31 @@ export const FileMonitor: FC<any> = ({ analysis,callback }) => {
     const runAnalysis = async () => {
         const res = await runAnalysisApi(analysis?.analysis_id)
         messageApi.success("运行成功")
-        if(callback){
+        if (callback) {
             callback()
         }
+    }
+    const componentMap: any = {
+        "output_dir": FileBrowser,
+        "workflow_log_file": LogFile,
+        "executor_log_file": LogFile,
+        "trace_file": LogFile,
+        "params_path": LogFile,
+        "command_path": LogFile,
+        "result_parse": ResultParse,
+    }
+
+    const ComponentRender = () => {
+        console.log("fileTabKey", fileTabKey)
+        const Component = componentMap[fileTabKey]
+        if (!Component) return <>no component</>
+        return <Component {...analysis} content={fileContent} />
     }
     return <div>
         <Tabs tabBarExtraContent={
             <Flex gap={"small"} align={"center"}>
                 <Tooltip title={<>
-                   {fileMap[fileTabKey]}
+                    {fileMap[fileTabKey]}
                 </>}>
                     <Button size="small" color="primary" variant="solid" onClick={() => {
                         readLogFile(fileMap[fileTabKey])
@@ -220,7 +242,7 @@ export const FileMonitor: FC<any> = ({ analysis,callback }) => {
                     {analysis?.analysis_id}
                 </>}>
                     <Button size="small" color="cyan" variant="solid" onClick={runAnalysis}>运行脚本</Button>
-                </Tooltip>  
+                </Tooltip>
             </Flex>
 
         } activeKey={fileTabKey} onChange={(key) => {
@@ -275,23 +297,83 @@ export const FileMonitor: FC<any> = ({ analysis,callback }) => {
                 </>}>
                     命令
                 </Tooltip>
+            },
+            {
+                key: "output_dir",
+                label: <Tooltip title={<>
+                    <ul>
+                        <li>{analysis?.output_dir}</li>
+                    </ul>
+                </>}>
+                    输出文件
+                </Tooltip>
+            } ,{
+                key: "result_parse",
+                label: <Tooltip title={<>
+                    <ul>
+                        <li>{analysis?.output_dir}</li>
+                    </ul>
+                </>}>
+                    结果解析
+                </Tooltip>
             }
         ]}></Tabs>
+        <ComponentRender></ComponentRender>
+        {/* {fileTabKey == "output_dir" ? <>
 
-        <Typography>
-  
+          <OutputDir analysis={analysis} operatePipeline={operatePipeline}></OutputDir>
+        </> : <Typography>
+
             <pre style={{ margin: 0 }}>
 
                 {fileContent}
             </pre>
-        </Typography>
+        </Typography>} */}
+        {/* <ComponentRender></ComponentRender> */}
+        {/* {JSON.stringify(analysis)} */}
     </div>
-}
-const PipelineInfo: FC<any> = ({ analysis_id:analysisId,onClose,callback, ...rest }) => {
+}, (prevProps, nextProps) => {
+    return JSON.stringify(prevProps?.analysis) === JSON.stringify(nextProps?.analysis)
+})
 
-    if (!rest) return null
-    // const [data, setData] = useState<any>()
-    // const [activeTabKey, setActiveTabKey] = useState<any>("trace")
+// export const FileMonitor = React.memo(({ analysis, callback, operatePipeline }: any) => {
+//     console.log("👶 FileMonitor render");
+//     return <FileMonitor0 analysis={analysis} callback={callback} operatePipeline={operatePipeline} />
+// },(prevProps,nextProps)=>{  
+//     console.log("prevProps",prevProps.analysis.analysis_id === nextProps.analysis.analysis_id)
+//     return JSON.stringify(prevProps?.analysis) === JSON.stringify(nextProps?.analysis)
+// })
+// const MemoChild = React.memo(({ name }: { name: string }) => {
+//     console.log("MemoChild render");
+//     return <div>子组件：{name}</div>;
+//   },(prevProps,nextProps)=>{
+//     console.log("prevProps",prevProps.name === nextProps.name)
+//     return true
+// });
+
+// const OutputDir: FC<any> = React.memo(({ analysis, operatePipeline }) => {
+//     return <>
+//         <FileBrowser dir={analysis?.output_dir} />
+//         <div style={{ marginTop: "1rem" }}></div>
+//         <ResultParse analysisId={analysis?.analysis_id} ></ResultParse>
+//     </>
+// })
+const LogFile: FC<any> = ({ content }) => {
+    return <>
+        <Typography>
+
+            <pre style={{ margin: 0 }}>
+
+                {content}
+            </pre>
+        </Typography>
+    </>
+}
+const PipelineInfo: FC<any> = ({ visible, params, onClose, callback }) => {
+
+    if (!visible) return null
+    const { analysis_id: analysisId, ...rest } = params
+
     const [analysis, setAnalysis] = useState<any>()
     const loadAnalysis = async () => {
         const res = await findAnalysisById(analysisId)
@@ -301,91 +383,21 @@ const PipelineInfo: FC<any> = ({ analysis_id:analysisId,onClose,callback, ...res
     useEffect(() => {
         loadAnalysis()
     }, [analysisId])
-    // const { eventSource } = useOutletContext<SSEContextType>();
-    // useEffect(() => {
-    //     if (!eventSource) return;
-
-    //     const handler = (event: MessageEvent) => {
-    //         const data = JSON.parse(event.data)
-    //         console.log(data)
-    //         if (data.analysis_id == analysisId) {
-    //             if ((data.msgType == "trace" || data.msgType == "process_end") && activeTabKey == "trace") {
-    //                 loadData(activeTabKey)
-    //                 console.log('子组件监听trace || process_end:', data);
-    //             } else if (data.msgType == "workflow_log" && activeTabKey == "workflow_log") {
-    //                 loadData(activeTabKey)
-    //                 console.log('子组件监听: workflow_log', data);
-    //             }
-    //         }
 
 
-    //     };
-
-    //     eventSource.addEventListener('message', handler);
-
-    //     return () => {
-    //         console.log("removeEventListener")
-    //         eventSource.removeEventListener('message', handler);
-    //     };
-    // }, [eventSource]);
-    // const loadData = async (type: any) => {
-    //     console.log(type)
-    //     const resp = await axios.get(`/monitor-analysis/${analysisId}?type=${type}`)
-    //     setData(resp.data)
-    // }
-    // const onTabChange = (key: any) => {
-    //     // console.log(key)
-    //     setData(undefined)
-    //     setActiveTabKey(key)
-    //     loadData(key)
-    // }
-    // useEffect(() => {
-    //     loadData(activeTabKey)
-    // }, [analysisId])
-    // const componentMap: any = {
-    //     trace: PipelineMonitor,
-    //     params: PipelineParams,
-    //     workflow_log: PipelineParams,
-    //     executor_log: PipelineParams,
-    //     script_config: PipelineParams
-    // }
-    // const ComponentsRender = (params: any) => {
-    //     const Component = componentMap[activeTabKey] || (() => <div>未知类型</div>);
-    //     return <Component {...params}></Component>
-    // }
     return <>
         <Card
-            title={`流程监控`}
+            title={`流程监控 ${analysisId}`}
 
             // activeTabKey={activeTabKey}
             extra={<>
                 <Button size="small" onClick={onClose} color="cyan" variant="solid">关闭</Button>
             </>}>
-            {/* {JSON.stringify(rest)} */}
-            {/* {JSON.stringify(data)} */}
-            {/* <ComponentsRender data={data} type={activeTabKey} {...rest}></ComponentsRender> */}
-                <FileMonitor analysis={analysis} callback={callback}></FileMonitor>
+
+            <FileMonitor analysis={analysis} callback={callback}></FileMonitor>
         </Card>
 
-        {/* <Tabs items={[
-            {
-                key: "1",
-                label: "流程监控",
-                children: <PipelineMonitor data={data}></PipelineMonitor>
-            }, {
-                key: "2",
-                label: "流程参数",
-                children: <PipelineParams {...params} type="params"></PipelineParams>
-            }, {
-                key: "3",
-                label: "运行日志",
-                children: <PipelineParams {...params} type="workflow_log" ></PipelineParams>
-            }, {
-                key: "4",
-                label: "程序日志",
-                children: <PipelineParams {...params} type="executor_log" ></PipelineParams>
-            }
-        ]}></Tabs> */}
+
     </>
 }
 export default PipelineInfo

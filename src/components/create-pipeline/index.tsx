@@ -188,12 +188,12 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
         pipeline: WrapPipeline,
         // pipeline: WrapPipeline,
         software: TextAreaContent,
-        file: TextAreaContent,
+        file: FileContent,
         script: TextAreaContent,
     }
     const ComponentsRender = ({ component_type, data, form }: any) => {
         const Component = componentMap[component_type] || (() => <div>未知类型 {JSON.stringify(data)}</div>);
-        return <Component data={data} form={form}></Component>
+        return <Component data={data} form={form} structure={structure}></Component>
     }
 
 
@@ -288,6 +288,23 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
     </>
 }
 export default CreateORUpdatePipelineCompnentRelation
+
+const FileContent: FC<any> = ({ data, form,structure }) => {
+    return <>
+        
+        {structure?.files && <>
+        <Typography>
+            <pre>{JSON.stringify(structure?.files,null,2)}</pre>
+        </Typography>
+        </>}
+        <Form.Item name={"content"} label="content">
+            <TextAreaComp></TextAreaComp>
+        </Form.Item>
+        {/* <Form.Item name={"component_id"} label="component_id">
+            <Input></Input>
+        </Form.Item> */}
+    </>
+}
 const TextAreaContent: FC<any> = ({ data, form }) => {
     return <>
         <Form.Item name={"content"} label="content">
