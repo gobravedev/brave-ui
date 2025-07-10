@@ -37,11 +37,7 @@ const ResultParse: FC<any> = ({ analysis_id: analysisId, callback }) => {
     return <>
         <Card title={`输出结果 ${analysisId}`} extra={
             <Flex gap={"small"} align={"center"}>
-                <Popconfirm title="确定解析吗？" onConfirm={() => loadData(true)}>
-                    <Button size="small" color="cyan" variant="solid" onClick={() => loadData(true)}>
-                        解析
-                    </Button>
-                </Popconfirm>
+
                 {data?.file_format_list && <>
                     {data?.file_format_list.map((item: any) => {
                         return <Button size="small" color="cyan" variant="solid"
@@ -51,8 +47,8 @@ const ResultParse: FC<any> = ({ analysis_id: analysisId, callback }) => {
                                 },
                                 title: item.name
                             })}>
-                                {item.name}
-                            </Button>
+                            {item.name}
+                        </Button>
                     })}
                 </>}
                 {/* <Button size="small" color="cyan" variant="solid"
@@ -61,7 +57,14 @@ const ResultParse: FC<any> = ({ analysis_id: analysisId, callback }) => {
                     })}>
                     查看结果
                 </Button> */}
-
+                <Popconfirm title="确定解析吗？" onConfirm={() => {
+                    loadData(true)
+                    messageApi.success("解析成功")
+                }}>
+                    <Button size="small" color="cyan" variant="solid" >
+                        解析
+                    </Button>
+                </Popconfirm>
                 <Button size="small" color="primary" variant="solid" onClick={() => loadData(false)}>
                     刷新
                 </Button>

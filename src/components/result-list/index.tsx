@@ -144,13 +144,13 @@ const ResultList = forwardRef<any, any>(({
                 if (!acc[key]) {
                     acc[key] = [];
                 }
-                const { analysis_key, id, sample_group, ...rest } = item
+                const { sample_name, id, sample_group, ...rest } = item
                 // debugger
                 acc[key].push({
-                    label: analysis_key,
+                    label: sample_name,
                     value: id,
                     sample_group: sample_group ? sample_group : "no_group",
-                    analysis_key: analysis_key,
+                    sample_name: sample_name,
                     id: id,
                     // "aaa":"1111",
                     ...rest
@@ -244,6 +244,7 @@ const ResultList = forwardRef<any, any>(({
                             <li>component_id: {record.component_id}</li>
                             <li>analysis_result_id: {record.analysis_result_id}</li>
                             <li>sample_id: {record.sample_id}</li>
+                            <li>file_name: {record.file_name}</li>
                         </ul>
                     </>}>
                         <span style={{ cursor: "pointer" }}>{text}</span>
@@ -654,7 +655,7 @@ export const AnalysisResultModal: FC<any> = ({ visible, onClose, params }) => {
     return <>
         <Modal title="分析结果" open={visible} onCancel={onClose} width={"80%"} >
             {/* {JSON.stringify(params)} */}
-            <ResultList {...params} ></ResultList>
+            <ResultList {...params} analysisType="sample" ></ResultList>
         </Modal>
     </>
 }
