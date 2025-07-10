@@ -229,48 +229,81 @@ const ResultList = forwardRef<any, any>(({
                 title: 'id',
                 dataIndex: 'id',
                 key: 'id',
+                width: 50,
                 ellipsis: true,
 
             },
             {
-                title: '分析Key',
-                dataIndex: 'analysis_key',
-                key: 'analysis_key',
+                title: '文件类型',
+                dataIndex: 'analysis_method',
+                key: 'analysis_method',
                 ellipsis: true,
-
-            }, {
-                title: '分析名称',
-                dataIndex: 'analysis_name',
-                key: 'analysis_name',
-                ellipsis: true,
-
-            }, {
-                title: '分析id',
-                dataIndex: 'analysis_id',
-                key: 'analysis_id',
-                ellipsis: true,
-
-            },
-            // {
-            //     title: '分析版本',
-            //     dataIndex: 'analysis_version',
-            //     key: 'analysis_version',
-            //     ellipsis: true,
-            // },
-            {
-                title: '样本Key',
-                dataIndex: 'sample_key',
-                key: 'sample_key',
-                ellipsis: true,
-
+                render: (text: any, record: any) => {
+                    return <Tooltip title={<>
+                        <ul>
+                            <li>component_id: {record.component_id}</li>
+                            <li>analysis_result_id: {record.analysis_result_id}</li>
+                            <li>sample_id: {record.sample_id}</li>
+                        </ul>
+                    </>}>
+                        <span style={{ cursor: "pointer" }}>{text}</span>
+                    </Tooltip>
+                }
             },
             {
                 title: '样本名称',
                 dataIndex: 'sample_name',
                 key: 'sample_name',
                 ellipsis: true,
+                render: (text: any, record: any) => {
+                    return <Tooltip title={<>
+                        <ul>
+                            <li>sample_id: {record.sample_id}</li>
+                            {/* <li>ID: {record.id}</li> */}
+                            {/* <li>analysis_id: {record.analysis_id}</li>
+                            <li>file_name: {record.file_name}</li> */}
+                            {/* <li>analysis_name: {record.analysis_name}</li> */}
+                        </ul>
+                    </>}>
+                        <span style={{ cursor: "pointer" }}>{text}</span>
+                    </Tooltip>
+                }
 
             },
+            //  {
+            //     title: '分析名称',
+            //     dataIndex: 'analysis_name',
+            //     key: 'analysis_name',
+            //     ellipsis: true,
+
+            // }, 
+            // {
+            //     title: '分析id',
+            //     dataIndex: 'analysis_id',
+            //     key: 'analysis_id',
+            //     ellipsis: true,
+
+            // },
+            // {
+            //     title: '分析版本',
+            //     dataIndex: 'analysis_version',
+            //     key: 'analysis_version',
+            //     ellipsis: true,
+            // },
+            // {
+            //     title: '样本名称',
+            //     dataIndex: 'sample_name',
+            //     key: 'sample_name',
+            //     ellipsis: true,
+
+            // },
+            // {
+            //     title: '样本名称',
+            //     dataIndex: 'sample_name',
+            //     key: 'sample_name',
+            //     ellipsis: true,
+
+            // },
             {
                 title: '样本分组',
                 dataIndex: 'sample_group',
@@ -282,12 +315,14 @@ const ResultList = forwardRef<any, any>(({
                 dataIndex: 'sample_group_name',
                 key: 'sample_group_name',
                 ellipsis: true,
-            }, {
-                title: '组件id',
-                dataIndex: 'component_id',
-                key: 'component_id',
-                ellipsis: true,
             },
+
+            //  {
+            //     title: '组件id',
+            //     dataIndex: 'component_id',
+            //     key: 'component_id',
+            //     ellipsis: true,
+            // },
 
             // {
             //     title: '样本来源',
@@ -345,13 +380,46 @@ const ResultList = forwardRef<any, any>(({
                                 // readHdfs(record.content)
                             }}>查看</Button>
                         </Popover>
+                        {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
+                            operatePipeline.openModal("analysisResultEdit", {
+                                ...record,
+                                callback: reload
+                            })
+                        }}>编辑</Button> */}
                         {/* <a onClick={() => { downloadHdfs(record.content) }}>下载</a> */}
+
+                        {
+                            record.sample_name ?
+                                <>
+                                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                        operatePipeline.openModal("metadataForm", {
+                                            analysis_result_id: record.analysis_result_id,
+                                            sample_id: record.sample_id,
+                                            callback: reload
+                                        })
+                                    }}>metadata</Button>
+                                </> :
+                                <>
+                                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                        operatePipeline.openModal("metadataForm", {
+                                            analysis_result_id: record.analysis_result_id,
+                                            callback: reload
+                                        })
+                                    }}>添加metadata</Button>
+                                </>
+                        }
+                        <Button size="small" color="cyan" variant="solid" onClick={() => {
+                            console.log(operatePipeline)
+                            operatePipeline.openModals("bindSample", {
+                                analysis_result_id: record.analysis_result_id,
+                                callback: reload
+                            })
+                        }}>绑定样本</Button>
                         <Popconfirm title="确定删除吗?" onConfirm={async () => {
                             await deleteById(record.id)
                         }}>
                             <Button size="small" color="danger" variant="solid">删除</Button>
                         </Popconfirm>
-
                     </Space>
                 ),
             },
@@ -478,7 +546,7 @@ const ResultList = forwardRef<any, any>(({
                 <Flex gap={"small"}>
                     {operatePipeline?.openModal && <>
                         <Tooltip title={currentAnalysisMethod?.label}>
-                            <Button color="cyan" variant="solid" onClick={() => {
+                            <Button size="small" color="cyan" variant="solid" onClick={() => {
                                 operatePipeline.openModal("modalC", {
                                     data: undefined,
                                     structure: {
@@ -491,7 +559,7 @@ const ResultList = forwardRef<any, any>(({
                             }}>新增文件</Button>
                         </Tooltip>
                         <Tooltip title={currentAnalysisMethod?.label}>
-                            <Button color="cyan" variant="solid" onClick={() => {
+                            <Button size="small" color="cyan" variant="solid" onClick={() => {
                                 operatePipeline.openModal("modalC", {
                                     data: currentAnalysisMethod, structure: {
                                         component_type: "file",
@@ -500,7 +568,7 @@ const ResultList = forwardRef<any, any>(({
                             }}>更新文件</Button>
                         </Tooltip>
                         <Tooltip title={currentAnalysisMethod?.label}>
-                            <Button color="cyan" variant="solid" onClick={() => {
+                            <Button size="small" color="cyan" variant="solid" onClick={() => {
                                 operatePipeline.openModal("modalA", {
                                     data: undefined,
                                     pipelineStructure: {
@@ -513,7 +581,7 @@ const ResultList = forwardRef<any, any>(({
                         </Tooltip>
 
                         <Tooltip title={currentAnalysisMethod?.label}>
-                            <Button color="cyan" variant="solid" onClick={() => {
+                            <Button size="small" color="cyan" variant="solid" onClick={() => {
                                 // operatePipeline.setOperateOpen(true)
                                 // operatePipeline.setPipelineRecord(currentAnalysisMethod)
                                 // operatePipeline.setPipelineStructure({ pipeline_type: pipelineType })
@@ -533,12 +601,12 @@ const ResultList = forwardRef<any, any>(({
                             <Popconfirm title="是否移除文件!" onConfirm={() => {
                                 operatePipeline.deletePipelineRelation(currentAnalysisMethod.relation_id)
                             }}>
-                                <Button color="cyan" variant="solid" >移除文件</Button>
+                                <Button size="small" color="cyan" variant="solid" >移除文件</Button>
                             </Popconfirm>
                         </Tooltip>
                     </>}
 
-                    <Button color="primary" variant="solid" onClick={reload}>刷新</Button>
+                    <Button size="small" color="primary" variant="solid" onClick={reload}>刷新</Button>
                 </Flex>
             </>}
             tabList={analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 1 ?
@@ -555,6 +623,7 @@ const ResultList = forwardRef<any, any>(({
             <Table
                 rowKey={(it: any) => it.id}
                 size="small"
+                bordered
                 // pagination={undefined}
                 pagination={{ pageSize: 10 }}
                 loading={loading}

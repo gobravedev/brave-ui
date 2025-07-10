@@ -1,28 +1,69 @@
-import { FC } from "react"
+import { FC, memo, useState } from "react"
 
 import SamplePage from '@/pages/sample'
-import { Drawer, Tabs } from "antd"
+import { Drawer, Modal, Tabs } from "antd"
 import ImportFile from "./import-file"
-const ImportData:FC<any> = ({ visible, onClose, params, callback } )=>{
+const ImportData: FC<any> = ({ visible, onClose, params, callback }) => {
     if (!visible) return null;
-
     return <>
-        <Drawer open={visible} onClose={onClose} width={"80%"}>
-        <Tabs items={[
-            {
-                key:"1",
-                label:"输入文件",
-                children:<ImportFile {...params}></ImportFile>
-            },
-            {
-                key:"2",
-                label:"metadata",
-                children:<SamplePage></SamplePage>
-            }
-           ]}></Tabs>
+        <Modal open={visible} onClose={onClose} width={"80%"} onCancel={onClose} title="导入数据">
+            {/* {JSON.stringify(params)} */}
+            <Tabs items={[
+                {
+                    key: "1",
+                    label: "输入文件",
+                    children: <>
+                        {params && <>
+                            <MemoizedImportFileComponnetRender params={params} type="inputFile" />
 
-        </Drawer>
+                        </>}
+                    </>
+                }, {
+                    key: "2",
+                    label: "输出文件",
+                    children: <>
+                        {params && <>
+                            <MemoizedImportFileComponnetRender params={params} type="outputFile" />
+
+                        </>}
+                    </>
+                },
+                // {
+                //     key: "3",
+                //     label: "metadata",
+                //     children: <SamplePage></SamplePage>
+                // }
+            ]}></Tabs>
+
+        </Modal>
     </>
 }
 
+const ImportFileComponnetRender: FC<any> = ({ params,type }) => {
+    if (!params) return <>无数据</>;
+    // const [files, setFiles] = useState<any>()
+    // const [currentFile, setCurrentFile] = useState<any>()
+    // return <>{JSON.stringify(params)}</>
+    if (params.component_type == "software") {
+        // return <>{JSON.stringify(params.inputFile )}</>
+        if (params[type] && Array.isArray(params[type]) && params[type].length > 0) {
+            return params[type].map((item: any, index: number) => {
+                return <ImportFile
+                    {...item}
+                    operatePipeline={params.operatePipeline}
+                    key={index}
+                ></ImportFile>
+            })
+        }
+
+
+
+
+
+
+    } else if (params.component_type == "pipeline") {
+        return <ImportFile {...params} ></ImportFile>
+    }
+}
+const MemoizedImportFileComponnetRender = memo(ImportFileComponnetRender)
 export default ImportData

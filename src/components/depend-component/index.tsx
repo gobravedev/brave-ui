@@ -54,10 +54,10 @@ const DependComponent = ({ visible, onClose, params, callback }: any) => {
                     <Popconfirm title="确定要删除组件吗？" onConfirm={() => {
                         deleteComponent(component_id)
                     }}>
-                        <Button color="danger" variant="solid">删除组件</Button>
+                        <Button size="small" color="danger" variant="solid">删除组件</Button>
                     </Popconfirm>
-                    <Button color="cyan" variant="solid" onClick={getDependComponent}>刷新</Button>
-                    <CancelBtn />
+                    <Button size="small" color="cyan" variant="solid" onClick={getDependComponent}>刷新</Button>
+                    <Button size="small" color="cyan" variant="solid" onClick={onClose}>关闭</Button>
 
                     {/* <OkBtn /> */}
                 </>
@@ -66,7 +66,11 @@ const DependComponent = ({ visible, onClose, params, callback }: any) => {
             <div>
                 {/* <pre>{JSON.stringify(dependComponent, null, 2)}</pre> */}
 
-                <Table columns={[{
+                <Table 
+                size="small"
+                bordered
+                pagination={false}
+                columns={[{
                     title: "组件名称",
                     dataIndex: "name",
                     key: "name"

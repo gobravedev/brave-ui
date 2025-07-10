@@ -9,7 +9,7 @@ import { useLocation, useNavigate, useOutletContext, useParams } from "react-rou
 import { deletePipelineRelationApi, listPipeline } from "@/api/pipeline"
 import { CreateORUpdatePipelineCompnentRelation, CreateOrUpdatePipelineComponent } from "../../../components/create-pipeline"
 import ModuleEdit from "../../../components/module-edit"
-import { useModal } from '@/hooks/useModal'
+import { useModal, useModals } from '@/hooks/useModal'
 import ImportData from '@/components/import-data'
 import BioDatabases from '@/components/bio-databases'
 import ParamsView from "../../../components/params-view"
@@ -17,6 +17,9 @@ import ParamsView from "../../../components/params-view"
 import DependComponent from "@/components/depend-component"
 import MonacoEditorModal from "@/components/react-monaco-editor"
 import React from "react"
+import { BindSample, MetadataModal } from "@/pages/sample"
+import MetadataForm from "@/components/metadata-form"
+import AnalysisResultEdit from "@/components/analysis-result-edit"
 const Pipeline: FC<any> = ({ }) => {
     const { component_type, component_id: name } = useParams()
     // console.log(pipelineId)
@@ -35,6 +38,7 @@ const Pipeline: FC<any> = ({ }) => {
     //     }));
     // };
     const { modal, openModal, closeModal } = useModal();
+    const { modals, openModals, closeModals } = useModals(["modalD","metadataModal","bindSample"])
 
     // const [createOpen, setCreateOpen] = useState<any>(false)
     // const [record, setRecord] = useState<any>()
@@ -98,14 +102,18 @@ const Pipeline: FC<any> = ({ }) => {
     //     }
     // ]
     const loadData = async () => {
-        const resp = await axios.get(`/get-pipeline-v2/${name}?component_type=${component_type}`)
+        let api = `/get-pipeline-v2/${name}?component_type=${component_type}`
+        if (component_type == "script") {
+            api = `/get-component-parent/${name}?component_type=${component_type}`
+        }
+        const resp = await axios.get(api)
         // console.log(resp.data)
         const data = resp.data
         const content = JSON.parse(data['content'])
-        const pipeline = { ...data, ...content }
+        const pipeline = { ...content, ...data }
         setPipeline(pipeline)
         console.log(pipeline)
-        // console.log(content)
+        // console.log(content)，
         // const items = getPipline(data)
         // setItems(items)
         // if (resp.data.items && Array.isArray(resp.data.items) && resp.data.items.length > 1) {
@@ -166,6 +174,12 @@ const Pipeline: FC<any> = ({ }) => {
             messageApi.error(`删除失败!${error.response.data.detail}`)
         }
     }
+    const operatePipeline = {
+        deletePipelineRelation: deletePipelineRelation,
+        openModal: openModal,
+        openModals: openModals
+    }
+
     useEffect(() => {
         loadData()
     }, [])
@@ -193,12 +207,14 @@ const Pipeline: FC<any> = ({ }) => {
                 </> : <Skeleton active></Skeleton>}
             </div>
             <Flex gap="small" wrap>
-                <Button color="cyan" variant="solid" onClick={() => {
-                    openModal("modalD", pipeline)
+                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                    openModals("modalD", { ...pipeline, operatePipeline: operatePipeline })
                 }}>导入数据</Button>
+                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                    openModals("metadataModal", { ...pipeline, operatePipeline: operatePipeline })
+                }}>metadata</Button>
 
-
-                <Button color="cyan" variant="solid" onClick={() => {
+                <Button size="small" color="cyan" variant="solid" onClick={() => {
                     openModal("modalC", {
                         data: pipeline, structure: {
                             component_type: component_type,
@@ -206,8 +222,8 @@ const Pipeline: FC<any> = ({ }) => {
                     })
                 }}>更新{component_type}</Button>
 
-                <Button color="primary" variant="solid" onClick={loadData}>刷新</Button>
-                <Button color="primary" variant="solid" onClick={() => navigate(`/${component_type}-card`)}>返回</Button>
+                <Button size="small" color="primary" variant="solid" onClick={loadData}>刷新</Button>
+                <Button size="small" color="primary" variant="solid" onClick={() => navigate(`/${component_type}-card`)}>返回</Button>
             </Flex>
 
         </Flex>
@@ -219,10 +235,7 @@ const Pipeline: FC<any> = ({ }) => {
         <MemoizedComponentsRender
             component_type={component_type || ""}
             component={pipeline}
-            operatePipeline={{
-                deletePipelineRelation: deletePipelineRelation,
-                openModal: openModal
-            }} />
+            operatePipeline={operatePipeline} />
         {/* <PipelineComponent /> */}
         {/* <Button onClick={() => {
             setTest(!test)
@@ -257,9 +270,9 @@ const Pipeline: FC<any> = ({ }) => {
             params={modal.params}></CreateOrUpdatePipelineComponent>
 
         <ImportData
-            visible={modal.key == "modalD" && modal.visible}
-            params={modal.params}
-            onClose={closeModal}></ImportData>
+            visible={modals.modalD.visible}
+            params={modals.modalD.params}
+            onClose={() => closeModals("modalD")}></ImportData>
         <BioDatabases
             visible={modal.key == "modalE" && modal.visible}
             onClose={closeModal}
@@ -277,6 +290,23 @@ const Pipeline: FC<any> = ({ }) => {
             visible={modal.key == "modalH" && modal.visible}
             onClose={closeModal}
             value={modal.params}></MonacoEditorModal>
+        {/* <AnalysisResultEdit
+            visible={modal.key == "analysisResultEdit" && modal.visible}
+            onClose={closeModal}
+            params={modal.params}></AnalysisResultEdit> */}
+        <MetadataModal
+            visible={modals.metadataModal.visible}
+            onClose={() => closeModals("metadataModal")}
+            params={modals.metadataModal.params}></MetadataModal>
+        <MetadataForm
+            visible={modal.key == "metadataForm" && modal.visible}
+            onClose={closeModal}
+            params={modal.params}></MetadataForm>
+        <BindSample
+            visible={modals.bindSample.visible}
+            onClose={() => closeModals("bindSample")}
+            operatePipeline={operatePipeline}
+            params={modals.bindSample.params}></BindSample> 
     </div>
 }
 
@@ -287,6 +317,7 @@ export default Pipeline
 
 const ComponentsRender = ({ component_type, operatePipeline, component }: { component_type: string, operatePipeline: any, component: any }) => {
     if (!component_type || !component) return null
+
     const componentMap = {
         "pipeline": PipelineComponent,
         "software": SoftwareComponent,
@@ -302,6 +333,7 @@ const MemoizedComponentsRender = React.memo(ComponentsRender, (prevProps, nextPr
 });
 
 const SoftwareComponent = ({ operatePipeline, component }: { operatePipeline: any, component: any }) => {
+
 
     return <>
         <AnalysisPanel
@@ -340,6 +372,7 @@ const PipelineComponent = ({ operatePipeline, component }: { operatePipeline: an
     const [items, setItems] = useState<any>([])
 
     const getPipline: any = (pipeline: any) => {
+
         // console.log(pipeline)
         const softwareList: any[] = pipeline.items
         // console.log(pipeline)
@@ -347,8 +380,8 @@ const PipelineComponent = ({ operatePipeline, component }: { operatePipeline: an
         return softwareList.map((item, index) => {
             // const { downstreamAnalysis, appendSampleColumns, analysisType, ...rest } = item
             return {
-                key: index + 1,
-                label: item.name,
+                key: item.component_id,
+                label: item.name || item.component_id,
                 children: <AnalysisPanel
 
                     // inputAnalysisMethod={item.inputAnalysisMethod}

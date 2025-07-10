@@ -1,10 +1,10 @@
-import { Button, Form, Input, InputNumber, Select } from "antd";
+import { Button, Flex, Form, Input, InputNumber, Select } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import axios from "axios";
 import { Component, FC, useEffect, useState, memo } from "react";
 import { data } from "react-router";
 const FormJsonComp: FC<any> = memo(({ formJson, dataMap }) => {
-    if(!formJson) return null 
+    if (!formJson) return null
     // console.log("dataMap",dataMap)
     const componentMap: any = {
         GroupSelect: {
@@ -53,7 +53,7 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap }) => {
         }
     };
     const ComponentsRender = ({ type, dataMap, inputAnalysisMethod, dataKey: dataKey_, data: data_, name, inputKey, ...rest }: any) => {
-        if(!dataMap) return  <div>加载中....</div> //(() => )
+        if (!dataMap) return <div>加载中....</div> //(() => )
         const componentObj = componentMap[type] //|| (() => <div>未知类型</div>);
         // if (first_data_key in dataMap_)
         // if(!dataMap_ && !dataMap_.first_data_key){
@@ -502,9 +502,11 @@ const GroupSelectButton: FC<any> = ({ value, onChange, sampleGrouped }) => {
     }
     return <>
         {/* <Select mode={"multiple"} value={value} onChange={onSelectChange} options={options}></Select> */}
-        {Object.entries(sampleGrouped ? sampleGrouped : {}).map(([key, value2]: any) => (<span key={key}>
-            <Button type={(value ? value : []).includes(key) ? "primary" : "dashed"} onClick={() => onSelectGroup(key)}>{key}({value2.length})</Button>
-        </span>))}
+        <Flex gap="small" wrap>
+            {Object.entries(sampleGrouped ? sampleGrouped : {}).map(([key, value2]: any) => (<span key={key}>
+                <Button size="small" type={(value ? value : []).includes(key) ? "primary" : "dashed"} onClick={() => onSelectGroup(key)}>{key}({value2.length})</Button>
+            </span>))}
+        </Flex>
         {/* {groupedKey} */}
 
     </>

@@ -1,20 +1,22 @@
 import { FC, useEffect, useState } from "react"
 import axios from "axios"
-import { Button, Card, Drawer, Flex, Form, Input, Modal, Space, Table, TableProps, Tabs } from "antd"
+import { Button, Card, Drawer, Flex, Form, Input, Modal, Popconfirm, Space, Table, TableProps, Tabs } from "antd"
 import { useOutletContext, useParams } from "react-router"
 
 import { useModal } from "@/hooks/useModal"
 import ImportFile from '@/components/import-data/inport-metadata'
+import { deleteSampleBySampleIdApi } from "@/api/sample"
+import { bindSampleToAnalysisResultApi } from "@/api/analysis-result"
 export const getSamples: any = (project: any) => axios.get(`/list-by-project?project=${project}`)
-const Sample: FC<any> = () => {
+const Sample: FC<any> = ({ operatePipeline, rowSelection }) => {
     const [sampleData, setSampleData] = useState([])
     const [data, setData] = useState([])
     const [loading, setLoading] = useState(false)
     const { project } = useOutletContext<any>()
 
-  
+
     const { modal, openModal, closeModal } = useModal();
-    
+
     const { Search } = Input;
     const loadSample = async () => {
         setLoading(true)
@@ -27,22 +29,27 @@ const Sample: FC<any> = () => {
     }
     const columns: TableProps<any>['columns'] = [
         {
-            title: '样本唯一标识',
-            dataIndex: 'sample_key',
-            key: 'sample_key',
+            title: 'ID',
+            dataIndex: 'sample_id',
+            key: 'sample_id',
             ellipsis: true,
-        },{
+        }, {
             title: '项目',
             dataIndex: 'project',
             key: 'project',
             ellipsis: true,
+        }, {
+            title: '样本唯一标识',
+            dataIndex: 'analysis_key',
+            key: 'analysis_key',
+            ellipsis: true,
         },
-         {
+        {
             title: '样本名称',
             dataIndex: 'sample_name',
             key: 'sample_name',
             ellipsis: true,
-        }, 
+        },
         // {
         //     title: '样本个体',
         //     dataIndex: 'sample_individual',
@@ -64,7 +71,7 @@ const Sample: FC<any> = () => {
         //     key: 'sequencing_target',
         //     ellipsis: true,
         // },
-         {
+        {
             title: '样本分组',
             dataIndex: 'sample_group',
             key: 'sample_group',
@@ -74,7 +81,7 @@ const Sample: FC<any> = () => {
             dataIndex: 'sample_group_name',
             key: 'sample_group_name',
             ellipsis: true,
-        }, 
+        },
         // {
         //     title: '样本来源',
         //     dataIndex: 'sample_source',
@@ -179,55 +186,121 @@ const Sample: FC<any> = () => {
             width: 200,
             render: (_: any, record: any) => (
                 <Space size="middle">
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        operatePipeline.openModal("metadataForm", {
+                            analysis_key: record.analysis_key,
+                            sample_id: record.sample_id,
+                            callback: loadSample
+                        })
+                    }}>编辑</Button>
                     {/* <a href={`http://10.110.1.11:8000/heixiaoyan/heixiaoyan_workspace/output/fastp/${record.sample_name}.fastp.html`} target="__black">fastp</a>
                     <a href={`http://10.110.1.11:8000/heixiaoyan/heixiaoyan_workspace/output/fastqc/clean_reads/${record.sample_name}_1.fastp_fastqc.html`} target="__black">cf1</a>
                     <a href={`http://10.110.1.11:8000/heixiaoyan/heixiaoyan_workspace/output/fastqc/clean_reads/${record.sample_name}_2.fastp_fastqc.html`} target="__black">cf2</a> */}
-
+                    <Popconfirm title="确定删除吗？" onConfirm={async () => {
+                        await deleteSampleBySampleIdApi(record.sample_id)
+                        loadSample()
+                    }}>
+                        <Button size="small" color="danger" variant="solid">删除</Button>
+                    </Popconfirm>
                 </Space>
             ),
         },
     ]
-    
+
     useEffect(() => {
         loadSample()
     }, [])
     return <>
         {/* {sampleData && <>样本数量{sampleData.length}</>} */}
+        {/* <Search
 
-        {!(modal.key == "modalA" && modal.visible) ? <>
-            <Search
+            style={{ width: 304 }}
+        /> */}
 
-                style={{ width: 304 }}
-            />
+        <Flex justify={"end"} align={"center"} gap="small" style={{ marginBottom: "1rem" }}>
+            <Button size="small" color="cyan" variant="solid" onClick={() => {
+                operatePipeline.openModal("metadataForm", {
+                    callback: loadSample
+                })
+            }}>添加样本</Button>
+            <Button size="small" color="primary" variant="solid" onClick={loadSample} >刷新</Button>
 
-            <Button onClick={loadSample} style={{ marginLeft: "1rem" }}>刷新</Button>
-            <Button onClick={() => { openModal("modalA",{operatureUrl:"import_sample_form_str"}) }} style={{ marginLeft: "1rem" }}>导入样本</Button>
-            <Button onClick={() => { openModal("modalA",{operatureUrl:"update_sample_form_str"}) }} style={{ marginLeft: "1rem" }}>更新样本</Button>
+        </Flex>
+        {/* <Button onClick={() => { openModal("modalA", { operatureUrl: "import_sample_form_str" }) }} style={{ marginLeft: "1rem" }}>导入样本</Button>
+<Button onClick={() => { openModal("modalA", { operatureUrl: "update_sample_form_str" }) }} style={{ marginLeft: "1rem" }}>更新样本</Button> */}
 
-            <Table
-                pagination={{ pageSize: 30 }}
-                loading={loading}
-                scroll={{ x: 'max-content', y: 55 * 5 }}
-                columns={columns}
-                footer={() => `一共${sampleData.length}条记录`}
-                dataSource={sampleData} />
+        <Table
+            rowSelection={rowSelection}
+            rowKey={(record) => record.sample_id}
+            size="small"
+            bordered
+            // rowClassName="cursor-pointer"
+            pagination={{ pageSize: 30 }}
+            loading={loading}
+            scroll={{ x: 'max-content', y: 55 * 5 }}
+            columns={columns}
+            footer={() => `一共${sampleData.length}条记录`}
+            dataSource={sampleData} />
 
-        </> : <>
-            <ImportFile 
+        {/* <ImportFile
             visible={modal.key == "modalA" && modal.visible}
-            onClose={closeModal} 
+            onClose={closeModal}
             params={modal.params}
-            > </ImportFile>
-        </>}
-
+        > </ImportFile> */}
     </>
 }
 
+export const BindSample: FC<any> = ({ visible, onClose, operatePipeline,params }) => {
+    const [selectedRowKey, setSelectedRowKey] = useState<any>()
+    const { messageApi } = useOutletContext<any>()
+    const submit = async () => {
+        if(!selectedRowKey){
+            messageApi.error("请选择样本")
+            return
+        }
+        const req = {
+            analysis_result_id:params.analysis_result_id,
+            sample_id:selectedRowKey[0]
+        }
+        // analysis_result_id:string,sample_id:string
+        console.log(req)
+        const resp = await bindSampleToAnalysisResultApi(req)
+        messageApi.success("绑定成功")
+        params.callback?.()
+        onClose()
+    }
+    return <Modal title="绑定样本" 
+    open={visible} 
+    onClose={onClose} 
+    onCancel={onClose} 
+    width={"80%"} 
+    onOk={submit}
+    >
+        {JSON.stringify(params)}
+        <Sample
+            rowSelection={{
+                type: "radio",
+                onChange: (selectedRowKeys: any, selectedRows: any) => {
+                    // console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+                    setSelectedRowKey(selectedRowKeys)
+                },
+            }}
+            operatePipeline={operatePipeline}></Sample>
 
-const SampleResult = () => {
+    </Modal>
+}
 
-    return <>
-        <Sample></Sample>
+
+export const MetadataModal: FC<any> = ({ visible, onClose, params }: any) => {
+    if (!visible) return null
+    const { operatePipeline, ...rest } = params
+    return <Modal title="metadata" open={visible} onClose={onClose} onCancel={onClose} width={"80%"} footer={null}>
+
+        {/* <Button onClick={() => {
+            operatePipeline.openModal("metadataForm")
+        }}>metadata</Button> */}
+        <Sample operatePipeline={operatePipeline}></Sample>
+
         {/* <Tabs items={[
             {
                 key: "sample",
@@ -236,7 +309,7 @@ const SampleResult = () => {
             }
           
         ]}></Tabs> */}
-    </>
+    </Modal>
 }
 
-export default SampleResult
+export default Sample

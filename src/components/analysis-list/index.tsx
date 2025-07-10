@@ -234,7 +234,7 @@ const ResultList = forwardRef<any, any>(({
                             }}>输出解析模块({item.module})</Button>)}
                     </>}
                 </>} */}
-                <Button type="primary" onClick={loadData}>刷新</Button>
+                <Button size="small"  type="primary" onClick={loadData}>刷新</Button>
             </Flex>
         } >
             {/* {software && <ul style={{ marginBottom: "0.5rem" }}>
@@ -248,6 +248,7 @@ const ResultList = forwardRef<any, any>(({
 
             <Table
                 size="small"
+                bordered
                 pagination={false}
                 loading={loading}
                 scroll={{ x: 'max-content', y: 55 * 5 }}

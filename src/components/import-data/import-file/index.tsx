@@ -26,22 +26,25 @@ project,library_name,sample_name,sequencing_target,sequencing_technique,sample_c
 test,R250506-21,OL-RNA-1,RNA,NGS,single_genome,/V350344603_L03_117_1.fq.gz,/V350344603_L03_117_2.fq.gz
 
 `
-const ImportFile: FC<any> = (pipeline) => {
+const ImportFile: FC<{ component_type: any, component_id: any, operatePipeline: any, label: any, name: any }> = ({ component_type, component_id, operatePipeline, label, name }) => {
+    // const { component_type,component_id,operatePipeline } = pipeline
     const [form] = Form.useForm();
     const [components, setComponents] = useState<any>([])
+    console.log("-->ImportFile渲染")
     // const [dataMap, setDataMap] = useState<any>({})
-    const componentId = Form.useWatch(["component_id"], form)
-    const [inputForm, setInputForm] = useState<any>([])
+    // const componentId = Form.useWatch(["component_id"], form)
+
+    const [inputForm, setInputForm] = useState<any>()
     const { messageApi, project } = useOutletContext<any>()
     const [parseData, setParseData] = useState<any>()
 
     useEffect(() => {
-        setInputForm([])
-        setParseData(undefined)
-        if (componentId) {
-            findByComponentId(componentId)
+        // setInputForm([])
+        // setParseData(undefined)
+        if (component_id) {
+            findByComponentId(component_id)
         }
-    }, [componentId])
+    }, [component_id])
     // const [operatureUrl, setOperatureUrl] = useState<any>()
     // const listPipelineComponents = async () => {
     //     const resp = await listPipelineComponentsApi({
@@ -70,48 +73,51 @@ const ImportFile: FC<any> = (pipeline) => {
         const data = JSON.parse(resp.data.content)
         if (data.inputForm) {
             setInputForm(data.inputForm)
-        } else {
-            messageApi.error("该组件没有配置inputForm!")
         }
 
     }
     const getPipelineComponents = async () => {
-        const options = pipeline.items.flatMap((item: any) => {
+        // console.log(pipeline)
+        // let options = []
+        // if (pipeline.component_type == "software") {
 
-            const inputFile = item.inputFile || []
-            const outputFile = item.outputFile || []
-            console.log(item)
-            const inputOptions = inputFile.map((it: any) => {
-                return {
-                    label: `${it.label}(${it.name})(${it.component_id})`,
-                    value: it.component_id
-                }
-            })
-            const outputOptions = outputFile.map((it: any) => {
-                return {
-                    label: `${it.label}(${it.name})(${it.component_id})`,
-                    value: it.component_id
-                }
-            })
-            return [
-                ...inputOptions,
-                ...outputOptions
-            ]
-        })
+        // } else if (pipeline.component_type == "pipeline") {
+        //     options = pipeline.items.flatMap((item: any) => {
 
-        setComponents(options)
+        //         const inputFile = item.inputFile || []
+        //         const outputFile = item.outputFile || []
+        //         console.log(item)
+        //         const inputOptions = inputFile.map((it: any) => {
+        //             return {
+        //                 label: `${it.label}(${it.name})(${it.component_id})`,
+        //                 value: it.component_id
+        //             }
+        //         })
+        //         const outputOptions = outputFile.map((it: any) => {
+        //             return {
+        //                 label: `${it.label}(${it.name})(${it.component_id})`,
+        //                 value: it.component_id
+        //             }
+        //         })
+        //         return [
+        //             ...inputOptions,
+        //             ...outputOptions
+        //         ]
+        //     })
+        // }
+        // setComponents(options)
     }
     const getRequestParams = (values: any) => {
-        const { component_id, content, analysis_key } = values
+        const { content, sample_name } = values
         if (parseData) {
             return parseData.map((item: any) => {
-                const { analysis_key, ...rest } = item
+                const { sample_name, ...rest } = item
                 return {
                     ...values,
                     project: project,
                     component_id: component_id,
                     content: JSON.stringify(rest),
-                    analysis_key: analysis_key
+                    sample_name: sample_name,
                 }
             })
         } else {
@@ -120,7 +126,7 @@ const ImportFile: FC<any> = (pipeline) => {
                 project: project,
                 component_id: component_id,
                 content: JSON.stringify(content),
-                analysis_key: analysis_key
+                sample_name: sample_name,
             }]
         }
     }
@@ -172,12 +178,16 @@ const ImportFile: FC<any> = (pipeline) => {
             render: (text: any) => <span>{text}</span>
         }))
 
-        return <Table footer={() => (
-            <div style={{ textAlign: 'right' }}>
-                一共{parseData.length}条记录 &nbsp;&nbsp;
-                <Button color="cyan" variant="solid" onClick={importData}>确认</Button>
-            </div>
-        )} columns={columns} dataSource={parseData} />;
+        return <Table
+            size="small"
+            bordered
+            pagination={false}
+            footer={() => (
+                <div style={{ textAlign: 'right' }}>
+                    一共{parseData.length}条记录 &nbsp;&nbsp;
+                    <Button  size="small" color="cyan" variant="solid" onClick={importData}>确认</Button>
+                </div>
+            )} columns={columns} dataSource={parseData} />;
     };
 
     useEffect(() => {
@@ -186,11 +196,18 @@ const ImportFile: FC<any> = (pipeline) => {
     }, [])
     return <>
         <Card
-            title={`导入文件`}
+            title={`${label}(${name})(${component_id})`}
             extra={<Flex gap={"small"} >
-                <Button color="cyan" variant="solid" disabled={!parseData} onClick={() => setParseData(undefined)}>取消解析</Button>
+                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                    operatePipeline.openModal("modalC", {
+                        data: { component_id }, structure: {
+                            component_type: component_type,
+                        }
+                    })
+                }}>编辑inputForm</Button>
+                <Button size="small" color="cyan" variant="solid" disabled={!parseData} onClick={() => setParseData(undefined)}>取消解析</Button>
 
-                <Button color="cyan" variant="solid" disabled={inputForm.length == 0} onClick={parseImportData}>解析</Button>
+                <Button size="small" color="cyan" variant="solid" disabled={!inputForm} onClick={parseImportData}>解析</Button>
             </Flex>}
 
         >
@@ -199,14 +216,34 @@ const ImportFile: FC<any> = (pipeline) => {
             </pre>
 
             <Form form={form}>
-                <Form.Item name={"component_id"} label="组件" rules={[{ required: true, message: "请选择组件" }]} >
+                {/* <Form.Item name={"component_id"} label="组件" rules={[{ required: true, message: "请选择组件" }]} >
                     <Select options={components} allowClear showSearch></Select>
-                </Form.Item>
-                {!parseData && <Form.Item name={"analysis_key"} label="分析key" rules={[{ required: false, message: "请输入分析key" }]} >
-                    <Input placeholder="样本名称, 与sample_key关联" allowClear></Input>
-                </Form.Item>}
+                </Form.Item> */}
 
-                <FormJsonComp formJson={inputForm} dataMap={{}} ></FormJsonComp>
+                {inputForm ?
+                    <>
+                        {!parseData && <Form.Item name={"sample_name"} label="分析key" rules={[{ required: false, message: "请输入分析key" }]} >
+                            <Input placeholder="样本名称, 与sample_key关联" allowClear></Input>
+                        </Form.Item>}
+                        <FormJsonComp formJson={inputForm} dataMap={{}} ></FormJsonComp>
+                    </>
+                    :
+                    <>
+                        <Empty
+
+                            description="该组件没有配置inputForm!"
+                        >
+
+                            <Button color="cyan" variant="solid" onClick={() => {
+                                operatePipeline.openModal("modalC", {
+                                    data: { component_id }, structure: {
+                                        component_type: component_type,
+                                    }
+                                })
+                            }}>配置inputForm</Button>
+                        </Empty>
+                    </>
+                }
                 {Array.isArray(parseData) ? (
                     renderTable()
                 ) : (
@@ -214,7 +251,7 @@ const ImportFile: FC<any> = (pipeline) => {
                         <Button
                             color="cyan"
                             variant="solid"
-                            disabled={inputForm.length === 0}
+                            disabled={!inputForm}
                             onClick={importData}
                         >
                             确认

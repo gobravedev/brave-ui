@@ -29,20 +29,20 @@ export function useModals(modalKeys: string[]) {
       Object.fromEntries(modalKeys.map((key) => [key, { visible: false, params: null }]))
     );
   
-    const openModal = (key: string, params?: any) => {
+    const openModals = (key: string, params?: any) => {
       setModals((prev) => ({
         ...prev,
         [key]: { visible: true, params },
       }));
     };
   
-    const closeModal = (key: string) => {
+    const closeModals = (key: string) => {
       setModals((prev) => ({
         ...prev,
         [key]: { visible: false, params: null },
       }));
     };
   
-    return { modals, openModal, closeModal };
+    return { modals, openModals, closeModals };
   }
   
