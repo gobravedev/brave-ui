@@ -54,11 +54,13 @@ const ResultList = forwardRef<any, any>(({
             console.log("analysis_result", data)
             if (data.msgType === "analysis_result"){
                 // message.success(data.msg)
-                // console.log("analysisMethod", analysisMethod) 
-                console.log("reload", currentAnalysisMethod?.component_id)   
-                if (data.component_id == currentAnalysisMethod?.component_id){
+                const componentIdList = analysisMethod.map((it:any)=>it.component_id)
+                console.log("componentIdList", componentIdList) 
+                console.log("data.component_id ", data.component_id )   
+                console.log(" componentIdList.includes(data.component_id) ", componentIdList.includes(data.component_id))   
+                if (  componentIdList.includes(data.component_id)){
                     reload()
-                    console.log("reload", currentAnalysisMethod?.component_id)   
+                    // console.log("reload", currentAnalysisMethod?.component_id)   
                 }
             }
             // if (data.analysis_id == analysis_id) {
@@ -669,7 +671,7 @@ const ResultList = forwardRef<any, any>(({
             </>}
 
 
-            {JSON.stringify(currentAnalysisMethod.component_id)}
+            {/* {JSON.stringify(currentAnalysisMethod.component_id)} */}
             <Table
                 rowKey={(it: any) => it.id}
                 size="small"
