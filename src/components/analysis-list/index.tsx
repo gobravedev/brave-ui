@@ -1,5 +1,5 @@
 import { Venn } from "@ant-design/plots"
-import { Button, Card, Flex, message, Popconfirm, Popover, Space, Table } from "antd"
+import { Button, Card, Flex, message, Popconfirm, Popover, Space, Table, Tag } from "antd"
 import axios from "axios"
 import { FC, forwardRef, useEffect, useImperativeHandle, useState } from "react"
 import { useLocation, useNavigate, useParams } from "react-router"
@@ -91,6 +91,15 @@ const ResultList = forwardRef<any, any>(({
     }
 
     let columns: any = [
+        {
+            title: 'analysis_status',
+            dataIndex: 'analysis_status',
+            key: 'analysis_status',
+            ellipsis: true,
+            render: (text: any) => {
+                return <Tag color={text === "success" ? "green" : text === "failed" ? "red" : "blue"}>{text}</Tag>
+            }   
+        },
         {
             title: 'analysis_id',
             dataIndex: 'analysis_id',

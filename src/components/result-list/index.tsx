@@ -1,3 +1,5 @@
+import { useSSEContext } from "@/context/sse/useSSEContext"
+import { SSEContextType } from "@/type/sse"
 import { Venn } from "@ant-design/plots"
 import { Button, Card, Flex, message, Modal, Popconfirm, Popover, Space, Table, Tooltip, Typography } from "antd"
 import axios from "axios"
@@ -41,6 +43,52 @@ const ResultList = forwardRef<any, any>(({
     const [groupedData, setGroupedData] = useState<any>()
     // const [content,setContent] = useState<any>()
     const [loading, setLoading] = useState(false)
+    // const { eventSource } = useOutletContext<SSEContextType>();
+    const { eventSourceRef, status, reconnect } = useSSEContext();
+
+    useEffect(() => {
+        if (!eventSourceRef) return;
+
+        const handler = (event: MessageEvent) => {
+            const data = JSON.parse(event.data)
+            console.log("analysis_result", data)
+            if (data.msgType === "analysis_result"){
+                // message.success(data.msg)
+                // console.log("analysisMethod", analysisMethod) 
+                console.log("reload", currentAnalysisMethod?.component_id)   
+                if (data.component_id == currentAnalysisMethod?.component_id){
+                    reload()
+                    console.log("reload", currentAnalysisMethod?.component_id)   
+                }
+            }
+            // if (data.analysis_id == analysis_id) {
+            //     if (data.msgType === "workflow_log") {
+            //         setFileTabKey("workflow_log_file")
+            //         console.log("workflow_log_file", data)
+            //         readLogFile(fileMap["workflow_log_file"])
+            //     } else if (data.msgType === "executor_log") {
+            //         setFileTabKey("executor_log_file")
+            //         readLogFile(fileMap["executor_log_file"])
+            //     } else if (data.msgType === "trace") {
+            //         setFileTabKey("trace_file")
+            //         readLogFile(fileMap["trace_file"])
+            //     } else if (data.msgType == "process_end") {
+            //         setFileTabKey("workflow_log_file")
+            //         readLogFile(fileMap["workflow_log_file"])
+            //         if (callback) {
+            //             callback()
+            //         }
+            //     }
+            // }
+        };
+
+        eventSourceRef.current?.addEventListener('message', handler);
+
+        return () => {
+            console.log("removeEventListener")
+            eventSourceRef.current?.removeEventListener('message', handler);
+        };
+    }, [eventSourceRef]);
     // const [currentAnalysisMenthod, setCurrentAnalysisMenthod] = useState<any>()
     // const [currentAnalysisMethod, setCurrentAnalysisMethod] = useState<any>()
     // const { setPipelineStructure, setOperateOpen, setPipelineRecord, datelePipeline } = operatePipeline
@@ -245,6 +293,7 @@ const ResultList = forwardRef<any, any>(({
                             <li>analysis_result_id: {record.analysis_result_id}</li>
                             <li>sample_id: {record.sample_id}</li>
                             <li>file_name: {record.file_name}</li>
+                            <li>analysis_result_hash: {record.analysis_result_hash}</li>
                         </ul>
                     </>}>
                         <span style={{ cursor: "pointer" }}>{text}</span>
@@ -417,7 +466,7 @@ const ResultList = forwardRef<any, any>(({
                             })
                         }}>绑定样本</Button>
                         <Popconfirm title="确定删除吗?" onConfirm={async () => {
-                            await deleteById(record.id)
+                            await deleteById(record.analysis_result_id)
                         }}>
                             <Button size="small" color="danger" variant="solid">删除</Button>
                         </Popconfirm>
@@ -515,7 +564,7 @@ const ResultList = forwardRef<any, any>(({
 
                         {/* <a onClick={() => { downloadHdfs(record.content) }}>下载</a> */}
                         <Popconfirm title="确定删除吗?" onConfirm={async () => {
-                            await deleteById(record.id)
+                            await deleteById(record.analysis_result_id)
                         }}>
                             <a>删除</a>
                         </Popconfirm>
@@ -541,7 +590,7 @@ const ResultList = forwardRef<any, any>(({
 
 
             </>}>
-                {currentAnalysisMethod?.label}
+                {/* {currentAnalysisMethod?.label} */}
             </Tooltip>)</>}
             extra={<>{cardExtra}
                 <Flex gap={"small"}>
@@ -620,7 +669,7 @@ const ResultList = forwardRef<any, any>(({
             </>}
 
 
-            {/* {JSON.stringify(currentAnalysisMenthod)} */}
+            {JSON.stringify(currentAnalysisMethod.component_id)}
             <Table
                 rowKey={(it: any) => it.id}
                 size="small"

@@ -1,7 +1,7 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import { LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Breadcrumb, Button, Layout, Menu, message, notification, Select, Skeleton, theme } from 'antd';
+import { Breadcrumb, Button, Layout, Menu, message, notification, Select, Skeleton, Tag, theme } from 'antd';
 import { NavLink, Outlet, useLocation, useNavigate, useParams } from 'react-router';
 import { Header } from 'antd/es/layout/layout';
 import { useDispatch, useSelector } from 'react-redux';
@@ -11,6 +11,8 @@ import { setSseData } from '@/store/globalSlice'
 import useMessage from 'antd/es/message/useMessage';
 import { useModal } from '@/hooks/useModal';
 import ContextModal from '@/components/context';
+import { useSSE } from '@/hooks/useSSE';
+import { useSSEContext } from '@/context/sse/useSSEContext';
 
 const { Content, Sider } = Layout;
 
@@ -77,39 +79,72 @@ const App: React.FC = () => {
             }
         }))
     }
-    const [eventSource, setEventSource] = useState<EventSource | null>(null);
-
+    const { eventSourceRef, status, reconnect } = useSSEContext();
     useEffect(() => {
-        const eventSource = new EventSource('/brave-api/sse-group');
-        setEventSource(eventSource);
-        eventSource.addEventListener('message', (event) => {
-            
+        if (!eventSourceRef) return;
+
+        const handler = (event: MessageEvent) => {
             const data = JSON.parse(event.data)
-            // console.log(data )
+            // console.log("1111111111111111",data )
             
             if(data.msgType === "process_end"){
                 const analysis:any = data.analysis
                 const msg = `${analysis.analysis_name}(${analysis.analysis_id}) 分析完成`
                 openNotification({ type: "info", message: msg })
             }
+            if (data.msgType === "analysis_result"){
+          
+                openNotification({ type: "info", message: data.msg })
+            }
             dispatch(setSseData(event.data))
-        });
-
-        // eventSource.onmessage = (event) => {
-        //     //   setMessages(prev => [...prev, event.data]);
-
-        // };
-
-        eventSource.onerror = (err) => {
-            console.error('SSE connection error:', err);
-            eventSource.close(); // 可选：关闭连接
         };
+
+        eventSourceRef.current?.addEventListener('message', handler);
 
         return () => {
-            eventSource.close(); // 组件卸载时关闭连接
+            console.log("removeEventListener")
+            eventSourceRef.current?.removeEventListener('message', handler);
         };
-    }, [])
+    }, [eventSourceRef]);
 
+    // const [eventSource, setEventSource] = useState<EventSource | null>(null);
+
+    // useEffect(() => {
+    //     const eventSource = new EventSource('/brave-api/sse-group');
+    //     setEventSource(eventSource);
+    //     eventSource.addEventListener('message', (event) => {
+            
+            // const data = JSON.parse(event.data)
+            // // console.log(data )
+            
+            // if(data.msgType === "process_end"){
+            //     const analysis:any = data.analysis
+            //     const msg = `${analysis.analysis_name}(${analysis.analysis_id}) 分析完成`
+            //     openNotification({ type: "info", message: msg })
+            // }
+            // if (data.msgType === "analysis_result"){
+          
+            //     openNotification({ type: "info", message: data.msg })
+            // }
+            // dispatch(setSseData(event.data))
+    //     });
+
+    //     // eventSource.onmessage = (event) => {
+    //     //     //   setMessages(prev => [...prev, event.data]);
+
+    //     // };
+
+    //     eventSource.onerror = (err) => {
+    //         console.error('SSE connection error:', err);
+    //         eventSource.close(); // 可选：关闭连接
+    //     };
+
+    //     return () => {
+    //         eventSource.close(); // 组件卸载时关闭连接
+    //     };
+    // }, [])
+
+    // const eventSourceRef :React.RefObject < EventSource | null> = useSSE(openNotification)
     useEffect(() => {
         loadProject()
     }, [])
@@ -253,6 +288,15 @@ const App: React.FC = () => {
 
                 {/* 右侧：项目选择 */}
                 <div style={{ marginLeft: "auto", minWidth: 100 }}>
+                   {/* <Tag color={status === "open" ? "green" : status === "connecting" ? "blue" : "red"} style={{marginRight:"1rem"}}>
+                    {status}
+                   </Tag> */}
+                    <Button size="small" 
+                    color={status === "open" ? "green" : status === "connecting" ? "blue" : "red"} 
+                    variant="solid"
+                    onClick={reconnect} style={{marginRight:"1rem"}}>
+                    {status === "open" ? "已连接" : status === "connecting" ? "连接中" : "连接失败"}
+                   </Button>
                     <Select
                         onChange={(value: any) => {
                             console.log(value)
@@ -292,7 +336,7 @@ const App: React.FC = () => {
 
                 <Content style={{ padding: '0 24px' }}>
                     <Suspense key={location.key} fallback={<Test></Test>}>
-                        <Outlet context={{ project,eventSource,messageApi }} />
+                        <Outlet context={{ project,messageApi }} />
                     </Suspense>
                 </Content>
             </Layout>

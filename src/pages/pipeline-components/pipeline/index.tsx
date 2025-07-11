@@ -21,6 +21,7 @@ import { BindSample, MetadataModal } from "@/pages/sample"
 import MetadataForm from "@/components/metadata-form"
 import AnalysisResultEdit from "@/components/analysis-result-edit"
 const Pipeline: FC<any> = ({ }) => {
+    console.log("Pipeline")
     const { component_type, component_id: name } = useParams()
     // console.log(pipelineId)
     const [pipeline, setPipeline] = useState<any>()

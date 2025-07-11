@@ -13,6 +13,7 @@ import ResultParse from "../result-parse";
 import { useModal } from "@/hooks/useModal";
 import { CreateOrUpdatePipelineComponent } from "../create-pipeline";
 import React from "react";
+import { useSSEContext } from "@/context/sse/useSSEContext";
 
 const PipelineMonitor: FC<any> = ({ data, ...rest }) => {
 
@@ -129,11 +130,12 @@ const PipelineParams: FC<any> = ({ data, type }) => {
 
 export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
     if (!analysis) return null
-    console.log("FileMonitor render")
+    // console.log("FileMonitor render")
     const { analysis_id } = analysis
     const [fileContent, setFileContent] = useState<any>("")
     const [fileTabKey, setFileTabKey] = useState<any>("workflow_log_file")
-    const { eventSource } = useOutletContext<SSEContextType>();
+    // const { eventSourceRef } = useOutletContext<SSEContextType>();
+    const { eventSourceRef, status, reconnect } = useSSEContext();
     const { messageApi } = useOutletContext<any>()
     const [fileMap, setFileMap] = useState<any>({})
     useEffect(() => {
@@ -171,39 +173,45 @@ export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
 
     }, [JSON.stringify(fileMap), fileTabKey])
     useEffect(() => {
-        if (!eventSource) return;
+        if (!eventSourceRef) return;
 
         const handler = (event: MessageEvent) => {
             const data = JSON.parse(event.data)
-
-            if (data.analysis_id == analysis_id) {
-                if (data.msgType === "workflow_log") {
-                    setFileTabKey("workflow_log_file")
-                    console.log("workflow_log_file", data)
-                    readLogFile(fileMap["workflow_log_file"])
-                } else if (data.msgType === "executor_log") {
-                    setFileTabKey("executor_log_file")
-                    readLogFile(fileMap["executor_log_file"])
-                } else if (data.msgType === "trace") {
-                    setFileTabKey("trace_file")
-                    readLogFile(fileMap["trace_file"])
-                } else if (data.msgType == "process_end") {
-                    setFileTabKey("workflow_log_file")
-                    readLogFile(fileMap["workflow_log_file"])
-                    if (callback) {
-                        callback()
+            if (data.msgType === "workflow_log" 
+                || data.msgType === "executor_log" 
+                || data.msgType === "trace" 
+                || data.msgType === "process_end") {
+                if (data.analysis_id == analysis_id) {
+                    if (data.msgType === "workflow_log") {
+                        setFileTabKey("workflow_log_file")
+                        // console.log("workflow_log_file", data)
+                        readLogFile(fileMap["workflow_log_file"])
+                    } else if (data.msgType === "executor_log") {
+                        setFileTabKey("executor_log_file")
+                        readLogFile(fileMap["executor_log_file"])
+                    } else if (data.msgType === "trace") {
+                        setFileTabKey("trace_file")
+                        readLogFile(fileMap["trace_file"])
+                    } else if (data.msgType == "process_end") {
+                        setFileTabKey("workflow_log_file")
+                        // console.log("11111111111process_end", data)
+                        readLogFile(fileMap["workflow_log_file"])
+                        if (callback) {
+                            callback()
+                        }
                     }
                 }
             }
+
         };
 
-        eventSource.addEventListener('message', handler);
+        eventSourceRef.current?.addEventListener('message', handler);
 
         return () => {
             console.log("removeEventListener")
-            eventSource.removeEventListener('message', handler);
+            eventSourceRef.current?.removeEventListener('message', handler);
         };
-    }, [eventSource]);
+    }, [eventSourceRef]);
 
     const runAnalysis = async () => {
         const res = await runAnalysisApi(analysis?.analysis_id)
@@ -223,7 +231,7 @@ export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
     }
 
     const ComponentRender = () => {
-        console.log("fileTabKey", fileTabKey)
+        // console.log("fileTabKey", fileTabKey)
         const Component = componentMap[fileTabKey]
         if (!Component) return <>no component</>
         return <Component {...analysis} content={fileContent} />
@@ -307,7 +315,7 @@ export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
                 </>}>
                     输出文件
                 </Tooltip>
-            } ,{
+            }, {
                 key: "result_parse",
                 label: <Tooltip title={<>
                     <ul>

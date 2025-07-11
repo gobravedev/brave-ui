@@ -7,6 +7,7 @@ import axios from 'axios';
 import store from './store'
 import { Provider } from 'react-redux'
 import { ConfigProvider } from 'antd'
+import { SSEProvider } from './context/sse/SSEProvider.tsx'
 
 console.log(import.meta.env.MODE)
 axios.defaults.baseURL = '/brave-api';
@@ -18,7 +19,9 @@ createRoot(document.getElementById('root')!).render(
   // </StrictMode>
   // <ConfigProvider>
     <Provider store={store}>
+      <SSEProvider> 
       <App />
+      </SSEProvider>
     </Provider>
   // </ConfigProvider>
 
