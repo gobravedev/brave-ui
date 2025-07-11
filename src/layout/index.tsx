@@ -1,7 +1,7 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import { LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Breadcrumb, Button, Layout, Menu, message, notification, Select, Skeleton, Tag, theme } from 'antd';
+import { Breadcrumb, Button, Flex, Layout, Menu, message, notification, Select, Skeleton, Tag, theme } from 'antd';
 import { NavLink, Outlet, useLocation, useNavigate, useParams } from 'react-router';
 import { Header } from 'antd/es/layout/layout';
 import { useDispatch, useSelector } from 'react-redux';
@@ -81,12 +81,14 @@ const App: React.FC = () => {
     }
     const { eventSourceRef, status, reconnect } = useSSEContext();
     useEffect(() => {
+        console.log("layout eventSourceRef",eventSourceRef)
         if (!eventSourceRef) return;
 
         const handler = (event: MessageEvent) => {
+           
             const data = JSON.parse(event.data)
             // console.log("1111111111111111",data )
-            
+            console.log(data)
             if(data.msgType === "process_end"){
                 const analysis:any = data.analysis
                 const msg = `${analysis.analysis_name}(${analysis.analysis_id}) 分析完成`
@@ -94,6 +96,10 @@ const App: React.FC = () => {
             }
             if (data.msgType === "analysis_result"){
           
+                openNotification({ type: "info", message: data.msg })
+            }
+
+            if(data.msgType === "test"){
                 openNotification({ type: "info", message: data.msg })
             }
             dispatch(setSseData(event.data))
@@ -105,7 +111,7 @@ const App: React.FC = () => {
             console.log("removeEventListener")
             eventSourceRef.current?.removeEventListener('message', handler);
         };
-    }, [eventSourceRef]);
+    }, [eventSourceRef.current]);
 
     // const [eventSource, setEventSource] = useState<EventSource | null>(null);
 
@@ -287,16 +293,22 @@ const App: React.FC = () => {
                 </div>
 
                 {/* 右侧：项目选择 */}
-                <div style={{ marginLeft: "auto", minWidth: 100 }}>
+                <Flex align="center" gap={"small"}>
                    {/* <Tag color={status === "open" ? "green" : status === "connecting" ? "blue" : "red"} style={{marginRight:"1rem"}}>
                     {status}
                    </Tag> */}
                     <Button size="small" 
                     color={status === "open" ? "green" : status === "connecting" ? "blue" : "red"} 
                     variant="solid"
-                    onClick={reconnect} style={{marginRight:"1rem"}}>
+                    onClick={reconnect} >
                     {status === "open" ? "已连接" : status === "connecting" ? "连接中" : "连接失败"}
                    </Button>
+                   <Button size="small" onClick={async () => {
+                    await axios.get("/send-test")
+                   }}>
+                    sse
+                   </Button>
+
                     <Select
                         onChange={(value: any) => {
                             console.log(value)
@@ -317,7 +329,7 @@ const App: React.FC = () => {
                         {project}/{namespace}
                     </Button> */}
                     {/* <Button>   {project}</Button> */}
-                </div>
+                </Flex>
             </Header>
             <Layout
                 style={{ padding: '24px 0', background: colorBgContainer, borderRadius: borderRadiusLG }}

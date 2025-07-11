@@ -90,7 +90,7 @@ const ResultList = forwardRef<any, any>(({
             console.log("removeEventListener")
             eventSourceRef.current?.removeEventListener('message', handler);
         };
-    }, [eventSourceRef]);
+    }, [eventSourceRef.current]);
     // const [currentAnalysisMenthod, setCurrentAnalysisMenthod] = useState<any>()
     // const [currentAnalysisMethod, setCurrentAnalysisMethod] = useState<any>()
     // const { setPipelineStructure, setOperateOpen, setPipelineRecord, datelePipeline } = operatePipeline

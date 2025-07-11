@@ -6,7 +6,7 @@ import ImportFile from "./import-file"
 const ImportData: FC<any> = ({ visible, onClose, params, callback }) => {
     if (!visible) return null;
     return <>
-        <Modal open={visible} onClose={onClose} width={"80%"} onCancel={onClose} title="导入数据">
+        <Modal open={visible} onClose={onClose} width={"80%"} onCancel={onClose} title="导入数据" footer={null}>
             {/* {JSON.stringify(params)} */}
             <Tabs items={[
                 {
@@ -14,7 +14,7 @@ const ImportData: FC<any> = ({ visible, onClose, params, callback }) => {
                     label: "输入文件",
                     children: <>
                         {params && <>
-                            <MemoizedImportFileComponnetRender params={params} type="inputFile" />
+                            <MemoizedImportFileComponnetRender params={params} type="inputFile" callback={onClose} />
 
                         </>}
                     </>
@@ -23,7 +23,7 @@ const ImportData: FC<any> = ({ visible, onClose, params, callback }) => {
                     label: "输出文件",
                     children: <>
                         {params && <>
-                            <MemoizedImportFileComponnetRender params={params} type="outputFile" />
+                            <MemoizedImportFileComponnetRender params={params} type="outputFile" callback={onClose} />
 
                         </>}
                     </>
@@ -39,7 +39,7 @@ const ImportData: FC<any> = ({ visible, onClose, params, callback }) => {
     </>
 }
 
-const ImportFileComponnetRender: FC<any> = ({ params,type }) => {
+const ImportFileComponnetRender: FC<any> = ({ params,type,callback }) => {
     if (!params) return <>无数据</>;
     // const [files, setFiles] = useState<any>()
     // const [currentFile, setCurrentFile] = useState<any>()
@@ -52,6 +52,7 @@ const ImportFileComponnetRender: FC<any> = ({ params,type }) => {
                     {...item}
                     operatePipeline={params.operatePipeline}
                     key={index}
+                    callback={callback}
                 ></ImportFile>
             })
         }

@@ -1,5 +1,5 @@
 import { Breadcrumb, Button, Empty, Flex, message, Modal, Skeleton, Tabs, Tag, Tooltip } from "antd"
-import { FC, useEffect, useState } from "react"
+import { FC, useEffect, useRef, useRef, useState } from "react"
 import AnalysisPanel, { UpstreamAnalysisOutput } from '../../../components/analysis-sotware-panel'
 import Meta from "antd/es/card/Meta"
 import { colors } from '@/utils/utils'
@@ -29,6 +29,10 @@ const Pipeline: FC<any> = ({ }) => {
 
     const [test, setTest] = useState<any>(true)
     const [messageApi, contextHolder] = message.useMessage();
+    const tableRef = {
+        inputFile: useRef<HTMLInputElement>(null),
+        outputFile: useRef<HTMLInputElement>(null)
+      };
     // const [editor, setEditor] = useState<any>({
     //     open: false,
     // })
@@ -236,6 +240,7 @@ const Pipeline: FC<any> = ({ }) => {
         <MemoizedComponentsRender
             component_type={component_type || ""}
             component={pipeline}
+            tableRef={tableRef}
             operatePipeline={operatePipeline} />
         {/* <PipelineComponent /> */}
         {/* <Button onClick={() => {
@@ -314,9 +319,15 @@ const Pipeline: FC<any> = ({ }) => {
 
 export default Pipeline
 
-
-
-const ComponentsRender = ({ component_type, operatePipeline, component }: { component_type: string, operatePipeline: any, component: any }) => {
+interface PipelineComponentProps {
+    operatePipeline: any,
+    component: any,
+    tableRef: any,
+}
+interface PipelineComponentRenderProps extends PipelineComponentProps {
+    component_type: string
+}
+const ComponentsRender = ({ component_type, operatePipeline, component ,...rest}: PipelineComponentRenderProps) => {
     if (!component_type || !component) return null
 
     const componentMap = {
@@ -327,13 +338,13 @@ const ComponentsRender = ({ component_type, operatePipeline, component }: { comp
     }
     const Component = componentMap[component_type as keyof typeof componentMap]
     if (!Component) return null
-    return <Component operatePipeline={operatePipeline} component={component} />
+    return <Component operatePipeline={operatePipeline} component={component} {...rest} />
 }
 const MemoizedComponentsRender = React.memo(ComponentsRender, (prevProps, nextProps) => {
     return JSON.stringify(prevProps) === JSON.stringify(nextProps)
 });
 
-const SoftwareComponent = ({ operatePipeline, component }: { operatePipeline: any, component: any }) => {
+const SoftwareComponent = ({ operatePipeline, component,...rest }: PipelineComponentProps) => {
 
 
     return <>
@@ -358,7 +369,7 @@ const SoftwareComponent = ({ operatePipeline, component }: { operatePipeline: an
 
 }
 
-const FileComponent = ({ operatePipeline, component }: { operatePipeline: any, component: any }) => {
+const FileComponent = ({ operatePipeline, component,...rest }: PipelineComponentProps) => {
     return <>
         <UpstreamAnalysisOutput
             analysisMethod={[component]}
@@ -369,7 +380,7 @@ const FileComponent = ({ operatePipeline, component }: { operatePipeline: any, c
     </>
 
 }
-const PipelineComponent = ({ operatePipeline, component }: { operatePipeline: any, component: any }) => {
+const PipelineComponent = ({ operatePipeline, component,...rest }: PipelineComponentProps) => {
     const [items, setItems] = useState<any>([])
 
     const getPipline: any = (pipeline: any) => {
@@ -389,6 +400,7 @@ const PipelineComponent = ({ operatePipeline, component }: { operatePipeline: an
                     // analysisPipline={item.analysisPipline}
                     // analysisMethod={item.analysisMethod}
                     // upstreamFormJson={item.upstreamFormJson}
+                    {...rest }
                     {...item}
                     pipeline={{
                         component_id: pipeline.component_id

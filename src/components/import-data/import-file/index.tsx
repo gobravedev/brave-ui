@@ -26,7 +26,7 @@ project,library_name,sample_name,sequencing_target,sequencing_technique,sample_c
 test,R250506-21,OL-RNA-1,RNA,NGS,single_genome,/V350344603_L03_117_1.fq.gz,/V350344603_L03_117_2.fq.gz
 
 `
-const ImportFile: FC<{ component_type: any, component_id: any, operatePipeline: any, label: any, name: any }> = ({ component_type, component_id, operatePipeline, label, name }) => {
+const ImportFile: FC<{ component_type: any, component_id: any, operatePipeline: any, label: any, name: any,callback:any }> = ({ component_type, component_id, operatePipeline, label, name,callback }) => {
     // const { component_type,component_id,operatePipeline } = pipeline
     const [form] = Form.useForm();
     const [components, setComponents] = useState<any>([])
@@ -143,6 +143,7 @@ const ImportFile: FC<{ component_type: any, component_id: any, operatePipeline: 
         try {
             const resp = await axios.post(`/import-data`, requestParams)
             messageApi.success("导入成功")
+            callback && callback()
         } catch (error: any) {
             messageApi.error(error.response.data.detail)
             // console.log()

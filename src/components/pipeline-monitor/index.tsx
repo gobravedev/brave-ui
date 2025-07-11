@@ -211,7 +211,7 @@ export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
             console.log("removeEventListener")
             eventSourceRef.current?.removeEventListener('message', handler);
         };
-    }, [eventSourceRef]);
+    }, [eventSourceRef.current]);
 
     const runAnalysis = async () => {
         const res = await runAnalysisApi(analysis?.analysis_id)
