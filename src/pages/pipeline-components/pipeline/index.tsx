@@ -1,5 +1,5 @@
 import { Breadcrumb, Button, Empty, Flex, message, Modal, Skeleton, Tabs, Tag, Tooltip } from "antd"
-import { FC, useEffect, useRef, useRef, useState } from "react"
+import { FC, useEffect, useRef, useState } from "react"
 import AnalysisPanel, { UpstreamAnalysisOutput } from '../../../components/analysis-sotware-panel'
 import Meta from "antd/es/card/Meta"
 import { colors } from '@/utils/utils'
