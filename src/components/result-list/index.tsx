@@ -291,6 +291,7 @@ const ResultList = forwardRef<any, any>(({
                 render: (text: any, record: any) => {
                     return <Tooltip title={<>
                         <ul>
+                            <li>analysis_id: {record.analysis_id}</li>
                             <li>component_id: {record.component_id}</li>
                             <li>analysis_result_id: {record.analysis_result_id}</li>
                             <li>sample_id: {record.sample_id}</li>
