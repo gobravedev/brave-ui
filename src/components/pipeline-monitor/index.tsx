@@ -354,6 +354,11 @@ export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
                 if (data.analysis_id == analysis?.analysis_id) {
                     if (data.msgType == "workflow_log" || data.msgType == "executor_log" || data.msgType == "trace" || data.msgType == "process_end") {
                         readLogFile()
+                        if(data.msgType == "process_end"){
+                            if (callback) {
+                                callback()
+                            }
+                        }
                     }
                 }
             };
