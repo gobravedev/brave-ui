@@ -1,5 +1,4 @@
-import { Button, Card, Flex, Table, Tabs, Tag, Tooltip } from "antd"
-import Typography from "antd/es/typography/Typography";
+import { Button, Card, Flex, Table, Tabs, Tag, Tooltip, Typography } from "antd"
 import axios from "axios"
 import { FC, memo, useEffect, useRef, useState } from "react"
 import { useSelector } from "react-redux"
@@ -153,103 +152,101 @@ const PipelineParams: FC<any> = ({ data, type }) => {
 //         <ResultParse analysisId={analysis?.analysis_id} ></ResultParse>
 //     </>
 // })
-const LogFile: FC<any> = ({ analysis_id, content: contentProps, file, setContentMap, fileKey }) => {
+
+
+interface LogFileProps {
+    analysis_id: string
+    content: { content: string[]; offset: number }
+    file: string
+    fileKey: string
+    setContentMap: any // 可加类型
+  }
+  
+const { Text } = Typography
+const LogFile: FC<LogFileProps> = ({ analysis_id, content: contentProps, file, setContentMap, fileKey }) => {
     if (!contentProps) return null
-    // console.log('LogFile', fileKey)
     const { content, offset } = contentProps
     if (!content) return null
-    const parentRef = React.useRef<HTMLDivElement>(null)
-    // const [offset, setOffset] = useState(100)
+  
+    const parentRef = useRef<HTMLDivElement>(null)
+  
     const virtualizer = useVirtualizer({
-        count: content.length,
-        getScrollElement: () => parentRef.current,
-        estimateSize: () => 45,
-        enabled: true,
+      count: content.length,
+      getScrollElement: () => parentRef.current,
+      estimateSize: () => 30,
+      overscan: 10,
     })
-
-
-    // useEffect(() => {
-    //     if (parentRef.current) {
-    //         requestAnimationFrame(() => {
-    //             parentRef.current!.scrollTop = parentRef.current!.scrollHeight
-    //         })
-    //     }
-    // }, [content])
-
+  
     useEffect(() => {
-        if (content?.length > 0) {
-            virtualizer.scrollToIndex(content.length - 1, { align: 'end' });
-        }
-    }, [content?.length]);
-
-    useEffect(() => {
-        const el = parentRef.current;
-        if (!el) return;
-      
-        const onScroll = () => {
-          const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 10;
-        //   setAutoScroll(nearBottom);
-        };
-        el.addEventListener("scroll", onScroll);
-        return () => el.removeEventListener("scroll", onScroll);
-      }, []);
+      if (content?.length > 0) {
+        virtualizer.scrollToIndex(content.length - 1, { align: "end", behavior: "smooth" })
+      }
+    }, [content?.length])
+  
     const items = virtualizer.getVirtualItems()
-    return <>
+  
+    return (
+      <Card
+        size="small"
+        title={
+          <Flex gap="small" wrap="wrap">
+            <Tag color="blue">文件: {file}</Tag>
+            <Tag color="purple">偏移量: {offset}</Tag>
+            <Tag color="green">分析ID: {analysis_id}</Tag>
+          </Flex>
+        }
+        bodyStyle={{ padding: 0 }}
+      >
         <div
-            ref={parentRef}
-            className="List"
-            style={{
-                height: 400,
-                overflowY: 'auto',
-                contain: 'strict',
-            }}
+          ref={parentRef}
+          style={{
+            height: 400,
+            overflowY: "auto",
+            fontFamily: "monospace",
+            backgroundColor: "#1e1e1e",
+            color: "#d4d4d4",
+            padding: "0 12px",
+          }}
         >
+          <div
+            style={{
+              height: virtualizer.getTotalSize(),
+              width: "100%",
+              position: "relative",
+            }}
+          >
             <div
-                style={{
-                    height: virtualizer.getTotalSize(),
-                    width: '100%',
-                    position: 'relative',
-                }}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                transform: `translateY(${items[0]?.start ?? 0}px)`,
+              }}
             >
+              {items.map((virtualRow) => (
                 <div
-                    style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        transform: `translateY(${items[0]?.start ?? 0}px)`,
-                    }}
+                  key={virtualRow.key}
+                  data-index={virtualRow.index}
+                  ref={virtualizer.measureElement}
+                  style={{
+                    padding: "4px 0",
+                    borderBottom: "1px solid #333",
+                  }}
                 >
-                    {offset}
-                    {file}
-                    {analysis_id}
-                    {/* <Button onClick={readLogFile}>a</Button> */}
-                    {items.map((virtualRow) => (
-                        <div
-                            key={virtualRow.key}
-                            data-index={virtualRow.index}
-                            ref={virtualizer.measureElement}
-                            className={
-                                virtualRow.index % 2 ? 'ListItemOdd' : 'ListItemEven'
-                            }
-                        >
-                            <Flex gap={"small"}>
-                                <div>Row {virtualRow.index}</div>
-                                <div>{content[virtualRow.index]}</div>
-                            </Flex>
-                        </div>
-                    ))}
+                  <Flex gap="middle">
+                    <Text type="secondary" style={{ width: 60, color: "#d4d4d4" }}>
+                      #{virtualRow.index + 1}
+                    </Text>
+                    <Text style={{ whiteSpace: "pre-wrap", color: "#d4d4d4"}} >{content[virtualRow.index]}</Text>
+                  </Flex>
                 </div>
+              ))}
             </div>
+          </div>
         </div>
-        {/* <Typography>
-
-            <pre style={{ margin: 0 }}>
-
-                {JSON.stringify(content, null, 2)}
-            </pre>
-        </Typography> */}
-    </>
+      </Card>
+    )
 }
 const ParamsFile: FC<any> = ({ content }) => {
     return <>
