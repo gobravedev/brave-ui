@@ -592,7 +592,7 @@ const ResultList = forwardRef<any, any>(({
 
 
             </>}>
-                {/* {currentAnalysisMethod?.label} */}
+                {currentAnalysisMethod?.label}
             </Tooltip>)</>}
             extra={<>{cardExtra}
                 <Flex gap={"small"}>
