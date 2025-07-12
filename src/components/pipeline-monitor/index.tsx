@@ -1,12 +1,12 @@
 import { Button, Card, Flex, Table, Tabs, Tag, Tooltip } from "antd"
 import Typography from "antd/es/typography/Typography";
 import axios from "axios"
-import { FC, memo, useEffect, useState } from "react"
+import { FC, memo, useEffect, useRef, useState } from "react"
 import { useSelector } from "react-redux"
 import { useOutletContext } from "react-router";
 import { SyncOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { SSEContextType } from '@/type/sse'
-import { readFileApi } from "@/api/file-operation";
+import { readFileApi, readLogFileApi } from "@/api/file-operation";
 import { findAnalysisById, runAnalysisApi } from "@/api/analysis";
 import FileBrowser from "../file-browser";
 import ResultParse from "../result-parse";
@@ -14,6 +14,8 @@ import { useModal } from "@/hooks/useModal";
 import { CreateOrUpdatePipelineComponent } from "../create-pipeline";
 import React from "react";
 import { useSSEContext } from "@/context/sse/useSSEContext";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { A } from "ollama/dist/shared/ollama.d792a03f.mjs";
 
 const PipelineMonitor: FC<any> = ({ data, ...rest }) => {
 
@@ -128,221 +130,6 @@ const PipelineParams: FC<any> = ({ data, type }) => {
 
 }
 
-export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
-    if (!analysis) return null
-    // console.log("FileMonitor render")
-    const { analysis_id } = analysis
-    const [fileContent, setFileContent] = useState<any>("")
-    const [fileTabKey, setFileTabKey] = useState<any>("workflow_log_file")
-    // const { eventSourceRef } = useOutletContext<SSEContextType>();
-    const { eventSourceRef, status, reconnect } = useSSEContext();
-    const { messageApi } = useOutletContext<any>()
-    const [fileMap, setFileMap] = useState<any>({})
-    useEffect(() => {
-        setFileMap({
-            workflow_log_file: analysis.workflow_log_file,
-            executor_log_file: analysis.executor_log_file,
-            trace_file: analysis.trace_file,
-            params_path: analysis.params_path,
-            command_path: analysis.command_path
-        })
-    }, [analysis])
-
-    const readFile = async (file: string) => {
-        const res = await readFileApi(file)
-        return res.data
-    }
-    const readLogFile = async (currentLogFile: string, showMessage: boolean = false) => {
-        // console.log(currentLogFile)
-        if (currentLogFile) {
-            let res = await readFile(currentLogFile)
-            if (fileTabKey === "params_path") {
-                res = JSON.stringify(JSON.parse(res), null, 2)
-            }
-            setFileContent(res)
-            if (showMessage) {
-                messageApi.success(`日志加载成功: ${currentLogFile}`)
-            }
-        }
-
-    }
-    useEffect(() => {
-        if (fileTabKey) {
-            readLogFile(fileMap[fileTabKey])
-        }
-
-    }, [JSON.stringify(fileMap), fileTabKey])
-    useEffect(() => {
-        if (!eventSourceRef) return;
-
-        const handler = (event: MessageEvent) => {
-            const data = JSON.parse(event.data)
-            if (data.msgType === "workflow_log" 
-                || data.msgType === "executor_log" 
-                || data.msgType === "trace" 
-                || data.msgType === "process_end") {
-                if (data.analysis_id == analysis_id) {
-                    if (data.msgType === "workflow_log") {
-                        setFileTabKey("workflow_log_file")
-                        // console.log("workflow_log_file", data)
-                        readLogFile(fileMap["workflow_log_file"])
-                    } else if (data.msgType === "executor_log") {
-                        setFileTabKey("executor_log_file")
-                        readLogFile(fileMap["executor_log_file"])
-                    } else if (data.msgType === "trace") {
-                        setFileTabKey("trace_file")
-                        readLogFile(fileMap["trace_file"])
-                    } else if (data.msgType == "process_end") {
-                        setFileTabKey("workflow_log_file")
-                        // console.log("11111111111process_end", data)
-                        readLogFile(fileMap["workflow_log_file"])
-                        if (callback) {
-                            callback()
-                        }
-                    }
-                }
-            }
-
-        };
-
-        eventSourceRef.current?.addEventListener('message', handler);
-
-        return () => {
-            console.log("removeEventListener")
-            eventSourceRef.current?.removeEventListener('message', handler);
-        };
-    }, [eventSourceRef.current]);
-
-    const runAnalysis = async () => {
-        const res = await runAnalysisApi(analysis?.analysis_id)
-        messageApi.success("运行成功")
-        if (callback) {
-            callback()
-        }
-    }
-    const componentMap: any = {
-        "output_dir": FileBrowser,
-        "workflow_log_file": LogFile,
-        "executor_log_file": LogFile,
-        "trace_file": LogFile,
-        "params_path": LogFile,
-        "command_path": LogFile,
-        "result_parse": ResultParse,
-    }
-
-    const ComponentRender = () => {
-        // console.log("fileTabKey", fileTabKey)
-        const Component = componentMap[fileTabKey]
-        if (!Component) return <>no component</>
-        return <Component {...analysis} content={fileContent} />
-    }
-    return <div>
-        <Tabs tabBarExtraContent={
-            <Flex gap={"small"} align={"center"}>
-                <Tooltip title={<>
-                    {fileMap[fileTabKey]}
-                </>}>
-                    <Button size="small" color="primary" variant="solid" onClick={() => {
-                        readLogFile(fileMap[fileTabKey])
-                    }}>刷新日志</Button>
-                </Tooltip>
-                <Tooltip title={<>
-                    {analysis?.analysis_id}
-                </>}>
-                    <Button size="small" color="cyan" variant="solid" onClick={runAnalysis}>运行脚本</Button>
-                </Tooltip>
-            </Flex>
-
-        } activeKey={fileTabKey} onChange={(key) => {
-            setFileTabKey(key)
-            // setCurrentLogFile(logFileMap[key])
-        }} size="small" items={[
-            {
-                key: "workflow_log_file",
-                label: <Tooltip title={<>
-                    <ul>
-                        <li>{analysis?.workflow_log_file}</li>
-                    </ul>
-                </>}>
-                    工作流日志
-                </Tooltip>
-            },
-            {
-                key: "executor_log_file",
-                label: <Tooltip title={<>
-                    <ul>
-                        <li>{analysis?.executor_log_file}</li>
-                    </ul>
-                </>}>
-                    执行器日志
-                </Tooltip>
-            },
-            {
-                key: "trace_file",
-                label: <Tooltip title={<>
-                    <ul>
-                        <li>{analysis?.trace_file}</li>
-                    </ul>
-                </>}>
-                    跟踪日志
-                </Tooltip>
-            }, {
-                key: "params_path",
-                label: <Tooltip title={<>
-                    <ul>
-                        <li>{analysis?.params_path}</li>
-                    </ul>
-                </>}>
-                    参数
-                </Tooltip>
-            },
-            {
-                key: "command_path",
-                label: <Tooltip title={<>
-                    <ul>
-                        <li>{analysis?.command_path}</li>
-                    </ul>
-                </>}>
-                    命令
-                </Tooltip>
-            },
-            {
-                key: "output_dir",
-                label: <Tooltip title={<>
-                    <ul>
-                        <li>{analysis?.output_dir}</li>
-                    </ul>
-                </>}>
-                    输出文件
-                </Tooltip>
-            }, {
-                key: "result_parse",
-                label: <Tooltip title={<>
-                    <ul>
-                        <li>{analysis?.output_dir}</li>
-                    </ul>
-                </>}>
-                    结果解析
-                </Tooltip>
-            }
-        ]}></Tabs>
-        <ComponentRender></ComponentRender>
-        {/* {fileTabKey == "output_dir" ? <>
-
-          <OutputDir analysis={analysis} operatePipeline={operatePipeline}></OutputDir>
-        </> : <Typography>
-
-            <pre style={{ margin: 0 }}>
-
-                {fileContent}
-            </pre>
-        </Typography>} */}
-        {/* <ComponentRender></ComponentRender> */}
-        {/* {JSON.stringify(analysis)} */}
-    </div>
-}, (prevProps, nextProps) => {
-    return JSON.stringify(prevProps?.analysis) === JSON.stringify(nextProps?.analysis)
-})
 
 // export const FileMonitor = React.memo(({ analysis, callback, operatePipeline }: any) => {
 //     console.log("👶 FileMonitor render");
@@ -366,33 +153,134 @@ export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
 //         <ResultParse analysisId={analysis?.analysis_id} ></ResultParse>
 //     </>
 // })
-const LogFile: FC<any> = ({ content }) => {
+const LogFile: FC<any> = ({ analysis_id, content: contentProps, file, setContentMap, fileKey }) => {
+    if (!contentProps) return null
+    // console.log('LogFile', fileKey)
+    const { content, offset } = contentProps
+    if (!content) return null
+    const parentRef = React.useRef<HTMLDivElement>(null)
+    // const [offset, setOffset] = useState(100)
+    const virtualizer = useVirtualizer({
+        count: content.length,
+        getScrollElement: () => parentRef.current,
+        estimateSize: () => 45,
+        enabled: true,
+    })
+
+
+    // useEffect(() => {
+    //     if (parentRef.current) {
+    //         requestAnimationFrame(() => {
+    //             parentRef.current!.scrollTop = parentRef.current!.scrollHeight
+    //         })
+    //     }
+    // }, [content])
+
+    useEffect(() => {
+        if (content?.length > 0) {
+            virtualizer.scrollToIndex(content.length - 1, { align: 'end' });
+        }
+    }, [content?.length]);
+
+    useEffect(() => {
+        const el = parentRef.current;
+        if (!el) return;
+      
+        const onScroll = () => {
+          const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 10;
+        //   setAutoScroll(nearBottom);
+        };
+        el.addEventListener("scroll", onScroll);
+        return () => el.removeEventListener("scroll", onScroll);
+      }, []);
+    const items = virtualizer.getVirtualItems()
     return <>
-        <Typography>
+        <div
+            ref={parentRef}
+            className="List"
+            style={{
+                height: 400,
+                overflowY: 'auto',
+                contain: 'strict',
+            }}
+        >
+            <div
+                style={{
+                    height: virtualizer.getTotalSize(),
+                    width: '100%',
+                    position: 'relative',
+                }}
+            >
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        transform: `translateY(${items[0]?.start ?? 0}px)`,
+                    }}
+                >
+                    {offset}
+                    {file}
+                    {analysis_id}
+                    {/* <Button onClick={readLogFile}>a</Button> */}
+                    {items.map((virtualRow) => (
+                        <div
+                            key={virtualRow.key}
+                            data-index={virtualRow.index}
+                            ref={virtualizer.measureElement}
+                            className={
+                                virtualRow.index % 2 ? 'ListItemOdd' : 'ListItemEven'
+                            }
+                        >
+                            <Flex gap={"small"}>
+                                <div>Row {virtualRow.index}</div>
+                                <div>{content[virtualRow.index]}</div>
+                            </Flex>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+        {/* <Typography>
 
             <pre style={{ margin: 0 }}>
 
+                {JSON.stringify(content, null, 2)}
+            </pre>
+        </Typography> */}
+    </>
+}
+const ParamsFile: FC<any> = ({ content }) => {
+    return <>
+        <Typography>
+            <pre style={{ margin: 0 }}>
                 {content}
             </pre>
         </Typography>
     </>
 }
+
 const PipelineInfo: FC<any> = ({ visible, params, onClose, callback }) => {
 
-    if (!visible) return null
-    const { analysis_id: analysisId, ...rest } = params
+
 
     const [analysis, setAnalysis] = useState<any>()
+
+    useEffect(() => {
+        if (visible) {
+            loadAnalysis()
+        }
+    }, [params])
+    if (!visible) return null
+
+    const { analysis_id: analysisId, ...rest } = params
+
     const loadAnalysis = async () => {
         const res = await findAnalysisById(analysisId)
         const analysis = res.data
         setAnalysis(analysis)
     }
-    useEffect(() => {
-        loadAnalysis()
-    }, [analysisId])
-
-
     return <>
         <Card
             title={`流程监控 ${analysisId}`}
@@ -408,4 +296,349 @@ const PipelineInfo: FC<any> = ({ visible, params, onClose, callback }) => {
 
     </>
 }
+
+const componentMap: any = {
+    "output_dir": FileBrowser,
+    "workflow_log_file": LogFile,
+    "executor_log_file": LogFile,
+    "trace_file": LogFile,
+    "params_path": ParamsFile,
+    "command_path": ParamsFile,
+    "result_parse": ResultParse,
+}
+
+const ComponentRender = ({ fileTabKey, analysis, contentMap, file, setContentMap, fileKey }: any) => {
+    // console.log("ComponentRender render", fileKey)
+
+    // console.log("fileTabKey", fileTabKey)
+    // console.log( fileTabKey)
+    const Component = componentMap[fileKey]
+    // console.log('Component', componentMap[fileTabKey])
+    if (!Component) return <>no component</>
+    // if (fileTabKey === "workflow_log_file") {
+    //     return <Component {...analysis} content={fileContent.content} setContent={setFileContent} offset={fileContent.offset} file={fileMap[fileTabKey]}/>
+    // }
+    return <Component {...analysis} content={contentMap[fileKey]} file={file} setContentMap={setContentMap} fileKey={fileKey} />
+}
+export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
+    
+    // console.log("FileMonitor render")
+    // const [fileContent, setFileContent] = useState<any>("")
+    // const contentRef = useRef<any>(null);
+    const [contentMap, setContentMap] = useState<{ [key: string]: any }>({})
+
+    const [fileTabKey, setFileTabKey] = useState<any>("workflow_log_file")
+    // const { eventSourceRef } = useOutletContext<SSEContextType>();
+    // const { eventSourceRef, status, reconnect } = useSSEContext();
+    const { messageApi } = useOutletContext<any>()
+    const { eventSourceRef, status, reconnect } = useSSEContext();
+    const offsetRef = useRef(0)
+    const filekeyRef = useRef<any>(fileTabKey)
+    // const [fileMap, setFileMap] = useState<any>({})
+
+    useEffect(() => {
+        if (analysis) {
+            if (fileTabKey) {
+                
+                readFile(fileTabKey)
+            }
+        }
+        
+    }, [analysis, fileTabKey])
+
+    useEffect(() => {
+        if (analysis && eventSourceRef) {
+            const handler = (event: MessageEvent) => {
+                const data = JSON.parse(event.data)
+                // console.log('fileTabKey',fileTabKey)
+                if (data.analysis_id == analysis?.analysis_id) {
+                    if (data.msgType == "workflow_log" || data.msgType == "executor_log" || data.msgType == "trace" || data.msgType == "process_end") {
+                        readLogFile()
+                    }
+                }
+            };
+
+            eventSourceRef.current?.addEventListener('message', handler);
+
+            return () => {
+                console.log("removeEventListener")
+                eventSourceRef.current?.removeEventListener('message', handler);
+            };
+        }
+
+
+
+
+    }, [eventSourceRef.current,JSON.stringify(analysis)]);
+    if (!analysis) return null
+    const fileMap: any = {
+        workflow_log_file: analysis.workflow_log_file,
+        executor_log_file: analysis.executor_log_file,
+        trace_file: analysis.trace_file,
+        params_path: analysis.params_path,
+        command_path: analysis.command_path
+    }
+    const { analysis_id } = analysis
+
+    // useEffect(() => {
+    //     setFileMap({
+
+    //     })
+    // }, [JSON.stringify(analysis)])
+
+
+ 
+    // const readFile = async (file: string) => {
+    //     const res = await readFileApi(file)
+    //     return res.data
+    // }
+    const readFile = async (fileKey: string, showMessage: boolean = false) => {
+        // console.log(currentLogFile)
+
+        const file = fileMap[fileKey]
+        console.log('fileKey', fileKey, file)
+        if (file) {
+            let resp: any
+            if (fileKey === "workflow_log_file" || fileKey === "executor_log_file" || fileKey === "trace_file") {
+                resp = await readLogFileApi(file)
+                offsetRef.current = resp.data.offset
+            } else {
+                resp = await readFileApi(file)
+            }
+
+
+
+            let res = resp.data
+            // let res = await readFile(currentLogFile)
+            if (fileKey === "params_path") {
+                res = JSON.stringify(JSON.parse(res), null, 2)
+            }
+            // setFileContent(res)
+            setContentMap((prev: any) => ({
+                ...prev,
+                [fileKey]: res
+            }))
+            if (showMessage) {
+                messageApi.success(`日志加载成功: ${file}`)
+            }
+        }
+
+    }
+
+
+
+    let isLoading = false
+
+    const readLogFile = async () => {
+        if (isLoading) return
+        isLoading = true
+        const fileTabKey = filekeyRef.current
+        console.log('readLogFile',fileTabKey, fileMap[fileTabKey], offsetRef.current)
+
+        const resp = await readLogFileApi(fileMap[fileTabKey], offsetRef.current)
+        const data = resp.data
+        isLoading = false
+        // setOffset(data.offset)
+        setContentMap((prev: any) => {
+            const prevEntry = prev[fileTabKey];
+
+            if (!prevEntry) {
+                // 第一次设置
+                offsetRef.current = data.offset;
+                return {
+                    ...prev,
+                    [fileTabKey]: {
+                        offset: data.offset,
+                        content: [...data.content],
+                    },
+                };
+            }
+
+            if (data.offset === prevEntry.offset) {
+                return prev;
+            }
+
+            offsetRef.current = data.offset;
+            const newData = {
+                ...prev,
+                [fileTabKey]: {
+                    offset: data.offset,
+                    content: [...prevEntry.content, ...data.content],
+                },
+            };
+            // console.log('newData', newData)
+            return newData
+        });
+
+    }
+
+
+
+    // useEffect(() => {
+    //     if (!eventSourceRef) return;
+
+    //     const handler = (event: MessageEvent) => {
+    //         const data = JSON.parse(event.data)
+    //         if (data.msgType === "workflow_log"
+    //             || data.msgType === "executor_log"
+    //             || data.msgType === "trace"
+    //             || data.msgType === "process_end") {
+    //             if (data.analysis_id == analysis_id) {
+    //                 if (data.msgType === "workflow_log") {
+    //                     setFileTabKey("workflow_log_file")
+    //                     // console.log("workflow_log_file", data)
+    //                     readFile("workflow_log_file")
+    //                 } else if (data.msgType === "executor_log") {
+    //                     setFileTabKey("executor_log_file")
+    //                     readFile("executor_log_file")
+    //                 } else if (data.msgType === "trace") {
+    //                     setFileTabKey("trace_file")
+    //                     readFile("trace_file")
+    //                 } else if (data.msgType == "process_end") {
+    //                     setFileTabKey("workflow_log_file")
+    //                     // console.log("11111111111process_end", data)
+    //                     readFile("workflow_log_file")
+    //                     if (callback) {
+    //                         callback()
+    //                     }
+    //                 }
+    //             }
+    //         }
+
+    //     };
+
+    //     eventSourceRef.current?.addEventListener('message', handler);
+
+    //     return () => {
+    //         console.log("removeEventListener")
+    //         eventSourceRef.current?.removeEventListener('message', handler);
+    //     };
+    // }, [eventSourceRef.current]);
+
+    const runAnalysis = async () => {
+        const res = await runAnalysisApi(analysis?.analysis_id)
+        messageApi.success("运行成功")
+        setContentMap((prev: any) => ({
+            ...prev,
+            workflow_log_file: {
+                content: [],
+                offset: 0
+            },
+            executor_log_file: {
+                content: [],
+                offset: 0
+            },
+            trace_file: {
+                content: [],
+                offset: 0
+            }
+        }))
+        offsetRef.current = 0
+        if (callback) {
+            callback()
+        }
+    }
+
+    const items = [
+        {
+            key: "workflow_log_file",
+            label: <Tooltip title={<>
+                <ul>
+                    <li>{analysis?.workflow_log_file}</li>
+                </ul>
+            </>}>
+                工作流日志
+            </Tooltip>
+        },
+        {
+            key: "executor_log_file",
+            label: <Tooltip title={<>
+                <ul>
+                    <li>{analysis?.executor_log_file}</li>
+                </ul>
+            </>}>
+                执行器日志
+            </Tooltip>
+        },
+        {
+            key: "trace_file",
+            label: <Tooltip title={<>
+                <ul>
+                    <li>{analysis?.trace_file}</li>
+                </ul>
+            </>}>
+                跟踪日志
+            </Tooltip>
+        }, {
+            key: "params_path",
+            label: <Tooltip title={<>
+                <ul>
+                    <li>{analysis?.params_path}</li>
+                </ul>
+            </>}>
+                参数
+            </Tooltip>
+        },
+        {
+            key: "command_path",
+            label: <Tooltip title={<>
+                <ul>
+                    <li>{analysis?.command_path}</li>
+                </ul>
+            </>}>
+                命令
+            </Tooltip>
+        },
+        {
+            key: "output_dir",
+            label: <Tooltip title={<>
+                <ul>
+                    <li>{analysis?.output_dir}</li>
+                </ul>
+            </>}>
+                输出文件
+            </Tooltip>
+        }, {
+            key: "result_parse",
+            label: <Tooltip title={<>
+                <ul>
+                    <li>{analysis?.output_dir}</li>
+                </ul>
+            </>}>
+                结果解析
+            </Tooltip>
+        }
+    ]
+
+    return <>
+
+        <Tabs tabBarExtraContent={
+            <Flex gap={"small"} align={"center"}>
+                <Tooltip title={<>
+                    {fileMap[fileTabKey]}
+                </>}>
+                    <Button size="small" color="primary" variant="solid" onClick={() => {
+                        readFile(fileTabKey)
+                    }}>刷新日志</Button>
+                </Tooltip>
+                <Tooltip title={<>
+                    {analysis?.analysis_id}
+                </>}>
+                    <Button size="small" color="cyan" variant="solid" onClick={runAnalysis}>运行脚本</Button>
+                </Tooltip>
+            </Flex>
+
+        } activeKey={fileTabKey} onChange={(key) => {
+            setFileTabKey(key)
+            filekeyRef.current = key
+
+            // setCurrentLogFile(logFileMap[key])
+        }} size="small" items={items.map((item: any) => ({
+            key: item.key,
+            label: item.label,
+            children: <ComponentRender file={fileMap[item.key]} fileKey={item.key} analysis={analysis} contentMap={contentMap} setContentMap={setContentMap}></ComponentRender>
+        }))
+        }></Tabs>
+    </>
+})
 export default PipelineInfo

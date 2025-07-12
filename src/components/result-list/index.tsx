@@ -51,7 +51,7 @@ const ResultList = forwardRef<any, any>(({
 
         const handler = (event: MessageEvent) => {
             const data = JSON.parse(event.data)
-            console.log("analysis_result", data)
+            // console.log("analysis_result", data)
             if (data.msgType === "analysis_result"){
                 // message.success(data.msg)
                 const componentIdList = analysisMethod.map((it:any)=>it.component_id)

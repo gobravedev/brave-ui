@@ -88,7 +88,7 @@ const App: React.FC = () => {
            
             const data = JSON.parse(event.data)
             // console.log("1111111111111111",data )
-            console.log(data)
+            // console.log(data)
             if(data.msgType === "process_end"){
                 const analysis:any = data.analysis
                 const msg = `${analysis.analysis_name}(${analysis.analysis_id}) 分析完成`

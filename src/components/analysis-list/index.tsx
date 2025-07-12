@@ -256,6 +256,7 @@ const ResultList = forwardRef<any, any>(({
             </ul>} */}
 
             <Table
+                rowKey="analysis_id"
                 size="small"
                 bordered
                 pagination={false}
@@ -268,6 +269,7 @@ const ResultList = forwardRef<any, any>(({
         </Card>
         <div style={{ marginBottom: "1rem" }}></div>
 
+{}
         <PipelineInfo
             visible={modal.key == "modalB" && modal.visible}
             params={modal.params}

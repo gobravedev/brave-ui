@@ -7,6 +7,7 @@ import {english} from './english'
 import {introduction} from './introduction'
 
 import {EmbedLLM}  from '../../components/embed-llm'
+import Demo from "@/components/smart-table"
 const Project:FC<any> = ()=>{
     const [data,setData] = useState<any>(introduction)
     const onChange = (value:any)=>{
@@ -28,6 +29,7 @@ const Project:FC<any> = ()=>{
         ]}></Tabs> */}
         {/* <EmbedLLM content={"hi"}>LLM</EmbedLLM> */}
         <Markdown data={data}></Markdown>
+        <Demo></Demo>
     </div>
 }
 

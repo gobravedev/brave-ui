@@ -1,6 +1,6 @@
 import { Button, Card, Flex, message, Modal, Popconfirm, Spin, Table, Tooltip, Typography } from "antd"
 import axios from "axios";
-import { FC, useEffect, useState } from "react"
+import { FC, memo, useEffect, useState } from "react"
 import { useOutletContext } from "react-router";
 import FileBrowser from "../file-browser";
 import { CreateORUpdatePipelineCompnentRelation } from "../create-pipeline";
@@ -9,7 +9,7 @@ import { useModal } from "@/hooks/useModal";
 import { AnalysisResultModal } from "../result-list";
 export const parseAnalysisResultAPi = (id: any, save: boolean) => axios.post(`/fast-api/parse-analysis-result/${id}?save=${save}`)
 
-const ResultParse: FC<any> = ({ analysis_id: analysisId, callback }) => {
+const ResultParse: FC<any> = memo(({ analysis_id: analysisId, callback }) => {
     // if (!visible) return null;
     const [data, setData] = useState<any>()
     const [loading, setLoading] = useState<any>(false)
@@ -183,6 +183,6 @@ const ResultParse: FC<any> = ({ analysis_id: analysisId, callback }) => {
 
         </Modal> */}
     </>
-}
+})
 
 export default ResultParse
