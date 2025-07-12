@@ -7,7 +7,8 @@ import { Button, Card, Collapse, Empty, Flex, Form, Input, Select, Table, Typogr
 import axios from "axios"
 import FormJsonComp from "@/components/form-components"
 import { useOutletContext } from "react-router"
-
+import FileBrowser from "@/components/file-browser"
+import { useSelector } from "react-redux"
 const markdown = `
 |project|library_name|sample_name|sequencing_target|sequencing_technique|sample_composition|fastq1                                                 |fastq2                                                     |
 |-------|------------|-----------|-----------------|--------------------|------------------|-------------------------------------------------------|-----------------------------------------------------------|
@@ -26,7 +27,7 @@ project,library_name,sample_name,sequencing_target,sequencing_technique,sample_c
 test,R250506-21,OL-RNA-1,RNA,NGS,single_genome,/V350344603_L03_117_1.fq.gz,/V350344603_L03_117_2.fq.gz
 
 `
-const ImportFile: FC<{ component_type: any, component_id: any, operatePipeline: any, label: any, name: any,callback:any }> = ({ component_type, component_id, operatePipeline, label, name,callback }) => {
+const ImportFile: FC<{ component_type: any, component_id: any, operatePipeline: any, label: any, name: any, callback: any }> = ({ component_type, component_id, operatePipeline, label, name, callback }) => {
     // const { component_type,component_id,operatePipeline } = pipeline
     const [form] = Form.useForm();
     const [components, setComponents] = useState<any>([])
@@ -37,7 +38,11 @@ const ImportFile: FC<{ component_type: any, component_id: any, operatePipeline: 
     const [inputForm, setInputForm] = useState<any>()
     const { messageApi, project } = useOutletContext<any>()
     const [parseData, setParseData] = useState<any>()
+    const [selectedFile, setSelectedFile] = useState<any>()
+    const setting = useSelector((state: any) => state.global.setting)
+    const [inputFormMap, setInputFormMap] = useState<any>({})
 
+    const [selectedField, setSelectedField] = useState<any>()
     useEffect(() => {
         // setInputForm([])
         // setParseData(undefined)
@@ -73,6 +78,10 @@ const ImportFile: FC<{ component_type: any, component_id: any, operatePipeline: 
         const data = JSON.parse(resp.data.content)
         if (data.inputForm) {
             setInputForm(data.inputForm)
+            setInputFormMap(data.inputForm.reduce((acc: any, item: any) => {
+                acc[item.label] = item.name
+                return acc
+            }, {}))
         }
 
     }
@@ -186,10 +195,11 @@ const ImportFile: FC<{ component_type: any, component_id: any, operatePipeline: 
             footer={() => (
                 <div style={{ textAlign: 'right' }}>
                     一共{parseData.length}条记录 &nbsp;&nbsp;
-                    <Button  size="small" color="cyan" variant="solid" onClick={importData}>确认</Button>
+                    <Button size="small" color="cyan" variant="solid" onClick={importData}>确认</Button>
                 </div>
             )} columns={columns} dataSource={parseData} />;
     };
+
 
     useEffect(() => {
         // listPipelineComponents()
@@ -215,6 +225,18 @@ const ImportFile: FC<{ component_type: any, component_id: any, operatePipeline: 
             <pre>
                 {/* {JSON.stringify(pipeline.items,null,2)} */}
             </pre>
+            {/* {JSON.stringify(setting)} */}
+            {/* {JSON.stringify(selectedField)}
+                {JSON.stringify(inputFormMap)} */}
+
+       
+
+            <Form.Item label="字段选择">
+                <Select style={{ width: "5rem" }} value={selectedField} onChange={(value) => setSelectedField(value)} options={Object.entries(inputFormMap).map(([key, value]) => ({
+                    label: key,
+                    value: key
+                }))}></Select>
+            </Form.Item>
 
             <Form form={form}>
                 {/* <Form.Item name={"component_id"} label="组件" rules={[{ required: true, message: "请选择组件" }]} >
@@ -284,7 +306,16 @@ const ImportFile: FC<{ component_type: any, component_id: any, operatePipeline: 
                     <TextArea rows={10}></TextArea>
                 </Form.Item> */}
             </Form>
-
+            <div style={{marginTop:"1rem"}}></div>
+            <FileBrowser path={setting.DATA_DIR} onSelectFile={(file: any) => {
+                if (selectedField) {
+                    // console.log(file)
+                    // console.log(inputFormMap[selectedField])
+                    form.setFieldValue(inputFormMap[selectedField], file.path)
+                } else {
+                    messageApi.error("请先选择字段")
+                }
+            }}></FileBrowser>
 
 
             {/* {JSON.stringify(Object.entries(parseData[0]).map(([key, value]) => ({

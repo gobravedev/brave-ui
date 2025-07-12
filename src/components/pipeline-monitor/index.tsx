@@ -297,8 +297,14 @@ const PipelineInfo: FC<any> = ({ visible, params, onClose, callback }) => {
     </>
 }
 
+
+const FileBrowserOutputDir: FC<any> = ({ output_dir ,...rest}) => {
+    {JSON.stringify(rest)}
+    return <FileBrowser path={output_dir}></FileBrowser>
+}
+
 const componentMap: any = {
-    "output_dir": FileBrowser,
+    "output_dir": FileBrowserOutputDir,
     "workflow_log_file": LogFile,
     "executor_log_file": LogFile,
     "trace_file": LogFile,
@@ -477,7 +483,7 @@ export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
 
     }
 
-
+    
 
     // useEffect(() => {
     //     if (!eventSourceRef) return;

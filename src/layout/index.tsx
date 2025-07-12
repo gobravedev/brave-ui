@@ -7,7 +7,7 @@ import { Header } from 'antd/es/layout/layout';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import {  setProject } from '@/store/contextSlice'
-import { setSseData } from '@/store/globalSlice'
+import { setSetting, setSseData } from '@/store/globalSlice'
 import useMessage from 'antd/es/message/useMessage';
 import { useModal } from '@/hooks/useModal';
 import ContextModal from '@/components/context';
@@ -78,6 +78,11 @@ const App: React.FC = () => {
                 value: item.project
             }
         }))
+    }
+    const getSetting = async () => {
+        const resp: any = await axios.get("/setting/get-setting")
+        console.log(resp.data)
+        dispatch(setSetting(resp.data))
     }
     const { eventSourceRef, status, reconnect } = useSSEContext();
     useEffect(() => {
@@ -153,6 +158,7 @@ const App: React.FC = () => {
     // const eventSourceRef :React.RefObject < EventSource | null> = useSSE(openNotification)
     useEffect(() => {
         loadProject()
+        getSetting()
     }, [])
     const {
         token: { colorBgContainer, borderRadiusLG },
