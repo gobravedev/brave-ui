@@ -6,7 +6,7 @@ export const findAnalysisById = async (id: string) => {
 }
 
 export const runAnalysisApi = async (analysis_id   : string) => {
-    const res = await axios.post(`/run-analysis/${analysis_id}`)
+    const res = await axios.post(`/run-analysis-v2/${analysis_id}`)
     return res
 }
 
