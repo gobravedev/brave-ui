@@ -287,7 +287,7 @@ const PipelineInfo: FC<any> = ({ visible, params, onClose, callback }) => {
                 <Button size="small" onClick={onClose} color="cyan" variant="solid">关闭</Button>
             </>}>
 
-            <FileMonitor analysis={analysis} callback={callback}></FileMonitor>
+            <FileMonitor analysis={analysis} callback={callback} loadAnalysis={loadAnalysis}></FileMonitor>
         </Card>
 
 
@@ -323,7 +323,7 @@ const ComponentRender = ({ fileTabKey, analysis, contentMap, file, setContentMap
     // }
     return <Component {...analysis} content={contentMap[fileKey]} file={file} setContentMap={setContentMap} fileKey={fileKey} />
 }
-export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
+export const FileMonitor: FC<any> = memo(({ analysis, callback ,loadAnalysis}) => {
     
     // console.log("FileMonitor render")
     // const [fileContent, setFileContent] = useState<any>("")
@@ -352,12 +352,13 @@ export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
     useEffect(() => {
         if (analysis && eventSourceRef) {
             const handler = (event: MessageEvent) => {
+                console.log('event',event)
                 const data = JSON.parse(event.data)
                 // console.log('fileTabKey',fileTabKey)
                 if (data.analysis_id == analysis?.analysis_id) {
-                    if (data.msgType == "workflow_log" || data.msgType == "executor_log" || data.msgType == "trace" || data.msgType == "process_end") {
+                    if (data.event_type == "workflow_log" || data.event_type == "executor_log" || data.event_type == "trace" || data.event_type == "process_end") {
                         readLogFile()
-                        if(data.msgType == "process_end"){
+                        if(data.event_type == "process_end"){
                             if (callback) {
                                 callback()
                             }
@@ -619,9 +620,10 @@ export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
     ]
 
     return <>
-
+        {/* {JSON.stringify(analysis)} */}
         <Tabs tabBarExtraContent={
             <Flex gap={"small"} align={"center"}>
+                <Tag color="cyan" >{analysis?.analysis_status}</Tag>
                 <Tooltip title={<>
                     {fileMap[fileTabKey]}
                 </>}>
