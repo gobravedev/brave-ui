@@ -1,7 +1,9 @@
-import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex } from "antd";
+import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs } from "antd";
 import TextArea from "antd/es/input/TextArea";
-import { FC, useEffect, useState } from "react";
+import { FC, forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import Markdown from '../markdown'
+import axios from "axios";
+import LogFile from "../log-file";
 export const TableView: FC<any> = ({ data, url }) => {
     const { Search } = Input;
     const [tableData, setTableData] = useState<any>([])
@@ -83,97 +85,185 @@ const StringView: FC<any> = ({ data }) => {
         <Paragraph style={{ background: "#13c2c2", padding: "1rem", border: "1px solid #1677ff" }}>{data}</Paragraph>
     </>
 }
-const HtmlView: FC<any> = ({ data}) => {
+const HtmlView: FC<any> = ({ data }) => {
 
     return <>
         {data && data.startsWith("/brave") ? <>
             <iframe src={data} width={"100%"} style={{ height: "80vh", border: "none" }}>
             </iframe>
-        </>:<>{data}</>}
+        </> : <>{data}</>}
 
     </>
 }
-const AnalysisResultView: FC<any> = ({ htmlUrl, plotLoading, filePlot, tableDesc,markdown }) => {
+const componentMap: any = {
+    table: TableView,
+    string: StringView,
+    html: HtmlView
+};
 
-    const componentMap: any = {
-        table: TableView,
-        string: StringView,
-        html: HtmlView
-    };
+const ComponentsRender = ({ type, ...rest }: any) => {
+    const Component = componentMap[type] || (() => <div>未知类型 {type}</div>)
+    return <Component {...rest} />;
+}
+// const AnalysisResultView2: FC<any> = ({ plotLoading, filePlot, tableDesc,markdown }) => {
 
-    const ComponentsRender = ({ type, ...rest }: any) => {
-        const Component = componentMap[type] || (() => <div>未知类型 {type}</div>)
-        return <Component {...rest} />;
+
+//     return <>
+
+//         <Spin spinning={plotLoading} tip="请求中..." >
+//             {filePlot ? <>
+//                 {/* {filePlot.img} */}
+
+
+//                 {filePlot.img && <div style={{ display: "flex", justifyContent: "flex-start" }}>
+//                     {
+
+//                         Array.isArray(filePlot.img) ? <>
+//                             {filePlot.img.map((it: any, index: any) => (<>
+//                                 <ImgView {...it} key={index}></ImgView>
+//                             </>))}
+//                         </> :
+//                             <>
+//                                 <ImgView {...filePlot.img}></ImgView>
+//                                 {/* <Image src={filePlot.img.data} style={{ maxWidth: "20rem" }}></Image> */}
+
+//                             </>
+//                     }
+//                 </div>}
+//                 {filePlot.dataList && Array.isArray(filePlot.dataList) && <>
+//                     {filePlot.dataList.map((item: any, index: any) => (
+//                       <ComponentsRender key={index} {...item}></ComponentsRender>
+//                         // <div key={index}>
+//                         //     {typeof item == 'string' ?
+//                         //         <TextArea value={item} rows={10}></TextArea>
+//                         //         :
+//                         //         <TableView data={item}></TableView>
+//                         //     }
+//                         // </div>
+
+//                     ))}
+//                 </>}
+
+//                 {filePlot.data && Array.isArray(filePlot.data) && <>
+//                     <TableView data={filePlot.data}></TableView>
+//                 </>}
+//                 {/* : <Typography >
+//                     {typeof filePlot.data == 'string' ? <TextArea value={filePlot.data} rows={10}></TextArea>
+//                         :
+//                         <pre>{JSON.stringify(filePlot.data, null, 2)}</pre>
+//                     }
+//                 </Typography> */}
+
+//             </> : <div style={{ height: plotLoading?"100px":"0px" }}></div>}
+//         </Spin>
+
+//         {tableDesc &&<Markdown data={tableDesc}></Markdown> }
+//         {markdown &&<Markdown data={markdown}></Markdown> }
+
+
+
+//     </>
+// }
+const AnalysisResultView: FC<any> = forwardRef<any, any>(({ params, visible,  currentAnalysis }, ref) => {
+    const [loading, setLoading] = useState<boolean>(false)
+    const [analsyisResult, setAnalsyisResult] = useState<any>(null)
+    const { output_dir } = params || {}
+
+    const loadData = async () => {
+        if(visible){
+            setLoading(true)
+            const res = await axios.get(`/file-operation/visualization-results?path=${output_dir}`)
+            setAnalsyisResult(res.data)
+            setLoading(false)
+        }
+     
     }
+
+    useEffect(() => {
+        if (visible) {
+            loadData()
+        }
+    }, [visible, params?.output_dir])
+
+    useImperativeHandle(ref, () => ({
+        relaod: loadData
+    }))
+    if (!visible) {
+        return null
+    }
+
+
+
+
+    // if (runningAnalysisId.includes(params.analysis_id)) {
+    //     return <Spin spinning={loading} tip="请求中..." ></Spin>
+    // }
     return <>
-        {/* {htmlUrl && <>
-            <iframe src={htmlUrl} width={"100%"} style={{ height: "80vh", border: "none" }}>
-            </iframe>
-   
-        </>} */}
-        <Spin spinning={plotLoading} tip="请求中..." >
-            {filePlot ? <>
-                {/* {filePlot.img} */}
-
-
-                {filePlot.img && <div style={{ display: "flex", justifyContent: "flex-start" }}>
+        <Card title={params?.analysis_id}>
+            <Tabs
+                items={[
                     {
+                        label: "分析结果",
+                        key: "analysis_result",
+                        children: <>
+                            {currentAnalysis?.analysis_status == "running" ? <Skeleton active></Skeleton> : <>
 
-                        Array.isArray(filePlot.img) ? <>
-                            {filePlot.img.map((it: any, index: any) => (<>
-                                <ImgView {...it} key={index}></ImgView>
-                            </>))}
-                        </> :
-                            <>
-                                <ImgView {...filePlot.img}></ImgView>
-                                {/* <Image src={filePlot.img.data} style={{ maxWidth: "20rem" }}></Image> */}
+                                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                    loadData()
+                                }}>刷新</Button>
+                                {currentAnalysis?.analysis_status == "failed" && <div style={{ textAlign: "center" }}>
+                                    <Tag color="red">分析失败</Tag>
+                                </div>}
 
+                                {analsyisResult && <>
+
+                                    {analsyisResult.images && <div style={{ display: "flex", justifyContent: "flex-start" }}>
+                                        {
+
+                                            Array.isArray(analsyisResult.images) ? <>
+                                                {analsyisResult.images.map((it: any, index: any) => (<>
+                                                    <ImgView {...it} key={index}></ImgView>
+                                                </>))}
+                                            </> :
+                                                <>
+                                                    <ImgView {...analsyisResult.images}></ImgView>
+
+                                                </>
+                                        }
+                                    </div>}
+
+
+                                    {analsyisResult.tables && Array.isArray(analsyisResult.tables) && <>
+                                        {analsyisResult.tables.map((item: any, index: any) => (
+                                            <ComponentsRender key={index} {...item}></ComponentsRender>
+
+
+                                        ))}
+                                    </>}
+
+                                </>}
                             </>
-                    }
-                </div>}
-                {filePlot.dataList && Array.isArray(filePlot.dataList) && <>
-                    {filePlot.dataList.map((item: any, index: any) => (
-                      <ComponentsRender key={index} {...item}></ComponentsRender>
-                        // <div key={index}>
-                        //     {typeof item == 'string' ?
-                        //         <TextArea value={item} rows={10}></TextArea>
-                        //         :
-                        //         <TableView data={item}></TableView>
-                        //     }
-                        // </div>
+                            }
 
-                    ))}
-                </>}
 
-                {filePlot.data && Array.isArray(filePlot.data) && <>
-                    <TableView data={filePlot.data}></TableView>
-                </>}
-                {/* : <Typography >
-                    {typeof filePlot.data == 'string' ? <TextArea value={filePlot.data} rows={10}></TextArea>
-                        :
-                        <pre>{JSON.stringify(filePlot.data, null, 2)}</pre>
-                    }
-                </Typography> */}
+                        </>
+                    },
+                    { label: "分析日志", key: "analysis_log", children: <LogFile file_path={currentAnalysis?.command_log_path}  ></LogFile> },
 
-            </> : <div style={{ height: plotLoading?"100px":"0px" }}></div>}
-        </Spin>
-        
+                ]}></Tabs>
+
+
+
+        </Card>
+
+
+        {/*         
         {tableDesc &&<Markdown data={tableDesc}></Markdown> }
         {markdown &&<Markdown data={markdown}></Markdown> }
+ */}
 
-        {/* {tableDesc && <>
-            <Collapse ghost items={[
-                {
-                    key: "1",
-                    label: "说明",
-                    children: <>
-                        <Markdown data={tableDesc}></Markdown>
-                    </>
-                }
-            ]} />
-        </>} */}
 
     </>
-}
-
+})
 export default AnalysisResultView
+

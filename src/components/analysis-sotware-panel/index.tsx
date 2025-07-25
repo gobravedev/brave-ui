@@ -1,6 +1,6 @@
 import { FC, memo, useEffect, useMemo, useRef, useState } from "react"
 import axios from "axios"
-import { Button, Col, Drawer, Input, Row, Space, Table, TableProps, Image, Form, Select, Spin, Modal, Tabs, Typography, message, Empty, Collapse, Card, Popover, Flex, Popconfirm } from "antd"
+import { Button, Col, Drawer, Input, Row, Space, Table, TableProps, Image, Form, Select, Spin, Modal, Tabs, Typography, message, Empty, Collapse, Card, Popover, Flex, Popconfirm, Tooltip } from "antd"
 import { useOutletContext, useParams } from "react-router"
 import ResultList from '@/components/result-list'
 // import AnalysisForm from "../analysis-form"
@@ -16,6 +16,7 @@ import PipelineMonitor from '@/components/pipeline-monitor'
 import { listAnalysisFiles } from '@/api/analysis-software'
 import { useSelector } from "react-redux"
 import BioDatabaseForm from "@/components/bio-database-form"
+import { CloseCircleOutlined } from "@ant-design/icons"
 type AnalysisFile = {
     name: string,
     label: string
@@ -158,17 +159,17 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
                 <hr />
                 {JSON.stringify(rest)} */}
 
-                    
+
 
                 {/* {JSON.stringify(inputFile)}
                 <hr />
                 {JSON.stringify(outputFile)} */}
-                {import.meta.env.MODE == "development" && <>
+                {/* {import.meta.env.MODE == "development" && <>
                     <ul>
                         <li>pipeline:{pipeline?.component_id}</li>
                         <li>software:{rest.component_id}</li>
                     </ul>
-                </>}
+                </>} */}
 
 
 
@@ -203,24 +204,24 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
                     </Flex> */}
 
                     <Flex justify="center" style={{ margin: "2rem" }} gap={"small"}>
-                        <Button size="small"  color="cyan" variant="solid" onClick={() => {
+                        <Button size="small" color="cyan" variant="solid" onClick={() => {
                             operatePipeline.openModal("modalC", {
                                 data: undefined,
                                 structure: {
                                     relation_type: "software_input_file", //"software_input_file",
                                     parent_component_id: rest.component_id,
-                                    pipeline_id: pipeline.component_id,
+                                    // pipeline_id: pipeline.component_id,
                                     component_type: "file"
                                 }
                             })
                         }}>新增文件</Button>
-                        <Button size="small"  color="cyan" variant="solid" onClick={() => {
+                        <Button size="small" color="cyan" variant="solid" onClick={() => {
                             operatePipeline.openModal("modalA", {
                                 data: undefined,
                                 pipelineStructure: {
                                     relation_type: "software_input_file", //"software_input_file",
                                     parent_component_id: rest.component_id,
-                                    pipeline_id: pipeline.component_id
+                                    // pipeline_id: pipeline.component_id
                                 }
                             })
                         }}>添加文件</Button>
@@ -252,18 +253,18 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
                         {/* {wrapAnalysisPipeline != analysisPipline &&
                             */}
                         <Flex justify="center" style={{ margin: "2rem" }} gap={"small"}>
-                            <Button size="small"  color="cyan" variant="solid" onClick={() => {
+                            <Button size="small" color="cyan" variant="solid" onClick={() => {
                                 operatePipeline.openModal("modalC", {
                                     data: undefined,
                                     structure: {
                                         relation_type: "software_output_file", //"software_input_file",
                                         parent_component_id: rest.component_id,
-                                        pipeline_id: pipeline.component_id,
+                                        // pipeline_id: pipeline.component_id,
                                         component_type: "file"
                                     }
                                 })
                             }}>新增文件</Button>
-                            <Button size="small"  color="cyan" variant="solid" onClick={() => {
+                            <Button size="small" color="cyan" variant="solid" onClick={() => {
                                 operatePipeline.openModal("modalA", {
                                     data: undefined,
                                     pipelineStructure: {
@@ -283,7 +284,7 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
                 <Flex gap="small" style={{ marginBottom: "1rem", flexWrap: "wrap" }}>
 
                     {pipeline &&
-                        <Button size="small"  color="cyan" variant="solid" onClick={() => {
+                        <Button size="small" color="cyan" variant="solid" onClick={() => {
                             operatePipeline.openModal("modalC", {
                                 data: undefined, structure: {
                                     component_type: "software",
@@ -294,7 +295,7 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
                             })
                         }}>新增软件</Button>
                     }
-                    <Button size="small"  color="cyan" variant="solid" onClick={() => {
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
                         operatePipeline.openModal("modalC", {
                             data: rest, structure: {
                                 component_type: "software",
@@ -305,7 +306,7 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
                     {pipeline &&
 
                         <>
-                            <Button size="small"  color="cyan" variant="solid" onClick={() => {
+                            <Button size="small" color="cyan" variant="solid" onClick={() => {
                                 operatePipeline.openModal("modalA", {
                                     data: undefined, pipelineStructure: {
                                         relation_type: "pipeline_software",
@@ -315,12 +316,12 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
                                     }
                                 })
                             }}>添加软件</Button>
-                            <Button size="small"  color="cyan" variant="solid" onClick={() => {
+                            <Button size="small" color="cyan" variant="solid" onClick={() => {
                                 operatePipeline.openModal("modalA", {
                                     data: rest,
                                     pipelineStructure: {
                                         relation_type: "pipeline_software",
-                                        pipeline_id: pipeline.component_id,
+                                        // pipeline_id: pipeline.component_id,
 
                                     }
                                 })
@@ -328,47 +329,49 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
                             <Popconfirm title="是否移除文件?" onConfirm={() => {
                                 operatePipeline.deletePipelineRelation(rest.relation_id)
                             }}>
-                                <Button size="small"  color="cyan" variant="solid" >移除软件</Button>
+                                <Button size="small" color="cyan" variant="solid" >移除软件</Button>
                             </Popconfirm>
                         </>
 
                     }
 
-                    <Button size="small"  color="cyan" variant="solid" onClick={() => {
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
                         operatePipeline.openModal("modalG", rest)
                     }}>查看依赖</Button>
-                    {/* {JSON.stringify(rest)} */}
-                </Flex>
-
-                <Flex gap={"small"} style={{ marginBottom: "1rem", flexWrap: "wrap" }}>
-                    <Button size="small"  color="cyan" variant="solid" onClick={() => {
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
                         operatePipeline.openModal("modalB", {
                             module_type: "nextflow",
                             file_type: "nf",
                             module_name: analysisPipline,
                             component_id: rest.component_id,
                         })
-                    }}>软件脚本</Button>
+                    }}>组件代码</Button>
+
+
+                    {/* {JSON.stringify(rest)} */}
+                </Flex>
+
+                <Flex gap={"small"} style={{ marginBottom: "1rem", flexWrap: "wrap" }}>
 
 
 
-                    <Button size="small"  color="cyan" variant="solid" onClick={() => {
+                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                         operatePipeline.openModal("modalB", {
                             module_type: "py_parse_analysis",
                             file_type: "py",
                             module_name: rest.parseAnalysisModule,
                             component_id: rest.component_id,
                         })
-                    }}>输入解析模块</Button>
-
-                    <Button size="small"  color="cyan" variant="solid" onClick={() => {
+                    }}>输入解析模块</Button> */}
+{/* 
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
                         operatePipeline.openModal("modalB", {
                             module_type: "py_parse_analysis_result",
                             file_type: "py",
                             module_name: rest.parseAnalysisResultModule,
                             component_id: rest.component_id,
                         })
-                    }}>输出解析模块</Button>
+                    }}>输出解析模块</Button> */}
                     {/* {rest.parseAnalysisResultModule && <>
                         {rest.parseAnalysisResultModule.map((item: any, index: any) =>
                             
@@ -376,7 +379,7 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
                 </Flex>
                 {/* {JSON.stringify(rest)} */}
                 {rest.databases && <Flex gap={"small"} style={{ marginBottom: "1rem", flexWrap: "wrap" }}>
-                    <Button size="small"  color="cyan" variant="solid" onClick={() => {
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
                         operatePipeline.openModal("modalE", rest.databases)
                     }}>配置数据库</Button>
                 </Flex>}
@@ -406,7 +409,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, ope
     const [resultTableList, setResultTableList] = useState<any>()
     const [messageApi, contextHolder] = message.useMessage();
     const [loading, setLoading] = useState<boolean>(false)
-    const formId = Form.useWatch((values) => values?.id, upstreamForm);
+    const formId = Form.useWatch((values) => values?.analysis_id, upstreamForm);
     // const [currentAnalysisMethod, setCurrentAnalysisMethod] = useState<any>(analysisMethod[0].value[0])
     // const [currentAnalysisMethod, setCurrentAnalysisMethod] = useState<any>(analysisPipline ? analysisPipline : "")
     const [activeTabKey, setActiveTabKey] = useState<any>()
@@ -434,7 +437,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, ope
         const requestParams = getrRequestParams(values)
         setLoading(true)
         try {
-            const resp: any = await axios.post(`/fast-api/save-analysis?save=${save}`, requestParams)
+            const resp: any = await axios.post(`/fast-api/analysis-controller?save=${save}`, requestParams)
             // setFilePlot(resp.data)
             // setAnalysisParams(resp.data)
             console.log(resp)
@@ -494,9 +497,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, ope
         <div style={{ marginBottom: "1rem" }}></div>
 
         <Form form={upstreamForm}>
-            <Form.Item name={"id"} style={{ display: "none" }}>
-                <Input></Input>
-            </Form.Item>
+
             <Collapse
                 // activeKey={collapseActiveKey}
                 style={{ marginTop: "1rem" }}
@@ -526,7 +527,9 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, ope
                             <Spin spinning={loading}>
 
                                 {/* {JSON.stringify(rest.parseAnalysisResultModule)} */}
-
+                                <Form.Item name={"analysis_id"} label="分析ID" >
+                                    <Input disabled></Input>
+                                </Form.Item>
                                 <Form.Item initialValue={`${rest.name}`} name={"analysis_name"} label={"分析名称"} rules={[{ required: true, message: '该字段不能为空!' }]}>
                                     <Input></Input>
                                 </Form.Item>
@@ -535,8 +538,8 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, ope
                                 {JSON.stringify(resultTableList,null,2)}
                                 </pre> */}
                                 <FormJsonComp formJson={inputAnalysisMethod} dataMap={resultTableList}></FormJsonComp>
-
-                                <BioDatabaseForm formJson={rest.databases}></BioDatabaseForm>
+                                {/* {JSON.stringify(rest)} */}
+                                <BioDatabaseForm software={rest} operatePipeline={operatePipeline} formJson={rest.databases}></BioDatabaseForm>
                                 {/* <FormJsonComp formJson={rest.databases} dataMap={resultTableList}></FormJsonComp> */}
 
                                 {/* {resultTableList && inputAnalysisMethod.map((it: any) => (<> */}
@@ -557,13 +560,13 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, ope
                                 {upstreamFormJson &&
                                     <FormJsonComp formJson={upstreamFormJson} dataMap={dataMap}></FormJsonComp>
                                 }
-                                <Button size="small"  color="cyan" variant="solid" style={{ marginRight: "0.5rem" }} onClick={() => {
+                                <Button size="small" color="cyan" variant="solid" style={{ marginRight: "0.5rem" }} onClick={() => {
                                     saveUpstreamAnalysis(false)
 
                                 }}>查看参数</Button>
 
-                                <Button size="small"  color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>{formId ? <>更新分析</> : <>保存分析</>}</Button>
-                                {formId && <Button  size="small"  color="cyan" variant="solid" onClick={() => upstreamForm.setFieldValue("id", undefined)}>取消更新</Button>}
+                                <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>{formId ? <>更新分析</> : <>保存分析</>}</Button>
+                                {formId && <Button size="small" color="cyan" variant="solid" onClick={() => upstreamForm.setFieldValue("id", undefined)}>取消更新</Button>}
                                 {/* <hr />
                                 
                                 <hr /> */}
@@ -644,6 +647,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, ope
             ref={tableRef}
             shouldTrigger={true}
             software={rest}
+            component_id={rest?.component_id}
             operatePipeline={operatePipeline}
             setRecord={(record: any) => {
                 const param = JSON.parse(record.request_param)
@@ -651,7 +655,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, ope
                 upstreamForm.resetFields()
                 upstreamForm.setFieldsValue(param)
                 if (record?.id) {
-                    upstreamForm.setFieldValue("id", record?.id)
+                    upstreamForm.setFieldValue("analysis_id", record?.analysis_id)
                 }
                 record['dataType'] = "analysis"
                 onClickItem(record)
@@ -683,7 +687,7 @@ export const SelectComp: FC<any> = ({ it, resultTableList, value, onChange }) =>
     }, [resultTableList])
     return <>
         <Select value={selectedItems} onChange={onChangeSelct} mode={it.mode == "multiple" ? "multiple" : undefined} allowClear options={options}></Select>
-        {it.mode == "multiple" && <Button size="small"  onClick={() => {
+        {it.mode == "multiple" && <Button size="small" onClick={() => {
             const values = options.map((it: any) => it.value)
             // console.log(values)
             setSelectedItems(values)
@@ -893,27 +897,29 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, software, operatePip
 
         {/* {JSON.stringify(currentAnalysisMethod?.downstreamAnalysis)} */}
 
-        <div style={{ marginBottom: "1rem" }}>
+        <Flex style={{ marginBottom: "1rem" }} gap={"small"}>
             {currentAnalysisMethod?.downstreamAnalysis && currentAnalysisMethod?.downstreamAnalysis.map((item: any, index: any) => {
                 const { name, analysisType, ...rest } = item
                 return <span key={index}>
                     {/* {JSON.stringify(item)} */}
                     {(record && analysisType == 'one') && <>
                         {/* variant="solid" */}
-                        <Button size="small" style={{ marginRight: "0.5rem" }} color="purple" variant={name == btnName ? "solid" : "filled"} onClick={() => plot({ ...rest, name: name })}>{name}({record.sample_name})</Button>
+                        <Button size="small" color="purple" variant={name == btnName ? "solid" : "filled"} onClick={() => plot({ ...rest, name: name })}>{name}({record.sample_name})</Button>
                     </>}
                     {(analysisType != 'one') && <>
-                        <Button size="small" style={{ marginRight: "0.5rem" }} color="primary" variant={name == btnName ? "solid" : "filled"} onClick={() => plot({ ...rest, name: name })}>{name}</Button>
+                        <Button size="small" color="primary" variant={name == btnName ? "solid" : "filled"} onClick={() => plot({ ...rest, name: name })}>{name}</Button>
+
                     </>}
 
                 </span>
             })}
-            <Button size="small" style={{ marginRight: "0.5rem" }} color="cyan" variant="solid" onClick={() => {
+
+            <Button size="small" color="cyan" variant="solid" onClick={() => {
                 operatePipeline.openModal("modalC", {
                     data: undefined,
                     structure: {
                         relation_type: "file_script",
-                        pipeline_id: pipeline.component_id,
+                        // pipeline_id: pipeline.component_id,
                         parent_component_id: currentAnalysisMethod.component_id,
                         component_type: "script"
                     }
@@ -924,13 +930,17 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, software, operatePip
                     data: undefined,
                     pipelineStructure: {
                         relation_type: "file_script",
-                        pipeline_id: pipeline.component_id,
+                        // pipeline_id: pipeline.component_id,
                         parent_component_id: currentAnalysisMethod.component_id,
                     }
                 })
 
             }}>添加分析</Button>
-        </div>
+            {btnName && <CloseCircleOutlined onClick={() => {
+                setDownstreamData(undefined)
+                setBtnName(undefined)
+            }} />}
+        </Flex>
 
 
         {children && React.cloneElement(children, {
@@ -953,7 +963,7 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, software, operatePip
                     <Input></Input>
                 </Form.Item> */}
             {/* {JSON.stringify(rest)} */}
-            {btnName && <>
+            {downstreamData && <>
                 {/* {JSON.stringify(downstreamData)} */}
                 <Collapse
                     // activeKey={collapseActiveKey}
@@ -963,28 +973,33 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, software, operatePip
                     items={[
                         {
                             key: '1',
-                            label: <>执行分析{btnName ? `(${btnName})` : ""}</>,
+                            label: <Tooltip title={<>
+                                <ul>
+                                    <li>software:{software.component_id}</li>
+                                    <li>file:{currentAnalysisMethod?.component_id}</li>
+                                    <li>script:{downstreamData?.component_id}</li>
+                                </ul>
+                            </>}>执行分析{btnName ? `(${btnName})` : ""}</Tooltip>,
                             children: <>
-                                {import.meta.env.MODE == "development" && <>
+                                {/* {import.meta.env.MODE == "development" && <>
                                     <ul>
-                                        <li>pipeline:{pipeline.component_id}</li>
                                         <li>software:{software.component_id}</li>
                                         <li>file:{currentAnalysisMethod?.component_id}</li>
                                         <li>script:{downstreamData?.component_id}</li>
-                                        {JSON.stringify(downstreamData)}
                                     </ul>
-                                </>}
+                                </>} */}
 
                                 <Flex gap={"small"}>
-                                    <Button color="cyan" variant="solid" onClick={() => {
+                                    <Button size="small" color="cyan" variant="solid" onClick={() => {
                                         operatePipeline.openModal("modalB", {
-                                            module_type: "py_plot",
-                                            module_name: downstreamData.moduleName,
+                                            // module_type: "py_plot",
+                                            // file_type: "py",
+                                            // module_name: downstreamData.moduleName,
                                             component_id: downstreamData.component_id,
                                             // module_dir: downstreamData.moduleDir
                                         })
-                                    }}>查看模块</Button>
-                                    <Button color="cyan" variant="solid" onClick={() => {
+                                    }}>组件代码</Button>
+                                    <Button size="small" color="cyan" variant="solid" onClick={() => {
                                         operatePipeline.openModal("modalC", {
                                             data: downstreamData, structure: {
                                                 component_type: "script",
@@ -992,7 +1007,7 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, software, operatePip
                                         })
                                     }}>更新分析</Button>
 
-                                    <Button color="cyan" variant="solid" onClick={() => {
+                                    <Button size="small" color="cyan" variant="solid" onClick={() => {
                                         operatePipeline.openModal("modalA", {
                                             data: downstreamData,
                                             pipelineStructure: {
@@ -1006,7 +1021,7 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, software, operatePip
                                         operatePipeline.deletePipelineRelation(downstreamData.relation_id)
                                         setBtnName(undefined)
                                     }}>
-                                        <Button color="danger" variant="solid" >删除分析</Button>
+                                        <Button size="small" color="danger" variant="solid" >删除分析</Button>
                                     </Popconfirm>
 
                                 </Flex>
@@ -1030,6 +1045,7 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, software, operatePip
                                                     // activeTabKey={activeTabKey}
                                                     sampleGroupApI={sampleGroupApI}
                                                     // moduleName={moduleName}
+                                                    operatePipeline={operatePipeline}
                                                     params={params}
                                                     name={btnName}
                                                     setPlotLoading={setPlotLoading}
@@ -1037,6 +1053,11 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, software, operatePip
                                                     saveAnalysisMethod={saveAnalysisMethod}
                                                     project={project}
                                                     setFilePlot={setFilePlot}
+                                                    callback={() => {
+                                                        if (tableRef.current) {
+                                                            tableRef.current.reload()
+                                                        }
+                                                    }}
                                                     plotReloadTable={() => {
                                                         if (tableRef.current) {
                                                             tableRef.current.reload()
@@ -1047,28 +1068,30 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, software, operatePip
                                                 // analysisMethod={analysisMethod} 
                                                 ></AnalysisForm>
 
-                                            }, {
-                                                key: "2",
-                                                label: "分析结果",
-                                                children: <ResultList
-                                                    title="下游分析历史记录"
-                                                    ref={tableRef}
-                                                    analysisType={"analysisResult"}
-                                                    analysisMethod={[
-                                                        {
-                                                            name: saveAnalysisMethod,
-                                                            label: saveAnalysisMethod,
-                                                            inputKey: [saveAnalysisMethod],
-                                                            mode: "multiple"
-                                                        }
-                                                    ]}
-                                                    form={form}
-                                                    setTableLoading={setPlotLoading}
-                                                    // setRecord={(data: any) => {  onClickItem(data) }}
-                                                    setTabletData={(data: any) => {
-                                                        setFilePlot(data)
-                                                    }}  ></ResultList>
-                                            }
+                                            },
+
+                                            // {
+                                            //     key: "2",
+                                            //     label: "分析结果",
+                                            //     children: <ResultList
+                                            //         title="下游分析历史记录"
+                                            //         ref={tableRef}
+                                            //         analysisType={"analysisResult"}
+                                            //         analysisMethod={[
+                                            //             {
+                                            //                 name: saveAnalysisMethod,
+                                            //                 label: saveAnalysisMethod,
+                                            //                 inputKey: [saveAnalysisMethod],
+                                            //                 mode: "multiple"
+                                            //             }
+                                            //         ]}
+                                            //         form={form}
+                                            //         setTableLoading={setPlotLoading}
+                                            //         // setRecord={(data: any) => {  onClickItem(data) }}
+                                            //         setTabletData={(data: any) => {
+                                            //             setFilePlot(data)
+                                            //         }}  ></ResultList>
+                                            // }
                                         ]}></Tabs>
 
 
@@ -1076,10 +1099,10 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, software, operatePip
                                 </>}
 
 
-                                <AnalysisResultView
+                                {/* <AnalysisResultView
                                     plotLoading={plotLoading}
                                     filePlot={filePlot}
-                                    {...downstreamData}></AnalysisResultView>
+                                    {...downstreamData}></AnalysisResultView> */}
 
                             </>
 
@@ -1116,6 +1139,29 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, software, operatePip
 
             {/* </Form> */}
         </div>
+        <div style={{ marginBottom: "1rem" }}></div>
+
+        {downstreamData && <AnalysisList
+            project={project}
+            ref={tableRef}
+            shouldTrigger={true}
+            software={downstreamData}
+            component_id={downstreamData.component_id}
+            operatePipeline={operatePipeline}
+            setRecord={(record: any) => {
+                const param = JSON.parse(record.request_param)
+                console.log(param)
+                form.resetFields()
+                form.setFieldsValue(param)
+                if (record?.analysis_id) {
+                    form.setFieldValue("analysis_id", record?.analysis_id)
+                }
+                // record['dataType'] = "analysis"
+                onClickItem(record)
+            }}></AnalysisList>
+        }
+
+
 
     </>
 }

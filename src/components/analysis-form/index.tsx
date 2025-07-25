@@ -1,4 +1,4 @@
-import { Button, Collapse, Form, Input, message, Select, Typography } from "antd";
+import { Button, Collapse, Flex, Form, Input, message, Select, Typography } from "antd";
 import axios from "axios";
 import { FC, useEffect, useState } from "react";
 import FormJsonComp from "../form-components";
@@ -8,6 +8,7 @@ export const AnalysisForm: FC<any> = ({
     pipeline,
     form,
     resultTableList,
+    operatePipeline,
     // activeTabKey,
     formJson,
     formDom,
@@ -19,10 +20,11 @@ export const AnalysisForm: FC<any> = ({
     project,
     setFilePlot,
     plotReloadTable,
+    callback,
     name,
     ...rest
 }) => {
-    const formId = Form.useWatch((values: any) => values?.id, form);
+    const formId = Form.useWatch((values: any) => values?.analysis_id, form);
     const is_save_analysis_result = Form.useWatch((values: any) => values?.is_save_analysis_result, form);
     const [sampleGroup, setSampleGroup] = useState<any>([])
     const [tableType, setTableType] = useState<any>("xlsx")
@@ -127,9 +129,9 @@ export const AnalysisForm: FC<any> = ({
                 imgType: imgType,
                 ...downstreamInput,
                 software: "python",
-                component_id:rest.component_id
+                component_id: rest.component_id
             }
-            if(rest?.moduleDir){
+            if (rest?.moduleDir) {
                 reqParams['module_dir'] = rest.moduleDir
             }
             // console.log(reqParams)
@@ -154,7 +156,7 @@ export const AnalysisForm: FC<any> = ({
         }
     }, [name])
     const getFirstKey = (resultTableList: any) => {
-        if (resultTableList && Object.keys(resultTableList).length >0) {
+        if (resultTableList && Object.keys(resultTableList).length > 0) {
             return Object.keys(resultTableList)[0]
         } else {
             return undefined
@@ -190,7 +192,7 @@ export const AnalysisForm: FC<any> = ({
 
     }
     useEffect(() => {
-        
+
         if (sampleGroupApI) {
             getSampleGroup()
         } else {
@@ -225,19 +227,62 @@ export const AnalysisForm: FC<any> = ({
         }
 
     }, [JSON.stringify(resultTableList)])
+
+
+
+    const saveUpstreamAnalysis = async (save: any, is_submit: any = false) => {
+        const values = await form.validateFields()
+        const requestParams = {
+            ...params,
+            ...values,
+            project: project,
+            analysis_method: saveAnalysisMethod,
+            table_type: tableType,
+            imgType: imgType,
+            software: "python",
+            component_id: rest.component_id
+        }
+        const scriptType = rest.script_type || "script"
+        console.log(scriptType)
+        try {
+            const resp: any = await axios.post(`/fast-api/analysis-controller?save=${save}&type=${scriptType}&is_submit=${is_submit}`, requestParams)
+            // setFilePlot(resp.data)
+            // setAnalysisParams(resp.data)
+            console.log(resp)
+
+            if (save) {
+                messageApi.success("执行成功!")
+                if (callback) {
+                    callback()
+                }
+                // if (tableRef.current) {
+                //     tableRef.current.reload()
+                // }
+            } else {
+                operatePipeline.openModal("modalF", resp.data)
+            }
+        } catch (error: any) {
+            console.log(error)
+            if (error.response?.data) {
+                messageApi.error(error.response.data.detail)
+            }
+        }
+        // setLoading(false)
+        // /fast-api/save-analysis
+    }
     return <>
         {contextHolder}
-        {/* {JSON.stringify(rest)} */}
+        {JSON.stringify(rest)}
         <Form form={form}   >
-            <Form.Item name={"id"} style={{ display: "none" }}>
-                <Input></Input>
+            <Form.Item name={"analysis_id"}  label="分析ID" >
+                <Input disabled></Input>
             </Form.Item>
             {/* {sampleSelectComp && resultTableList && analysisMethod.map((it: any, index: any) => (<div key={index}>
                 <Form.Item key={it.name} label={it.label} name={it.name}>
                     <SelectComp it={it} resultTableList={resultTableList} ></SelectComp>
                 </Form.Item>
             </div>))} */}
-
+            {/* 
             <Form.Item initialValue={false} name={"is_save_analysis_result"} label={"是否保存分析结果"} rules={[{ required: true, message: '该字段不能为空!' }]}>
                 <Select options={[
                     {
@@ -248,13 +293,13 @@ export const AnalysisForm: FC<any> = ({
                         value: false
                     }
                 ]}></Select>
+            </Form.Item> */}
+            {/* {is_save_analysis_result &&
+             } */}
+
+            <Form.Item label="分析名称" name={"analysis_name"} style={{ maxWidth: 600 }} rules={[{ required: true, message: '该字段不能为空!' }]}>
+                <Input></Input>
             </Form.Item>
-            {is_save_analysis_result &&
-                <Form.Item label="分析名称" name={"analysis_name"} style={{ maxWidth: 600 }} rules={[{ required: true, message: '该字段不能为空!' }]}>
-                    <Input></Input>
-                </Form.Item>}
-
-
             {formJson &&
                 <FormJsonComp project={project} formJson={formJson} dataMap={dataMap}></FormJsonComp>
             }
@@ -266,18 +311,31 @@ export const AnalysisForm: FC<any> = ({
             }
 
 
-            {(formDom || sampleGroup || formJson) && <>
-                <Button type="primary" onClick={() => {
+            {(formDom || sampleGroup || formJson) && <Flex gap={"small"}>
+                {/* <Button size="small" type="primary" onClick={() => {
                     runPlot({ moduleName: rest.moduleName, params: params })
-                }}>{formId ? <>更新</> : is_save_analysis_result ? <>运行并保存</> : <>运行</>}</Button>
-                {formId && <Button type="primary" onClick={() => form.setFieldValue("id", undefined)}>取消更新</Button>}
+                }}>{formId ? <>更新</> : is_save_analysis_result ? <>运行并保存</> : <>运行</>}</Button> */}
+
+
+
+                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                    saveUpstreamAnalysis(false)
+
+                }}>查看参数</Button>
+
+
+                <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>{formId ? <>更新分析</> : <>保存分析</>}</Button>
+
+
+                {/* <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true, true)}>{formId ? <>更新运行</> : <>保存运行</>}</Button> */}
 
                 {/* <Button type="primary" onClick={() => {
                                             runPlot({ moduleName: moduleName, params: params })
                                         }}>执行</Button> */}
 
+                {formId && <Button  size="small" color="cyan" onClick={() => form.setFieldValue("analysis_id", undefined)}>取消更新</Button>}
 
-            </>
+            </Flex>
             }
 
             <Collapse ghost items={[

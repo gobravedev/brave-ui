@@ -1,4 +1,4 @@
-import { Button, Drawer, Flex, message, Modal } from "antd"
+import { Button, Drawer, Flex, message, Modal, Tabs } from "antd"
 import axios from "axios"
 import { FC, useEffect, useRef, useState } from "react"
 import { message as $message } from 'antd';
@@ -9,11 +9,12 @@ const ModuleEdit: FC<any> = ({ visible, onClose, params, callback }) => {
     if (!visible) return null;
     const [data, setData] = useState<any>()
     const [messageApi, contextHolder] = message.useMessage();
+    const [scriptName, setScriptName] = useState("main")
     const editorRef = useRef<any>(null)
 
     const getModuleContent = async (params: any) => {
         try {
-            const resp = await axios.post("/get-module-content", params)
+            const resp = await axios.get(`/get-component-module-content/${params.component_id}?script_name=${scriptName}`)
             console.log(resp)
             setData(resp.data)
         } catch (error: any) {
@@ -24,23 +25,23 @@ const ModuleEdit: FC<any> = ({ visible, onClose, params, callback }) => {
     }
     useEffect(() => {
         getModuleContent(params)
-    }, [JSON.stringify(params)])
+    }, [JSON.stringify(params), scriptName])
     return <>
         {contextHolder}
-        <Drawer 
-        extra={
-            <Flex justify="flex-end" gap={"small"}>
-                <Button color="cyan" variant="solid" onClick={() => {
-                    editorRef.current.setValue(data?.content)
-                }}>保存</Button>
-            </Flex>
-        }
-        title="查看文件" 
-        open={visible} 
-        onClose={onClose} width={"50%"}>
+        <Drawer
+            extra={
+                <Flex justify="flex-end" gap={"small"}>
+                    <Button color="cyan" variant="solid" onClick={() => {
+                        editorRef.current.setValue(data?.content)
+                    }}>保存</Button>
+                </Flex>
+            }
+            title="查看文件"
+            open={visible}
+            onClose={onClose} width={"50%"}>
             {/* {JSON.stringify(data)} */}
             <ul>
-                <li>module:{data?.module}</li>
+                {/* <li>module:{data?.module}</li> */}
                 <li>path:{data?.path}</li>
             </ul>
             <hr />
@@ -49,11 +50,17 @@ const ModuleEdit: FC<any> = ({ visible, onClose, params, callback }) => {
                     {data?.content}
                 </pre>
             </Typography> */}
+            <Tabs
+                // key={scriptName}
+                onChange={(key) => {
+                    setScriptName(key)
+                }}
+                items={[{ label: "main", key: "main" }, { label: "input_parse", key: "input_parse" }, { label: "output_parse", key: "output_parse" }]}></Tabs>
             <MonacoEditor value={data?.content} editorRef={editorRef} defaultLanguage="python"></MonacoEditor>
             {/* <TextArea value={data?.content} disabled rows={10}>
-            </TextArea> */} 
-           
-            </Drawer>
+            </TextArea> */}
+
+        </Drawer>
     </>
 }
 

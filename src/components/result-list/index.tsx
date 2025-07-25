@@ -38,7 +38,7 @@ const ResultList = forwardRef<any, any>(({
         reload
     }))
 
-    const { project } = useOutletContext<any>()
+    const { project,projectObj } = useOutletContext<any>()
     const [data, setData] = useState<any>([])
     const [groupedData, setGroupedData] = useState<any>()
     // const [content,setContent] = useState<any>()
@@ -113,14 +113,14 @@ const ResultList = forwardRef<any, any>(({
     // }
 
     const reload = () => {
-        console.log(analysisMethod)
+        // console.log(analysisMethod)
         if (analysisMethod && Array.isArray(analysisMethod)) {
 
-            const analysisMethodList = analysisMethod.flatMap((it: any) => it.name)
+            // const analysisMethodList = analysisMethod.flatMap((it: any) => it.name)
             const componentIdList = analysisMethod.flatMap((it: any) => it.component_id)
 
-            // console.log(analysisMethodList)
-            loadData({ analysisMethodValues: undefined, componentIdList: componentIdList })
+            // console.log("componentIdList", componentIdList)
+            loadData({componentIdList: componentIdList })
         } else {
             loadData({ params: params })
         }
@@ -129,7 +129,7 @@ const ResultList = forwardRef<any, any>(({
 
     const getCurrentAnalysisMenthod = (activeTabKey: any) => {
         const analysisMethodDict: any = analysisMethod.reduce((acc: any, item: any) => {
-            acc[item?.name] = item;
+            acc[item?.component_id] = item;
             return acc;
         }, {});
         // const analysisMethodDict = analysisMethidtoDict(analysisMethod)
@@ -140,8 +140,8 @@ const ResultList = forwardRef<any, any>(({
         // const currentAnalysisMethod = analysisMethod[0]
         if (analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 0) {
             if (setActiveTabKey) {
-                setActiveTabKey(analysisMethod[0]?.name)
-                const currentAnalysisMethod = getCurrentAnalysisMenthod(analysisMethod[0]?.name)
+                setActiveTabKey(analysisMethod[0]?.component_id)
+                const currentAnalysisMethod = getCurrentAnalysisMenthod(analysisMethod[0]?.component_id)
                 setCurrentAnalysisMethod(currentAnalysisMethod)
             }
         }
@@ -177,19 +177,19 @@ const ResultList = forwardRef<any, any>(({
     }
     const loadData = async ({ analysisMethodValues, params, componentIdList }: any) => {
         setLoading(true)
-        let resp: any = await axios.post(`/fast-api/find-analyais-result-by-analysis-method`, {
+        let resp: any = await axios.post(`/analysis-result/list-analysis-result`, {
             project: project,
-            analysis_method: analysisMethodValues,
+            // analysis_method: analysisMethodValues,
             component_ids: componentIdList,
             ...params
         })
 
-        if (componentIdList || analysisMethodValues) {
-            const keyMap = getKeyMap()
+        if (componentIdList ) {
+            // const keyMap = getKeyMap()
             // console.log(keyMap)
 
             const groupedData = resp.data.reduce((acc: any, item: any) => {
-                const key = item.analysis_method;
+                const key = item.component_id;
                 // const key = keyMap[item.analysis_method]
                 if (!acc[key]) {
                     acc[key] = [];
@@ -207,7 +207,7 @@ const ResultList = forwardRef<any, any>(({
                 });
                 return acc;
             }, {});
-            console.log(groupedData)
+            // console.log("groupedData",groupedData)
             if (setResultTableList) {
                 // console.log(groupedData)
                 setResultTableList(groupedData)
@@ -217,7 +217,7 @@ const ResultList = forwardRef<any, any>(({
             if (activeTabKey) {
                 setData(groupedData[activeTabKey] ? groupedData[activeTabKey] : [])
             } else {
-                setData(groupedData[analysisMethod[0].name] ? groupedData[analysisMethod[0].name] : [])
+                setData(groupedData[analysisMethod[0].component_id] ? groupedData[analysisMethod[0].component_id] : [])
             }
         } else {
             // console.log(resp.data)
@@ -272,333 +272,268 @@ const ResultList = forwardRef<any, any>(({
         downloadTSV(resp.data, contentPath.split('/').pop())
     }
 
-    let columns: any = []
-    if (analysisType == "sample") {
-        columns = [
-            {
-                title: 'id',
-                dataIndex: 'id',
-                key: 'id',
-                width: 50,
+    const getMetadataColumns = ()=>{
+        // console.log("projectObj",projectObj?.metadata_form)
+        if (!projectObj?.metadata_form || !Array.isArray(projectObj?.metadata_form)) return []
+        return projectObj?.metadata_form?.map((item:any)=>{
+            return {
+                title: item.label,
+                dataIndex: item.name,
+                key: item.name,
                 ellipsis: true,
-
-            },
-            {
-                title: '文件类型',
-                dataIndex: 'analysis_method',
-                key: 'analysis_method',
-                ellipsis: true,
-                render: (text: any, record: any) => {
-                    return <Tooltip title={<>
-                        <ul>
-                            <li>analysis_id: {record.analysis_id}</li>
-                            <li>component_id: {record.component_id}</li>
-                            <li>analysis_result_id: {record.analysis_result_id}</li>
-                            <li>sample_id: {record.sample_id}</li>
-                            <li>file_name: {record.file_name}</li>
-                            <li>analysis_result_hash: {record.analysis_result_hash}</li>
-                        </ul>
-                    </>}>
-                        <span style={{ cursor: "pointer" }}>{text}</span>
-                    </Tooltip>
-                }
-            },
-            {
-                title: '样本名称',
-                dataIndex: 'sample_name',
-                key: 'sample_name',
-                ellipsis: true,
-                render: (text: any, record: any) => {
-                    return <Tooltip title={<>
-                        <ul>
-                            <li>sample_id: {record.sample_id}</li>
-                            {/* <li>ID: {record.id}</li> */}
-                            {/* <li>analysis_id: {record.analysis_id}</li>
-                            <li>file_name: {record.file_name}</li> */}
-                            {/* <li>analysis_name: {record.analysis_name}</li> */}
-                        </ul>
-                    </>}>
-                        <span style={{ cursor: "pointer" }}>{text}</span>
-                    </Tooltip>
-                }
-
-            },
-            //  {
-            //     title: '分析名称',
-            //     dataIndex: 'analysis_name',
-            //     key: 'analysis_name',
-            //     ellipsis: true,
-
-            // }, 
-            // {
-            //     title: '分析id',
-            //     dataIndex: 'analysis_id',
-            //     key: 'analysis_id',
-            //     ellipsis: true,
-
-            // },
-            // {
-            //     title: '分析版本',
-            //     dataIndex: 'analysis_version',
-            //     key: 'analysis_version',
-            //     ellipsis: true,
-            // },
-            // {
-            //     title: '样本名称',
-            //     dataIndex: 'sample_name',
-            //     key: 'sample_name',
-            //     ellipsis: true,
-
-            // },
-            // {
-            //     title: '样本名称',
-            //     dataIndex: 'sample_name',
-            //     key: 'sample_name',
-            //     ellipsis: true,
-
-            // },
-            {
-                title: '样本分组',
-                dataIndex: 'sample_group',
-                key: 'sample_group',
-                ellipsis: true,
-
-            }, {
-                title: '样本分组名称',
-                dataIndex: 'sample_group_name',
-                key: 'sample_group_name',
-                ellipsis: true,
-            },
-
-            //  {
-            //     title: '组件id',
-            //     dataIndex: 'component_id',
-            //     key: 'component_id',
-            //     ellipsis: true,
-            // },
-
-            // {
-            //     title: '样本来源',
-            //     dataIndex: 'sample_source',
-            //     key: 'sample_source',
-            //     ellipsis: true,
-
-            // }, {
-            //     title: '疾病',
-            //     dataIndex: 'host_disease',
-            //     key: 'host_disease',
-            //     ellipsis: true,
-
-            // },  {
-            //     title: "软件",
-            //     dataIndex: 'software',
-            //     key: 'software',
-            //     ellipsis: true,
-            // },
-            {
-                title: 'project',
-                dataIndex: 'project',
-                key: 'project',
-                ellipsis: true,
-            },
-            ...appendSampleColumns, {
-                title: '操作',
-                key: 'action',
-                fixed: "right",
-                ellipsis: true,
-                width: 200,
-                render: (_: any, record: any) => (
-                    <Space size="middle">
-                        <Popover content={<>
-                            {/* {record.component_id} */}
-                            <Typography >
-                                <pre>{JSON.stringify(record.content, null, 2)}</pre>
-                            </Typography>
-                            {/* {record.analysis_name} */}
-                        </>} >
-                            <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                // record.content = JSON.parse(record.content)
-                                setRecord(record)
-                                if (cleanDom) {
-                                    cleanDom(undefined)
-                                }
-
-                                // const param = JSON.parse(record.request_param)
-                                // console.log(param)
-                                // form.resetFields()
-                                // form.setFieldsValue(param)
-                                // if (record?.id) {
-                                //     form.setFieldValue("id", record?.id)
-                                // }
-                                // readHdfs(record.content)
-                            }}>查看</Button>
-                        </Popover>
-                        {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
-                            operatePipeline.openModal("analysisResultEdit", {
-                                ...record,
-                                callback: reload
-                            })
-                        }}>编辑</Button> */}
-                        {/* <a onClick={() => { downloadHdfs(record.content) }}>下载</a> */}
-
-                        {
-                            record.sample_name ?
-                                <>
-                                    <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                        operatePipeline.openModal("metadataForm", {
-                                            analysis_result_id: record.analysis_result_id,
-                                            sample_id: record.sample_id,
-                                            callback: reload
-                                        })
-                                    }}>metadata</Button>
-                                </> :
-                                <>
-                                    <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                        operatePipeline.openModal("metadataForm", {
-                                            analysis_result_id: record.analysis_result_id,
-                                            callback: reload
-                                        })
-                                    }}>添加metadata</Button>
-                                </>
-                        }
-                        <Button size="small" color="cyan" variant="solid" onClick={() => {
-                            console.log(operatePipeline)
-                            operatePipeline.openModals("bindSample", {
-                                analysis_result_id: record.analysis_result_id,
-                                callback: reload
-                            })
-                        }}>绑定样本</Button>
-                        <Popconfirm title="确定删除吗?" onConfirm={async () => {
-                            await deleteById(record.analysis_result_id)
-                        }}>
-                            <Button size="small" color="danger" variant="solid">删除</Button>
-                        </Popconfirm>
-                    </Space>
-                ),
-            },
-        ]
-
-    } else {
-        columns = [
-            {
-                title: '分析名称',
-                dataIndex: 'analysis_name',
-                key: 'analysis_name',
-                ellipsis: true,
-
-            }, {
-                title: 'id',
-                dataIndex: 'id',
-                key: 'id',
-                ellipsis: true,
-
-            }, {
-                title: "分析方法",
-                dataIndex: 'analysis_method',
-                key: 'analysis_method',
-                ellipsis: true,
-            }, {
-                title: '输入软件',
-                dataIndex: 'software',
-                key: 'software',
-                ellipsis: true,
-            }, {
-                title: 'project',
-                dataIndex: 'project',
-                key: 'project',
-                ellipsis: true,
-            }, {
-                title: 'analysis_type',
-                dataIndex: 'analysis_type',
-                key: 'analysis_type',
-                ellipsis: true,
-            },
-            // {
-            //     title: 'control',
-            //     dataIndex: 'control',
-            //     key: 'control',
-            //     ellipsis: true,
-            // }, {
-            //     title: 'treatment',
-            //     dataIndex: 'treatment',
-            //     key: 'treatment',
-            //     ellipsis: true,
-
-            // }, {
-            //     title: 'rank',
-            //     dataIndex: 'rank',
-            //     key: 'rank',
-            //     ellipsis: true,
-            // },
-            {
-                title: '创建时间',
-                dataIndex: 'create_date',
-                key: 'create_date',
-                ellipsis: true,
-            }, {
-                title: '操作',
-                key: 'action',
-                fixed: "right",
-                ellipsis: true,
-                width: 200,
-                render: (_: any, record: any) => (
-                    <Space size="middle">
-                        <Popover content={<>
-                            <Typography >
-                                <pre>{JSON.stringify(record.content, null, 2)}</pre>
-                            </Typography>
-                        </>} >
-                            <a onClick={() => {
-                                const param = JSON.parse(record.request_param)
-                                if (form) {
-                                    form.resetFields()
-                                    form.setFieldsValue(param)
-                                    if (record?.id) {
-                                        form.setFieldValue("id", record?.id)
-                                    }
-                                }
-
-                                readJOSN(record.content)
-                                if (setRecord) {
-                                    setRecord(record)
-                                }
-                            }}>查看</a>
-                        </Popover>
-
-                        {/* <a onClick={() => { downloadHdfs(record.content) }}>下载</a> */}
-                        <Popconfirm title="确定删除吗?" onConfirm={async () => {
-                            await deleteById(record.analysis_result_id)
-                        }}>
-                            <a>删除</a>
-                        </Popconfirm>
-
-                    </Space>
-                ),
-            },
-        ]
+                // render: (text: any, record: any) => {
+                //     return <Tooltip title={record[item.name]}>
+                //         <span style={{ cursor: "pointer" }}>{text}</span>
+                //     </Tooltip>
+                // }
+            }
+        })
     }
+
+    let columns: any  = [
+        {
+            title: '项目名称',
+            dataIndex: 'project_name',
+            key: 'project_name',
+            width: 100,
+            ellipsis: true,
+            render: (text: any, record: any) => {
+                return <Tooltip title={record.project}>
+                    <span style={{ cursor: "pointer" }}>{text}</span>
+                </Tooltip>
+            }
+        },
+       
+        {
+            title: '分析结果ID',
+            dataIndex: 'analysis_result_id',
+            key: 'analysis_result_id',
+            width: 50,
+            ellipsis: true,
+            render: (text: any, record: any) => {
+                return <Tooltip title={record.analysis_result_id}>
+                    <span style={{ cursor: "pointer" }} >{String(text).slice(0, 8)}</span>
+                </Tooltip>
+            }
+
+        },
+        {
+            title: '组件名称',
+            dataIndex: 'component_name',
+            key: 'component_name',
+            width: 100,
+            ellipsis: true,
+            render: (text: any, record: any) => {
+                return <Tooltip title={<>
+                    <ul>
+                        <li>analysis_id: {record.analysis_id}</li>
+                        <li>component_id: {record.component_id}</li>
+                        <li>analysis_result_id: {record.analysis_result_id}</li>
+                        <li>sample_id: {record.sample_id}</li>
+                        <li>file_name: {record.file_name}</li>
+                        <li>analysis_result_hash: {record.analysis_result_hash}</li>
+                    </ul>
+                </>}>
+                    <span style={{ cursor: "pointer" }}>{text}</span>
+                </Tooltip>
+            }
+        },
+        {
+            title: '样本名称',
+            dataIndex: 'sample_name',
+            key: 'sample_name',
+            width: 100,
+            ellipsis: true,
+            render: (text: any, record: any) => {
+                return <Tooltip title={<>
+                    <ul>
+                        <li>sample_id: {record.sample_id}</li>
+                        {/* <li>ID: {record.id}</li> */}
+                        {/* <li>analysis_id: {record.analysis_id}</li>
+                        <li>file_name: {record.file_name}</li> */}
+                        {/* <li>analysis_name: {record.analysis_name}</li> */}
+                    </ul>
+                </>}>
+                    <span style={{ cursor: "pointer" }}>{text}</span>
+                </Tooltip>
+            }
+
+        },
+        ...getMetadataColumns(),
+        //  {
+        //     title: '分析名称',
+        //     dataIndex: 'analysis_name',
+        //     key: 'analysis_name',
+        //     ellipsis: true,
+
+        // }, 
+        // {
+        //     title: '分析id',
+        //     dataIndex: 'analysis_id',
+        //     key: 'analysis_id',
+        //     ellipsis: true,
+
+        // },
+        // {
+        //     title: '分析版本',
+        //     dataIndex: 'analysis_version',
+        //     key: 'analysis_version',
+        //     ellipsis: true,
+        // },
+        // {
+        //     title: '样本名称',
+        //     dataIndex: 'sample_name',
+        //     key: 'sample_name',
+        //     ellipsis: true,
+
+        // },
+        // {
+        //     title: '样本名称',
+        //     dataIndex: 'sample_name',
+        //     key: 'sample_name',
+        //     ellipsis: true,
+
+        // },
+        // {
+        //     title: '样本分组',
+        //     dataIndex: 'sample_group',
+        //     key: 'sample_group',
+        //     ellipsis: true,
+
+        // }, 
+        // {
+        //     title: '样本分组名称',
+        //     dataIndex: 'sample_group_name',
+        //     key: 'sample_group_name',
+        //     ellipsis: true,
+        // },
+
+        //  {
+        //     title: '组件id',
+        //     dataIndex: 'component_id',
+        //     key: 'component_id',
+        //     ellipsis: true,
+        // },
+
+        // {
+        //     title: '样本来源',
+        //     dataIndex: 'sample_source',
+        //     key: 'sample_source',
+        //     ellipsis: true,
+
+        // }, {
+        //     title: '疾病',
+        //     dataIndex: 'host_disease',
+        //     key: 'host_disease',
+        //     ellipsis: true,
+
+        // },  {
+        //     title: "软件",
+        //     dataIndex: 'software',
+        //     key: 'software',
+        //     ellipsis: true,
+        // },
+        
+        ...appendSampleColumns, {
+            title: '操作',
+            key: 'action',
+            fixed: "right",
+            ellipsis: true,
+            width: 200,
+            
+            render: (_: any, record: any) => (
+                <Space size="middle">
+                    <Popover content={<>
+                        {/* {record.component_id} */}
+                        <Typography >
+                            <pre>{JSON.stringify(record.content, null, 2)}</pre>
+                        </Typography>
+                        {/* {record.analysis_name} */}
+                    </>} >
+                        <Button size="small" color="cyan" variant="solid" onClick={() => {
+                            // record.content = JSON.parse(record.content)
+                            setRecord(record)
+                            if (cleanDom) {
+                                cleanDom(undefined)
+                            }
+                            operatePipeline.openModal("openFile", record.content)
+
+                            // const param = JSON.parse(record.request_param)
+                            // console.log(param)
+                            // form.resetFields()
+                            // form.setFieldsValue(param)
+                            // if (record?.id) {
+                            //     form.setFieldValue("id", record?.id)
+                            // }
+                            // readHdfs(record.content)
+                        }}>查看</Button>
+                    </Popover>
+                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        operatePipeline.openModal("analysisResultEdit", {
+                            ...record,
+                            callback: reload
+                        })
+                    }}>编辑</Button> */}
+                    {/* <a onClick={() => { downloadHdfs(record.content) }}>下载</a> */}
+
+                    {
+                        record.sample_name ?
+                            <>
+                                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                    operatePipeline.openModal("metadataForm", {
+                                        analysis_result_id: record.analysis_result_id,
+                                        sample_id: record.sample_id,
+                                        callback: reload
+                                    })
+                                }}>metadata</Button>
+                            </> :
+                            <>
+                                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                    operatePipeline.openModal("metadataForm", {
+                                        analysis_result_id: record.analysis_result_id,
+                                        callback: reload
+                                    })
+                                }}>添加metadata</Button>
+                            </>
+                    }
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        console.log(operatePipeline)
+                        operatePipeline.openModals("bindSample", {
+                            analysis_result_id: record.analysis_result_id,
+                            callback: reload
+                        })
+                    }}>绑定样本</Button>
+                    <Popconfirm title="确定删除吗?" onConfirm={async () => {
+                        await deleteById(record.analysis_result_id)
+                    }}>
+                        <Button size="small" color="danger" variant="solid">删除</Button>
+                    </Popconfirm>
+                </Space>
+            ),
+        },
+    ]
 
 
 
     return <>
         <Card title={<>{title}(
-            <Tooltip title={<>
+            <Tooltip  title={<>
                 <ul>
                     <li>namespace: {currentAnalysisMethod?.namespace_name}</li>
-                    <li>pipeline: {pipeline?.component_id}</li>
-                    <li>software: {software?.component_id}</li>
-                    <li>file: {currentAnalysisMethod?.component_id}</li>
-                    <li>name: {currentAnalysisMethod?.name}</li>
+                    {pipeline?.component_id && <li>pipeline: {pipeline?.component_id}</li>}
+                    {software?.component_id && <li>software: {software?.component_id}</li>}
+                    {currentAnalysisMethod?.component_id && <li>file: {currentAnalysisMethod?.component_id}</li>}
+                    {currentAnalysisMethod?.name && <li>name: {currentAnalysisMethod?.name}</li>}
                 </ul>
 
 
             </>}>
-                {currentAnalysisMethod?.label}
+                <span style={{ cursor: "pointer" }}>{currentAnalysisMethod?.component_name}</span>
             </Tooltip>)</>}
             extra={<>{cardExtra}
                 <Flex gap={"small"}>
                     {operatePipeline?.openModal && <>
-                        <Tooltip title={currentAnalysisMethod?.label}>
+                        <Tooltip title={currentAnalysisMethod?.component_name}>
                             <Button size="small" color="cyan" variant="solid" onClick={() => {
                                 operatePipeline.openModal("modalC", {
                                     data: undefined,
@@ -611,7 +546,7 @@ const ResultList = forwardRef<any, any>(({
                                 })
                             }}>新增文件</Button>
                         </Tooltip>
-                        <Tooltip title={currentAnalysisMethod?.label}>
+                        <Tooltip title={currentAnalysisMethod?.component_name}>
                             <Button size="small" color="cyan" variant="solid" onClick={() => {
                                 operatePipeline.openModal("modalC", {
                                     data: currentAnalysisMethod, structure: {
@@ -620,7 +555,7 @@ const ResultList = forwardRef<any, any>(({
                                 })
                             }}>更新文件</Button>
                         </Tooltip>
-                        <Tooltip title={currentAnalysisMethod?.label}>
+                        <Tooltip title={currentAnalysisMethod?.component_name}>
                             <Button size="small" color="cyan" variant="solid" onClick={() => {
                                 operatePipeline.openModal("modalA", {
                                     data: undefined,
@@ -633,7 +568,7 @@ const ResultList = forwardRef<any, any>(({
                             }}>添加文件</Button>
                         </Tooltip>
 
-                        <Tooltip title={currentAnalysisMethod?.label}>
+                        <Tooltip title={currentAnalysisMethod?.component_name}>
                             <Button size="small" color="cyan" variant="solid" onClick={() => {
                                 // operatePipeline.setOperateOpen(true)
                                 // operatePipeline.setPipelineRecord(currentAnalysisMethod)
@@ -650,7 +585,7 @@ const ResultList = forwardRef<any, any>(({
                             }}>替换文件</Button>
                         </Tooltip>
 
-                        <Tooltip title={currentAnalysisMethod?.label}>
+                        <Tooltip title={currentAnalysisMethod?.component_name}>
                             <Popconfirm title="是否移除文件!" onConfirm={() => {
                                 operatePipeline.deletePipelineRelation(currentAnalysisMethod.relation_id)
                             }}>
@@ -663,7 +598,7 @@ const ResultList = forwardRef<any, any>(({
                 </Flex>
             </>}
             tabList={analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 1 ?
-                analysisMethod.map((it: any) => ({ key: it.name, label: it.label })) : undefined}
+                analysisMethod.map((it: any) => ({ key: it.component_id, label: it.label })) : undefined}
             activeTabKey={activeTabKey}
             onTabChange={onTabChange}
         >
@@ -671,7 +606,7 @@ const ResultList = forwardRef<any, any>(({
 
             </>}
 
-
+            {/* {JSON.stringify(projectObj)} */}
             {/* {JSON.stringify(currentAnalysisMethod.component_id)} */}
             <Table
                 rowKey={(it: any) => it.id}

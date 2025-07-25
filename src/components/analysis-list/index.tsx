@@ -1,12 +1,14 @@
 import { Venn } from "@ant-design/plots"
-import { Button, Card, Flex, message, Popconfirm, Popover, Space, Table, Tag } from "antd"
+import { Button, Card, Flex, message, Popconfirm, Popover, Space, Table, Tag, Tooltip } from "antd"
 import axios from "axios"
-import { FC, forwardRef, useEffect, useImperativeHandle, useState } from "react"
+import { FC, forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
 import { useLocation, useNavigate, useParams } from "react-router"
 import ResultParse from "../result-parse"
 import { useModal } from "@/hooks/useModal"
 import PipelineInfo from "../pipeline-monitor"
 import { runAnalysisApi } from "@/api/analysis"
+import AnalysisResultView from "../analysis-result-view"
+import { useSSEContext } from "@/context/sse/useSSEContext"
 
 export const readHdfsAPi = (contentPath: any) => axios.get(`/api/read-hdfs?path=${contentPath}`)
 export const readJsonAPi = (contentPath: any) => axios.get(`/fast-api/read-json?path=${contentPath}`)
@@ -26,6 +28,7 @@ const ResultList = forwardRef<any, any>(({
     columnsParamsALL,
     project,
     software,
+    component_id,
     operatePipeline
 }, ref) => {
     useImperativeHandle(ref, () => ({
@@ -37,6 +40,63 @@ const ResultList = forwardRef<any, any>(({
     const [openMonitor, setOpenMonitor] = useState<any>(false)
     const navigate = useNavigate()
     const location = useLocation()
+    const { eventSourceRef, status, reconnect } = useSSEContext();
+    const [data, setData] = useState<any>([])
+    const analysisIdRef = useRef<any>([])
+    const analysisResultRef = useRef<any>(null)
+    const pipelineInfoRef = useRef<any>(null)
+    // const [content,setContent] = useState<any>()
+    const [loading, setLoading] = useState(false)
+    const [currentAnalysis, setCurrentAnalysis] = useState<any>()
+
+    useEffect(() => {
+        if(data && Array.isArray(data) &&data.length > 0){
+            // const runningAnalysis = data.filter((item: any) => item.analysis_status == "running")
+            if(modal.visible && modal.params){
+                const analysis = data.find((item: any) => item.analysis_id == modal.params.analysis_id)
+                if(analysis){
+                    setCurrentAnalysis(analysis)
+                }
+            }
+   
+        }
+    }, [data,modal.params])
+
+    useEffect(() => {
+        if (eventSourceRef) {
+            const handler = (event: MessageEvent) => {
+                // console.log('event', event)
+                const data = JSON.parse(event.data)
+                console.log('analysisId', analysisIdRef.current)
+                if (analysisIdRef.current.includes(data.analysis_id)) {
+                 
+                    if(data.event == "analysis_complete" || data.event == "analysis_failed"){
+                        loadData()
+                        if(analysisResultRef.current){
+                            analysisResultRef.current?.relaod()
+                        }
+                        if(pipelineInfoRef.current){
+                            pipelineInfoRef.current?.relaod()
+                        }
+                    }
+
+                }
+            };
+
+            eventSourceRef.current?.addEventListener('message', handler);
+
+            return () => {
+                console.log("removeEventListener")
+                eventSourceRef.current?.removeEventListener('message', handler);
+            };
+        }
+
+
+
+
+    }, [eventSourceRef.current]);
+
+
 
     const setRecord = (record: any) => {
         if (setRecord_) {
@@ -45,15 +105,13 @@ const ResultList = forwardRef<any, any>(({
 
         setRecord0(record)
     }
-    const [data, setData] = useState<any>([])
-    // const [content,setContent] = useState<any>()
-    const [loading, setLoading] = useState(false)
+
     const loadData = async () => {
         setLoading(true)
         // ?analysis_method=${analysisMethod}&project=${project}
         let resp: any = await axios.post(`/list-analysis`, {
             // analysisMethod: analysisMethod,
-            component_id: software?.component_id,
+            component_id: component_id,
             project: project
         });
         // if (analysisMethod) {
@@ -66,6 +124,10 @@ const ResultList = forwardRef<any, any>(({
         }
 
         setData(resp.data)
+        const analysisId = resp.data.map((item: any) => item.analysis_id)
+        // console.log('>>>>>>>>analysisId', analysisId)
+
+        analysisIdRef.current = analysisId
         setLoading(false)
     }
     const deleteById = async (id: any) => {
@@ -89,73 +151,75 @@ const ResultList = forwardRef<any, any>(({
         if (!modal.params) return false
         return record.analysis_id == modal.params.analysis_id && key == modal.key
     }
+    const runAnalysis = async (record: any) => {
+        await runAnalysisApi(record.analysis_id)
+        message.success("运行成功")
+        loadData()
+    }
 
     let columns: any = [
         {
+            title: 'project_name',
+            dataIndex: 'project_name',
+            key: 'project_name',
+            ellipsis: true,
+            render: (text: any, record: any) => {
+                return <Tooltip title={record.project}>
+                    <span style={{ cursor: "pointer" }}>{text}</span>
+                </Tooltip>
+            }
+        }, {
             title: 'analysis_status',
             dataIndex: 'analysis_status',
             key: 'analysis_status',
             ellipsis: true,
             render: (text: any) => {
                 return <Tag color={text === "success" ? "green" : text === "failed" ? "red" : "blue"}>{text}</Tag>
-            }   
+            }
         },
         {
             title: 'analysis_id',
             dataIndex: 'analysis_id',
             key: 'analysis_id',
             ellipsis: true,
+            render: (text: any,record:any) => {
+                return  <Popover title={<>
+                    <ul>
+                        <li>analysis_name:{record.analysis_name}</li>
+                        <li>pipeline_script:{record.pipeline_script}</li>
+                        <li>work_dir:{record.work_dir}</li>
+                        <li>output_dir:{record.output_dir}</li>
+                        <li>command_log_path:{record.command_log_path}</li>
+                        <li>trace_file:{record.trace_file}</li>
+                        <li>executor_log_file:{record.executor_log_file}</li>
+                        <li>workflow_log_file:{record.workflow_log_file}</li>
+                       
+                    </ul>
+                </>}><span style={{cursor:"pointer"}}>{text}</span></Popover>
+            }
 
         }, {
-            title: 'component_id',
-            dataIndex: 'component_id',
-            key: 'component_id',
+            title: "组件名称",
+            dataIndex: 'component_name',
+            key: 'component_name',
             ellipsis: true,
-
+            render: (text: any, record: any) => {
+                return <Tooltip title={record.component_id}>
+                    <span style={{ cursor: "pointer" }}>{text}</span>
+                </Tooltip>
+            }
         }, {
-            title: 'process_id',
-            dataIndex: 'process_id',
-            key: 'process_id',
-            ellipsis: true,
-
-        }, {
-            title: 'project',
-            dataIndex: 'project',
-            key: 'project',
-            ellipsis: true,
-
-        }, {
-            title: 'analysis_method',
-            dataIndex: 'analysis_method',
-            key: 'analysis_method',
-            ellipsis: true,
-
-        }, {
-            title: "analysis_name",
+            title: "分析名称",
             dataIndex: 'analysis_name',
             key: 'analysis_name',
             ellipsis: true,
-        }, {
-            title: 'params_path',
-            dataIndex: 'params_path',
-            key: 'params_path',
-            ellipsis: true,
-        }, {
-            title: 'pipeline_script',
-            dataIndex: 'pipeline_script',
-            key: 'pipeline_script',
-            ellipsis: true,
-        }, {
-            title: 'work_dir',
-            dataIndex: 'work_dir',
-            key: 'work_dir',
-            ellipsis: true,
-        }, {
-            title: 'output_dir',
-            dataIndex: 'output_dir',
-            key: 'output_dir',
-            ellipsis: true,
-        }, {
+        },{
+            title:"image",
+            dataIndex:"image",
+            key:"image",
+            ellipsis:true,
+         
+        },  {
             title: '操作',
             key: 'action',
             fixed: "right",
@@ -170,6 +234,23 @@ const ResultList = forwardRef<any, any>(({
                             }
                         })
                     }}>编辑</Button>
+                    <Popconfirm title={"是否运行!"} onConfirm={() => {
+                        runAnalysis(record)
+                        openModal("modalA", record)
+                        setRecord(record)
+                    }}>
+                        <Button disabled={record.analysis_status == "running"} size="small" color="cyan" variant="solid">
+                            {record.analysis_status == "created" ? "运行" : "重新运行"}
+                        </Button>
+                    </Popconfirm>
+                    {isSelected(record, "modalA") ?
+                        <Button size="small" color={"cyan"} variant="solid" onClick={() => {
+                            closeModal()
+                        }}>关闭</Button> :
+                        <Button size="small" color={"cyan"} variant="solid" onClick={() => {
+                            openModal("modalA", record)
+                            setRecord(record)
+                        }}>查看结果</Button>}
 
                     {isSelected(record, "modalB") ?
                         <Button size="small" color={"cyan"} variant="solid" onClick={() => {
@@ -177,7 +258,8 @@ const ResultList = forwardRef<any, any>(({
                         }}>关闭</Button> :
                         <Button size="small" color={"cyan"} variant="solid" onClick={() => {
                             openModal("modalB", record)
-                        }}>查看/运行/结果</Button>}
+                            setRecord(record)
+                        }}>详情</Button>}
                     {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                         openModal("modalB", record)
                     }}>查看/运行</Button> */}
@@ -243,7 +325,7 @@ const ResultList = forwardRef<any, any>(({
                             }}>输出解析模块({item.module})</Button>)}
                     </>}
                 </>} */}
-                <Button size="small"  type="primary" onClick={loadData}>刷新</Button>
+                <Button size="small" type="primary" onClick={loadData}>刷新</Button>
             </Flex>
         } >
             {/* {software && <ul style={{ marginBottom: "0.5rem" }}>
@@ -269,8 +351,15 @@ const ResultList = forwardRef<any, any>(({
         </Card>
         <div style={{ marginBottom: "1rem" }}></div>
 
-{}
+        <AnalysisResultView
+            ref={analysisResultRef}
+            visible={modal.key == "modalA" && modal.visible}
+            params={modal.params}
+            currentAnalysis={currentAnalysis}
+            status={record?.analysis_status}
+            onClose={closeModal}></AnalysisResultView>
         <PipelineInfo
+            ref={pipelineInfoRef}
             visible={modal.key == "modalB" && modal.visible}
             params={modal.params}
             onClose={closeModal}

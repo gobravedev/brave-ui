@@ -1,4 +1,4 @@
-import { Button, Card, Flex, Splitter, Tabs, Tooltip, Typography } from "antd";
+import { Button, Card, Flex, Splitter, Tabs, Tag, Tooltip, Typography } from "antd";
 import { FC, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useOutletContext, useParams } from "react-router";
 import { MonacoEditor } from "@/components/react-monaco-editor";
@@ -9,6 +9,7 @@ import { SSEContextType } from '@/type/sse'
 import { FileMonitor } from "@/components/pipeline-monitor";
 import { CreateOrUpdatePipelineComponent } from "@/components/create-pipeline";
 import { useModal } from "@/hooks/useModal";
+import { useSSEContext } from "@/context/sse/useSSEContext";
 
 const SoftwareAnalysisEditor: FC<any> = () => {
     const { analysisId } = useParams()
@@ -22,10 +23,51 @@ const SoftwareAnalysisEditor: FC<any> = () => {
 
     const [content, setContent] = useState<any>("")
     const [currentFile, setCurrentFile] = useState<any>(null)
+    const { eventSourceRef, status, reconnect } = useSSEContext();
 
     const [contentTabKey, setContentTabKey] = useState<any>("pipeline_script")
     const [contentFileMap, setContentFileMap] = useState<any>({})
     const [format, setFormat] = useState<any>(false)
+    useEffect(() => {
+        if (eventSourceRef) {
+            const handler = (event: MessageEvent) => {
+                // console.log('event', event)
+                const data = JSON.parse(event.data)
+                if (analysisId == data.analysis_id) {
+                    // if (fileTabKey == "workflow_log_file") {
+                    //     if (data.event_type == "workflow_log" || data.event_type == "executor_log" || data.event_type == "trace" || data.event_type == "process_end") {
+                    //         readLogFile()
+                    //         if (data.event_type == "process_end") {
+                    //             if (callback) {
+                    //                 callback()
+                    //             }
+                    //         }
+                    //     }
+                    // }else if(fileTabKey == "trace_file"){
+                    //     if(data.workflow_event == "on_process_complete"){
+                    //         readLogFile()
+                    //     }
+                    // }
+                    if (data.event == "analysis_complete" || data.event == "analysis_failed") {
+                        loadAnalysis()
+                    }
+
+                }
+            };
+
+            eventSourceRef.current?.addEventListener('message', handler);
+
+            return () => {
+                console.log("removeEventListener")
+                eventSourceRef.current?.removeEventListener('message', handler);
+            };
+        }
+
+
+
+
+    }, [eventSourceRef.current]);
+
 
     const readFile = async (file: string) => {
         const res = await readFileApi(file)
@@ -36,6 +78,8 @@ const SoftwareAnalysisEditor: FC<any> = () => {
         const res = await writeFileApi(currentFile, editorRef.current.getValue())
         messageApi.success("保存成功")
     }
+
+
     const loadAnalysis = async () => {
         const res = await findAnalysisById(analysisId)
         const analysis = res.data
@@ -48,7 +92,7 @@ const SoftwareAnalysisEditor: FC<any> = () => {
             script_config_file: analysis.script_config_file,
 
         })
-      
+
         // readLogFile(analysis.workflow_log_file)
         // readScriptFile(analysis.pipeline_script)
     }
@@ -112,24 +156,36 @@ const SoftwareAnalysisEditor: FC<any> = () => {
             }}
             tabBarExtraContent={
                 <Flex gap={"small"} align={"center"}>
-                    {analysis?.analysis_name}
+                    <Tag color="cyan">{analysis?.analysis_status}</Tag>
+                    <Tag color="cyan">{analysis?.analysis_name}</Tag>
+
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                       window.open(`http://10.110.1.11:8888/jupyter/notebooks/${analysis.jupyter_notebook_path}`, "_blank")
+                    }}>jupyter</Button>
+
                     <Tooltip title={<>
                         {currentFile}
                     </>}>
-                        <Button color="cyan" variant="solid" onClick={writeFile}>保存</Button>
+                        <Button size="small" color="cyan" variant="solid" onClick={writeFile}>保存</Button>
                     </Tooltip>
 
+                        
+                        
 
                     <Tooltip title={<>
                         {currentFile}
                     </>}>
-                        <Button color="cyan" variant="solid" onClick={() => {
+                        <Button size="small" color="cyan" variant="solid" onClick={() => {
                             readScriptFile(currentFile, true)
                         }}>刷新脚本</Button>
                     </Tooltip>
 
+                    <Button size="small" color="cyan" variant="solid" onClick={loadAnalysis}>
+                        刷新
+                    </Button>
+                    
                     {locationPath && (
-                        <Button color="cyan" variant="solid" onClick={() => {
+                        <Button size="small" color="cyan" variant="solid" onClick={() => {
                             navigate(locationPath)
                         }}>返回</Button>
                     )}
@@ -164,9 +220,12 @@ const SoftwareAnalysisEditor: FC<any> = () => {
             ]}></Tabs>
         <MonacoEditor format={format} value={content} editorRef={editorRef} defaultLanguage="python" height="50vh" />
 
-        <FileMonitor analysis={analysis} operatePipeline={ {
-                            openModal: openModal
-                        }} />
+        <FileMonitor
+            callback={loadAnalysis}
+            analysis={analysis}
+            operatePipeline={{
+                openModal: openModal
+            }} />
         {/* <CreateOrUpdatePipelineComponent
             // callback={loadData}
             // pipelineStructure={pipelineStructure}

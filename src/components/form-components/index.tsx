@@ -52,7 +52,7 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap }) => {
             dataKey: "sample_group_list"
         }
     };
-    const ComponentsRender = ({ type, dataMap, inputAnalysisMethod, dataKey: dataKey_, data: data_, name, inputKey, ...rest }: any) => {
+    const ComponentsRender = ({ type, dataMap, inputAnalysisMethod, dataKey: dataKey_, data: data_, name,component_id, inputKey, ...rest }: any) => {
         if (!dataMap) return <div>加载中....</div> //(() => )
         const componentObj = componentMap[type] //|| (() => <div>未知类型</div>);
         // if (first_data_key in dataMap_)
@@ -88,8 +88,8 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap }) => {
                     data = dataMap[dataMap['first_data_key']]
                 } else {
                     // 上游分析的key
-                    if (name in dataMap) {
-                        data = dataMap[name]
+                    if (component_id in dataMap) {
+                        data = dataMap[component_id]
                     }
                 }
                 // if (inputKey) {

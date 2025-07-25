@@ -20,6 +20,7 @@ import React from "react"
 import { BindSample, MetadataModal } from "@/pages/sample"
 import MetadataForm from "@/components/metadata-form"
 import AnalysisResultEdit from "@/components/analysis-result-edit"
+import OpenFile from "@/components/open-file"
 const Pipeline: FC<any> = ({ }) => {
     console.log("Pipeline")
     const { component_type, component_id: name } = useParams()
@@ -313,6 +314,12 @@ const Pipeline: FC<any> = ({ }) => {
             onClose={() => closeModals("bindSample")}
             operatePipeline={operatePipeline}
             params={modals.bindSample.params}></BindSample> 
+
+
+        <OpenFile
+            visible={modal.key == "openFile" && modal.visible}
+            onClose={closeModal}
+            params={modal.params}></OpenFile>   
     </div>
 }
 

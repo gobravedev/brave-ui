@@ -38,12 +38,7 @@ const Sample: FC<any> = ({ operatePipeline, rowSelection }) => {
             dataIndex: 'project',
             key: 'project',
             ellipsis: true,
-        }, {
-            title: '样本唯一标识',
-            dataIndex: 'analysis_key',
-            key: 'analysis_key',
-            ellipsis: true,
-        },
+        }, 
         {
             title: '样本名称',
             dataIndex: 'sample_name',
@@ -76,12 +71,13 @@ const Sample: FC<any> = ({ operatePipeline, rowSelection }) => {
             dataIndex: 'sample_group',
             key: 'sample_group',
             ellipsis: true,
-        }, {
-            title: '样本分组名称',
-            dataIndex: 'sample_group_name',
-            key: 'sample_group_name',
-            ellipsis: true,
         },
+        //  {
+        //     title: '样本分组名称',
+        //     dataIndex: 'sample_group_name',
+        //     key: 'sample_group_name',
+        //     ellipsis: true,
+        // },
         // {
         //     title: '样本来源',
         //     dataIndex: 'sample_source',

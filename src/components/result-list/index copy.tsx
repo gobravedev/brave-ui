@@ -450,7 +450,7 @@ const ResultList = forwardRef<any, any>(({
                                     structure: {
                                         relation_type: relationType, //"software_input_file",
                                         parent_component_id: software.component_id,
-                                        pipeline_id: pipeline.component_id,
+                                        // pipeline_id: pipeline.component_id,
                                         component_type: "file"
                                     }
                                 })

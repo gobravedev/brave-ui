@@ -41,11 +41,13 @@ export const MonacoEditor: FC<any> = ({ value, editorRef, defaultLanguage, forma
     loader.config({ monaco });
     // loader.init().then(/* ... */);
     function handleEditorDidMount(editor: any, monaco: any) {
-        editorRef.current = editor;
-        if (format) {
-            editor.onDidChangeModelDecorations(async () => {
-                await editorRef.current.getAction('editor.action.formatDocument').run();
-            });
+        if (editorRef) {
+            editorRef.current = editor;
+            if (format) {
+                editor.onDidChangeModelDecorations(async () => {
+                    await editorRef.current.getAction('editor.action.formatDocument').run();
+                });
+            }
         }
 
     }

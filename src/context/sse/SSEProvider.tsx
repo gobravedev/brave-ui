@@ -5,83 +5,104 @@ import { SSEContextType, SSEStatus } from "./types";
 export const SSEContext = createContext<SSEContextType | null>(null);
 
 export const SSEProvider = ({
-    url = "/brave-api/sse-group",
-    retryInterval = 5000,
-    children,
-  }: {
-    url?: string;
-    retryInterval?: number;
-    children: ReactNode;
-  }) => {
-    const eventSourceRef = useRef<EventSource | null>(null);
-    const [status, setStatus] = useState<SSEStatus>("connecting");
-    const retryTimerRef = useRef<NodeJS.Timeout | null>(null);
-  
-    const connect = () => {
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-      }
-  
-      setStatus("connecting");
-      const es = new EventSource(url);
-      eventSourceRef.current = es;
-  
-      es.onopen = () => {
-        setStatus("open");
-        console.log("✅ SSE connected");
-      };
-  
-      es.onerror = (err) => {
-        console.warn("❌ SSE error", err);
-        setStatus("closed");
-        es.close();
-        eventSourceRef.current = null;
-  
-        if (!retryTimerRef.current) {
-          retryTimerRef.current = setTimeout(() => {
-            retryTimerRef.current = null;
-            connect();
-          }, retryInterval);
-        }
-      };
-  
-      es.onmessage = (event) => {
-        // 你也可以在这里广播消息
-        console.log("📩 SSE message:", event.data);
-      };
+  url = "/brave-api/sse-group",
+  retryInterval = 5000,
+  children,
+}: {
+  url?: string;
+  retryInterval?: number;
+  children: ReactNode;
+}) => {
+  const eventSourceRef = useRef<EventSource | null>(null);
+  const [status, setStatus] = useState<SSEStatus>("connecting");
+  const retryTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const lastReceived = useRef(Date.now());
+  const timeoutMs = 15000;
+
+  const connect = () => {
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+    }
+
+    setStatus("connecting");
+    const es = new EventSource(url);
+    eventSourceRef.current = es;
+
+    es.onopen = () => {
+      setStatus("open");
+      lastReceived.current = Date.now();
+      console.log("✅ SSE connected");
     };
-    
-    const close = () => {
-      retryTimerRef.current && clearTimeout(retryTimerRef.current);
-      retryTimerRef.current = null;
-      eventSourceRef.current?.close();
-      eventSourceRef.current = null;
+
+    const autoReConnect = () => {
       setStatus("closed");
+      es.close();
+      eventSourceRef.current = null;
+
+      if (!retryTimerRef.current) {
+        retryTimerRef.current = setTimeout(() => {
+          retryTimerRef.current = null;
+          connect();
+        }, retryInterval);
+      }
+    }
+
+    intervalRef.current = setInterval(() => {
+      if (Date.now() - lastReceived.current > timeoutMs) {
+        console.warn("⚠️ SSE 心跳超时，服务器可能异常退出");
+        autoReConnect()
+      }
+    }, 5000);
+
+    es.onerror = (err) => {
+      console.warn("❌ SSE error", err);
+      // autoReConnect()
     };
-  
-    const reconnect = () => {
-      close();
-      connect();
+
+    es.onmessage = (event) => {
+      lastReceived.current = Date.now();
+      // 你也可以在这里广播消息
+      const data = JSON.parse(event.data)
+      if (data.type != "ping") {
+        console.log("📩 SSE message:", event.data);
+      }
     };
-  
-    useEffect(() => {
-        // setInterval(() => {
-        //     console.log(eventSourceRef.current?.readyState)
-        //     console.warn("EventSource closed, reconnecting...");
-        //     if (eventSourceRef.current?.readyState === 2) {
-               
-        //     //   reconnect();
-        //     }
-        // }, 5000);
-      connect();
-      return () => {
-        close();
-      };
-    }, []);
-  
-    return (
-      <SSEContext.Provider value={{ eventSourceRef, status, close, reconnect }}>
-        {children}
-      </SSEContext.Provider>
-    );
   };
+
+  const close = () => {
+    retryTimerRef.current && clearTimeout(retryTimerRef.current);
+    retryTimerRef.current = null;
+    eventSourceRef.current?.close();
+    eventSourceRef.current = null;
+    setStatus("closed");
+  };
+
+  const reconnect = () => {
+    close();
+    connect();
+  };
+
+
+  useEffect(() => {
+    // setInterval(() => {
+    //     console.log(eventSourceRef.current?.readyState)
+    //     console.warn("EventSource closed, reconnecting...");
+    //     if (eventSourceRef.current?.readyState === 2) {
+
+    //     //   reconnect();
+    //     }
+    // }, 5000);
+    connect();
+    return () => {
+      close();
+      intervalRef.current && clearInterval(intervalRef.current)
+    };
+  }, []);
+
+  return (
+    <SSEContext.Provider value={{ eventSourceRef, status, close, reconnect }}>
+      {children}
+    </SSEContext.Provider>
+  );
+};

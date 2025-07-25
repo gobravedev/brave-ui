@@ -27,7 +27,7 @@ const BioDatabases: FC<any> = ({ visible, onClose, params, callback }) => {
     const onSave = async () => {
         const reqParams = await getFormData()
         if (record) {
-            await axios.post("/update-bio-database", { ...reqParams, id: record.id })
+            await axios.post("/update-bio-database", { ...reqParams, database_id: record.database_id })
         } else {
             await axios.post("/add-bio-database", reqParams)
         }
@@ -65,8 +65,8 @@ const BioDatabases: FC<any> = ({ visible, onClose, params, callback }) => {
     >
         <Tabs
             tabBarExtraContent={<>
-                <Button style={{ marginRight: "0.5rem" }} type="primary" onClick={reload}> 刷新</Button>
-                <Button type="primary" onClick={() => {
+                <Button size="small" color="cyan" variant="solid" style={{ marginRight: "0.5rem" }} type="primary" onClick={reload}> 刷新</Button>
+                <Button size="small" color="cyan" variant="solid" type="primary" onClick={() => {
                     setRecord(undefined)
                     onSave()
                 }}> {record ? "更新" : "添加"}</Button>
@@ -81,11 +81,14 @@ const BioDatabases: FC<any> = ({ visible, onClose, params, callback }) => {
                 }
             })}>
         </Tabs>
-        <Form form={form} style={{ maxWidth: 600 }}>
+        <Form form={form} style={{ maxWidth: 600 }} labelCol={{ span: 3 }} >
             <Form.Item name="name" label="名称" rules={[{ required: true, message: "请输入名称" }]}>
                 <Input />
             </Form.Item>
             <Form.Item name="path" label="路径" rules={[{ required: true, message: "请输入路径" }]}>
+                <Input />
+            </Form.Item>
+            <Form.Item name="db_index" label="索引" >
                 <Input />
             </Form.Item>
         </Form>
@@ -107,6 +110,10 @@ const BioDatabases: FC<any> = ({ visible, onClose, params, callback }) => {
                 title: "路径",
                 dataIndex: "path",
                 key: "path"
+            }, {
+                title: "索引",
+                dataIndex: "db_index",
+                key: "db_index"
             }, {
                 title: "操作",
                 dataIndex: "action",

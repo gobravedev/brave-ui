@@ -8,10 +8,11 @@ const contextSlice = createSlice({
   initialState: {
     project: localProject
       ? JSON.parse(localProject)  // 如果存在，从 localStorage 解析
-      : {
-          name: "default",  // 否则使用默认值
-          projectKey: "default"
-        },
+      : {},
+      // {
+      //     name: "default",  // 否则使用默认值
+      //     project_id: "default"
+      //   },
       namespace: localNamespace
       ? JSON.parse(localNamespace)  // 如果存在，从 localStorage 解析
       : {
