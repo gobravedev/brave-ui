@@ -33,7 +33,7 @@ const Pipeline: FC<any> = ({ }) => {
     const tableRef = {
         inputFile: useRef<HTMLInputElement>(null),
         outputFile: useRef<HTMLInputElement>(null)
-      };
+    };
     // const [editor, setEditor] = useState<any>({
     //     open: false,
     // })
@@ -44,7 +44,7 @@ const Pipeline: FC<any> = ({ }) => {
     //     }));
     // };
     const { modal, openModal, closeModal } = useModal();
-    const { modals, openModals, closeModals } = useModals(["modalD","metadataModal","bindSample"])
+    const { modals, openModals, closeModals } = useModals(["modalD", "metadataModal", "bindSample"])
 
     // const [createOpen, setCreateOpen] = useState<any>(false)
     // const [record, setRecord] = useState<any>()
@@ -114,9 +114,12 @@ const Pipeline: FC<any> = ({ }) => {
         }
         const resp = await axios.get(api)
         // console.log(resp.data)
-        const data = resp.data
-        const content = JSON.parse(data['content'])
-        const pipeline = { ...content, ...data }
+        let pipeline = resp.data
+        if ( "content" in pipeline){
+            const content = JSON.parse(pipeline['content'])
+            pipeline = { ...content, ...pipeline }
+        }
+        
         setPipeline(pipeline)
         console.log(pipeline)
         // console.log(content)，
@@ -313,13 +316,13 @@ const Pipeline: FC<any> = ({ }) => {
             visible={modals.bindSample.visible}
             onClose={() => closeModals("bindSample")}
             operatePipeline={operatePipeline}
-            params={modals.bindSample.params}></BindSample> 
+            params={modals.bindSample.params}></BindSample>
 
 
         <OpenFile
             visible={modal.key == "openFile" && modal.visible}
             onClose={closeModal}
-            params={modal.params}></OpenFile>   
+            params={modal.params}></OpenFile>
     </div>
 }
 
@@ -334,13 +337,14 @@ interface PipelineComponentProps {
 interface PipelineComponentRenderProps extends PipelineComponentProps {
     component_type: string
 }
-const ComponentsRender = ({ component_type, operatePipeline, component ,...rest}: PipelineComponentRenderProps) => {
+const ComponentsRender = ({ component_type, operatePipeline, component, ...rest }: PipelineComponentRenderProps) => {
     if (!component_type || !component) return null
 
     const componentMap = {
         "pipeline": PipelineComponent,
         "software": SoftwareComponent,
         "file": FileComponent,
+        "script": ScriptComponent,
         "module": "module-card",
     }
     const Component = componentMap[component_type as keyof typeof componentMap]
@@ -351,7 +355,7 @@ const MemoizedComponentsRender = React.memo(ComponentsRender, (prevProps, nextPr
     return JSON.stringify(prevProps) === JSON.stringify(nextProps)
 });
 
-const SoftwareComponent = ({ operatePipeline, component,...rest }: PipelineComponentProps) => {
+const SoftwareComponent = ({ operatePipeline, component, ...rest }: PipelineComponentProps) => {
 
 
     return <>
@@ -376,18 +380,35 @@ const SoftwareComponent = ({ operatePipeline, component,...rest }: PipelineCompo
 
 }
 
-const FileComponent = ({ operatePipeline, component,...rest }: PipelineComponentProps) => {
+const FileComponent = ({ operatePipeline, component, ...rest }: PipelineComponentProps) => {
+    const { project } = useOutletContext<any>()
     return <>
         <UpstreamAnalysisOutput
             analysisMethod={[component]}
             operatePipeline={operatePipeline}
+            project={project}
         ></UpstreamAnalysisOutput>
 
 
     </>
 
 }
-const PipelineComponent = ({ operatePipeline, component,...rest }: PipelineComponentProps) => {
+
+const ScriptComponent = ({ operatePipeline, component, ...rest }: PipelineComponentProps) => {
+    const { project } = useOutletContext<any>()
+
+    return <>
+        {/* {JSON.stringify(component)} */}
+        <UpstreamAnalysisOutput
+            script={component.script}
+            analysisMethod={component.parent}
+            operatePipeline={operatePipeline}
+            project={project}
+        ></UpstreamAnalysisOutput>
+    </>
+}
+
+const PipelineComponent = ({ operatePipeline, component, ...rest }: PipelineComponentProps) => {
     const [items, setItems] = useState<any>([])
 
     const getPipline: any = (pipeline: any) => {
@@ -407,7 +428,7 @@ const PipelineComponent = ({ operatePipeline, component,...rest }: PipelineCompo
                     // analysisPipline={item.analysisPipline}
                     // analysisMethod={item.analysisMethod}
                     // upstreamFormJson={item.upstreamFormJson}
-                    {...rest }
+                    {...rest}
                     {...item}
                     pipeline={{
                         component_id: pipeline.component_id

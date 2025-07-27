@@ -139,9 +139,13 @@ const ResultList = forwardRef<any, any>(({
     useEffect(() => {
         // const currentAnalysisMethod = analysisMethod[0]
         if (analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 0) {
+
             if (setActiveTabKey) {
+
                 setActiveTabKey(analysisMethod[0]?.component_id)
                 const currentAnalysisMethod = getCurrentAnalysisMenthod(analysisMethod[0]?.component_id)
+                // console.log("currentAnalysisMethod",currentAnalysisMethod)
+
                 setCurrentAnalysisMethod(currentAnalysisMethod)
             }
         }
@@ -207,7 +211,7 @@ const ResultList = forwardRef<any, any>(({
                 });
                 return acc;
             }, {});
-            // console.log("groupedData",groupedData)
+            console.log("groupedData",groupedData)
             if (setResultTableList) {
                 // console.log(groupedData)
                 setResultTableList(groupedData)
@@ -562,7 +566,7 @@ const ResultList = forwardRef<any, any>(({
                                     pipelineStructure: {
                                         relation_type: relationType, //"software_input_file",
                                         parent_component_id: software.component_id,
-                                        pipeline_id: pipeline.component_id
+                                        // pipeline_id: pipeline.component_id
                                     }
                                 })
                             }}>添加文件</Button>
@@ -577,7 +581,7 @@ const ResultList = forwardRef<any, any>(({
                                     data: currentAnalysisMethod,
                                     pipelineStructure: {
                                         relation_type: relationType,// "software_input_file",
-                                        pipeline_id: pipeline.component_id
+                                        // pipeline_id: pipeline.component_id
                                         // parent_component_id: currentAnalysisMethod.component_id,
                                         // pipeline_id: currentAnalysisMethod.pipeline_id
                                     }
@@ -598,14 +602,14 @@ const ResultList = forwardRef<any, any>(({
                 </Flex>
             </>}
             tabList={analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 1 ?
-                analysisMethod.map((it: any) => ({ key: it.component_id, label: it.label })) : undefined}
+                analysisMethod.map((it: any) => ({ key: it.component_id, label: it.component_name?it.component_name:"no_name" })) : undefined}
             activeTabKey={activeTabKey}
             onTabChange={onTabChange}
         >
             {import.meta.env.MODE == "development" && <>
 
             </>}
-
+                {/* {JSON.stringify(analysisMethod)} */}
             {/* {JSON.stringify(projectObj)} */}
             {/* {JSON.stringify(currentAnalysisMethod.component_id)} */}
             <Table

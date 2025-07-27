@@ -8,7 +8,10 @@ const ImportData: FC<any> = ({ visible, onClose, params, callback }) => {
     return <>
         <Modal open={visible} onClose={onClose} width={"80%"} onCancel={onClose} title="导入数据" footer={null}>
             {/* {JSON.stringify(params)} */}
-            <Tabs items={[
+            <MemoizedImportFileComponnetRender params={params} type="inputFile" callback={onClose} />
+
+            {/* {JSON.stringify(params)} */}
+            {/* <Tabs items={[
                 {
                     key: "1",
                     label: "输入文件",
@@ -28,18 +31,14 @@ const ImportData: FC<any> = ({ visible, onClose, params, callback }) => {
                         </>}
                     </>
                 },
-                // {
-                //     key: "3",
-                //     label: "metadata",
-                //     children: <SamplePage></SamplePage>
-                // }
-            ]}></Tabs>
+               
+            ]}></Tabs> */}
 
         </Modal>
     </>
 }
 
-const ImportFileComponnetRender: FC<any> = ({ params,type,callback }) => {
+const ImportFileComponnetRender: FC<any> = ({ params, type, callback }) => {
     if (!params) return <>无数据</>;
     // const [files, setFiles] = useState<any>()
     // const [currentFile, setCurrentFile] = useState<any>()
@@ -56,13 +55,9 @@ const ImportFileComponnetRender: FC<any> = ({ params,type,callback }) => {
                 ></ImportFile>
             })
         }
-
-
-
-
-
-
     } else if (params.component_type == "pipeline") {
+        return <ImportFile {...params} ></ImportFile>
+    } else if (params.component_type == "file") {
         return <ImportFile {...params} ></ImportFile>
     }
 }

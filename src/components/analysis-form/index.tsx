@@ -272,7 +272,7 @@ export const AnalysisForm: FC<any> = ({
     }
     return <>
         {contextHolder}
-        {JSON.stringify(rest)}
+        {/* {JSON.stringify(rest)} */}
         <Form form={form}   >
             <Form.Item name={"analysis_id"}  label="分析ID" >
                 <Input disabled></Input>
@@ -300,6 +300,7 @@ export const AnalysisForm: FC<any> = ({
             <Form.Item label="分析名称" name={"analysis_name"} style={{ maxWidth: 600 }} rules={[{ required: true, message: '该字段不能为空!' }]}>
                 <Input></Input>
             </Form.Item>
+            {/* {JSON.stringify(dataMap)} */}
             {formJson &&
                 <FormJsonComp project={project} formJson={formJson} dataMap={dataMap}></FormJsonComp>
             }
