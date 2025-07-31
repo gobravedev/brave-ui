@@ -3,6 +3,7 @@ import axios from "axios";
 import { FC, useEffect, useState } from "react";
 import FormJsonComp from "../form-components";
 import { listAnalysisFiles } from '@/api/analysis-software'
+import { useOutletContext } from "react-router";
 
 export const AnalysisForm: FC<any> = ({
     pipeline,
@@ -21,6 +22,7 @@ export const AnalysisForm: FC<any> = ({
     setFilePlot,
     plotReloadTable,
     callback,
+    dataComponentIds,
     name,
     ...rest
 }) => {
@@ -58,98 +60,74 @@ export const AnalysisForm: FC<any> = ({
     // const getData = async (inputAnalysisMethod:any)=>{
     // }
 
-    const rank = [
-        {
-            label: "SGB",
-            value: "SGB"
-        }, {
-            label: "SPECIES",
-            value: "SPECIES"
-        }, {
-            label: "GENUS",
-            value: "GENUS"
-        }, {
-            label: "FAMILY",
-            value: "FAMILY"
-        }, {
-            label: "ORDER",
-            value: "ORDER"
-        }, {
-            label: "CLASS",
-            value: "CLASS"
-        }, {
-            label: "PHYLUM",
-            value: "PHYLUM"
-        },
-    ]
-    const group_field = [
-        {
-            label: "样本分组",
-            value: "sample_group"
-        }, {
-            label: "样本分组名称",
-            value: "sample_group_name"
-        }, {
-            label: "样本来源",
-            value: "sample_source"
-        }, {
-            label: "宿主疾病",
-            value: "host_disease"
-        }
-    ]
+    
+    // const group_field = [
+    //     {
+    //         label: "样本分组",
+    //         value: "sample_group"
+    //     }, {
+    //         label: "样本分组名称",
+    //         value: "sample_group_name"
+    //     }, {
+    //         label: "样本来源",
+    //         value: "sample_source"
+    //     }, {
+    //         label: "宿主疾病",
+    //         value: "host_disease"
+    //     }
+    // ]
     const dataMap_ = {
         // "sample_group_list": sampleGroup,
         "first_data_key": undefined,
-        "rank": rank,
-        group_field: group_field
+    
     }
     const [dataMap, setDataMap] = useState<any>(dataMap_)
 
 
-    const runPlot = async ({ moduleName, params }: any) => {
-        const values = await form.validateFields()
-        console.log(values)
-        setPlotLoading(true)
+    // const runPlot = async ({ moduleName, params }: any) => {
+    //     const values = await form.validateFields()
+    //     console.log(values)
+    //     setPlotLoading(true)
 
-        const downstreamInput = {
-            inputAnalysisMenthod: inputAnalysisMethod,
-            moduleName: moduleName,
-            params: params
-            // analysisMethod:saveAnalysisMethod
-        }
-        // console.log(downstreamInput)
+    //     const downstreamInput = {
+    //         inputAnalysisMenthod: inputAnalysisMethod,
+    //         moduleName: moduleName,
+    //         params: params
+    //         // analysisMethod:saveAnalysisMethod
+    //     }
+    //     // console.log(downstreamInput)
 
-        try {
-            const reqParams = {
-                ...params,
-                ...values,
-                project: project,
-                analysis_method: saveAnalysisMethod,
-                table_type: tableType,
-                imgType: imgType,
-                ...downstreamInput,
-                software: "python",
-                component_id: rest.component_id
-            }
-            if (rest?.moduleDir) {
-                reqParams['module_dir'] = rest.moduleDir
-            }
-            // console.log(reqParams)
-            const resp: any = await axios.post(`/fast-api/file-parse-plot/${moduleName}`, reqParams)
-            setFilePlot(resp.data)
-            if (plotReloadTable && values.is_save_analysis_result) {
-                plotReloadTable()
-            }
-        } catch (error: any) {
-            console.log(error)
-            if (error.response?.data) {
-                messageApi.error(error.response.data.detail)
-            }
-        }
+    //     try {
+    //         const reqParams = {
+    //             ...params,
+    //             ...values,
+    //             project: project,
+    //             analysis_method: saveAnalysisMethod,
+    //             table_type: tableType,
+    //             imgType: imgType,
+    //             ...downstreamInput,
+    //             software: "python",
+    //             component_id: rest.component_id
+    //         }
+    //         if (rest?.moduleDir) {
+    //             reqParams['module_dir'] = rest.moduleDir
+    //         }
+    //         // console.log(reqParams)
+    //         const resp: any = await axios.post(`/fast-api/file-parse-plot/${moduleName}`, reqParams)
+    //         setFilePlot(resp.data)
+    //         if (plotReloadTable && values.is_save_analysis_result) {
+    //             plotReloadTable()
+    //         }
+    //     } catch (error: any) {
+    //         console.log(error)
+    //         if (error.response?.data) {
+    //             messageApi.error(error.response.data.detail)
+    //         }
+    //     }
 
-        setPlotLoading(false)
-        // console.log(resp.data);
-    }
+    //     setPlotLoading(false)
+    //     // console.log(resp.data);
+    // }
     useEffect(() => {
         if (name) {
             form.setFieldValue("analysis_name", name)
@@ -210,14 +188,14 @@ export const AnalysisForm: FC<any> = ({
             if (formJson) {
                 analysisMetnodNames = formJson.filter((item: any) => item.inputAnalysisMethod !== undefined).map((item: any) => item.inputAnalysisMethod);
             }
-            console.log(formJson)
+            // console.log(formJson)
             // console.log(analysisMetnodNames)
             if (analysisMetnodNames.length != 0) {
                 loadData(analysisMetnodNames)
             } else {
                 const data = { ...dataMap_, ...resultTableList, first_data_key: getFirstKey(resultTableList) }
                 console.log(data)
-                console.log(resultTableList)
+                // console.log(resultTableList)
                 setDataMap(data)
 
             }
@@ -240,7 +218,8 @@ export const AnalysisForm: FC<any> = ({
             table_type: tableType,
             imgType: imgType,
             software: "python",
-            component_id: rest.component_id
+            component_id: rest.component_id,
+            data_component_ids:JSON.stringify(dataComponentIds)
         }
         const scriptType = rest.script_type || "script"
         console.log(scriptType)
@@ -272,6 +251,7 @@ export const AnalysisForm: FC<any> = ({
     }
     return <>
         {contextHolder}
+        {/* {JSON.stringify(projectObj)} */}
         {/* {JSON.stringify(rest)} */}
         <Form form={form}   >
             <Form.Item name={"analysis_id"}  label="分析ID" >

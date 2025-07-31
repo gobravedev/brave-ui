@@ -2,9 +2,46 @@ import { Button, Flex, Form, Input, InputNumber, Select } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import axios from "axios";
 import { Component, FC, useEffect, useState, memo } from "react";
-import { data } from "react-router";
+import { data, useOutletContext } from "react-router";
 const FormJsonComp: FC<any> = memo(({ formJson, dataMap }) => {
     if (!formJson) return null
+    const {projectObj} = useOutletContext<any>()
+
+    const rank = [
+        {
+            label: "SGB",
+            value: "SGB"
+        }, {
+            label: "SPECIES",
+            value: "SPECIES"
+        }, {
+            label: "GENUS",
+            value: "GENUS"
+        }, {
+            label: "FAMILY",
+            value: "FAMILY"
+        }, {
+            label: "ORDER",
+            value: "ORDER"
+        }, {
+            label: "CLASS",
+            value: "CLASS"
+        }, {
+            label: "PHYLUM",
+            value: "PHYLUM"
+        },
+    ]
+    const getGroupField = ()=>{
+        if (!projectObj?.metadata_form)return []
+        return projectObj?.metadata_form.map((item:any)=>({
+            label:item.label,
+            value: item.name
+        }))
+    }
+    const constDataMap = {
+        "rank": rank,
+        group_field: getGroupField()
+    }
     // console.log("dataMap",dataMap)
     const componentMap: any = {
         GroupSelect: {
@@ -35,7 +72,7 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap }) => {
             Component: BaseSelect,
             dataKey: "group_field",
             mode: undefined,
-            initialValue: "sample_group"
+            initialValue: "group"
         }, FilterFieldSelect: {
             Component: FilterSelect,
             dataKey: "sample_group_list",
@@ -44,7 +81,7 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap }) => {
         },
         GroupSelectSampleButton: {
             Component: GroupSelectSampleButton,
-            dataKey: "sample_group_list"
+            // dataKey: "sample_group_list"
         }, MetaphlanCladeSelect: {
             Component: MetaphlanCladeSelect,
         }, SelectAll: {
@@ -54,6 +91,7 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap }) => {
     };
     const ComponentsRender = ({ type, dataMap, inputAnalysisMethod, dataKey: dataKey_, data: data_, name,component_id, inputKey, ...rest }: any) => {
         if (!dataMap) return <div>加载中....</div> //(() => )
+        dataMap = {...dataMap,...constDataMap}
         const componentObj = componentMap[type] //|| (() => <div>未知类型</div>);
         // if (first_data_key in dataMap_)
         // if(!dataMap_ && !dataMap_.first_data_key){
@@ -64,9 +102,9 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap }) => {
             return <div>未知类型 {type}</div>
         }
         // debugger
-        const { Component, ...crest } = componentObj
+        const { Component,dataKey, ...crest } = componentObj
         // debugger
-
+        console.log(crest)
 
         let data: any = []
         if (data_) {
@@ -84,7 +122,12 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap }) => {
                     data = dataMap[dataKey_]
                 }
             } else {
-                if ("first_data_key" in dataMap) {
+                if (dataKey){
+                    if (dataKey in dataMap){
+                        data = dataMap[dataKey]
+                    }
+
+                }else if ("first_data_key" in dataMap) {
                     data = dataMap[dataMap['first_data_key']]
                 } else {
                     // 上游分析的key
@@ -266,6 +309,7 @@ const BaseInputNumber: FC<any> = ({ label, name, data, initialValue, rules, ...r
 }
 export const BaseSelect: FC<any> = ({ label, name, data, initialValue, rules, ...rest }) => {
     return <>
+    {/* {JSON.stringify(data)} */}
         <Form.Item initialValue={initialValue} label={label} name={name} rules={rules}>
             <BasicSelect {...rest} options={data}></BasicSelect>
             {/* <Select showSearch filterOption={(input: any, option: any) =>
@@ -353,7 +397,7 @@ export const GroupSelectSampleButton: FC<any> = ({ label, name, rules, data, fil
         <Form.Item label={label} name={[name, "sample"]} rules={rules}>
             <GroupSelectSample sampleGrouped={sampleGrouped} sampleGroup={options} watch={[name, "group"]}></GroupSelectSample>
         </Form.Item>
-        <Form.Item label={label} name={[name, "group"]} rules={rules}>
+        <Form.Item label={label} name={[name, "group"]} >
             <GroupSelectButton sampleGrouped={sampleGrouped}></GroupSelectButton>
         </Form.Item>
     </>

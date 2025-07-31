@@ -470,6 +470,7 @@ const PipelineComponent = ({ operatePipeline, component, ...rest }: PipelineComp
     }
     const getInitialNodes = (component:any) => {
         const softwareList = component.software
+        if (!softwareList)  return []
         const position = JSON.parse(component.position) || []
         const positionMap = position.reduce((acc:any,item:any)=>{
             acc[item.component_id] = item.position

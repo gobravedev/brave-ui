@@ -474,7 +474,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
         {contextHolder}
         {modalContextHolder}
         {/* {JSON.stringify(inputAnalysisMethod)} */}
-        <ResultList
+        {inputAnalysisMethod &&         <ResultList
             {...rest}
             pipeline={pipeline}
             software={rest}
@@ -491,6 +491,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
             analysisMethod={inputAnalysisMethod}
             setRecord={(record: any) => onClickItem(record)}
             setResultTableList={setResultTableList}></ResultList>
+}
 
 
         <div style={{ marginBottom: "1rem" }}></div>

@@ -27,29 +27,30 @@ project,library_name,sample_name,sequencing_target,sequencing_technique,sample_c
 test,R250506-21,OL-RNA-1,RNA,NGS,single_genome,/V350344603_L03_117_1.fq.gz,/V350344603_L03_117_2.fq.gz
 
 `
-const ImportFile: FC<{ component_type: any, component_id: any, operatePipeline: any, label: any, name: any, callback: any }> = ({ component_type, component_id, operatePipeline, label, name, callback }) => {
+const ImportFile: FC<{ component_type: any, component_id: any,component_name:any,inputForm:any,inputFormMap:any, operatePipeline: any, name: any, callback: any }> = ({
+    component_type, component_id,component_name, inputForm,operatePipeline, name, callback }) => {
     // const { component_type,component_id,operatePipeline } = pipeline
     const [form] = Form.useForm();
-    const [components, setComponents] = useState<any>([])
+    // const [components, setComponents] = useState<any>([])
     console.log("-->ImportFile渲染")
     // const [dataMap, setDataMap] = useState<any>({})
     // const componentId = Form.useWatch(["component_id"], form)
 
-    const [inputForm, setInputForm] = useState<any>()
+    // const [inputForm, setInputForm] = useState<any>()
     const { messageApi, project } = useOutletContext<any>()
     const [parseData, setParseData] = useState<any>()
-    const [selectedFile, setSelectedFile] = useState<any>()
+    // const [selectedFile, setSelectedFile] = useState<any>()
     const setting = useSelector((state: any) => state.global.setting)
-    const [inputFormMap, setInputFormMap] = useState<any>({})
+    // const [inputFormMap, setInputFormMap] = useState<any>({})
 
     const [selectedField, setSelectedField] = useState<any>()
-    useEffect(() => {
-        // setInputForm([])
-        // setParseData(undefined)
-        if (component_id) {
-            findByComponentId(component_id)
-        }
-    }, [component_id])
+    // useEffect(() => {
+    //     // setInputForm([])
+    //     // setParseData(undefined)
+    //     if (component_id) {
+    //         findByComponentId(component_id)
+    //     }
+    // }, [component_id])
     // const [operatureUrl, setOperatureUrl] = useState<any>()
     // const listPipelineComponents = async () => {
     //     const resp = await listPipelineComponentsApi({
@@ -72,50 +73,20 @@ const ImportFile: FC<{ component_type: any, component_id: any, operatePipeline: 
     //     console.log(resp)
     // }
 
-    const findByComponentId = async (componentId: any) => {
-        const resp = await axios.get(`/find-by-component-id/${componentId}`)
-        console.log(resp)
-        const data = JSON.parse(resp.data.content)
-        if (data.inputForm) {
-            setInputForm(data.inputForm)
-            setInputFormMap(data.inputForm.reduce((acc: any, item: any) => {
-                acc[item.label] = item.name
-                return acc
-            }, {}))
-        }
+    // const findByComponentId = async (componentId: any) => {
+    //     const resp = await axios.get(`/find-by-component-id/${componentId}`)
+    //     console.log(resp)
+    //     const data = JSON.parse(resp.data.content)
+    //     if (data.inputForm) {
+    //         setInputForm(data.inputForm)
+    //         setInputFormMap(data.inputForm.reduce((acc: any, item: any) => {
+    //             acc[item.label] = item.name
+    //             return acc
+    //         }, {}))
+    //     }
 
-    }
-    const getPipelineComponents = async () => {
-        // console.log(pipeline)
-        // let options = []
-        // if (pipeline.component_type == "software") {
-
-        // } else if (pipeline.component_type == "pipeline") {
-        //     options = pipeline.items.flatMap((item: any) => {
-
-        //         const inputFile = item.inputFile || []
-        //         const outputFile = item.outputFile || []
-        //         console.log(item)
-        //         const inputOptions = inputFile.map((it: any) => {
-        //             return {
-        //                 label: `${it.label}(${it.name})(${it.component_id})`,
-        //                 value: it.component_id
-        //             }
-        //         })
-        //         const outputOptions = outputFile.map((it: any) => {
-        //             return {
-        //                 label: `${it.label}(${it.name})(${it.component_id})`,
-        //                 value: it.component_id
-        //             }
-        //         })
-        //         return [
-        //             ...inputOptions,
-        //             ...outputOptions
-        //         ]
-        //     })
-        // }
-        // setComponents(options)
-    }
+    // }
+  
     const getRequestParams = (values: any) => {
         const { content, sample_name } = values
         if (parseData) {
@@ -203,11 +174,10 @@ const ImportFile: FC<{ component_type: any, component_id: any, operatePipeline: 
 
     useEffect(() => {
         // listPipelineComponents()
-        getPipelineComponents()
     }, [])
     return <>
         <Card
-            title={`${label}(${name})(${component_id})`}
+            title={`${component_name}(${component_id})`}
             extra={<Flex gap={"small"} >
                 <Button size="small" color="cyan" variant="solid" onClick={() => {
                     operatePipeline.openModal("modalC", {
@@ -228,15 +198,15 @@ const ImportFile: FC<{ component_type: any, component_id: any, operatePipeline: 
             {/* {JSON.stringify(setting)} */}
             {/* {JSON.stringify(selectedField)}
                 {JSON.stringify(inputFormMap)} */}
-
+ {JSON.stringify(inputForm)}
        
 
-            <Form.Item label="字段选择">
+            {/* <Form.Item label="字段选择">
                 <Select style={{ width: "5rem" }} value={selectedField} onChange={(value) => setSelectedField(value)} options={Object.entries(inputFormMap).map(([key, value]) => ({
                     label: key,
                     value: key
                 }))}></Select>
-            </Form.Item>
+            </Form.Item> */}
 
             <Form form={form}>
                 {/* <Form.Item name={"component_id"} label="组件" rules={[{ required: true, message: "请选择组件" }]} >
@@ -306,16 +276,16 @@ const ImportFile: FC<{ component_type: any, component_id: any, operatePipeline: 
                     <TextArea rows={10}></TextArea>
                 </Form.Item> */}
             </Form>
-            <div style={{marginTop:"1rem"}}></div>
-            <FileBrowser path={setting.DATA_DIR} onSelectFile={(file: any) => {
+            {/* <div style={{marginTop:"1rem"}}></div> */}
+            {/* <FileBrowser path={setting.DATA_DIR} onSelectFile={(file: any) => {
                 if (selectedField) {
                     // console.log(file)
                     // console.log(inputFormMap[selectedField])
-                    form.setFieldValue(inputFormMap[selectedField], file.path)
+                    // form.setFieldValue(inputFormMap[selectedField], file.path)
                 } else {
                     messageApi.error("请先选择字段")
                 }
-            }}></FileBrowser>
+            }}></FileBrowser> */}
 
 
             {/* {JSON.stringify(Object.entries(parseData[0]).map(([key, value]) => ({
