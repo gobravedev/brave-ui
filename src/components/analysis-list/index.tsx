@@ -9,7 +9,7 @@ import PipelineInfo from "../pipeline-monitor"
 import { runAnalysisApi } from "@/api/analysis"
 import AnalysisResultView from "../analysis-result-view"
 import { useSSEContext } from "@/context/sse/useSSEContext"
-
+import {LineChartOutlined } from '@ant-design/icons'
 export const readHdfsAPi = (contentPath: any) => axios.get(`/api/read-hdfs?path=${contentPath}`)
 export const readJsonAPi = (contentPath: any) => axios.get(`/fast-api/read-json?path=${contentPath}`)
 
@@ -29,7 +29,9 @@ const ResultList = forwardRef<any, any>(({
     project,
     software,
     component_id,
-    operatePipeline
+    component_ids,
+    operatePipeline,
+    editParams
 }, ref) => {
     useImperativeHandle(ref, () => ({
         reload: loadData
@@ -112,6 +114,7 @@ const ResultList = forwardRef<any, any>(({
         let resp: any = await axios.post(`/list-analysis`, {
             // analysisMethod: analysisMethod,
             component_id: component_id,
+            component_ids:component_ids,
             project: project
         });
         // if (analysisMethod) {
@@ -243,6 +246,8 @@ const ResultList = forwardRef<any, any>(({
                             {record.analysis_status == "created" ? "运行" : "重新运行"}
                         </Button>
                     </Popconfirm>
+                    {editParams &&   <Button size="small" color="cyan" variant="solid" onClick={()=>editParams(record)}>编辑参数</Button>}
+                  
                     {isSelected(record, "modalA") ?
                         <Button size="small" color={"cyan"} variant="solid" onClick={() => {
                             closeModal()
@@ -311,7 +316,7 @@ const ResultList = forwardRef<any, any>(({
     return <>
         {contextHolder}
         {/* {JSON.stringify(location.pathname)} */}
-        <Card title={title} extra={
+        <Card size="small" title={<><LineChartOutlined /> 分析记录</>} extra={
             <Flex gap={"small"}>
                 {/* {software && <>
                     {software.outputFormat && <>

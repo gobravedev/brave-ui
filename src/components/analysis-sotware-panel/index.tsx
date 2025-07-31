@@ -17,6 +17,7 @@ import { listAnalysisFiles } from '@/api/analysis-software'
 import { useSelector } from "react-redux"
 import BioDatabaseForm from "@/components/bio-database-form"
 import { CloseCircleOutlined } from "@ant-design/icons"
+import SortTable from "@/components/sort-table"
 type AnalysisFile = {
     name: string,
     label: string
@@ -31,7 +32,7 @@ type AnalysisSoftware = {
     parseAnalysisModule?: any,
     parseAnalysisResultModule?: any,
     databases?: any,
-
+    software?: any,
 
     wrapAnalysisPipeline?: any,
     analysisPipline?: any,
@@ -44,7 +45,8 @@ type AnalysisSoftware = {
     upstreamFormJson?: any,
     downstreamAnalysis?: any,
     operatePipeline?: any,
-    label?: any
+    label?: any,
+    hiddenUpstreamAnalysis?: boolean
 }
 
 const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
@@ -179,9 +181,9 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
                         {...rest}
                         pipeline={pipeline}
                         record={record}
-                        software={{
-                            component_id: rest.component_id
-                        }}
+                        // software={{
+                        //     component_id: rest.component_id
+                        // }}
                         onClickItem={setRecord}
                         project={project}
                         operatePipeline={operatePipeline}
@@ -335,9 +337,7 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
 
                     }
 
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        operatePipeline.openModal("modalG", rest)
-                    }}>查看依赖</Button>
+              
                     <Button size="small" color="cyan" variant="solid" onClick={() => {
                         operatePipeline.openModal("modalB", {
                             module_type: "nextflow",
@@ -351,39 +351,26 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
                     {/* {JSON.stringify(rest)} */}
                 </Flex>
 
-                <Flex gap={"small"} style={{ marginBottom: "1rem", flexWrap: "wrap" }}>
 
 
-
-                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        operatePipeline.openModal("modalB", {
-                            module_type: "py_parse_analysis",
-                            file_type: "py",
-                            module_name: rest.parseAnalysisModule,
-                            component_id: rest.component_id,
-                        })
-                    }}>输入解析模块</Button> */}
-                    {/* 
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        operatePipeline.openModal("modalB", {
-                            module_type: "py_parse_analysis_result",
-                            file_type: "py",
-                            module_name: rest.parseAnalysisResultModule,
-                            component_id: rest.component_id,
-                        })
-                    }}>输出解析模块</Button> */}
-                    {/* {rest.parseAnalysisResultModule && <>
-                        {rest.parseAnalysisResultModule.map((item: any, index: any) =>
-                            
-                    </>} */}
-                </Flex>
                 {/* {JSON.stringify(rest)} */}
                 {rest.databases && <Flex gap={"small"} style={{ marginBottom: "1rem", flexWrap: "wrap" }}>
                     <Button size="small" color="cyan" variant="solid" onClick={() => {
                         operatePipeline.openModal("modalE", rest.databases)
                     }}>配置数据库</Button>
                 </Flex>}
+                {/* {
+                    rest?.software && <>
 
+                        <SortTable data={rest?.software.map((item: any) => ({
+                            ...item,
+                            key: item.component_id
+                        }))}></SortTable>
+
+                    </>
+                } */}
+
+                <div style={{ marginBottom: "1rem" }}></div>
                 <Card title={`详细信息`}>
                     {record ? <>
                         <p>
@@ -404,7 +391,7 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
 export default AnalysisSoftwarePanel
 
 
-export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, operatePipeline, project, markdown, analysisPipline, upstreamFormJson, inputAnalysisMethod, onClickItem, cardExtra, ...rest }) => {
+export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeline, project, markdown, analysisPipline, upstreamFormJson, inputAnalysisMethod, onClickItem, cardExtra, ...rest }) => {
     const [upstreamForm] = Form.useForm();
     const [resultTableList, setResultTableList] = useState<any>()
     const [messageApi, contextHolder] = message.useMessage();
@@ -416,17 +403,20 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, ope
     const [currentAnalysisMethod, setCurrentAnalysisMethod] = useState<any>()
     // const [analysisParams, setAnalysisParams] = useState<any>()
     const [modal, modalContextHolder] = Modal.useModal();
+    const { projectObj } = useOutletContext<any>()
 
     // const {    setPipelineStructure,setOperateOpen,setPipelineRecord,datelePipeline} = operatePipeline
     const tableRef = useRef<any>(null)
 
     const getrRequestParams = (values: any) => {
+        console.log(inputAnalysisMethod.map((item:any)=>item.component_id))
         const requestParams = {
             ...values,
             project: project,
             // analysis_pipline: analysisPipline,
             // parse_analysis_module: rest.parse_analysis_module,
             component_id: rest.component_id,
+            data_component_ids:JSON.stringify(dataComponentIds)
             // pipeline_id: pipeline.component_id
             // parse_analysis_result_module: rest.parseAnalysisResultModule
         }
@@ -468,6 +458,13 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, ope
             value: "/data/databases/mouse/bowtie2/Mus_musculus.GRCm39.dna_sm.toplevel.fa"
         }
     ]
+    const getGroupField = () => {
+        if (!projectObj?.metadata_form) return []
+        return projectObj?.metadata_form.map((item: any) => ({
+            label: item.label,
+            value: item.name
+        }))
+    }
     const dataMap: any = {
         "host_genome_index": host_genome_index
     }
@@ -476,9 +473,11 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, ope
         {/* {JSON.stringify(software)} */}
         {contextHolder}
         {modalContextHolder}
+        {/* {JSON.stringify(inputAnalysisMethod)} */}
         <ResultList
+            {...rest}
             pipeline={pipeline}
-            software={software}
+            software={rest}
             currentAnalysisMethod={currentAnalysisMethod}
             setCurrentAnalysisMethod={setCurrentAnalysisMethod}
             operatePipeline={operatePipeline}
@@ -496,19 +495,20 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, ope
 
         <div style={{ marginBottom: "1rem" }}></div>
 
-        <Form form={upstreamForm}>
+        {!rest?.hiddenUpstreamAnalysis && <>
+            <Form form={upstreamForm}>
 
-            <Collapse
-                // activeKey={collapseActiveKey}
-                style={{ marginTop: "1rem" }}
-                // defaultActiveKey={['1']}
-                size="small"
-                items={[
-                    {
-                        key: '1',
-                        label: `执行分析 (${rest.name})`,
-                        children: <>
-                            {/* <Flex gap={"small"} style={{ marginBottom: "1rem" }}>
+                <Collapse
+                    // activeKey={collapseActiveKey}
+                    style={{ marginTop: "1rem" }}
+                    // defaultActiveKey={['1']}
+                    size="small"
+                    items={[
+                        {
+                            key: '1',
+                            label: `执行分析 (${rest.component_name})`,
+                            children: <>
+                                {/* <Flex gap={"small"} style={{ marginBottom: "1rem" }}>
                                 <Button color="cyan" variant="solid" onClick={() => {
                                     operatePipeline.openModal("modalB", {
                                         module_type: "nextflow",
@@ -524,29 +524,42 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, ope
                                     })
                                 }}>输入解析模块</Button>
                             </Flex> */}
-                            <Spin spinning={loading}>
+                                <Spin spinning={loading}>
 
-                                {/* {JSON.stringify(rest.parseAnalysisResultModule)} */}
-                                <Form.Item name={"analysis_id"} label="分析ID" >
-                                    <Input disabled></Input>
-                                </Form.Item>
-                                <Form.Item initialValue={`${rest.name}`} name={"analysis_name"} label={"分析名称"} rules={[{ required: true, message: '该字段不能为空!' }]}>
-                                    <Input></Input>
-                                </Form.Item>
-                                {/* 查看datamap */}
-                                {/* <pre>
+                                    {/* {JSON.stringify(rest.parseAnalysisResultModule)} */}
+                                    <Form.Item name={"analysis_id"} label="分析ID" >
+                                        <Input disabled></Input>
+                                    </Form.Item>
+                                    <Form.Item initialValue={`${rest.component_name}`} name={"analysis_name"} label={"分析名称"} rules={[{ required: true, message: '该字段不能为空!' }]}>
+                                        <Input></Input>
+                                    </Form.Item>
+                                    <FormJsonComp formJson={[{
+                                        "name": "group_field",
+                                        "label": "分组列",
+                                        "rules": [
+                                            {
+                                                "required": true,
+                                                "message": "该字段不能为空!"
+                                            }
+                                        ],
+                                        "type": "GroupFieldSelect"
+                                    }]} dataMap={[]}></FormJsonComp>
+
+                                    {/* 查看datamap */}
+                                    {/* <pre>
                                 {JSON.stringify(resultTableList,null,2)}
                                 </pre> */}
-                                <FormJsonComp formJson={inputAnalysisMethod} dataMap={resultTableList}></FormJsonComp>
-                                {/* {JSON.stringify(rest)} */}
-                                <BioDatabaseForm software={rest} operatePipeline={operatePipeline} formJson={rest.databases}></BioDatabaseForm>
-                                {/* <FormJsonComp formJson={rest.databases} dataMap={resultTableList}></FormJsonComp> */}
+                                    {/* {JSON.stringify(inputAnalysisMethod)} */}
+                                    <FormJsonComp formJson={inputAnalysisMethod} dataMap={resultTableList}></FormJsonComp>
+                                    {/* {JSON.stringify(rest)} */}
+                                    <BioDatabaseForm software={rest} operatePipeline={operatePipeline} formJson={rest.databases}></BioDatabaseForm>
+                                    {/* <FormJsonComp formJson={rest.databases} dataMap={resultTableList}></FormJsonComp> */}
 
-                                {/* {resultTableList && inputAnalysisMethod.map((it: any) => (<> */}
-                                {/* <Form.Item key={it.key} label={it.name} name={it.key}>
+                                    {/* {resultTableList && inputAnalysisMethod.map((it: any) => (<> */}
+                                    {/* <Form.Item key={it.key} label={it.name} name={it.key}>
                                         <SelectComp it={it} resultTableList={resultTableList} ></SelectComp>
                                     </Form.Item> */}
-                                {/* 
+                                    {/* 
                                     {it.mode == "multiple" && <GroupSelectSampleButton
                                         key={it.key}
                                         label={it.name}
@@ -556,38 +569,38 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, ope
                                         groupField={"sample_group"} ></GroupSelectSampleButton>} */}
 
 
-                                {/* </>))} */}
-                                {upstreamFormJson &&
-                                    <FormJsonComp formJson={upstreamFormJson} dataMap={dataMap}></FormJsonComp>
-                                }
-                                <Button size="small" color="cyan" variant="solid" style={{ marginRight: "0.5rem" }} onClick={() => {
-                                    saveUpstreamAnalysis(false)
+                                    {/* </>))} */}
+                                    {upstreamFormJson &&
+                                        <FormJsonComp formJson={upstreamFormJson} dataMap={dataMap}></FormJsonComp>
+                                    }
+                                    <Button size="small" color="cyan" variant="solid" style={{ marginRight: "0.5rem" }} onClick={() => {
+                                        saveUpstreamAnalysis(false)
 
-                                }}>查看参数</Button>
+                                    }}>查看参数</Button>
 
-                                <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>{formId ? <>更新分析</> : <>保存分析</>}</Button>
-                                {formId && <Button size="small" color="cyan" variant="solid" onClick={() => upstreamForm.setFieldValue("id", undefined)}>取消更新</Button>}
-                                {/* <hr />
+                                    <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>{formId ? <>更新分析</> : <>保存分析</>}</Button>
+                                    {formId && <Button size="small" color="cyan" variant="solid" onClick={() => upstreamForm.setFieldValue("id", undefined)}>取消更新</Button>}
+                                    {/* <hr />
                                 
                                 <hr /> */}
-                                <Collapse ghost items={[
-                                    {
-                                        key: "1",
-                                        label: "更多",
-                                        children: <>
-                                            <Form.Item noStyle shouldUpdate>
-                                                {() => (
-                                                    <Typography>
-                                                        <pre>{JSON.stringify(getrRequestParams(upstreamForm.getFieldsValue()), null, 2)}</pre>
-                                                    </Typography>
-                                                )}
-                                            </Form.Item>
-                                        </>
-                                    }
-                                ]} />
+                                    <Collapse ghost items={[
+                                        {
+                                            key: "1",
+                                            label: "更多",
+                                            children: <>
+                                                <Form.Item noStyle shouldUpdate>
+                                                    {() => (
+                                                        <Typography>
+                                                            <pre>{JSON.stringify(getrRequestParams(upstreamForm.getFieldsValue()), null, 2)}</pre>
+                                                        </Typography>
+                                                    )}
+                                                </Form.Item>
+                                            </>
+                                        }
+                                    ]} />
 
-                                {/* {JSON.stringify(rest)} */}
-                                {/* <AnalysisList
+                                    {/* {JSON.stringify(rest)} */}
+                                    {/* <AnalysisList
                                     project={project}
                                     ref={tableRef}
                                     shouldTrigger={true}
@@ -604,64 +617,65 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, software, ope
                                         onClickItem(record)
                                     }}></AnalysisList> */}
 
-                                {/* {record && record.dataType == 'analysis' && <PipelineMonitor analysisId={record.analysis_id} ></PipelineMonitor>} */}
+                                    {/* {record && record.dataType == 'analysis' && <PipelineMonitor analysisId={record.analysis_id} ></PipelineMonitor>} */}
 
 
-                                {/* {markdown} */}
-                                <AnalysisResultView
-                                    plotLoading={false}
-                                    markdown={markdown}></AnalysisResultView>
-                                {/* <Literature params={{
+                                    {/* {markdown} */}
+                                    <AnalysisResultView
+                                        plotLoading={false}
+                                        markdown={markdown}></AnalysisResultView>
+                                    {/* <Literature params={{
                                     obj_key: analysisPipline,
                                     obj_type: "analysis_img"
                                 }}></Literature> */}
-                            </Spin>
+                                </Spin>
 
-                        </>
-                    },
-                    // {
-                    //     key: "2",
-                    //     label: `分析记录 (${analysisPipline})`,
-                    //     children: <>
-                    //         <Spin spinning={loading}>
-                    //             {currentAnalysisMethod}
+                            </>
+                        },
+                        // {
+                        //     key: "2",
+                        //     label: `分析记录 (${analysisPipline})`,
+                        //     children: <>
+                        //         <Spin spinning={loading}>
+                        //             {currentAnalysisMethod}
 
-                    //         </Spin>
+                        //         </Spin>
 
-                    //     </>
-                    // }
-                ]}
-            >
-            </Collapse>
+                        //     </>
+                        // }
+                    ]}
+                >
+                </Collapse>
 
-        </Form>
-        <div style={{ marginBottom: "1rem" }}></div>
+            </Form>
+            <div style={{ marginBottom: "1rem" }}></div>
 
 
-        {/* <Flex gap={"small"} style={{ marginBottom: "1rem" }}>
+            {/* <Flex gap={"small"} style={{ marginBottom: "1rem" }}>
            
         </Flex> */}
 
-        <AnalysisList
-            project={project}
-            ref={tableRef}
-            shouldTrigger={true}
-            software={rest}
-            component_id={rest?.component_id}
-            operatePipeline={operatePipeline}
-            setRecord={(record: any) => {
-                const param = JSON.parse(record.request_param)
-                console.log(param)
-                upstreamForm.resetFields()
-                upstreamForm.setFieldsValue(param)
-                if (record?.id) {
-                    upstreamForm.setFieldValue("analysis_id", record?.analysis_id)
-                }
-                record['dataType'] = "analysis"
-                onClickItem(record)
-            }}></AnalysisList>
+            <AnalysisList
+                project={project}
+                ref={tableRef}
+                shouldTrigger={true}
+                software={rest}
+                component_id={rest?.component_id}
+                operatePipeline={operatePipeline}
+                setRecord={(record: any) => {
+                    const param = JSON.parse(record.request_param)
+                    console.log(param)
+                    upstreamForm.resetFields()
+                    upstreamForm.setFieldsValue(param)
+                    if (record?.id) {
+                        upstreamForm.setFieldValue("analysis_id", record?.analysis_id)
+                    }
+                    record['dataType'] = "analysis"
+                    onClickItem(record)
+                }}></AnalysisList>
 
-        <div style={{ marginBottom: "1rem" }}></div>
+            <div style={{ marginBottom: "1rem" }}></div>
+        </>}
     </>
 }
 
@@ -699,7 +713,7 @@ export const SelectComp: FC<any> = ({ it, resultTableList, value, onChange }) =>
 
 
 
-export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, software, operatePipeline, children, project, onClickItem, analysisType, analysisMethod, appendSampleColumns, script, ...rest }) => {
+export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, operatePipeline, children, project, onClickItem, analysisType, analysisMethod, appendSampleColumns, script, ...rest }) => {
     const [form] = Form.useForm();
 
     // const [loading, setLoading] = useState(false)
@@ -735,11 +749,6 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, software, operatePip
 
 
     const [sampleGroupApI, setSampleGroupApI] = useState<any>(false)
-    useEffect(() => {
-        if (script) {
-            plot({ ...script, name: script.name })
-        }
-    }, [script])
 
 
 
@@ -877,38 +886,73 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, software, operatePip
         const { name, analysisType, ...rest } = item
 
         if (record && analysisType == 'one') {
-            return <Button size="small" color="purple" variant={downstreamData?.component_id == rest.component_id ? "solid" : "filled"} onClick={() => plot({ ...rest, name: name })}>{name}({record.sample_name})</Button>
+            return <Button size="small" color="purple" variant={downstreamData?.component_id == rest.component_id ? "solid" : "filled"} onClick={() => plot({ ...rest, name: name })}>{rest.component_name}({record.sample_name})</Button>
         } else {
-            return <Button size="small" color="primary" variant={downstreamData?.component_id == rest.component_id ? "solid" : "filled"} onClick={() => plot({ ...rest, name: name })}>{name}</Button>
+            return <Button size="small" color="primary" variant={downstreamData?.component_id == rest.component_id ? "solid" : "filled"} onClick={() => plot({ ...rest, name: name })}>{rest.component_name}</Button>
 
         }
 
     }
+    const [componentIds, setComponentIds] = useState<any>()
+    useEffect(() => {
+        if (currentAnalysisMethod?.downstreamAnalysis) {
+            const componentIds = currentAnalysisMethod?.downstreamAnalysis.map((item: any) => item.component_id)
+            if (componentIds.length > 0) {
+                setComponentIds(componentIds)
+
+            }
+        }
+    }, [currentAnalysisMethod?.downstreamAnalysis])
+    useEffect(() => {
+        if (script) {
+            plot({ ...script, name: script.name })
+            setComponentIds([script.component_id])
+            // console.log(analysisMethod)
+        }
+    }, [script])
+
+    // const []
+    const [scriptMap, setScriptMap] = useState<any>()
+    useEffect(() => {
+        const script = analysisMethod.filter((item: any) => "downstreamAnalysis" in item)
+            .map((item: any) => item.downstreamAnalysis).flat(Infinity)
+        const scriptMap: any = script.reduce((acc: any, item: any) => {
+            acc[item.component_id] = item;
+            return acc;
+        }, {});
+        // console.log(script)
+        setScriptMap(scriptMap)
+    }, [analysisMethod])
+
     return <>
         {contextHolder}
         {/* {JSON.stringify(analysisMethod)} */}
-        <ResultList
-            pipeline={pipeline}
-            software={software}
-            currentAnalysisMethod={currentAnalysisMethod}
-            setCurrentAnalysisMethod={setCurrentAnalysisMethod}
-            operatePipeline={operatePipeline}
-            relationType="software_output_file"
-            title={`输出文件 ${analysisMethod.length > 0 ? "" : analysisMethod.map((it: any) => it.name)}`}
-            appendSampleColumns={appendSampleColumns}
-            activeTabKey={activeTabKey}
-            setActiveTabKey={setActiveTabKey}
-            cleanDom={cleanDom}
-            analysisType={"sample"}
-            analysisMethod={analysisMethod}
-            shouldTrigger={true}
-            form={form}
-            // setTableLoading={setLoading}
-            setResultTableList={setResultTableList}
-            setRecord={(data: any) => { setRecord(data); onClickItem(data) }}
-        // setTabletData={(data: any) => { setData(data) }}
+        {analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 0 && <>
+            <ResultList
+                {...rest}
+                pipeline={pipeline}
+                software={rest}
+                currentAnalysisMethod={currentAnalysisMethod}
+                setCurrentAnalysisMethod={setCurrentAnalysisMethod}
+                operatePipeline={operatePipeline}
+                relationType="software_output_file"
+                title={`输出文件 ${analysisMethod.length > 0 ? "" : analysisMethod.map((it: any) => it.name)}`}
+                appendSampleColumns={appendSampleColumns}
+                activeTabKey={activeTabKey}
+                setActiveTabKey={setActiveTabKey}
+                cleanDom={cleanDom}
+                analysisType={"sample"}
+                analysisMethod={analysisMethod}
+                shouldTrigger={true}
+                form={form}
+                // setTableLoading={setLoading}
+                setResultTableList={setResultTableList}
+                setRecord={(data: any) => { setRecord(data); onClickItem(data) }}
+            // setTabletData={(data: any) => { setData(data) }}
 
-        ></ResultList>
+            ></ResultList>
+        </>}
+
         <div style={{ marginBottom: "1rem" }}></div>
 
 
@@ -993,7 +1037,7 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, software, operatePip
                             key: '1',
                             label: <Tooltip title={<>
                                 <ul>
-                                    <li>software:{software?.component_id}</li>
+                                    <li>software:{rest?.component_id}</li>
                                     <li>file:{currentAnalysisMethod?.component_id}</li>
                                     <li>script:{downstreamData?.component_id}</li>
                                 </ul>
@@ -1067,6 +1111,7 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, software, operatePip
                                                     params={params}
                                                     name={btnName}
                                                     setPlotLoading={setPlotLoading}
+                                                    dataComponentIds={[currentAnalysisMethod?.component_id]}
                                                     inputAnalysisMethod={currentAnalysisMethod}
                                                     saveAnalysisMethod={saveAnalysisMethod}
                                                     project={project}
@@ -1159,26 +1204,45 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, software, operatePip
         </div>
         <div style={{ marginBottom: "1rem" }}></div>
         {/* 111 {project} */}
-        {downstreamData && <AnalysisList
-            project={project}
-            ref={tableRef}
-            shouldTrigger={true}
-            software={downstreamData}
-            component_id={downstreamData.component_id}
-            operatePipeline={operatePipeline}
-            setRecord={(record: any) => {
-                const param = JSON.parse(record.request_param)
-                console.log(param)
-                form.resetFields()
-                form.setFieldsValue(param)
-                if (record?.analysis_id) {
-                    form.setFieldValue("analysis_id", record?.analysis_id)
-                }
-                // record['dataType'] = "analysis"
-                onClickItem(record)
-            }}></AnalysisList>
-        }
+        {/* {JSON.stringify(getScriptComponentIds())} */}
+        {componentIds &&
+            <AnalysisList
+                project={project}
+                ref={tableRef}
+                shouldTrigger={true}
+                software={downstreamData}
+                component_ids={componentIds}
+                operatePipeline={operatePipeline}
+                editParams={(record: any) => {
+                    // console.log(scriptMap)
+                    // console.log(record)
+                    // console.log(record.component_id in scriptMap)
+                    if (record.component_id in scriptMap) {
+                        // console.log(11111111111111)
+                        plot({ ...scriptMap[record.component_id] })
 
+                        const param = JSON.parse(record.request_param)
+                        console.log(param)
+                        form.resetFields()
+                        form.setFieldsValue(param)
+                        if (record?.analysis_id) {
+                            form.setFieldValue("analysis_id", record?.analysis_id)
+                        }
+                    }
+                }}
+                setRecord={(record: any) => {
+                    // const param = JSON.parse(record.request_param)
+                    // console.log(param)
+                    // form.resetFields()
+                    // form.setFieldsValue(param)
+                    // if (record?.analysis_id) {
+                    //     form.setFieldValue("analysis_id", record?.analysis_id)
+                    // }
+                    // record['dataType'] = "analysis"
+                    // onClickItem(record)
+                }}></AnalysisList>
+        }
+        {/* scriptMap */}
 
 
     </>

@@ -1,6 +1,6 @@
-import { Breadcrumb, Button, Empty, Flex, message, Modal, Skeleton, Tabs, Tag, Tooltip } from "antd"
+import { Breadcrumb, Button, Card, Empty, Flex, message, Modal, Skeleton, Tabs, Tag, Tooltip } from "antd"
 import { FC, useEffect, useRef, useState } from "react"
-import AnalysisPanel, { UpstreamAnalysisOutput } from '../../../components/analysis-sotware-panel'
+import AnalysisPanel, { UpstreamAnalysisInput, UpstreamAnalysisOutput } from '../../../components/analysis-sotware-panel'
 import Meta from "antd/es/card/Meta"
 import { colors } from '@/utils/utils'
 
@@ -21,6 +21,8 @@ import { BindSample, MetadataModal } from "@/pages/sample"
 import MetadataForm from "@/components/metadata-form"
 import AnalysisResultEdit from "@/components/analysis-result-edit"
 import OpenFile from "@/components/open-file"
+import PipelineFlow from "@/components/pipeline-flow"
+import SortSoftwareModal from "@/components/sort-software"
 const Pipeline: FC<any> = ({ }) => {
     console.log("Pipeline")
     const { component_type, component_id: name } = useParams()
@@ -115,11 +117,11 @@ const Pipeline: FC<any> = ({ }) => {
         const resp = await axios.get(api)
         // console.log(resp.data)
         let pipeline = resp.data
-        if ( "content" in pipeline){
+        if ("content" in pipeline) {
             const content = JSON.parse(pipeline['content'])
             pipeline = { ...content, ...pipeline }
         }
-        
+
         setPipeline(pipeline)
         console.log(pipeline)
         // console.log(content)，
@@ -199,7 +201,7 @@ const Pipeline: FC<any> = ({ }) => {
             <div >
                 {pipeline ? <>
                     <h2 style={{ margin: 0 }}>
-                        {pipeline?.name}
+                        {pipeline?.component_name}
                         <Tooltip title={pipeline?.namespace}>
                             <span style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)", fontSize: "1rem" }}> {pipeline?.namespace_name}</span>
                         </Tooltip>
@@ -216,9 +218,14 @@ const Pipeline: FC<any> = ({ }) => {
                 </> : <Skeleton active></Skeleton>}
             </div>
             <Flex gap="small" wrap>
+                {component_type == "pipeline" && <>
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        openModal("sortSoftware", { software: pipeline.software })
+                    }}>更新排序</Button>
+                </>}
                 <Button size="small" color="cyan" variant="solid" onClick={() => {
-                    openModals("modalD", { ...pipeline, operatePipeline: operatePipeline })
-                }}>导入数据</Button>
+                        operatePipeline.openModal("modalG", pipeline)
+                    }}>查看依赖</Button>
                 <Button size="small" color="cyan" variant="solid" onClick={() => {
                     openModals("metadataModal", { ...pipeline, operatePipeline: operatePipeline })
                 }}>metadata</Button>
@@ -323,6 +330,11 @@ const Pipeline: FC<any> = ({ }) => {
             visible={modal.key == "openFile" && modal.visible}
             onClose={closeModal}
             params={modal.params}></OpenFile>
+
+        <SortSoftwareModal
+            visible={modal.key == "sortSoftware" && modal.visible}
+            onClose={closeModal}
+            params={modal.params} callback={loadData}></SortSoftwareModal>
     </div>
 }
 
@@ -384,6 +396,7 @@ const FileComponent = ({ operatePipeline, component, ...rest }: PipelineComponen
     const { project } = useOutletContext<any>()
     return <>
         <UpstreamAnalysisOutput
+            {...component}
             analysisMethod={[component]}
             operatePipeline={operatePipeline}
             project={project}
@@ -401,7 +414,7 @@ const ScriptComponent = ({ operatePipeline, component, ...rest }: PipelineCompon
         {/* {JSON.stringify(component)} */}
         <UpstreamAnalysisOutput
             script={component.script}
-            analysisMethod={component.parent}
+            analysisMethod={component.parent ||[]}
             operatePipeline={operatePipeline}
             project={project}
         ></UpstreamAnalysisOutput>
@@ -409,13 +422,13 @@ const ScriptComponent = ({ operatePipeline, component, ...rest }: PipelineCompon
 }
 
 const PipelineComponent = ({ operatePipeline, component, ...rest }: PipelineComponentProps) => {
-    const [items, setItems] = useState<any>([])
+    const [softwareList, setSoftwareList] = useState<any>([])
+    const { project } = useOutletContext<any>()
 
     const getPipline: any = (pipeline: any) => {
 
         // console.log(pipeline)
-        const softwareList: any[] = pipeline.items
-        // console.log(pipeline)
+        const softwareList: any[] = pipeline.software
         if (!softwareList) return []
         return softwareList.map((item, index) => {
             // const { downstreamAnalysis, appendSampleColumns, analysisType, ...rest } = item
@@ -430,6 +443,7 @@ const PipelineComponent = ({ operatePipeline, component, ...rest }: PipelineComp
                     // upstreamFormJson={item.upstreamFormJson}
                     {...rest}
                     {...item}
+                    hiddenUpstreamAnalysis={true}
                     pipeline={{
                         component_id: pipeline.component_id
 
@@ -454,18 +468,84 @@ const PipelineComponent = ({ operatePipeline, component, ...rest }: PipelineComp
             }
         })
     }
+    const getInitialNodes = (component:any) => {
+        const softwareList = component.software
+        const position = JSON.parse(component.position) || []
+        const positionMap = position.reduce((acc:any,item:any)=>{
+            acc[item.component_id] = item.position
+            return acc
+        },{})
+        // console.log(positionMap) 
+        const initialNodes = softwareList.map((component:any, index:number) => {
+            // const id = `${index + 1}`;
+            const label = component.component_name;
+            const inputs = (component.inputFile || []).map((input:any) => input);
+            const outputs = (component.outputFile || []).map((output:any) => output);
 
+            return {
+                id:component.component_id,
+                type: 'custom',
+                position:  positionMap[component.component_id] || {
+                    x: index * 300, // 你可以根据需要布局位置
+                    y: 100,
+                } ,
+                data: {
+                    label,
+                    color: '#' + ((1 << 24) * Math.random() | 0).toString(16), // 随机颜色
+                    inputs,
+                    outputs,
+                },
+            };
+        });
+        return initialNodes || []
+    }
+    const getInitialEdges = (component:any) => {
+        const edges = JSON.parse(component.edges)
+        return edges || []
+    }
 
     useEffect(() => {
         if (component) {
-            setItems(getPipline(component))
+            setSoftwareList(getPipline(component))
         }
     }, [JSON.stringify(component)])
 
     console.log("--->PipelineComponent渲染")
     return <>
+        {/* <AnalysisPanel>
+        </AnalysisPanel> */}
 
-        {component && Array.isArray(component?.items) ? <Tabs destroyInactiveTabPane={true} items={items}></Tabs> :
+        {/* <pre>
+            {JSON.stringify(component?.items[0]["inputFile"], null, 2)}
+        </pre> */}
+        {/* {JSON.stringify(component.software,null,2)} */}
+        {/* <AnalysisPanel
+            {...component}
+            operatePipeline={operatePipeline}
+
+        >
+        </AnalysisPanel>
+        */}
+
+            {/* {JSON.stringify(getInitialNodes(component.software))} */}
+        <PipelineFlow
+            initialEdges={getInitialEdges(component)}
+            initialNodes={getInitialNodes(component)}
+            component={component}
+            
+        ></PipelineFlow>
+        <div style={{marginTop:"1rem"}}></div>
+        <UpstreamAnalysisInput
+        {...component}
+        project={project}
+        operatePipeline={operatePipeline}   
+        inputAnalysisMethod={component.inputFile}
+        >
+        </UpstreamAnalysisInput>
+        {/* {JSON.stringify(softwareList)} */}
+        {component && Array.isArray(component?.software) ?
+            <Tabs destroyInactiveTabPane={true} items={softwareList}></Tabs>
+            :
 
             <Empty>
                 <Button style={{ marginRight: "0.5rem" }} color="cyan" variant="solid" onClick={() => {

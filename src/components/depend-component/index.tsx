@@ -72,8 +72,8 @@ const DependComponent = ({ visible, onClose, params, callback }: any) => {
                 pagination={false}
                 columns={[{
                     title: "组件名称",
-                    dataIndex: "name",
-                    key: "name"
+                    dataIndex: "component_name",
+                    key: "component_name"
                 }, {
                     title: "组件类型",
                     dataIndex: "component_type",

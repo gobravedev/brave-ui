@@ -25,3 +25,13 @@ export const deleteComponentApi = async (componentId:any)=>{
     const resp: any = await axios.delete(`/delete-component/${componentId}`)
     return resp
 }
+
+export const saveComponentRelationOrderApi = async (params:any)=>{
+    const resp: any = await axios.post(`/save-component-relation-order`,params)
+    return resp
+}
+
+export const savePipelineComponentsEdgesApi = async (params:any)=>{
+    const resp: any = await axios.post(`/save-pipeline-components-edges`,params)
+    return resp
+}

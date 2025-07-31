@@ -5,7 +5,7 @@ import { Button, Card, Flex, message, Modal, Popconfirm, Popover, Space, Table, 
 import axios from "axios"
 import { FC, forwardRef, useEffect, useImperativeHandle, useState } from "react"
 import { useOutletContext, useParams } from "react-router"
-
+import {FileOutlined} from "@ant-design/icons"
 export const readHdfsAPi = (contentPath: any) => axios.get(`/api/read-hdfs?path=${contentPath}`)
 export const readJsonAPi = (contentPath: any) => axios.get(`/fast-api/read-json?path=${contentPath}`)
 
@@ -32,13 +32,14 @@ const ResultList = forwardRef<any, any>(({
     relationType,
     currentAnalysisMethod,
     setCurrentAnalysisMethod,
-    params
+    params,
+    ...rest
 }, ref) => {
     useImperativeHandle(ref, () => ({
         reload
     }))
 
-    const { project,projectObj } = useOutletContext<any>()
+    const { project, projectObj } = useOutletContext<any>()
     const [data, setData] = useState<any>([])
     const [groupedData, setGroupedData] = useState<any>()
     // const [content,setContent] = useState<any>()
@@ -52,13 +53,13 @@ const ResultList = forwardRef<any, any>(({
         const handler = (event: MessageEvent) => {
             const data = JSON.parse(event.data)
             // console.log("analysis_result", data)
-            if (data.msgType === "analysis_result"){
+            if (data.msgType === "analysis_result") {
                 // message.success(data.msg)
-                const componentIdList = analysisMethod.map((it:any)=>it.component_id)
+                const componentIdList = analysisMethod.map((it: any) => it.component_id)
                 console.log("componentIdList", componentIdList) 
-                console.log("data.component_id ", data.component_id )   
+                console.log("data.component_id ", data.component_id)
                 console.log(" componentIdList.includes(data.component_id) ", componentIdList.includes(data.component_id))   
-                if (  componentIdList.includes(data.component_id)){
+                if (componentIdList.includes(data.component_id)) {
                     reload()
                     // console.log("reload", currentAnalysisMethod?.component_id)   
                 }
@@ -120,7 +121,7 @@ const ResultList = forwardRef<any, any>(({
             const componentIdList = analysisMethod.flatMap((it: any) => it.component_id)
 
             // console.log("componentIdList", componentIdList)
-            loadData({componentIdList: componentIdList })
+            loadData({ componentIdList: componentIdList })
         } else {
             loadData({ params: params })
         }
@@ -188,7 +189,7 @@ const ResultList = forwardRef<any, any>(({
             ...params
         })
 
-        if (componentIdList ) {
+        if (componentIdList) {
             // const keyMap = getKeyMap()
             // console.log(keyMap)
 
@@ -211,7 +212,7 @@ const ResultList = forwardRef<any, any>(({
                 });
                 return acc;
             }, {});
-            console.log("groupedData",groupedData)
+            console.log("groupedData", groupedData)
             if (setResultTableList) {
                 // console.log(groupedData)
                 setResultTableList(groupedData)
@@ -221,7 +222,7 @@ const ResultList = forwardRef<any, any>(({
             if (activeTabKey) {
                 setData(groupedData[activeTabKey] ? groupedData[activeTabKey] : [])
             } else {
-                setData(groupedData[analysisMethod[0].component_id] ? groupedData[analysisMethod[0].component_id] : [])
+                setData(groupedData[analysisMethod[0]?.component_id] ? groupedData[analysisMethod[0]?.component_id] : [])
             }
         } else {
             // console.log(resp.data)
@@ -276,10 +277,10 @@ const ResultList = forwardRef<any, any>(({
         downloadTSV(resp.data, contentPath.split('/').pop())
     }
 
-    const getMetadataColumns = ()=>{
+    const getMetadataColumns = () => {
         // console.log("projectObj",projectObj?.metadata_form)
         if (!projectObj?.metadata_form || !Array.isArray(projectObj?.metadata_form)) return []
-        return projectObj?.metadata_form?.map((item:any)=>{
+        return projectObj?.metadata_form?.map((item: any) => {
             return {
                 title: item.label,
                 dataIndex: item.name,
@@ -294,7 +295,7 @@ const ResultList = forwardRef<any, any>(({
         })
     }
 
-    let columns: any  = [
+    let columns: any = [
         {
             title: '项目名称',
             dataIndex: 'project_name',
@@ -520,8 +521,8 @@ const ResultList = forwardRef<any, any>(({
 
 
     return <>
-        <Card title={<>{title}(
-            <Tooltip  title={<>
+        <Card size="small" title={<><FileOutlined /> {title}(
+            <Tooltip title={<>
                 <ul>
                     <li>namespace: {currentAnalysisMethod?.namespace_name}</li>
                     {pipeline?.component_id && <li>pipeline: {pipeline?.component_id}</li>}
@@ -536,8 +537,14 @@ const ResultList = forwardRef<any, any>(({
             </Tooltip>)</>}
             extra={<>{cardExtra}
                 <Flex gap={"small"}>
+
                     {operatePipeline?.openModal && <>
+                        <Button size="small" color="cyan" variant="solid" onClick={() => {
+                            operatePipeline.openModals("modalD", { ...currentAnalysisMethod, operatePipeline: operatePipeline })
+                        }}>导入数据</Button>
+                        {(rest.component_type == "software" || rest.component_type == "file") && <>
                         <Tooltip title={currentAnalysisMethod?.component_name}>
+
                             <Button size="small" color="cyan" variant="solid" onClick={() => {
                                 operatePipeline.openModal("modalC", {
                                     data: undefined,
@@ -597,19 +604,18 @@ const ResultList = forwardRef<any, any>(({
                             </Popconfirm>
                         </Tooltip>
                     </>}
+                    </>}
 
                     <Button size="small" color="primary" variant="solid" onClick={reload}>刷新</Button>
                 </Flex>
             </>}
             tabList={analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 1 ?
-                analysisMethod.map((it: any) => ({ key: it.component_id, label: it.component_name?it.component_name:"no_name" })) : undefined}
+                analysisMethod.map((it: any) => ({ key: it.component_id, label: it.component_name ? it.component_name : "no_name" })) : undefined}
             activeTabKey={activeTabKey}
             onTabChange={onTabChange}
         >
-            {import.meta.env.MODE == "development" && <>
 
-            </>}
-                {/* {JSON.stringify(analysisMethod)} */}
+            {/* {JSON.stringify(rest)} */}
             {/* {JSON.stringify(projectObj)} */}
             {/* {JSON.stringify(currentAnalysisMethod.component_id)} */}
             <Table
