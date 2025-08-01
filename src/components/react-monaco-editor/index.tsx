@@ -15,7 +15,7 @@ import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
 // import pythonWorker from 'monaco-editor/esm/vs/language/python/ts.worker?worker';
 import { Drawer, Modal } from 'antd';
 
-export const MonacoEditor: FC<any> = ({ value, editorRef, defaultLanguage, format, height }) => {
+export const MonacoEditor: FC<any> = ({onChange, value, editorRef, defaultLanguage, format, height }) => {
     // const editorRef = useRef<any>(null);
 
     self.MonacoEnvironment = {
@@ -47,6 +47,7 @@ export const MonacoEditor: FC<any> = ({ value, editorRef, defaultLanguage, forma
                 editor.onDidChangeModelDecorations(async () => {
                     await editorRef.current.getAction('editor.action.formatDocument').run();
                 });
+               
             }
         }
 
@@ -63,6 +64,7 @@ export const MonacoEditor: FC<any> = ({ value, editorRef, defaultLanguage, forma
             height={height ? height : "65vh"}
             value={value}
             theme="vs-dark"
+            onChange={onChange}
             defaultLanguage={defaultLanguage}
             //   defaultValue={defaultValue}
             onMount={handleEditorDidMount}

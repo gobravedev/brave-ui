@@ -1,0 +1,18 @@
+.hidden-textarea {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+  }
+  
+  .ant-container {
+    padding: 24px;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 8px;
+  }
+  
+  .editable-ant-table .selected-cell input {
+    background-color: #e6f4ff !important;
+    border-color: #1890ff !important;
+  }
+  

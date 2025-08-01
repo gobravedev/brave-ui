@@ -409,7 +409,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
     const tableRef = useRef<any>(null)
 
     const getrRequestParams = (values: any) => {
-        console.log(inputAnalysisMethod.map((item:any)=>item.component_id))
+        const dataComponentIds =inputAnalysisMethod.map((item:any)=>item.component_id)
         const requestParams = {
             ...values,
             project: project,
@@ -580,7 +580,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
                                     }}>查看参数</Button>
 
                                     <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>{formId ? <>更新分析</> : <>保存分析</>}</Button>
-                                    {formId && <Button size="small" color="cyan" variant="solid" onClick={() => upstreamForm.setFieldValue("id", undefined)}>取消更新</Button>}
+                                    {formId && <Button size="small" color="cyan" variant="solid" onClick={() => upstreamForm.setFieldValue("analysis_id", undefined)}>取消更新</Button>}
                                     {/* <hr />
                                 
                                 <hr /> */}
@@ -1042,7 +1042,7 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, operatePipeline, chi
                                     <li>file:{currentAnalysisMethod?.component_id}</li>
                                     <li>script:{downstreamData?.component_id}</li>
                                 </ul>
-                            </>}>执行分析{btnName ? `(${btnName})` : ""}</Tooltip>,
+                            </>}>执行分析{downstreamData ? `(${downstreamData.component_name})` : ""}</Tooltip>,
                             children: <>
                                 {/* {import.meta.env.MODE == "development" && <>
                                     <ul>

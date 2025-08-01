@@ -30,6 +30,7 @@ export const TableView: FC<any> = ({ data, url }) => {
     return <>
         {Array.isArray(tableData) && <>
             <Table
+             size="small"
                 title={() => <>
                     <Search
                         placeholder="input search text"
@@ -51,9 +52,12 @@ export const TableView: FC<any> = ({ data, url }) => {
                 // showHeader={()=>{}}
                 scroll={{ x: 'max-content', y: 55 * 5 }}
                 dataSource={tableData}
+                pagination={false}
+                virtual
                 columns={getColumns(data[0])}
                 footer={() => `一共${data.length}条记录`}
             ></Table>
+            
 
         </>}
 

@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react"
+import { FC, useEffect, useRef, useState } from "react"
 import TextArea from "antd/es/input/TextArea"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from 'remark-gfm'
@@ -9,6 +9,7 @@ import FormJsonComp from "@/components/form-components"
 import { useOutletContext } from "react-router"
 import FileBrowser from "@/components/file-browser"
 import { useSelector } from "react-redux"
+import PasteTable from "@/components/paste-table"
 const markdown = `
 |project|library_name|sample_name|sequencing_target|sequencing_technique|sample_composition|fastq1                                                 |fastq2                                                     |
 |-------|------------|-----------|-----------------|--------------------|------------------|-------------------------------------------------------|-----------------------------------------------------------|
@@ -38,12 +39,42 @@ const ImportFile: FC<{ component_type: any, component_id: any,component_name:any
 
     // const [inputForm, setInputForm] = useState<any>()
     const { messageApi, project } = useOutletContext<any>()
-    const [parseData, setParseData] = useState<any>()
+    const [parseData, setParseData] = useState<any>([])
     // const [selectedFile, setSelectedFile] = useState<any>()
     const setting = useSelector((state: any) => state.global.setting)
     // const [inputFormMap, setInputFormMap] = useState<any>({})
 
     const [selectedField, setSelectedField] = useState<any>()
+    const [columns, setColumns] = useState<any>()
+    const columnRef = useRef<any>(null)
+
+    useEffect(()=>{
+        if(inputForm){
+            const columns =inputForm.map((item:any)=>{
+                
+                if(Array.isArray(item.name)){
+                    return item.name[1]
+                }else{
+                    return item.name
+                }
+            })
+            let columnsObj = columns.map((item:any)=>({
+                title: item,
+                dataIndex: item,
+                key: item,
+                render: (text: any) => <span>{text}</span>
+            }))
+            columnsObj =[{
+                title: "样本名称",
+                dataIndex: "sample_name",
+                key: "sample_name",
+                render: (text: any) => <span>{text}</span>
+            },...columnsObj]
+            console.log(columnsObj)
+            columnRef.current = columnsObj
+            setColumns(columnsObj)
+        }
+    },[inputForm])
     // useEffect(() => {
     //     // setInputForm([])
     //     // setParseData(undefined)
@@ -114,7 +145,10 @@ const ImportFile: FC<{ component_type: any, component_id: any,component_name:any
 
     const importData = async () => {
         const values = await form.validateFields()
-
+        if (values.length ==0){
+            messageApi.error("没有数据添加!")
+            return 
+        }
         if (inputForm && inputForm.length == 0) {
             messageApi.error("该组件没有配置inputForm!")
             return
@@ -146,18 +180,18 @@ const ImportFile: FC<{ component_type: any, component_id: any,component_name:any
     }
 
     const renderTable = () => {
-        if (!Array.isArray(parseData)) return null;
+        // if (!Array.isArray(parseData)) return null;
 
-        if (parseData.length === 0) {
-            return <Empty description="没有解析数据" />;
-        }
+        // if (parseData.length === 0) {
+        //     return <Empty description="没有解析数据" />;
+        // }
 
-        const columns = Object.entries(parseData[0]).map(([key, value]) => ({
-            title: key,
-            dataIndex: key,
-            key: key,
-            render: (text: any) => <span>{text}</span>
-        }))
+        // const columns = Object.entries(parseData[0]).map(([key, value]) => ({
+        //     title: key,
+        //     dataIndex: key,
+        //     key: key,
+        //     render: (text: any) => <span>{text}</span>
+        // }))
 
         return <Table
             size="small"
@@ -171,7 +205,41 @@ const ImportFile: FC<{ component_type: any, component_id: any,component_name:any
             )} columns={columns} dataSource={parseData} />;
     };
 
+    useEffect(() => {
+        const handlePaste = (event: ClipboardEvent) => {
+            const text = event.clipboardData?.getData('Text') || '';
+            if (!text) return;
 
+            const delimiter = text.includes('\t') ? '\t' : ',';
+            const rows = text.split(/\r?\n/).filter(line => line.trim() !== '');
+            const data = rows.map(row => row.split(delimiter).map(cell => cell.trim()));
+            console.log(data)
+            // console.log(columnRef.current)
+            const converted = data.map((row:any) => {
+               
+                const obj: Record<string, string> = {};
+                columnRef.current.forEach((col:any, index:any) => {
+                    if (row.length<= index){
+                        obj[col.dataIndex] = "unknown"
+
+                    }else{
+                        obj[col.dataIndex] = row[index];
+
+                    }
+                });
+                return obj;
+              });
+              
+            setParseData(converted);
+            messageApi.success('粘贴成功！');
+        };
+
+        document.addEventListener('paste', handlePaste);
+        return () =>{
+            document.removeEventListener('paste', handlePaste);
+}
+    }, []);
+    
     useEffect(() => {
         // listPipelineComponents()
     }, [])
@@ -186,7 +254,7 @@ const ImportFile: FC<{ component_type: any, component_id: any,component_name:any
                         }
                     })
                 }}>编辑inputForm</Button>
-                <Button size="small" color="cyan" variant="solid" disabled={!parseData} onClick={() => setParseData(undefined)}>取消解析</Button>
+                <Button size="small" color="cyan" variant="solid" disabled={!parseData} onClick={() => setParseData([])}>清空</Button>
 
                 <Button size="small" color="cyan" variant="solid" disabled={!inputForm} onClick={parseImportData}>解析</Button>
             </Flex>}
@@ -198,7 +266,7 @@ const ImportFile: FC<{ component_type: any, component_id: any,component_name:any
             {/* {JSON.stringify(setting)} */}
             {/* {JSON.stringify(selectedField)}
                 {JSON.stringify(inputFormMap)} */}
- {JSON.stringify(inputForm)}
+ {/* {JSON.stringify(columns)} */}
        
 
             {/* <Form.Item label="字段选择">
@@ -215,9 +283,9 @@ const ImportFile: FC<{ component_type: any, component_id: any,component_name:any
 
                 {inputForm ?
                     <>
-                        {!parseData && <Form.Item name={"sample_name"} label="分析key" rules={[{ required: false, message: "请输入分析key" }]} >
+                        {/* {!parseData && <Form.Item name={"sample_name"} label="样本名称" rules={[{ required: false, message: "请输入分析key" }]} >
                             <Input placeholder="样本名称, 与sample_key关联" allowClear></Input>
-                        </Form.Item>}
+                        </Form.Item>} */}
                         <FormJsonComp formJson={inputForm} dataMap={{}} ></FormJsonComp>
                     </>
                     :
@@ -237,20 +305,8 @@ const ImportFile: FC<{ component_type: any, component_id: any,component_name:any
                         </Empty>
                     </>
                 }
-                {Array.isArray(parseData) ? (
-                    renderTable()
-                ) : (
-                    <div style={{ textAlign: 'right' }}>
-                        <Button
-                            color="cyan"
-                            variant="solid"
-                            disabled={!inputForm}
-                            onClick={importData}
-                        >
-                            确认
-                        </Button>
-                    </div>
-                )}
+                {renderTable()}
+             
                 <Collapse ghost items={[
                     {
                         key: "1",
@@ -276,6 +332,9 @@ const ImportFile: FC<{ component_type: any, component_id: any,component_name:any
                     <TextArea rows={10}></TextArea>
                 </Form.Item> */}
             </Form>
+
+
+            {/* <PasteTable></PasteTable> */}
             {/* <div style={{marginTop:"1rem"}}></div> */}
             {/* <FileBrowser path={setting.DATA_DIR} onSelectFile={(file: any) => {
                 if (selectedField) {

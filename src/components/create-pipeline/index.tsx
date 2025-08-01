@@ -1,11 +1,13 @@
 import { Button, Card, Collapse, Divider, Flex, Form, Input, Modal, Popconfirm, Select, Space, Typography } from "antd"
 import TextArea from "antd/es/input/TextArea"
 import axios from "axios"
-import { FC, use, useEffect, useState } from "react"
+import { FC, use, useEffect, useRef, useState } from "react"
 import { listPipelineComponents as listPipelineComponentsApi } from '@/api/pipeline'
 import { useModal } from "@/hooks/useModal"
 import { data } from "react-router"
 import { useForm } from "antd/es/form/Form"
+import { MonacoEditor } from "../react-monaco-editor"
+import { es } from "@faker-js/faker"
 export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClose, params, callback }) => {
     if (!visible) return null;
 
@@ -18,14 +20,14 @@ export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClo
     const componentMap: any = {
         // wrap_pipeline: WrapPipeline,
         // pipeline: WrapPipeline,
-        pipeline_software: TextAreaContent,
-        software_input_file: TextAreaContent,
-        software_output_file: TextAreaContent,
-        file_script: TextAreaContent
+        pipeline_software: DefaultComponentRelation,
+        software_input_file: DefaultComponentRelation,
+        software_output_file: DefaultComponentRelation,
+        file_script: DefaultComponentRelation
     }
     const ComponentsRender = ({ relation_type, data, form }: any) => {
         const Component = componentMap[relation_type] || (() => <div>未知类型 {JSON.stringify(data)}</div>);
-        return <Component data={data} form={form}></Component>
+        return <Component data={data} form={form} components={components}></Component>
     }
     const listPipelineComponents = async (componentType: any) => {
         const resp = await listPipelineComponentsApi({
@@ -36,22 +38,23 @@ export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClo
             const content = JSON.parse(item.content)
             if (pipelineStructure.relation_type == "pipeline_software") {
                 return {
-                    label: `${content.name}`,
+                    label: `${item.component_name}(${item.component_id})`,
                     value: item.component_id
                 }
             } else if (pipelineStructure.relation_type == "file_script") {
                 return {
-                    label: `${content.name}(${content.moduleName})`,
+                    label: `${item.component_name}(${item.component_id})`,
                     value: item.component_id
                 }
             } else {
                 return {
-                    label: `${content.label}(${content.name})`,
+                    label: `${item.component_name}(${item.component_id})`,
                     value: item.component_id
                 }
             }
 
         })
+        console.log(data)
         setComponents(data)
         console.log(resp)
     }
@@ -99,8 +102,13 @@ export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClo
         }
         if (data) {
             params['relation_id'] = pipelineRelation.relation_id
-            params['parent_component_id'] = pipelineRelation.parent_component_id
+            // params['parent_component_id'] = pipelineRelation.parent_component_id
         }
+        // if (pipelineStructure.relation_type == "pipeline_software") {
+        //     params['component_id'] = values.to_component_id
+        // }else{
+
+        // }
         // if (data) {
         //     params['parent_component_id'] =data.componemt_id
         //     params['pipeline_id'] =data.pipeline_id
@@ -143,17 +151,17 @@ export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClo
             onCancel={() => onClose()}>
             <Form form={form}>
 
-
+                {/* 
                 <Form.Item name={"component_id"} label="组件">
                     <Select showSearch options={components}></Select>
-                </Form.Item>
+                </Form.Item> */}
 
                 {pipelineRelation && <>
                     {/* {JSON.stringify(pipelineRelation)}
                     <hr /> */}
                     {/*  */}
                 </>}
-                {/* <ComponentsRender {...pipelineStructure} data={pipeline} form={form}></ComponentsRender> */}
+                <ComponentsRender {...pipelineStructure} data={pipeline} form={form}></ComponentsRender>
                 <Collapse ghost items={[
                     {
                         key: "1",
@@ -176,6 +184,18 @@ export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClo
     </>
 }
 
+
+const PipelineSoftwareComponent: FC<any> = ({ components }) => {
+    return <>
+        <Form.Item name={"parent_component_id"} label="form_component">
+            <Select showSearch options={components}></Select>
+        </Form.Item>
+        <Form.Item name={"component_id"} label="to_component_id">
+            <Select showSearch options={components}></Select>
+        </Form.Item>
+    </>
+}
+
 export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, params, callback }) => {
     if (!visible) return null;
 
@@ -187,13 +207,13 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
     const componentMap: any = {
         pipeline: WrapPipeline,
         // pipeline: WrapPipeline,
-        software: TextAreaContent,
+        software: SoftwareContent,
         file: FileContent,
-        script: TextAreaContent,
+        script: ScriptContent,
     }
     const ComponentsRender = ({ component_type, data, form }: any) => {
         const Component = componentMap[component_type] || (() => <div>未知类型 {JSON.stringify(data)}</div>);
-        return <Component data={data} form={form} structure={structure}></Component>
+        return <Component  data={data} form={form} structure={structure}></Component>
     }
 
 
@@ -201,9 +221,15 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
         const resp = await axios.post("/find-pipeline", { component_id: componentId })
 
         const data = resp.data
-        data['content'] = JSON.parse(data['content']) //JSON.stringify(JSON.parse(data['content']), null, 2)
+        // data['content'] = JSON.parse(data['content']) //JSON.stringify(JSON.parse(data['content']), null, 2)
         setComponent(data)
+        if (structure.component_type == "pipeline") {
+            data['content'] = JSON.parse(data['content'])
+            form.setFieldsValue(data)
+        } else {
         form.setFieldsValue(data)
+    }
+
     }
 
     useEffect(() => {
@@ -234,6 +260,13 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
 
         return params
     }
+    const getParamsFormat = (values: any) => {
+        const params = getParams(values)
+        if (typeof params['content'] == 'string') {
+            params['content'] = JSON.parse(params['content'])
+        }
+        return params
+    }
     const savePipeline = async () => {
         setLoaidng(true)
         const values = await form.validateFields()
@@ -259,11 +292,16 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
             okText={data ? "更新" : "新增"}
             onOk={savePipeline}
             open={visible}
+            width={"60%"}
             onClose={() => onClose()}
             onCancel={() => onClose()}>
             <Form form={form}>
                 <Form.Item name={"component_name"} label="组件名称">
                     <Input ></Input>
+                </Form.Item>
+            
+                <Form.Item name={"namespace"} label="namespace" >
+                    <NamespaceSelect  disabled={data?.componemt_id}/>
                 </Form.Item>
                 <ComponentsRender {...structure} data={component} form={form}></ComponentsRender>
                 <Collapse ghost items={[
@@ -274,7 +312,7 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
                             <Form.Item noStyle shouldUpdate>
                                 {() => (
                                     <Typography>
-                                        <pre>{JSON.stringify(getParams(form.getFieldsValue()), null, 2)}</pre>
+                                        <pre>{JSON.stringify(getParamsFormat(form.getFieldsValue()), null, 2)}</pre>
                                     </Typography>
                                 )}
                             </Form.Item>
@@ -289,12 +327,12 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
 }
 export default CreateORUpdatePipelineCompnentRelation
 
-const FileContent: FC<any> = ({ data, form,structure }) => {
+const FileContent: FC<any> = ({ data, form, structure }) => {
     return <>
         
         {structure?.files && <>
         <Typography>
-            <pre>{JSON.stringify(structure?.files,null,2)}</pre>
+                <pre>{JSON.stringify(structure?.files, null, 2)}</pre>
         </Typography>
         </>}
         <Form.Item name={"content"} label="content">
@@ -305,30 +343,85 @@ const FileContent: FC<any> = ({ data, form,structure }) => {
         </Form.Item> */}
     </>
 }
-const TextAreaContent: FC<any> = ({ data, form }) => {
+
+const DefaultComponentRelation: FC<any> = ({ data, form, components }) => {
+    return <>
+
+        <Form.Item name={"component_id"} label="组件">
+            <Select showSearch options={components}></Select>
+        </Form.Item>
+
+    </>
+}
+import {softwareTemplete,scriptTemplete} from './templete'
+const SoftwareContent: FC<any> = ({ data, form }) => {
+    const [templete,setTemplete] = useState<any>()
+
+    useEffect(()=>{
+        if(!data?.componemt_id){
+            setTemplete(JSON.stringify(softwareTemplete,null,2))
+        }
+    },[])
     return <>
         <Form.Item name={"content"} label="content">
-            <TextAreaComp></TextAreaComp>
+            <TextAreaComp templete={templete}></TextAreaComp>
         </Form.Item>
         {/* <Form.Item name={"component_id"} label="component_id">
             <Input></Input>
         </Form.Item> */}
     </>
 }
-const TextAreaComp: FC<any> = ({ value, onChange }) => {
-    const [data, setData] = useState<any>(JSON.stringify(value))
-    // useEffect(()=>{
-    //     setData(JSON.stringify(value))
-    // },[value])
+const ScriptContent: FC<any> = ({ data, form }) => {
+    const [templete,setTemplete] = useState<any>()
+
+    useEffect(()=>{
+        if(!data?.componemt_id){
+            setTemplete(JSON.stringify(scriptTemplete,null,2))
+        }
+    },[])
     return <>
-        <TextArea rows={10} value={data} onChange={(e: any) => {
+        <Form.Item name={"content"} label="content">
+            <TextAreaComp templete={templete}></TextAreaComp>
+        </Form.Item>
+        {/* <Form.Item name={"component_id"} label="component_id">
+            <Input></Input>
+        </Form.Item> */}
+    </>
+}
+const TextAreaContent: FC<any> = ({ data, form }) => {
+    return <>
+        <Form.Item name={"content"} label="content">
+            <TextAreaComp ></TextAreaComp>
+        </Form.Item>
+        {/* <Form.Item name={"component_id"} label="component_id">
+            <Input></Input>
+        </Form.Item> */}
+    </>
+}
+const TextAreaComp: FC<any> = ({ value, onChange,templete }) => {
+    // const [data, setData] = useState<any>(JSON.stringify(value))
+    const editorRef = useRef<any>(null)
+    useEffect(()=>{
+        if(templete){
+            onChange(templete)
+        }
+    },[])
+    // useEffect(()=>{
+    //     // setData(JSON.stringify(value))
+    //     // editorRef.current.getValue()
+    //     // onChange(editorRef.current.getValue())
+    // },[editorRef.current])
+    return <>
+        {/* <TextArea rows={10} value={data} onChange={(e: any) => {
             setData(e.target.value)
             onChange(e.target.value)
             // console.log(e.target.value)
-        }}></TextArea>
-        <Button onClick={() => {
+        }}></TextArea> */}
+
+        <MonacoEditor value={value} onChange={onChange} editorRef={editorRef} defaultLanguage="json" ></MonacoEditor>
+        {/* <Button onClick={() => {
             setData(JSON.stringify(value, null, 2))
-        }}>格式化</Button>
+        }}>格式化</Button> */}
     </>
 }
 
@@ -358,12 +451,20 @@ const WrapPipeline: FC<any> = ({ data, form }) => {
         {/* <Form.Item name={"pipeline_key"} label="pipeline_key">
             <Input disabled={data ? true : false}></Input>
         </Form.Item> */}
-        <Form.Item name={"namespace"} label="namespace">
-            <NamespaceSelect
-
-            />
-        </Form.Item>
+        {/* <Form.Item name={"namespace"} label="namespace">
+            <NamespaceSelect />
+        </Form.Item> */}
         <Form.Item name={["content", "name"]} label="name">
+            <Input></Input>
+        </Form.Item>
+        <Form.Item name={["content", "script_type"]} label="脚本类型">
+            <Select options={
+                [{ label: "python", value: "python" },
+                { label: "nextflow", value: "nextflow" },
+                { label: "shell", value: "shell" },
+                { label: "R", value: "R" }]}></Select>
+        </Form.Item>
+        <Form.Item name={["content", "image"]} label="镜像">
             <Input></Input>
         </Form.Item>
         {/* <Form.Item name={["content", "analysisPipline"]} label="analysisPipline">
@@ -400,7 +501,7 @@ const WrapPipeline: FC<any> = ({ data, form }) => {
     </>
 }
 
-const NamespaceSelect: FC<any> = ({ value, onChange }) => {
+const NamespaceSelect: FC<any> = ({ value, onChange,disabled }) => {
     const [namespace, setNamespace] = useState<any>([])
     // const { modal, openModal, closeModal } = useModal();
     const loadNamespace = async () => {
@@ -413,7 +514,8 @@ const NamespaceSelect: FC<any> = ({ value, onChange }) => {
     }, [])
     return <>
         <Flex justify="space-between">
-            <Select value={value} onChange={onChange} options={namespace.map((item: any) => ({ label: item.name, value: item.context_id }))}>
+            {/* {JSON.stringify(namespace)} */}
+            <Select disabled={disabled} value={value} onChange={onChange} options={namespace.map((item: any) => ({ label: item.name, value: item.namespace_id }))}>
             </Select>
             {/* {modal.key == "namespaceOperation" && modal.visible ?
                 <Button onClick={() => {

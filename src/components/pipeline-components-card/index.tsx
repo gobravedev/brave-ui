@@ -99,25 +99,25 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
     return <div style={{ maxWidth: "1500px", margin: "1rem auto" }}>
         {/* {JSON.stringify(sseData)} */}
         <Flex justify="flex-end" gap="small">
-            <Button color="cyan" variant="solid" onClick={() => {
+            <Button size="small" color="cyan" variant="solid" onClick={() => {
 
                 openModal("modalA", {
                     data: undefined,
                     structure: {
-                        component_type: "pipeline",
+                        component_type: component_type,
                     }
                 })
-            }}>创建管道</Button>
+            }}>创建组件</Button>
 
 
 
-            <Button color="cyan" variant="solid" onClick={() => {
+            <Button size="small" color="cyan" variant="solid" onClick={() => {
                 openModal("modalB")
             }}>创建/更新namespace</Button>
-            <Button color="cyan" variant="solid" onClick={() => {
+            <Button size="small" color="cyan" variant="solid" onClick={() => {
                 openModal("modalC")
             }}>安装namespace</Button>
-            <Button color="primary" variant="solid" onClick={reload}>刷新</Button>
+            <Button size="small" color="primary" variant="solid" onClick={reload}>刷新</Button>
         </Flex>
         <div style={{ marginBottom: "2rem" }}>
         </div>

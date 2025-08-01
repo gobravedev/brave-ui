@@ -93,7 +93,7 @@ const childern = [
         map={(item: any) => ({
             id: item.id,
             component_id: item.component_id,
-            name: item.name,
+            name: item.component_name,
             category: item.category,
             img: item.img,
             tags: item.tags,
@@ -110,7 +110,7 @@ const childern = [
         map={(item: any) => ({
             id: item.id,
             component_id: item.component_id,
-            name: item.name,
+            name: item.component_name,
             category: item.category,
             img: item.img,
             tags: item.tags,
@@ -127,7 +127,7 @@ const childern = [
         map={(item: any) => ({
             id: item.id,
             component_id: item.component_id,
-            name: item.name,
+            name: item.component_name,
             category: item.category,
             img: item.img,
             tags: item.tags,
