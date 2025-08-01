@@ -102,7 +102,7 @@ export const InstallNamespace: FC<any> = ({ visible, onClose, params }) => {
             messageApi.error(error.response.data.message)
         }
     }
-    return <Modal title="安装namespace" open={visible} onCancel={onClose} >
+    return <Modal footer={null} title="安装namespace" open={visible} onCancel={onClose} >
         {namespaceList && namespaceList.map((item: any) => {
             return <Flex style={{ display: "flex", marginBottom: "0.5rem", justifyContent: "space-between" }} key={item.namespace_id}>
                 <div >{item.name}({item.namespace_id})</div>

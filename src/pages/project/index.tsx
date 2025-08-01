@@ -29,7 +29,7 @@ const Project:FC<any> = ()=>{
         ]}></Tabs> */}
         {/* <EmbedLLM content={"hi"}>LLM</EmbedLLM> */}
         <Markdown data={data}></Markdown>
-        <Demo></Demo>
+        {/* <Demo></Demo> */}
     </div>
 }
 
