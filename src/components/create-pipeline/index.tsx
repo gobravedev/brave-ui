@@ -327,22 +327,7 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
 }
 export default CreateORUpdatePipelineCompnentRelation
 
-const FileContent: FC<any> = ({ data, form, structure }) => {
-    return <>
-        
-        {structure?.files && <>
-        <Typography>
-                <pre>{JSON.stringify(structure?.files, null, 2)}</pre>
-        </Typography>
-        </>}
-        <Form.Item name={"content"} label="content">
-            <TextAreaComp></TextAreaComp>
-        </Form.Item>
-        {/* <Form.Item name={"component_id"} label="component_id">
-            <Input></Input>
-        </Form.Item> */}
-    </>
-}
+
 
 const DefaultComponentRelation: FC<any> = ({ data, form, components }) => {
     return <>
@@ -353,7 +338,7 @@ const DefaultComponentRelation: FC<any> = ({ data, form, components }) => {
 
     </>
 }
-import {softwareTemplete,scriptTemplete} from './templete'
+import {softwareTemplete,scriptTemplete, fileTemplete} from './templete'
 const SoftwareContent: FC<any> = ({ data, form }) => {
     const [templete,setTemplete] = useState<any>()
 
@@ -388,6 +373,29 @@ const ScriptContent: FC<any> = ({ data, form }) => {
         </Form.Item> */}
     </>
 }
+const FileContent: FC<any> = ({ data, form,structure }) => {
+    const [templete,setTemplete] = useState<any>()
+
+    useEffect(()=>{
+        if(!data?.componemt_id){
+            setTemplete(JSON.stringify(fileTemplete,null,2))
+        }
+    },[])
+    return <>
+     {structure?.files && <>
+        <Typography>
+                <pre>{JSON.stringify(structure?.files, null, 2)}</pre>
+        </Typography>
+        </>}
+        <Form.Item name={"content"} label="content">
+            <TextAreaComp templete={templete}></TextAreaComp>
+        </Form.Item>
+        {/* <Form.Item name={"component_id"} label="component_id">
+            <Input></Input>
+        </Form.Item> */}
+    </>
+}
+
 const TextAreaContent: FC<any> = ({ data, form }) => {
     return <>
         <Form.Item name={"content"} label="content">

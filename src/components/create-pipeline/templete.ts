@@ -42,7 +42,7 @@ export const softwareTemplete = {
   ]
 }
 
-export const scriptTemplete ={
+export const scriptTemplete = {
   "name": "丰度矩阵",
   "script_type": "python",
   "image": "registry.cn-hangzhou.aliyuncs.com/wybioinfo/datascience-notebook:x86_64-ubuntu-22.04",
@@ -75,4 +75,54 @@ export const scriptTemplete ={
     }
   ],
   "tableDesc": ""
+}
+
+export const fileTemplete = {
+  "name": "raw_reads",
+  "label": "下机原始reads",
+  "mode": "multiple",
+  "type": "GroupSelectSampleButton",
+  "group": "group_field",
+  "rules": [
+    {
+      "required": true,
+      "message": "该字段不能为空!"
+    }
+  ],
+  "dir": "metaphlan",
+  "fileFormat": {
+    "profile": "*/*_profile.txt"
+  },
+  "inputForm": [
+    {
+      "name": [
+        "content",
+        "fastq1"
+      ],
+      "initialValue": "/data/wangyang/NGS_TEST/*_1.fastq.gz",
+      "label": "fastq1",
+      "type": "BaseInput",
+      "rules": [
+        {
+          "required": true,
+          "message": "该字段不能为空!"
+        }
+      ]
+    },
+    {
+      "name": [
+        "content",
+        "fastq2"
+      ],
+      "initialValue": "/data/wangyang/NGS_TEST/*_2.fastq.gz",
+      "label": "fastq2",
+      "type": "BaseInput",
+      "rules": [
+        {
+          "required": true,
+          "message": "该字段不能为空!"
+        }
+      ]
+    }
+  ]
 }
