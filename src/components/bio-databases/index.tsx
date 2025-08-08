@@ -47,6 +47,9 @@ const BioDatabases: FC<any> = ({ visible, onClose, params, callback }) => {
     }, [params])
     const onChange = (key: any) => {
         setActiveTabKey(key)
+        loadData({
+            "type": key
+        })
     }
     const onDelete = async (record: any) => {
         await axios.delete(`/delete-bio-database/${record.id}`)

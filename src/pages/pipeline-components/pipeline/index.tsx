@@ -434,7 +434,7 @@ const PipelineComponent = ({ operatePipeline, component, ...rest }: PipelineComp
             // const { downstreamAnalysis, appendSampleColumns, analysisType, ...rest } = item
             return {
                 key: item.component_id,
-                label: item.name || item.component_id,
+                label: item.component_name || item.component_id,
                 children: <AnalysisPanel
 
                     // inputAnalysisMethod={item.inputAnalysisMethod}
