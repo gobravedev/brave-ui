@@ -1,4 +1,4 @@
-import { Button, Card, Collapse, Divider, Flex, Form, Input, Modal, Popconfirm, Select, Space, Typography } from "antd"
+import { Button, Card, Collapse, Divider, Flex, Form, Input, Modal, Popconfirm, Select, Space, Tabs, Typography } from "antd"
 import TextArea from "antd/es/input/TextArea"
 import axios from "axios"
 import { FC, use, useEffect, useRef, useState } from "react"
@@ -213,7 +213,7 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
     }
     const ComponentsRender = ({ component_type, data, form }: any) => {
         const Component = componentMap[component_type] || (() => <div>未知类型 {JSON.stringify(data)}</div>);
-        return <Component  data={data} form={form} structure={structure}></Component>
+        return <Component data={data} form={form} structure={structure}></Component>
     }
 
 
@@ -227,8 +227,8 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
             data['content'] = JSON.parse(data['content'])
             form.setFieldsValue(data)
         } else {
-        form.setFieldsValue(data)
-    }
+            form.setFieldsValue(data)
+        }
 
     }
 
@@ -296,14 +296,33 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
             onClose={() => onClose()}
             onCancel={() => onClose()}>
             <Form form={form}>
-                <Form.Item name={"component_name"} label="组件名称">
-                    <Input ></Input>
-                </Form.Item>
-            
-                <Form.Item name={"namespace"} label="namespace" >
-                    <NamespaceSelect  disabled={data?.componemt_id}/>
-                </Form.Item>
-                <ComponentsRender {...structure} data={component} form={form}></ComponentsRender>
+                <Tabs items={[
+                    {
+                        label: "组件信息",
+                        key: "1",
+                        children: <>
+                            <Form.Item name={"component_name"} label="组件名称">
+                                <Input ></Input>
+                            </Form.Item>
+
+                            <Form.Item name={"namespace"} label="namespace" >
+                                <NamespaceSelect disabled={data?.componemt_id} />
+                            </Form.Item>
+                            <ComponentsRender {...structure} data={component} form={form}></ComponentsRender>
+                        </>
+                    }, {
+                        label: "组件描述",
+                        key: "2",
+                        children: <>
+                            <Form.Item name={"description"} label="组件名称">
+                                <TextAreaComp templete={""}></TextAreaComp>
+
+                            </Form.Item>
+                        </>
+                    }
+                ]}>
+                </Tabs>
+
                 <Collapse ghost items={[
                     {
                         key: "1",
@@ -338,15 +357,15 @@ const DefaultComponentRelation: FC<any> = ({ data, form, components }) => {
 
     </>
 }
-import {softwareTemplete,scriptTemplete, fileTemplete} from './templete'
+import { softwareTemplete, scriptTemplete, fileTemplete } from './templete'
 const SoftwareContent: FC<any> = ({ data, form }) => {
-    const [templete,setTemplete] = useState<any>()
+    const [templete, setTemplete] = useState<any>()
 
-    useEffect(()=>{
-        if(!data?.componemt_id){
-            setTemplete(JSON.stringify(softwareTemplete,null,2))
+    useEffect(() => {
+        if (!data?.componemt_id) {
+            setTemplete(JSON.stringify(softwareTemplete, null, 2))
         }
-    },[])
+    }, [])
     return <>
         <Form.Item name={"content"} label="content">
             <TextAreaComp templete={templete}></TextAreaComp>
@@ -357,13 +376,13 @@ const SoftwareContent: FC<any> = ({ data, form }) => {
     </>
 }
 const ScriptContent: FC<any> = ({ data, form }) => {
-    const [templete,setTemplete] = useState<any>()
+    const [templete, setTemplete] = useState<any>()
 
-    useEffect(()=>{
-        if(!data?.componemt_id){
-            setTemplete(JSON.stringify(scriptTemplete,null,2))
+    useEffect(() => {
+        if (!data?.componemt_id) {
+            setTemplete(JSON.stringify(scriptTemplete, null, 2))
         }
-    },[])
+    }, [])
     return <>
         <Form.Item name={"content"} label="content">
             <TextAreaComp templete={templete}></TextAreaComp>
@@ -373,20 +392,20 @@ const ScriptContent: FC<any> = ({ data, form }) => {
         </Form.Item> */}
     </>
 }
-const FileContent: FC<any> = ({ data, form,structure }) => {
-    const [templete,setTemplete] = useState<any>()
+const FileContent: FC<any> = ({ data, form, structure }) => {
+    const [templete, setTemplete] = useState<any>()
 
-    useEffect(()=>{
-        if(!data?.componemt_id){
-            setTemplete(JSON.stringify(fileTemplete,null,2))
+    useEffect(() => {
+        if (!data?.componemt_id) {
+            setTemplete(JSON.stringify(fileTemplete, null, 2))
         }
-    },[])
+    }, [])
     return <>
-     {structure?.files && <>
-        <Typography>
+        {structure?.files && <Card  style={{maxHeight:"20rem",overflow:"auto",marginBottom:"1rem"}}>
+            <Typography>
                 <pre>{JSON.stringify(structure?.files, null, 2)}</pre>
-        </Typography>
-        </>}
+            </Typography>
+        </Card>}
         <Form.Item name={"content"} label="content">
             <TextAreaComp templete={templete}></TextAreaComp>
         </Form.Item>
@@ -406,14 +425,14 @@ const TextAreaContent: FC<any> = ({ data, form }) => {
         </Form.Item> */}
     </>
 }
-const TextAreaComp: FC<any> = ({ value, onChange,templete }) => {
+const TextAreaComp: FC<any> = ({ value, onChange, templete }) => {
     // const [data, setData] = useState<any>(JSON.stringify(value))
     const editorRef = useRef<any>(null)
-    useEffect(()=>{
-        if(templete){
+    useEffect(() => {
+        if (templete) {
             onChange(templete)
         }
-    },[])
+    }, [])
     // useEffect(()=>{
     //     // setData(JSON.stringify(value))
     //     // editorRef.current.getValue()
@@ -509,7 +528,7 @@ const WrapPipeline: FC<any> = ({ data, form }) => {
     </>
 }
 
-const NamespaceSelect: FC<any> = ({ value, onChange,disabled }) => {
+const NamespaceSelect: FC<any> = ({ value, onChange, disabled }) => {
     const [namespace, setNamespace] = useState<any>([])
     // const { modal, openModal, closeModal } = useModal();
     const loadNamespace = async () => {
@@ -576,6 +595,6 @@ const NamespaceOperation: FC<any> = ({ visible, onClose, params, callback }) => 
     return <Card title="新增namespace">
         {/* {JSON.stringify(params)} */}
 
-      
+
     </Card>
 }

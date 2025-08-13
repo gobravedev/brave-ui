@@ -85,6 +85,7 @@ export const SSEProvider = ({
 
 
   useEffect(() => {
+    console.log(">>>>>>>>>>建立连接.................................")
     // setInterval(() => {
     //     console.log(eventSourceRef.current?.readyState)
     //     console.warn("EventSource closed, reconnecting...");

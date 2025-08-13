@@ -29,7 +29,7 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
             category: item.category,
             img: item.img,
             tags: item.tags,
-            description: item.description,
+            // description: item.description,
             order: item.order_index,
             path: `/component/${component_type}/${item.component_id}`,
             namespace: item.namespace,

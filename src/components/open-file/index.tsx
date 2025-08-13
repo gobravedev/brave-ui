@@ -1,16 +1,18 @@
 import { readFileApi } from "@/api/file-operation";
-import { Button, Flex, Modal, Tabs } from "antd";
+import { Button, Flex, Modal, Spin, Tabs } from "antd";
 import axios from "axios";
 import { FC, useEffect, useState } from "react"
 import { MonacoEditor } from "../react-monaco-editor";
+import Markdown from "../markdown";
 
 const OpenFile: FC<any> = ({ visible, onClose, params }) => {
     const [fileContent, setFileContent] = useState<any>()
     const [fileList, setFileList] = useState<any[]>([])
     const [tabKey, setTabKey] = useState<any>()
+    const [loading, setLoading] = useState<any>()
     useEffect(() => {
         if (visible) {
-            const paramsList = Object.entries(params).map(([key, value]) => ({
+            const paramsList = Object.entries(params.content).map(([key, value]) => ({
                 key: value,
                 label: key
             }))
@@ -23,8 +25,10 @@ const OpenFile: FC<any> = ({ visible, onClose, params }) => {
         }
     }, [visible])
     const readFile = async (file_path: string) => {
+        setLoading(true)
         const resp = await readFileApi(file_path)
         setFileContent(resp.data)
+        setLoading(false)
     }
     const handleDownload = (file_path: string) => {
         const url = `/brave-api/file-operation/download?path=${file_path}`;
@@ -36,6 +40,7 @@ const OpenFile: FC<any> = ({ visible, onClose, params }) => {
         open={visible}
         onCancel={onClose}
         title="打开文件"
+        footer={false}
 
     >
         <Tabs tabBarExtraContent={
@@ -47,13 +52,16 @@ const OpenFile: FC<any> = ({ visible, onClose, params }) => {
                     readFile(tabKey)
                 }}>刷新</Button>
             </Flex>
-
         } items={fileList} onChange={(key) => {
             readFile(key)
             setTabKey(key)
         }} />
         {/* {JSON.stringify(fileList)} */}
-        <MonacoEditor value={fileContent} />
+        <Spin spinning={loading}>
+            <MonacoEditor value={fileContent} />
+
+        </Spin>
+        <Markdown data={params.description}></Markdown>
         {/* <div>{JSON.stringify(params)}</div> */}
     </Modal>
 }

@@ -5,7 +5,7 @@ import { Button, Card, Flex, message, Modal, Popconfirm, Popover, Space, Table, 
 import axios from "axios"
 import { FC, forwardRef, useEffect, useImperativeHandle, useState } from "react"
 import { useOutletContext, useParams } from "react-router"
-import {FileOutlined} from "@ant-design/icons"
+import { FileOutlined, QuestionCircleOutlined, RedoOutlined } from "@ant-design/icons"
 export const readHdfsAPi = (contentPath: any) => axios.get(`/api/read-hdfs?path=${contentPath}`)
 export const readJsonAPi = (contentPath: any) => axios.get(`/fast-api/read-json?path=${contentPath}`)
 
@@ -56,9 +56,9 @@ const ResultList = forwardRef<any, any>(({
             if (data.msgType === "analysis_result") {
                 // message.success(data.msg)
                 const componentIdList = analysisMethod.map((it: any) => it.component_id)
-                console.log("componentIdList", componentIdList) 
+                console.log("componentIdList", componentIdList)
                 console.log("data.component_id ", data.component_id)
-                console.log(" componentIdList.includes(data.component_id) ", componentIdList.includes(data.component_id))   
+                console.log(" componentIdList.includes(data.component_id) ", componentIdList.includes(data.component_id))
                 if (componentIdList.includes(data.component_id)) {
                     reload()
                     // console.log("reload", currentAnalysisMethod?.component_id)   
@@ -308,7 +308,7 @@ const ResultList = forwardRef<any, any>(({
                 </Tooltip>
             }
         },
-       
+
         {
             title: '分析结果ID',
             dataIndex: 'analysis_result_id',
@@ -438,14 +438,14 @@ const ResultList = forwardRef<any, any>(({
         //     key: 'software',
         //     ellipsis: true,
         // },
-        
+
         ...appendSampleColumns, {
             title: '操作',
             key: 'action',
             fixed: "right",
             ellipsis: true,
             width: 200,
-            
+
             render: (_: any, record: any) => (
                 <Space size="middle">
                     <Popover content={<>
@@ -461,7 +461,7 @@ const ResultList = forwardRef<any, any>(({
                             if (cleanDom) {
                                 cleanDom(undefined)
                             }
-                            operatePipeline.openModal("openFile", record.content)
+                            operatePipeline.openModal("openFile",{content: record.content,description:currentAnalysisMethod.description})
 
                             // const param = JSON.parse(record.request_param)
                             // console.log(param)
@@ -543,70 +543,74 @@ const ResultList = forwardRef<any, any>(({
                             operatePipeline.openModals("modalD", { ...currentAnalysisMethod, operatePipeline: operatePipeline })
                         }}>导入数据</Button>
                         {(rest.component_type == "software" || rest.component_type == "file") && <>
-                        <Tooltip title={currentAnalysisMethod?.component_name}>
+                            <Tooltip title={currentAnalysisMethod?.component_name}>
 
-                            <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                operatePipeline.openModal("modalC", {
-                                    data: undefined,
-                                    structure: {
-                                        relation_type: relationType, //"software_input_file",
-                                        parent_component_id: software.component_id,
-                                        // pipeline_id: pipeline.component_id,
-                                        component_type: "file"
-                                    }
-                                })
-                            }}>新增文件</Button>
-                        </Tooltip>
-                        <Tooltip title={currentAnalysisMethod?.component_name}>
-                            <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                operatePipeline.openModal("modalC", {
-                                    data: currentAnalysisMethod, structure: {
-                                        component_type: "file",
-                                    }
-                                })
-                            }}>更新文件</Button>
-                        </Tooltip>
-                        <Tooltip title={currentAnalysisMethod?.component_name}>
-                            <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                operatePipeline.openModal("modalA", {
-                                    data: undefined,
-                                    pipelineStructure: {
-                                        relation_type: relationType, //"software_input_file",
-                                        parent_component_id: software.component_id,
-                                        // pipeline_id: pipeline.component_id
-                                    }
-                                })
-                            }}>添加文件</Button>
-                        </Tooltip>
+                                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                    operatePipeline.openModal("modalC", {
+                                        data: undefined,
+                                        structure: {
+                                            relation_type: relationType, //"software_input_file",
+                                            parent_component_id: software.component_id,
+                                            // pipeline_id: pipeline.component_id,
+                                            component_type: "file"
+                                        }
+                                    })
+                                }}>新增文件</Button>
+                            </Tooltip>
+                            <Tooltip title={currentAnalysisMethod?.component_name}>
+                                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                    operatePipeline.openModal("modalC", {
+                                        data: currentAnalysisMethod, structure: {
+                                            component_type: "file",
+                                        }
+                                    })
+                                }}>更新文件</Button>
+                            </Tooltip>
+                            <Tooltip title={currentAnalysisMethod?.component_name}>
+                                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                    operatePipeline.openModal("modalA", {
+                                        data: undefined,
+                                        pipelineStructure: {
+                                            relation_type: relationType, //"software_input_file",
+                                            parent_component_id: software.component_id,
+                                            // pipeline_id: pipeline.component_id
+                                        }
+                                    })
+                                }}>添加文件</Button>
+                            </Tooltip>
 
-                        <Tooltip title={currentAnalysisMethod?.component_name}>
-                            <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                // operatePipeline.setOperateOpen(true)
-                                // operatePipeline.setPipelineRecord(currentAnalysisMethod)
-                                // operatePipeline.setPipelineStructure({ pipeline_type: pipelineType })
-                                operatePipeline.openModal("modalA", {
-                                    data: currentAnalysisMethod,
-                                    pipelineStructure: {
-                                        relation_type: relationType,// "software_input_file",
-                                        // pipeline_id: pipeline.component_id
-                                        // parent_component_id: currentAnalysisMethod.component_id,
-                                        // pipeline_id: currentAnalysisMethod.pipeline_id
-                                    }
-                                })
-                            }}>替换文件</Button>
-                        </Tooltip>
+                            <Tooltip title={currentAnalysisMethod?.component_name}>
+                                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                    // operatePipeline.setOperateOpen(true)
+                                    // operatePipeline.setPipelineRecord(currentAnalysisMethod)
+                                    // operatePipeline.setPipelineStructure({ pipeline_type: pipelineType })
+                                    operatePipeline.openModal("modalA", {
+                                        data: currentAnalysisMethod,
+                                        pipelineStructure: {
+                                            relation_type: relationType,// "software_input_file",
+                                            // pipeline_id: pipeline.component_id
+                                            // parent_component_id: currentAnalysisMethod.component_id,
+                                            // pipeline_id: currentAnalysisMethod.pipeline_id
+                                        }
+                                    })
+                                }}>替换文件</Button>
+                            </Tooltip>
 
-                        <Tooltip title={currentAnalysisMethod?.component_name}>
-                            <Popconfirm title="是否移除文件!" onConfirm={() => {
-                                operatePipeline.deletePipelineRelation(currentAnalysisMethod.relation_id)
-                            }}>
-                                <Button size="small" color="cyan" variant="solid" >移除文件</Button>
-                            </Popconfirm>
-                        </Tooltip>
-                    </>}
+                            <Tooltip title={currentAnalysisMethod?.component_name}>
+                                <Popconfirm title="是否移除文件!" onConfirm={() => {
+                                    operatePipeline.deletePipelineRelation(currentAnalysisMethod.relation_id)
+                                }}>
+                                    <Button size="small" color="cyan" variant="solid" >移除文件</Button>
+                                </Popconfirm>
+                            </Tooltip>
+                        </>}
                     </>}
 
                     <Button size="small" color="primary" variant="solid" onClick={reload}>刷新</Button>
+                    {/* <RedoOutlined style={{ cursor: "pointer"}}  onClick={reload}/> */}
+                    <QuestionCircleOutlined onClick={() => {
+                        operatePipeline.openModal("descriptionModal", currentAnalysisMethod.description)
+                    }} style={{ cursor: "pointer"}} />
                 </Flex>
             </>}
             tabList={analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 1 ?

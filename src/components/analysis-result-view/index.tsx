@@ -68,7 +68,7 @@ const ImgView: FC<any> = ({ data, url }) => {
     return <div >
         <div style={{ textAlign: "center" }}>
 
-            <Image src={data} style={{ maxWidth: "20rem", marginRight: "0.5rem" }}></Image>
+            <Image src={`${data}?t=${Date.now()}`} style={{ maxWidth: "20rem", marginRight: "0.5rem" }}></Image>
 
             {url && <div>
                 <Popover title={`${window.location.origin}${url}`}>

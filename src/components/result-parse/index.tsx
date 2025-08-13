@@ -79,6 +79,7 @@ const ResultParse: FC<any> = memo(({ analysis_id: analysisId, callback }) => {
                     </Typography> :
                         <>
                             <Table
+                            // virtual
                                 size="small"
                                 pagination={false}
                                 rowKey={"component_id"}
@@ -99,7 +100,9 @@ const ResultParse: FC<any> = memo(({ analysis_id: analysisId, callback }) => {
                                     dataIndex: "fileFormat",
                                     key: "fileFormat",
                                     render: (_, record: any) => {
-                                        return JSON.stringify(record.fileFormat)
+                                        return <div style={{overflowWrap:"break-word",wordBreak:"break-all"}}>
+                                            {JSON.stringify(record.fileFormat)}
+                                        </div>
                                     }
                                 }, {
                                     title: "操作",
@@ -119,10 +122,13 @@ const ResultParse: FC<any> = memo(({ analysis_id: analysisId, callback }) => {
                                     }
                                 }]}
                                 dataSource={data?.file_format_list} />
-                            <Typography>
+                            <Card style={{ maxHeight: "20rem", overflow: "auto" }} >
+                                <Typography>
 
-                                <pre>{JSON.stringify(data, null, 2)}</pre>
-                            </Typography>
+                                    <pre>{JSON.stringify(data, null, 2)}</pre>
+                                </Typography>
+                            </Card>
+
                         </>
                     }
                 </>}

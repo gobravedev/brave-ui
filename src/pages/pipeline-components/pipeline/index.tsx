@@ -23,6 +23,7 @@ import AnalysisResultEdit from "@/components/analysis-result-edit"
 import OpenFile from "@/components/open-file"
 import PipelineFlow from "@/components/pipeline-flow"
 import SortSoftwareModal from "@/components/sort-software"
+import DescriptionModal from "@/components/description-modal"
 const Pipeline: FC<any> = ({ }) => {
     console.log("Pipeline")
     const { component_type, component_id: name } = useParams()
@@ -206,7 +207,7 @@ const Pipeline: FC<any> = ({ }) => {
                             <span style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)", fontSize: "1rem" }}> {pipeline?.namespace_name}</span>
                         </Tooltip>
                     </h2>
-                    <p style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)" }}>{pipeline?.description}</p>
+                    {/* <p style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)" }}>{pipeline?.description}</p> */}
 
 
                     {import.meta.env.MODE == "development" && <>
@@ -224,8 +225,8 @@ const Pipeline: FC<any> = ({ }) => {
                     }}>更新排序</Button>
                 </>}
                 <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        operatePipeline.openModal("modalG", pipeline)
-                    }}>查看依赖</Button>
+                    operatePipeline.openModal("modalG", pipeline)
+                }}>查看依赖</Button>
                 <Button size="small" color="cyan" variant="solid" onClick={() => {
                     openModals("metadataModal", { ...pipeline, operatePipeline: operatePipeline })
                 }}>metadata</Button>
@@ -335,6 +336,10 @@ const Pipeline: FC<any> = ({ }) => {
             visible={modal.key == "sortSoftware" && modal.visible}
             onClose={closeModal}
             params={modal.params} callback={loadData}></SortSoftwareModal>
+        <DescriptionModal
+            visible={modal.key == "descriptionModal" && modal.visible}
+            onClose={closeModal}
+            params={modal.params} callback={loadData}></DescriptionModal>
     </div>
 }
 
@@ -414,7 +419,7 @@ const ScriptComponent = ({ operatePipeline, component, ...rest }: PipelineCompon
         {/* {JSON.stringify(component)} */}
         <UpstreamAnalysisOutput
             script={component.script}
-            analysisMethod={component.parent ||[]}
+            analysisMethod={component.parent || []}
             operatePipeline={operatePipeline}
             project={project}
         ></UpstreamAnalysisOutput>
@@ -468,28 +473,28 @@ const PipelineComponent = ({ operatePipeline, component, ...rest }: PipelineComp
             }
         })
     }
-    const getInitialNodes = (component:any) => {
+    const getInitialNodes = (component: any) => {
         const softwareList = component.software
-        if (!softwareList)  return []
+        if (!softwareList) return []
         const position = JSON.parse(component.position) || []
-        const positionMap = position.reduce((acc:any,item:any)=>{
+        const positionMap = position.reduce((acc: any, item: any) => {
             acc[item.component_id] = item.position
             return acc
-        },{})
+        }, {})
         // console.log(positionMap) 
-        const initialNodes = softwareList.map((component:any, index:number) => {
+        const initialNodes = softwareList.map((component: any, index: number) => {
             // const id = `${index + 1}`;
             const label = component.component_name;
-            const inputs = (component.inputFile || []).map((input:any) => input);
-            const outputs = (component.outputFile || []).map((output:any) => output);
+            const inputs = (component.inputFile || []).map((input: any) => input);
+            const outputs = (component.outputFile || []).map((output: any) => output);
 
             return {
-                id:component.component_id,
+                id: component.component_id,
                 type: 'custom',
-                position:  positionMap[component.component_id] || {
+                position: positionMap[component.component_id] || {
                     x: index * 300, // 你可以根据需要布局位置
                     y: 100,
-                } ,
+                },
                 data: {
                     label,
                     color: '#' + ((1 << 24) * Math.random() | 0).toString(16), // 随机颜色
@@ -500,7 +505,7 @@ const PipelineComponent = ({ operatePipeline, component, ...rest }: PipelineComp
         });
         return initialNodes || []
     }
-    const getInitialEdges = (component:any) => {
+    const getInitialEdges = (component: any) => {
         const edges = JSON.parse(component.edges)
         return edges || []
     }
@@ -528,19 +533,19 @@ const PipelineComponent = ({ operatePipeline, component, ...rest }: PipelineComp
         </AnalysisPanel>
         */}
 
-            {/* {JSON.stringify(getInitialNodes(component.software))} */}
+        {/* {JSON.stringify(getInitialNodes(component.software))} */}
         <PipelineFlow
             initialEdges={getInitialEdges(component)}
             initialNodes={getInitialNodes(component)}
             component={component}
-            
+
         ></PipelineFlow>
-        <div style={{marginTop:"1rem"}}></div>
+        <div style={{ marginTop: "1rem" }}></div>
         <UpstreamAnalysisInput
-        {...component}
-        project={project}
-        operatePipeline={operatePipeline}   
-        inputAnalysisMethod={component.inputFile}
+            {...component}
+            project={project}
+            operatePipeline={operatePipeline}
+            inputAnalysisMethod={component.inputFile}
         >
         </UpstreamAnalysisInput>
         {/* {JSON.stringify(softwareList)} */}
