@@ -108,7 +108,7 @@ const SoftwareAnalysisEditor: FC<any> = () => {
     const readScriptFile = async (currentFile: string, showMessage: boolean = false) => {
         if (currentFile) {
             readFile(currentFile).then(res => {
-                setContent(res)
+                setContent(res.data)
                 if (showMessage) {
                     messageApi.success(`脚本加载成功: ${currentFile}`)
                 }
@@ -156,6 +156,8 @@ const SoftwareAnalysisEditor: FC<any> = () => {
             }}
             tabBarExtraContent={
                 <Flex gap={"small"} align={"center"}>
+                    <Tag color="cyan">{analysis?.container_name}</Tag>
+
                     <Tag color="cyan">{analysis?.analysis_status}</Tag>
                     <Tag color="cyan">{analysis?.analysis_name}</Tag>
 

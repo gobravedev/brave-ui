@@ -28,8 +28,8 @@ const AnalysisResult = () => {
 
     }
 
-    return <div style={{ maxWidth: "1800px", margin: "1rem auto" }}>
-        <Flex style={{ marginBottom: "1rem" }} justify={"flex-end"} align={"center"} gap="small">
+    return <div style={{ maxWidth: "1500px", margin: "1rem auto" }}>
+        {/* <Flex style={{ marginBottom: "1rem" }} justify={"flex-end"} align={"center"} gap="small">
             <Radio.Group
                 options={[
                     {
@@ -50,12 +50,12 @@ const AnalysisResult = () => {
                 buttonStyle="solid"
             />
 
-        </Flex>
+        </Flex> */}
         <ResultList
-            title="下游分析历史记录"
+            title="分析结果"
             ref={tableRef}
             analysisType={"analysisResult"}
-            params={{ analysis_type: analysisType }}
+            params={{ }}
             setTableLoading={setPlotLoading}
             // analysisMethod={[
             //     // {

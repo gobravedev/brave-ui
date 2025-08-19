@@ -358,6 +358,7 @@ const DefaultComponentRelation: FC<any> = ({ data, form, components }) => {
     </>
 }
 import { softwareTemplete, scriptTemplete, fileTemplete } from './templete'
+import ContainerPage from "@/pages/container"
 const SoftwareContent: FC<any> = ({ data, form }) => {
     const [templete, setTemplete] = useState<any>()
 
@@ -367,6 +368,9 @@ const SoftwareContent: FC<any> = ({ data, form }) => {
         }
     }, [])
     return <>
+         <Form.Item name={"container_id"} label="容器">
+            <SelectContainer data={data}></SelectContainer>
+        </Form.Item>
         <Form.Item name={"content"} label="content">
             <TextAreaComp templete={templete}></TextAreaComp>
         </Form.Item>
@@ -384,6 +388,9 @@ const ScriptContent: FC<any> = ({ data, form }) => {
         }
     }, [])
     return <>
+        <Form.Item name={"container_id"} label="容器">
+            <SelectContainer data={data}></SelectContainer>
+        </Form.Item>
         <Form.Item name={"content"} label="content">
             <TextAreaComp templete={templete}></TextAreaComp>
         </Form.Item>
@@ -401,7 +408,7 @@ const FileContent: FC<any> = ({ data, form, structure }) => {
         }
     }, [])
     return <>
-        {structure?.files && <Card  style={{maxHeight:"20rem",overflow:"auto",marginBottom:"1rem"}}>
+        {structure?.files && <Card style={{ maxHeight: "20rem", overflow: "auto", marginBottom: "1rem" }}>
             <Typography>
                 <pre>{JSON.stringify(structure?.files, null, 2)}</pre>
             </Typography>
@@ -415,6 +422,31 @@ const FileContent: FC<any> = ({ data, form, structure }) => {
     </>
 }
 
+const SelectContainer: FC<any> = ({ value, onChange,data }) => {
+    const { modal, openModal, closeModal } = useModal()
+    const [container,setContainer] = useState<any>(data?.container)
+    return <>
+        <Input value={container?.name} style={{ cursor: "pointer" }} onClick={() => openModal("modalA")}></Input>
+        {/* {JSON.stringify(container)}
+        {data?.container_image}{data?.container_name} */}
+        <Modal footer={false} width={"50%"} title="选择容器" open={modal.visible && modal.key == "modalA"} onClose={closeModal} onCancel={closeModal}>
+            <ContainerPage rowSelection={{
+                type: "radio",
+                onChange: (selectedRowKeys: any, selectedRows: any) => {
+                    // console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+                    // setSelectedRowKey(selectedRowKeys)
+                   
+                    if(selectedRows.length>0){
+                        setContainer(selectedRows[0])
+                        onChange(selectedRows[0].container_id)
+                        closeModal()
+                    }
+                  
+                },
+            }}></ContainerPage>
+        </Modal>
+    </>
+}
 const TextAreaContent: FC<any> = ({ data, form }) => {
     return <>
         <Form.Item name={"content"} label="content">
@@ -528,7 +560,7 @@ const WrapPipeline: FC<any> = ({ data, form }) => {
     </>
 }
 
-const NamespaceSelect: FC<any> = ({ value, onChange, disabled }) => {
+export const NamespaceSelect: FC<any> = ({ value, onChange, disabled }) => {
     const [namespace, setNamespace] = useState<any>([])
     // const { modal, openModal, closeModal } = useModal();
     const loadNamespace = async () => {

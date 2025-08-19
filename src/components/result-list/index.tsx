@@ -457,7 +457,9 @@ const ResultList = forwardRef<any, any>(({
                     </>} >
                         <Button size="small" color="cyan" variant="solid" onClick={() => {
                             // record.content = JSON.parse(record.content)
-                            setRecord(record)
+                            if(setRecord){
+                                setRecord(record)
+                            }
                             if (cleanDom) {
                                 cleanDom(undefined)
                             }
@@ -521,8 +523,8 @@ const ResultList = forwardRef<any, any>(({
 
 
     return <>
-        <Card size="small" title={<><FileOutlined /> {title}(
-            <Tooltip title={<>
+        <Card size="small" title={<><FileOutlined /> {title}
+            {currentAnalysisMethod?.component_name && <Tooltip title={<>
                 <ul>
                     <li>namespace: {currentAnalysisMethod?.namespace_name}</li>
                     {pipeline?.component_id && <li>pipeline: {pipeline?.component_id}</li>}
@@ -533,8 +535,8 @@ const ResultList = forwardRef<any, any>(({
 
 
             </>}>
-                <span style={{ cursor: "pointer" }}>{currentAnalysisMethod?.component_name}</span>
-            </Tooltip>)</>}
+                <span style={{ cursor: "pointer" }}>({currentAnalysisMethod?.component_name})</span>
+            </Tooltip>}</>}
             extra={<>{cardExtra}
                 <Flex gap={"small"}>
 

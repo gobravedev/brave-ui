@@ -4,7 +4,7 @@ import axios from "axios";
 import { FC, useEffect, useState } from "react"
 import { MonacoEditor } from "../react-monaco-editor";
 import Markdown from "../markdown";
-
+import  {ComponentsRender} from '../analysis-result-view'
 const OpenFile: FC<any> = ({ visible, onClose, params }) => {
     const [fileContent, setFileContent] = useState<any>()
     const [fileList, setFileList] = useState<any[]>([])
@@ -58,8 +58,8 @@ const OpenFile: FC<any> = ({ visible, onClose, params }) => {
         }} />
         {/* {JSON.stringify(fileList)} */}
         <Spin spinning={loading}>
-            <MonacoEditor value={fileContent} />
-
+            {/* <MonacoEditor value={fileContent} /> */}
+            <ComponentsRender {...fileContent}></ComponentsRender>
         </Spin>
         <Markdown data={params.description}></Markdown>
         {/* <div>{JSON.stringify(params)}</div> */}

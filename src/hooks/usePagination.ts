@@ -39,9 +39,12 @@ export const usePagination = ({ pageApi,params,map, initialPageSize = 12 }: any)
 
             if(map){
                 response.data = items.map(map)
+                setData(response.data);
+            }else{
+                setData(response.data.items);
             }
 
-            setData(response.data); // 设置数据
+ // 设置数据
             // setTotalPage(Math.ceil(response.total / pageSize)); // 计算总页数\
             setTotalPage(total)
         } catch (error) {

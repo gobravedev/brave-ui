@@ -35,107 +35,109 @@ const ResultParse: FC<any> = memo(({ analysis_id: analysisId, callback }) => {
     }, [analysisId])
 
     return <>
-        <Card title={`输出结果 ${analysisId}`} extra={
-            <Flex gap={"small"} align={"center"}>
+        {/* <Card size="small" title={`输出结果 ${analysisId}`}
+            extra={
 
-                {data?.file_format_list && <>
-                    {data?.file_format_list.map((item: any) => {
-                        return <Button size="small" color="cyan" variant="solid"
-                            onClick={() => openModal("modalA", {
-                                params: {
-                                    component_id: item.component_id
-                                },
-                                title: item.name
-                            })}>
-                            {item.name}
-                        </Button>
-                    })}
-                </>}
-                {/* <Button size="small" color="cyan" variant="solid"
-                    onClick={() => openModal("modalA", {
-                        component_id: data?.component_id
-                    })}>
-                    查看结果
-                </Button> */}
-                <Popconfirm title="确定解析吗？" onConfirm={() => {
-                    loadData(true)
-                    messageApi.success("解析成功")
-                }}>
-                    <Button size="small" color="cyan" variant="solid" >
-                        解析
+            }>
+
+        </Card> */}
+        <Flex gap={"small"} justify="flex-end" align={"center"}>
+
+            {data?.file_format_list && <>
+                {data?.file_format_list.map((item: any) => {
+                    return <Button size="small" color="cyan" variant="solid"
+                        onClick={() => openModal("modalA", {
+                            params: {
+                                component_id: item.component_id
+                            },
+                            title: item.name
+                        })}>
+                        {item.name}
                     </Button>
-                </Popconfirm>
-                <Button size="small" color="primary" variant="solid" onClick={() => loadData(false)}>
-                    刷新
+                })}
+            </>}
+            {/* <Button size="small" color="cyan" variant="solid"
+onClick={() => openModal("modalA", {
+component_id: data?.component_id
+})}>
+查看结果
+</Button> */}
+            <Popconfirm title="确定解析吗？" onConfirm={() => {
+                loadData(true)
+                messageApi.success("解析成功")
+            }}>
+                <Button size="small" color="cyan" variant="solid" >
+                    解析
                 </Button>
-            </Flex>
-        }>
-            <Spin spinning={loading}>
-                {data && <>
+            </Popconfirm>
+            <Button size="small" color="primary" variant="solid" onClick={() => loadData(false)}>
+                刷新
+            </Button>
+        </Flex>
+        <Spin spinning={loading}>
+            {data && <>
 
 
-                    {data?.error ? <Typography>
-                        <pre>{data?.error}</pre>
-                    </Typography> :
-                        <>
-                            <Table
+                {data?.error ? <Typography>
+                    <pre>{data?.error}</pre>
+                </Typography> :
+                    <>
+                        <Table
                             // virtual
-                                size="small"
-                                pagination={false}
-                                rowKey={"component_id"}
-                                columns={[{
-                                    title: "名称",
-                                    dataIndex: "name",
-                                    key: "name",
-                                }, {
-                                    title: "目录",
-                                    dataIndex: "dir",
-                                    key: "dir",
-                                }, {
-                                    title: "文件组件ID",
-                                    dataIndex: "component_id",
-                                    key: "component_id",
-                                }, {
-                                    title: "文件格式",
-                                    dataIndex: "fileFormat",
-                                    key: "fileFormat",
-                                    render: (_, record: any) => {
-                                        return <div style={{overflowWrap:"break-word",wordBreak:"break-all"}}>
-                                            {JSON.stringify(record.fileFormat)}
-                                        </div>
-                                    }
-                                }, {
-                                    title: "操作",
-                                    dataIndex: "component_id",
-                                    key: "component_id",
-                                    render: (_, record: any) => {
-                                        return <>
-                                            <Button color="cyan" variant="solid" size="small" onClick={() => {
-                                                openModal("modalC", {
-                                                    data: { component_id: record.component_id }, structure: {
-                                                        component_type: "file",
-                                                        files: data?.file_dict[record.dir]
-                                                    }
-                                                })
-                                            }}>编辑</Button>
-                                        </>
-                                    }
-                                }]}
-                                dataSource={data?.file_format_list} />
-                            <Card style={{ maxHeight: "20rem", overflow: "auto" }} >
-                                <Typography>
+                            size="small"
+                            pagination={false}
+                            rowKey={"component_id"}
+                            columns={[{
+                                title: "名称",
+                                dataIndex: "name",
+                                key: "name",
+                            }, {
+                                title: "目录",
+                                dataIndex: "dir",
+                                key: "dir",
+                            }, {
+                                title: "文件组件ID",
+                                dataIndex: "component_id",
+                                key: "component_id",
+                            }, {
+                                title: "文件格式",
+                                dataIndex: "fileFormat",
+                                key: "fileFormat",
+                                render: (_, record: any) => {
+                                    return <div style={{ overflowWrap: "break-word", wordBreak: "break-all" }}>
+                                        {JSON.stringify(record.fileFormat)}
+                                    </div>
+                                }
+                            }, {
+                                title: "操作",
+                                dataIndex: "component_id",
+                                key: "component_id",
+                                render: (_, record: any) => {
+                                    return <>
+                                        <Button color="cyan" variant="solid" size="small" onClick={() => {
+                                            openModal("modalC", {
+                                                data: { component_id: record.component_id }, structure: {
+                                                    component_type: "file",
+                                                    files: data?.file_dict[record.dir]
+                                                }
+                                            })
+                                        }}>编辑</Button>
+                                    </>
+                                }
+                            }]}
+                            dataSource={data?.file_format_list} />
+                        <Card style={{ maxHeight: "20rem", overflow: "auto" }} >
+                            <Typography>
 
-                                    <pre>{JSON.stringify(data, null, 2)}</pre>
-                                </Typography>
-                            </Card>
+                                <pre>{JSON.stringify(data, null, 2)}</pre>
+                            </Typography>
+                        </Card>
 
-                        </>
-                    }
-                </>}
+                    </>
+                }
+            </>}
 
-            </Spin>
-            {/* <FileBrowser dir={params.output_dir} /> */}
-        </Card>
+        </Spin>
 
         <CreateOrUpdatePipelineComponent
             callback={loadData}

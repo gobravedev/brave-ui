@@ -1,13 +1,17 @@
-import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs } from "antd";
+import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { FC, forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import Markdown from '../markdown'
 import axios from "axios";
 import LogFile from "../log-file";
+import { QuestionCircleOutlined } from "@ant-design/icons"
+import { MonacoEditor } from "../react-monaco-editor";
+
 export const TableView: FC<any> = ({ data, url }) => {
     const { Search } = Input;
     const [tableData, setTableData] = useState<any>([])
     const getColumns = (data: any) => {
+        if (!data) return []
         return Object.keys(data).map(it => {
             return {
                 title: it,
@@ -30,7 +34,7 @@ export const TableView: FC<any> = ({ data, url }) => {
     return <>
         {Array.isArray(tableData) && <>
             <Table
-             size="small"
+                size="small"
                 title={() => <>
                     <Search
                         placeholder="input search text"
@@ -57,7 +61,7 @@ export const TableView: FC<any> = ({ data, url }) => {
                 columns={getColumns(data[0])}
                 footer={() => `一共${data.length}条记录`}
             ></Table>
-            
+
 
         </>}
 
@@ -72,7 +76,7 @@ const ImgView: FC<any> = ({ data, url }) => {
 
             {url && <div>
                 <Popover title={`${window.location.origin}${url}`}>
-                    <Button onClick={() => { window.open(url, "_blank") }} type="primary">下载</Button>
+                    <Button size="small" onClick={() => { window.open(url, "_blank") }} type="primary">下载</Button>
                 </Popover>
             </div>}
 
@@ -86,7 +90,26 @@ const { Paragraph } = Typography;
 const StringView: FC<any> = ({ data }) => {
 
     return <>
-        <Paragraph style={{ background: "#13c2c2", padding: "1rem", border: "1px solid #1677ff" }}>{data}</Paragraph>
+        <MonacoEditor value={data} />
+        {/* <Paragraph style={{ background: "#13c2c2", padding: "1rem", border: "1px solid #1677ff" }}>{data}</Paragraph> */}
+    </>
+}
+const TextView: FC<any> = ({ data }) => {
+
+    return <>
+        <Typography>
+            <pre style={{ margin: 0 }}>
+                {data}
+            </pre>
+        </Typography>
+
+    </>
+}
+const JSONView: FC<any> = ({ data }) => {
+
+    return <>
+        <MonacoEditor value={data} defaultLanguage={"json"} />
+        {/* <Paragraph style={{ background: "#13c2c2", padding: "1rem", border: "1px solid #1677ff" }}>{data}</Paragraph> */}
     </>
 }
 const HtmlView: FC<any> = ({ data }) => {
@@ -102,10 +125,12 @@ const HtmlView: FC<any> = ({ data }) => {
 const componentMap: any = {
     table: TableView,
     string: StringView,
-    html: HtmlView
+    html: HtmlView,
+    json: JSONView,
+    text: TextView
 };
 
-const ComponentsRender = ({ type, ...rest }: any) => {
+export const ComponentsRender = ({ type, ...rest }: any) => {
     const Component = componentMap[type] || (() => <div>未知类型 {type}</div>)
     return <Component {...rest} />;
 }
@@ -168,19 +193,21 @@ const ComponentsRender = ({ type, ...rest }: any) => {
 
 //     </>
 // }
-const AnalysisResultView: FC<any> = forwardRef<any, any>(({ params, visible,  currentAnalysis }, ref) => {
+const AnalysisResultView: FC<any> = forwardRef<any, any>(({ params, visible, currentAnalysis, operatePipeline }, ref) => {
     const [loading, setLoading] = useState<boolean>(false)
     const [analsyisResult, setAnalsyisResult] = useState<any>(null)
-    const { output_dir } = params || {}
+    const { output_dir, analysis_id } = params || {}
 
     const loadData = async () => {
-        if(visible){
+        if (visible) {
             setLoading(true)
-            const res = await axios.get(`/file-operation/visualization-results?path=${output_dir}`)
+            // const res = await axios.get(`/file-operation/visualization-results?path=${output_dir}`)
+            const res = await axios.get(`/analysis/visualization-results/${analysis_id}`)
+
             setAnalsyisResult(res.data)
             setLoading(false)
         }
-     
+
     }
 
     useEffect(() => {
@@ -203,58 +230,79 @@ const AnalysisResultView: FC<any> = forwardRef<any, any>(({ params, visible,  cu
     //     return <Spin spinning={loading} tip="请求中..." ></Spin>
     // }
     return <>
-        <Card title={params?.analysis_id}>
-            <Tabs
+        <Card
+            title={<>{params?.analysis_name}({params?.analysis_id})</>}
+            size="small"
+            extra={
+                <Flex gap="small">
+                    {currentAnalysis?.analysis_status == "failed" && <Tag color="red">分析失败</Tag>}
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        loadData()
+                    }}>刷新</Button>
+                    <QuestionCircleOutlined onClick={() => {
+                        operatePipeline.openModal("descriptionModal", analsyisResult.description)
+                    }} style={{ cursor: "pointer" }} />
+                </Flex>
+
+            }
+        >
+
+
+            {currentAnalysis?.analysis_status == "failed" ? <div style={{ textAlign: "center" }}>
+
+                <LogFile file_path={currentAnalysis?.command_log_path}  ></LogFile>
+            </div> : <>
+                {(currentAnalysis?.analysis_status == "running" || loading) ? <Skeleton active></Skeleton> : <>
+
+
+
+                    {analsyisResult && <>
+
+                        {analsyisResult.images && <div style={{ display: "flex", justifyContent: "flex-start" }}>
+
+
+                            {
+
+                                Array.isArray(analsyisResult.images) ? <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
+                                    {analsyisResult.images.map((it: any, index: any) => (<Col key={index} span={6}>
+                                        <ImgView {...it} ></ImgView>
+                                    </Col>))}
+                                </Row> :
+                                    <>
+                                        <ImgView {...analsyisResult.images}></ImgView>
+
+                                    </>
+                            }
+                        </div>}
+                        {analsyisResult.tables && Array.isArray(analsyisResult.tables) && <>
+                            {analsyisResult.tables.map((item: any, index: any) => (
+                                <ComponentsRender key={index} {...item}></ComponentsRender>
+
+
+                            ))}
+                        </>}
+
+                    </>}
+                </>
+                }
+
+            </>}
+
+            {/* <LogFile file_path={currentAnalysis?.command_log_path}  ></LogFile> */}
+
+            {/* <Tabs
                 items={[
                     {
                         label: "分析结果",
                         key: "analysis_result",
                         children: <>
-                            {currentAnalysis?.analysis_status == "running" ? <Skeleton active></Skeleton> : <>
-
-                                <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                    loadData()
-                                }}>刷新</Button>
-                                {currentAnalysis?.analysis_status == "failed" && <div style={{ textAlign: "center" }}>
-                                    <Tag color="red">分析失败</Tag>
-                                </div>}
-
-                                {analsyisResult && <>
-
-                                    {analsyisResult.images && <div style={{ display: "flex", justifyContent: "flex-start" }}>
-                                        {
-
-                                            Array.isArray(analsyisResult.images) ? <>
-                                                {analsyisResult.images.map((it: any, index: any) => (<>
-                                                    <ImgView {...it} key={index}></ImgView>
-                                                </>))}
-                                            </> :
-                                                <>
-                                                    <ImgView {...analsyisResult.images}></ImgView>
-
-                                                </>
-                                        }
-                                    </div>}
-
-
-                                    {analsyisResult.tables && Array.isArray(analsyisResult.tables) && <>
-                                        {analsyisResult.tables.map((item: any, index: any) => (
-                                            <ComponentsRender key={index} {...item}></ComponentsRender>
-
-
-                                        ))}
-                                    </>}
-
-                                </>}
-                            </>
-                            }
 
 
                         </>
                     },
-                    { label: "分析日志", key: "analysis_log", children: <LogFile file_path={currentAnalysis?.command_log_path}  ></LogFile> },
+                    { label: "分析日志", key: "analysis_log", children:  },
 
-                ]}></Tabs>
+                ]}></Tabs> */}
 
 
 

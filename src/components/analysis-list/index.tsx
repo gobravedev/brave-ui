@@ -6,10 +6,10 @@ import { useLocation, useNavigate, useParams } from "react-router"
 import ResultParse from "../result-parse"
 import { useModal } from "@/hooks/useModal"
 import PipelineInfo from "../pipeline-monitor"
-import { runAnalysisApi } from "@/api/analysis"
+import { runAnalysisApi, stopAnalysisApi } from "@/api/analysis"
 import AnalysisResultView from "../analysis-result-view"
 import { useSSEContext } from "@/context/sse/useSSEContext"
-import {LineChartOutlined } from '@ant-design/icons'
+import { LineChartOutlined } from '@ant-design/icons'
 export const readHdfsAPi = (contentPath: any) => axios.get(`/api/read-hdfs?path=${contentPath}`)
 export const readJsonAPi = (contentPath: any) => axios.get(`/fast-api/read-json?path=${contentPath}`)
 
@@ -52,17 +52,17 @@ const ResultList = forwardRef<any, any>(({
     const [currentAnalysis, setCurrentAnalysis] = useState<any>()
 
     useEffect(() => {
-        if(data && Array.isArray(data) &&data.length > 0){
+        if (data && Array.isArray(data) && data.length > 0) {
             // const runningAnalysis = data.filter((item: any) => item.analysis_status == "running")
-            if(modal.visible && modal.params){
+            if (modal.visible && modal.params) {
                 const analysis = data.find((item: any) => item.analysis_id == modal.params.analysis_id)
-                if(analysis){
+                if (analysis) {
                     setCurrentAnalysis(analysis)
                 }
             }
-   
+
         }
-    }, [data,modal.params])
+    }, [data, modal.params])
 
     useEffect(() => {
         if (eventSourceRef) {
@@ -71,13 +71,13 @@ const ResultList = forwardRef<any, any>(({
                 const data = JSON.parse(event.data)
                 console.log('analysisId', analysisIdRef.current)
                 if (analysisIdRef.current.includes(data.analysis_id)) {
-                 
-                    if(data.event == "analysis_complete" || data.event == "analysis_failed"){
+
+                    if (data.event == "analysis_complete" || data.event == "analysis_failed") {
                         loadData()
-                        if(analysisResultRef.current){
+                        if (analysisResultRef.current) {
                             analysisResultRef.current?.relaod()
                         }
-                        if(pipelineInfoRef.current){
+                        if (pipelineInfoRef.current) {
                             pipelineInfoRef.current?.relaod()
                         }
                     }
@@ -114,7 +114,7 @@ const ResultList = forwardRef<any, any>(({
         let resp: any = await axios.post(`/list-analysis`, {
             // analysisMethod: analysisMethod,
             component_id: component_id,
-            component_ids:component_ids,
+            component_ids: component_ids,
             project: project
         });
         // if (analysisMethod) {
@@ -159,7 +159,11 @@ const ResultList = forwardRef<any, any>(({
         message.success("运行成功")
         loadData()
     }
-
+    const stopAnalysis = async (record: any) => {
+        await stopAnalysisApi(record.analysis_id)
+        message.success("停止成功")
+        loadData()
+    }
     let columns: any = [
         {
             title: 'project_name',
@@ -179,14 +183,19 @@ const ResultList = forwardRef<any, any>(({
             render: (text: any) => {
                 return <Tag color={text === "success" ? "green" : text === "failed" ? "red" : "blue"}>{text}</Tag>
             }
+        }, {
+            title: "分析名称",
+            dataIndex: 'analysis_name',
+            key: 'analysis_name',
+            ellipsis: true,
         },
         {
             title: 'analysis_id',
             dataIndex: 'analysis_id',
             key: 'analysis_id',
             ellipsis: true,
-            render: (text: any,record:any) => {
-                return  <Popover title={<>
+            render: (text: any, record: any) => {
+                return <Popover title={<>
                     <ul>
                         <li>analysis_name:{record.analysis_name}</li>
                         <li>pipeline_script:{record.pipeline_script}</li>
@@ -196,9 +205,9 @@ const ResultList = forwardRef<any, any>(({
                         <li>trace_file:{record.trace_file}</li>
                         <li>executor_log_file:{record.executor_log_file}</li>
                         <li>workflow_log_file:{record.workflow_log_file}</li>
-                       
+
                     </ul>
-                </>}><span style={{cursor:"pointer"}}>{text}</span></Popover>
+                </>}><span style={{ cursor: "pointer" }}>{text}</span></Popover>
             }
 
         }, {
@@ -212,17 +221,22 @@ const ResultList = forwardRef<any, any>(({
                 </Tooltip>
             }
         }, {
-            title: "分析名称",
-            dataIndex: 'analysis_name',
-            key: 'analysis_name',
+            title: "容器",
+            dataIndex: "container_name",
+            key: "container_name",
             ellipsis: true,
-        },{
-            title:"image",
-            dataIndex:"image",
-            key:"image",
-            ellipsis:true,
-         
-        },  {
+            render: (text: any, record: any) => {
+                return <Tooltip title={<>
+                <ul>
+                    <li>{record.container_id}</li>
+                    <li>{record.container_image}</li>
+                </ul>
+                </>}>
+                    <span style={{ cursor: "pointer" }}>{text}</span>
+                </Tooltip>
+            }
+
+        }, {
             title: '操作',
             key: 'action',
             fixed: "right",
@@ -237,6 +251,16 @@ const ResultList = forwardRef<any, any>(({
                             }
                         })
                     }}>编辑</Button>
+                    {/* /analysis/stop-analysis/{analysis_id} */}
+                    <Popconfirm title={"是否停止!"} onConfirm={() => {
+                        stopAnalysis(record)
+
+                    }}>
+                        <Button disabled={record.analysis_status != "running"} size="small" color="cyan" variant="solid">
+                            停止
+                        </Button>
+                    </Popconfirm>
+
                     <Popconfirm title={"是否运行!"} onConfirm={() => {
                         runAnalysis(record)
                         openModal("modalA", record)
@@ -246,15 +270,15 @@ const ResultList = forwardRef<any, any>(({
                             {record.analysis_status == "created" ? "运行" : "重新运行"}
                         </Button>
                     </Popconfirm>
-                    {editParams &&   <Button size="small" color="cyan" variant="solid" onClick={()=>editParams(record)}>编辑参数</Button>}
-                  
+                    {editParams && <Button size="small" color="cyan" variant="solid" onClick={() => editParams(record)}>编辑参数</Button>}
+
                     {isSelected(record, "modalA") ?
                         <Button size="small" color={"cyan"} variant="solid" onClick={() => {
                             closeModal()
                         }}>关闭</Button> :
                         <Button size="small" color={"cyan"} variant="solid" onClick={() => {
                             openModal("modalA", record)
-                            setRecord(record)
+                            // setRecord(record)
                         }}>查看结果</Button>}
 
                     {isSelected(record, "modalB") ?
@@ -263,7 +287,7 @@ const ResultList = forwardRef<any, any>(({
                         }}>关闭</Button> :
                         <Button size="small" color={"cyan"} variant="solid" onClick={() => {
                             openModal("modalB", record)
-                            setRecord(record)
+                            // setRecord(record)
                         }}>详情</Button>}
                     {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                         openModal("modalB", record)
@@ -362,6 +386,7 @@ const ResultList = forwardRef<any, any>(({
             params={modal.params}
             currentAnalysis={currentAnalysis}
             status={record?.analysis_status}
+            operatePipeline={operatePipeline}
             onClose={closeModal}></AnalysisResultView>
         <PipelineInfo
             ref={pipelineInfoRef}

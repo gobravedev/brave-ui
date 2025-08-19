@@ -9,6 +9,10 @@ export const runAnalysisApi = async (analysis_id   : string) => {
     const res = await axios.post(`/run-analysis-v2/${analysis_id}`)
     return res
 }
+export const stopAnalysisApi = async (analysis_id   : string) => {
+    const res = await axios.post(`/analysis/stop-analysis/${analysis_id}`)
+    return res
+}
 
 export const monitorAnalysisApi = async (analysisId: string, type: string) => {
     const resp = await axios.get(`/monitor-analysis/${analysisId}?type=${type}`)

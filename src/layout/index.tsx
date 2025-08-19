@@ -208,6 +208,9 @@ const App: React.FC = () => {
         }, {
             key: `/analysis-result`,
             label: "分析结果"
+        },{
+            key: `/container-page`,
+            label: "容器管理"
         }, {
             key: `/literature`,
             label: "文献资料"
