@@ -61,7 +61,8 @@ const OpenFile: FC<any> = ({ visible, onClose, params }) => {
             {/* <MonacoEditor value={fileContent} /> */}
             <ComponentsRender {...fileContent}></ComponentsRender>
         </Spin>
-        <Markdown data={params.description}></Markdown>
+        {params?.description && <Markdown data={params.description}></Markdown>}
+        
         {/* <div>{JSON.stringify(params)}</div> */}
     </Modal>
 }

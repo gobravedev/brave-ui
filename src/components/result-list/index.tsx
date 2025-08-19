@@ -1,9 +1,9 @@
 import { useSSEContext } from "@/context/sse/useSSEContext"
 import { SSEContextType } from "@/type/sse"
 import { Venn } from "@ant-design/plots"
-import { Button, Card, Flex, message, Modal, Popconfirm, Popover, Space, Table, Tooltip, Typography } from "antd"
+import { Button, Card, Flex, Input, message, Modal, Popconfirm, Popover, Space, Table, Tooltip, Typography } from "antd"
 import axios from "axios"
-import { FC, forwardRef, useEffect, useImperativeHandle, useState } from "react"
+import { FC, forwardRef, useEffect, useImperativeHandle, useMemo, useState } from "react"
 import { useOutletContext, useParams } from "react-router"
 import { FileOutlined, QuestionCircleOutlined, RedoOutlined } from "@ant-design/icons"
 export const readHdfsAPi = (contentPath: any) => axios.get(`/api/read-hdfs?path=${contentPath}`)
@@ -457,13 +457,13 @@ const ResultList = forwardRef<any, any>(({
                     </>} >
                         <Button size="small" color="cyan" variant="solid" onClick={() => {
                             // record.content = JSON.parse(record.content)
-                            if(setRecord){
+                            if (setRecord) {
                                 setRecord(record)
                             }
                             if (cleanDom) {
                                 cleanDom(undefined)
                             }
-                            operatePipeline.openModal("openFile",{content: record.content,description:currentAnalysisMethod.description})
+                            operatePipeline.openModal("openFile", { content: record.content, description: currentAnalysisMethod.description })
 
                             // const param = JSON.parse(record.request_param)
                             // console.log(param)
@@ -519,7 +519,15 @@ const ResultList = forwardRef<any, any>(({
             ),
         },
     ]
-
+    const [searchText, setSearchText] = useState("");
+    const filteredData = useMemo(() => {
+        if (!searchText) return data;
+        return data.filter((item: any) =>
+            Object.values(item).some((val) =>
+                String(val).toLowerCase().includes(searchText.toLowerCase())
+            )
+        );
+    }, [data, searchText]);
 
 
     return <>
@@ -612,7 +620,7 @@ const ResultList = forwardRef<any, any>(({
                     {/* <RedoOutlined style={{ cursor: "pointer"}}  onClick={reload}/> */}
                     <QuestionCircleOutlined onClick={() => {
                         operatePipeline.openModal("descriptionModal", currentAnalysisMethod.description)
-                    }} style={{ cursor: "pointer"}} />
+                    }} style={{ cursor: "pointer" }} />
                 </Flex>
             </>}
             tabList={analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 1 ?
@@ -625,6 +633,17 @@ const ResultList = forwardRef<any, any>(({
             {/* {JSON.stringify(projectObj)} */}
             {/* {JSON.stringify(currentAnalysisMethod.component_id)} */}
             <Table
+                title={() => (
+                    <Input.Search
+                        size="small"
+                        placeholder="搜索结果..."
+                        allowClear
+                        enterButton
+                        value={searchText}
+                        onChange={(e:any) => setSearchText(e.target.value)}
+                        style={{ width: 300 }}
+                    />
+                )}
                 rowKey={(it: any) => it.id}
                 size="small"
                 bordered
@@ -633,8 +652,8 @@ const ResultList = forwardRef<any, any>(({
                 loading={loading}
                 scroll={{ x: 'max-content', y: 55 * 5 }}
                 columns={columnsParamsALL ? columnsParamsALL : columns}
-                footer={() => `一共${data && Array.isArray(data) && data.length}条记录`}
-                dataSource={data} />
+                footer={() => `一共${filteredData && Array.isArray(filteredData) && data.length}条记录`}
+                dataSource={filteredData} />
             {currentAnalysisMethod?.parseFormat && currentAnalysisMethod?.relation_type == "software_output_file" && <Typography>
                 <pre>
                     {JSON.stringify(currentAnalysisMethod.parseFormat, null, 2)}

@@ -1,7 +1,7 @@
 import { Venn } from "@ant-design/plots"
-import { Button, Card, Flex, message, Popconfirm, Popover, Space, Table, Tag, Tooltip } from "antd"
+import { Button, Card, Flex, Input, message, Popconfirm, Popover, Space, Table, Tag, Tooltip } from "antd"
 import axios from "axios"
-import { FC, forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
+import { FC, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { useLocation, useNavigate, useParams } from "react-router"
 import ResultParse from "../result-parse"
 import { useModal } from "@/hooks/useModal"
@@ -227,10 +227,10 @@ const ResultList = forwardRef<any, any>(({
             ellipsis: true,
             render: (text: any, record: any) => {
                 return <Tooltip title={<>
-                <ul>
-                    <li>{record.container_id}</li>
-                    <li>{record.container_image}</li>
-                </ul>
+                    <ul>
+                        <li>{record.container_id}</li>
+                        <li>{record.container_image}</li>
+                    </ul>
                 </>}>
                     <span style={{ cursor: "pointer" }}>{text}</span>
                 </Tooltip>
@@ -337,6 +337,15 @@ const ResultList = forwardRef<any, any>(({
     useEffect(() => {
         loadData()
     }, [])
+    const [searchText, setSearchText] = useState("");
+    const filteredData = useMemo(() => {
+        if (!searchText) return data;
+        return data.filter((item: any) =>
+            Object.values(item).some((val) =>
+                String(val).toLowerCase().includes(searchText.toLowerCase())
+            )
+        );
+    }, [data, searchText]);
     return <>
         {contextHolder}
         {/* {JSON.stringify(location.pathname)} */}
@@ -367,6 +376,17 @@ const ResultList = forwardRef<any, any>(({
             </ul>} */}
 
             <Table
+                title={() => (
+                    <Input.Search
+                        size="small"
+                        placeholder="搜索结果..."
+                        allowClear
+                        enterButton
+                        value={searchText}
+                        onChange={(e: any) => setSearchText(e.target.value)}
+                        style={{ width: 300 }}
+                    />
+                )}
                 rowKey="analysis_id"
                 size="small"
                 bordered
@@ -374,8 +394,8 @@ const ResultList = forwardRef<any, any>(({
                 loading={loading}
                 scroll={{ x: 'max-content', y: 55 * 5 }}
                 columns={columns}
-                footer={() => `一共${data.length}条记录`}
-                dataSource={data} />
+                footer={() => `一共${filteredData.length}条记录`}
+                dataSource={filteredData} />
 
         </Card>
         <div style={{ marginBottom: "1rem" }}></div>
