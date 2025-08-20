@@ -1,4 +1,4 @@
-import { Button, Card, Col, Collapse, Empty, Flex, Form, Input, message, Modal, notification, Pagination, Popconfirm, Row, Space, Spin, Table, Tag, Tooltip, Typography } from "antd"
+import { Button, Card, Col, Collapse, Empty, Flex, Form, Input, message, Modal, notification, Pagination, Popconfirm, Row, Select, Space, Spin, Table, Tag, Tooltip, Typography } from "antd"
 import Item from "antd/es/list/Item"
 import { FC, useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
@@ -31,7 +31,7 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
             title: "namespace",
             dataIndex: "namespace_name",
             key: "namespace_name"
-        },{
+        }, {
             title: "container_id",
             dataIndex: "container_id",
             key: "container_id"
@@ -154,6 +154,26 @@ const ContainerModal: FC<any> = ({ visible, params, onClose, callback }) => {
                 <TextArea ></TextArea>
             </Form.Item>
 
+            <Form.Item name={"envionment"} label="环境变量">
+                <TextArea ></TextArea>
+            </Form.Item>
+            <Form.Item name={"command"} label="命令">
+                <TextArea ></TextArea>
+            </Form.Item>
+            <Form.Item name={"port"} label="端口">
+                <Input ></Input>
+            </Form.Item>
+            <Form.Item name={"change_uid"} label="修改用户">
+                <Select options={[
+                    {
+                        label: "是",
+                        value: true
+                    }, {
+                        label: "否",
+                        value: false
+                    }
+                ]} ></Select>
+            </Form.Item>
 
             <Collapse ghost items={[
                 {

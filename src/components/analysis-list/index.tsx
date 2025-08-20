@@ -1,5 +1,5 @@
 import { Venn } from "@ant-design/plots"
-import { Button, Card, Flex, Input, message, Popconfirm, Popover, Space, Table, Tag, Tooltip } from "antd"
+import { Button, Card, Dropdown, Flex, Input, message, Popconfirm, Popover, Space, Table, Tag, Tooltip } from "antd"
 import axios from "axios"
 import { FC, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { useLocation, useNavigate, useParams } from "react-router"
@@ -9,7 +9,7 @@ import PipelineInfo from "../pipeline-monitor"
 import { runAnalysisApi, stopAnalysisApi } from "@/api/analysis"
 import AnalysisResultView from "../analysis-result-view"
 import { useSSEContext } from "@/context/sse/useSSEContext"
-import { LineChartOutlined } from '@ant-design/icons'
+import { DownOutlined, LineChartOutlined } from '@ant-design/icons'
 export const readHdfsAPi = (contentPath: any) => axios.get(`/api/read-hdfs?path=${contentPath}`)
 export const readJsonAPi = (contentPath: any) => axios.get(`/fast-api/read-json?path=${contentPath}`)
 
@@ -72,7 +72,7 @@ const ResultList = forwardRef<any, any>(({
                 console.log('analysisId', analysisIdRef.current)
                 if (analysisIdRef.current.includes(data.analysis_id)) {
 
-                    if (data.event == "analysis_complete" || data.event == "analysis_failed") {
+                    if (data.event == "analysis_complete" || data.event == "analysis_failed" || data.event == "analysis_started" ) {
                         loadData()
                         if (analysisResultRef.current) {
                             analysisResultRef.current?.relaod()
@@ -154,8 +154,8 @@ const ResultList = forwardRef<any, any>(({
         if (!modal.params) return false
         return record.analysis_id == modal.params.analysis_id && key == modal.key
     }
-    const runAnalysis = async (record: any) => {
-        await runAnalysisApi(record.analysis_id)
+    const runAnalysis = async (record: any,run_type:string) => {
+        await runAnalysisApi(record.analysis_id,run_type)
         message.success("运行成功")
         loadData()
     }
@@ -236,6 +236,11 @@ const ResultList = forwardRef<any, any>(({
                 </Tooltip>
             }
 
+        },{
+            title: "ports",
+            dataIndex: 'ports',
+            key: 'ports',
+            ellipsis: true,
         }, {
             title: '操作',
             key: 'action',
@@ -244,32 +249,32 @@ const ResultList = forwardRef<any, any>(({
             width: 200,
             render: (_: any, record: any) => (
                 <Space size="middle">
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        navigate(`/software-analysis-editor/${record.analysis_id}`, {
-                            state: {
-                                location: location.pathname,
-                            }
-                        })
-                    }}>编辑</Button>
+
                     {/* /analysis/stop-analysis/{analysis_id} */}
-                    <Popconfirm title={"是否停止!"} onConfirm={() => {
-                        stopAnalysis(record)
+                    {record.analysis_status == "running" ?
+                        <>
+                            <Popconfirm title={"是否停止!"} onConfirm={() => {
+                                stopAnalysis(record)
 
-                    }}>
-                        <Button disabled={record.analysis_status != "running"} size="small" color="cyan" variant="solid">
-                            停止
-                        </Button>
-                    </Popconfirm>
+                            }}>
+                                <Button  size="small" color="cyan" variant="solid">
+                                    停止
+                                </Button>
+                            </Popconfirm>
+                        </> : <>
+                            <Popconfirm title={"是否运行!"} onConfirm={() => {
+                                runAnalysis(record,"job")
+                                openModal("modalA", record)
+                                setRecord(record)
+                            }}>
+                                <Button size="small" color="cyan" variant="solid">
+                                    {record.analysis_status == "created" ? "运行" : "重新运行"}
+                                </Button>
+                            </Popconfirm>
+                        </>
+                    }
 
-                    <Popconfirm title={"是否运行!"} onConfirm={() => {
-                        runAnalysis(record)
-                        openModal("modalA", record)
-                        setRecord(record)
-                    }}>
-                        <Button disabled={record.analysis_status == "running"} size="small" color="cyan" variant="solid">
-                            {record.analysis_status == "created" ? "运行" : "重新运行"}
-                        </Button>
-                    </Popconfirm>
+
                     {editParams && <Button size="small" color="cyan" variant="solid" onClick={() => editParams(record)}>编辑参数</Button>}
 
                     {isSelected(record, "modalA") ?
@@ -309,12 +314,7 @@ const ResultList = forwardRef<any, any>(({
                         }}>输出结果</Button>} */}
 
 
-                    <Popconfirm title={"是否删除!"} onConfirm={async () => {
-                        await deleteById(record.id)
-                        loadData()
-                    }}>
-                        <Button size="small" color="danger" variant="solid">删除</Button>
-                    </Popconfirm>
+
                     {/* <Popconfirm title={"是否解析!"} onConfirm={async () => {
                         try {
                             await parseAnalysisResultAPi(record.id, true)
@@ -327,6 +327,47 @@ const ResultList = forwardRef<any, any>(({
                     }}>
                         
                     </Popconfirm> */}
+                    <Dropdown menu={{
+                        items: [
+                            {
+                                key: '2',
+                                label: (<>
+                                   <Popconfirm title="是否启动服务?" onConfirm={() => {
+                                       
+                                       runAnalysis(record,"server")
+                                    }}>
+                                   <a >启动服务</a>
+                                   </Popconfirm>
+                                </>)
+                            }, {
+                                key: '3',
+                                label: (<>
+                                    <a onClick={() => {
+                                        navigate(`/software-analysis-editor/${record.analysis_id}`, {
+                                            state: {
+                                                location: location.pathname,
+                                            }
+                                        })
+                                    }}>编辑</a>
+                                </>)
+                            }, {
+                                key: '4',
+                                label: (<> <Popconfirm title={"是否删除!"} onConfirm={async () => {
+                                    await deleteById(record.id)
+                                    loadData()
+                                }}>
+                                    <a >删除</a>
+                                </Popconfirm></>)
+                            }
+                        ]
+                    }}>
+                        <a onClick={(e) => e.preventDefault()}>
+                            <Space>
+                                更多
+                                <DownOutlined />
+                            </Space>
+                        </a>
+                    </Dropdown>
                 </Space>
             ),
         },
