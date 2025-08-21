@@ -523,7 +523,7 @@ export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
     }
 
     const runAnalysis = async () => {
-        const res = await runAnalysisApi(analysis?.analysis_id)
+        const res = await runAnalysisApi(analysis?.analysis_id,"job")
         messageApi.success("运行成功")
         // setContentMap((prev: any) => ({
         //     ...prev,

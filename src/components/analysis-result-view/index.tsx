@@ -50,7 +50,7 @@ export const TableView: FC<any> = ({ data, url }) => {
                     />
 
                     {url && <Popover title={`${window.location.origin}${url}`}><Button onClick={() => {
-                        window.open(url, "_blank")
+                        window.open(`${url}?t=${Date.now()}`, "_blank")
                     }} style={{ marginLeft: "1rem" }} type="primary">下载</Button></Popover>}
                 </>}
                 // showHeader={()=>{}}
@@ -76,7 +76,7 @@ const ImgView: FC<any> = ({ data, url }) => {
 
             {url && <div>
                 <Popover title={`${window.location.origin}${url}`}>
-                    <Button size="small" onClick={() => { window.open(url, "_blank") }} type="primary">下载</Button>
+                    <Button size="small" onClick={() => { window.open(`${url}?t=${Date.now()}`, "_blank") }} type="primary">下载</Button>
                 </Popover>
             </div>}
 
