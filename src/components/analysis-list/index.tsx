@@ -72,7 +72,7 @@ const ResultList = forwardRef<any, any>(({
                 console.log('analysisId', analysisIdRef.current)
                 if (analysisIdRef.current.includes(data.analysis_id)) {
 
-                    if (data.event == "analysis_complete" || data.event == "analysis_failed" || data.event == "analysis_started" ) {
+                    if (data.event == "analysis_complete" || data.event == "analysis_failed" || data.event == "analysis_started") {
                         loadData()
                         if (analysisResultRef.current) {
                             analysisResultRef.current?.relaod()
@@ -154,8 +154,8 @@ const ResultList = forwardRef<any, any>(({
         if (!modal.params) return false
         return record.analysis_id == modal.params.analysis_id && key == modal.key
     }
-    const runAnalysis = async (record: any,run_type:string) => {
-        await runAnalysisApi(record.analysis_id,run_type)
+    const runAnalysis = async (record: any, run_type: string) => {
+        await runAnalysisApi(record.analysis_id, run_type)
         message.success("运行成功")
         loadData()
     }
@@ -236,12 +236,17 @@ const ResultList = forwardRef<any, any>(({
                 </Tooltip>
             }
 
-        },{
-            title: "ports",
-            dataIndex: 'ports',
-            key: 'ports',
-            ellipsis: true,
-        }, {
+        },
+        // {
+        //     title: "ports",
+        //     dataIndex: 'ports',
+        //     key: 'ports',
+        //     ellipsis: true,
+        //     render:(text: any, record: any)=>(<>
+        //         {text}
+        //     </>)
+        // }, 
+        {
             title: '操作',
             key: 'action',
             fixed: "right",
@@ -257,13 +262,23 @@ const ResultList = forwardRef<any, any>(({
                                 stopAnalysis(record)
 
                             }}>
-                                <Button  size="small" color="cyan" variant="solid">
+                                <Button size="small" color="cyan" variant="solid">
                                     停止
                                 </Button>
                             </Popconfirm>
+                            {record.run_type == "server" && <>
+                                <Tooltip title={<>
+                                        {window.location.protocol}//{window.location.hostname}:{record?.ports}
+                                    </>}>
+                                    < Button size="small" color="cyan" variant="solid" onClick={()=>{
+                                        window.open(`${window.location.protocol}//${window.location.hostname}:${record?.ports}`,"_black")
+                                    }}>打开URL</Button>
+                                </Tooltip>
+                            </>
+                            }
                         </> : <>
                             <Popconfirm title={"是否运行!"} onConfirm={() => {
-                                runAnalysis(record,"job")
+                                runAnalysis(record, "job")
                                 openModal("modalA", record)
                                 setRecord(record)
                             }}>
@@ -271,29 +286,38 @@ const ResultList = forwardRef<any, any>(({
                                     {record.analysis_status == "created" ? "运行" : "重新运行"}
                                 </Button>
                             </Popconfirm>
+                            <Popconfirm title="是否启动服务?" onConfirm={() => {
+
+                                runAnalysis(record, "server")
+                            }}>
+                                <Button size="small" color="cyan" variant="solid">启动服务</Button>
+                            </Popconfirm>
                         </>
                     }
 
-
                     {editParams && <Button size="small" color="cyan" variant="solid" onClick={() => editParams(record)}>编辑参数</Button>}
 
-                    {isSelected(record, "modalA") ?
-                        <Button size="small" color={"cyan"} variant="solid" onClick={() => {
-                            closeModal()
-                        }}>关闭</Button> :
-                        <Button size="small" color={"cyan"} variant="solid" onClick={() => {
-                            openModal("modalA", record)
-                            // setRecord(record)
-                        }}>查看结果</Button>}
+                    {
+                        isSelected(record, "modalA") ?
+                            <Button size="small" color={"cyan"} variant="solid" onClick={() => {
+                                closeModal()
+                            }}>关闭</Button> :
+                            <Button size="small" color={"cyan"} variant="solid" onClick={() => {
+                                openModal("modalA", record)
+                                // setRecord(record)
+                            }}>查看结果</Button>
+                    }
 
-                    {isSelected(record, "modalB") ?
-                        <Button size="small" color={"cyan"} variant="solid" onClick={() => {
-                            closeModal()
-                        }}>关闭</Button> :
-                        <Button size="small" color={"cyan"} variant="solid" onClick={() => {
-                            openModal("modalB", record)
-                            // setRecord(record)
-                        }}>详情</Button>}
+                    {
+                        isSelected(record, "modalB") ?
+                            <Button size="small" color={"cyan"} variant="solid" onClick={() => {
+                                closeModal()
+                            }}>关闭</Button> :
+                            <Button size="small" color={"cyan"} variant="solid" onClick={() => {
+                                openModal("modalB", record)
+                                // setRecord(record)
+                            }}>详情</Button>
+                    }
                     {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                         openModal("modalB", record)
                     }}>查看/运行</Button> */}
@@ -330,16 +354,6 @@ const ResultList = forwardRef<any, any>(({
                     <Dropdown menu={{
                         items: [
                             {
-                                key: '2',
-                                label: (<>
-                                   <Popconfirm title="是否启动服务?" onConfirm={() => {
-                                       
-                                       runAnalysis(record,"server")
-                                    }}>
-                                   <a >启动服务</a>
-                                   </Popconfirm>
-                                </>)
-                            }, {
                                 key: '3',
                                 label: (<>
                                     <a onClick={() => {
@@ -368,7 +382,7 @@ const ResultList = forwardRef<any, any>(({
                             </Space>
                         </a>
                     </Dropdown>
-                </Space>
+                </Space >
             ),
         },
     ]
