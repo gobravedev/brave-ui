@@ -222,7 +222,11 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
 
         const data = resp.data
         // data['content'] = JSON.parse(data['content']) //JSON.stringify(JSON.parse(data['content']), null, 2)
+        if( data['tags'] ){
+            data['tags'] = JSON.parse(data['tags'])
+        }
         setComponent(data)
+        console.log(data)
         if (structure.component_type == "pipeline") {
             data['content'] = JSON.parse(data['content'])
             form.setFieldsValue(data)
@@ -265,6 +269,7 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
         if (typeof params['content'] == 'string') {
             params['content'] = JSON.parse(params['content'])
         }
+     
         return params
     }
     const savePipeline = async () => {
@@ -273,6 +278,9 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
         const params = getParams(values)
         if (typeof params['content'] != 'string') {
             params['content'] = JSON.stringify(params['content'])
+        }
+        if (typeof params['tags'] != 'string') {
+            params['tags'] = JSON.stringify(params['tags'])
         }
 
         console.log(params)
@@ -308,6 +316,14 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
                             <Form.Item name={"namespace"} label="namespace" >
                                 <NamespaceSelect disabled={data?.componemt_id} />
                             </Form.Item>
+
+                            <Form.Item name={"tags"} label="tags">
+                                <Select
+                                    mode="tags"
+                                    style={{ width: '100%' }}
+                                />
+                            </Form.Item>
+                            
                             <ComponentsRender {...structure} data={component} form={form}></ComponentsRender>
                         </>
                     }, {
@@ -368,7 +384,7 @@ const SoftwareContent: FC<any> = ({ data, form }) => {
         }
     }, [])
     return <>
-         <Form.Item name={"container_id"} label="容器">
+        <Form.Item name={"container_id"} label="容器">
             <SelectContainer data={data}></SelectContainer>
         </Form.Item>
         <Form.Item name={"content"} label="content">
@@ -422,9 +438,9 @@ const FileContent: FC<any> = ({ data, form, structure }) => {
     </>
 }
 
-const SelectContainer: FC<any> = ({ value, onChange,data }) => {
+const SelectContainer: FC<any> = ({ value, onChange, data }) => {
     const { modal, openModal, closeModal } = useModal()
-    const [container,setContainer] = useState<any>(data?.container)
+    const [container, setContainer] = useState<any>(data?.container)
     return <>
         <Input value={container?.name} style={{ cursor: "pointer" }} onClick={() => openModal("modalA")}></Input>
         {/* {JSON.stringify(container)}
@@ -435,13 +451,13 @@ const SelectContainer: FC<any> = ({ value, onChange,data }) => {
                 onChange: (selectedRowKeys: any, selectedRows: any) => {
                     // console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
                     // setSelectedRowKey(selectedRowKeys)
-                   
-                    if(selectedRows.length>0){
+
+                    if (selectedRows.length > 0) {
                         setContainer(selectedRows[0])
                         onChange(selectedRows[0].container_id)
                         closeModal()
                     }
-                  
+
                 },
             }}></ContainerPage>
         </Modal>
@@ -538,12 +554,12 @@ const WrapPipeline: FC<any> = ({ data, form }) => {
         <Form.Item name={["content", "category"]} label="category">
             <Input></Input>
         </Form.Item>
-        <Form.Item name={["content", "tags"]} label="tags">
+        {/* <Form.Item name={["content", "tags"]} label="tags">
             <Select
                 mode="tags"
                 style={{ width: '100%' }}
             />
-        </Form.Item>
+        </Form.Item> */}
         <Form.Item name={["content", "description"]} label="description">
             <TextArea></TextArea>
         </Form.Item>

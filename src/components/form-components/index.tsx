@@ -1,11 +1,81 @@
-import { Button, Flex, Form, Input, InputNumber, Select } from "antd";
+import { Button, Flex, Form, Input, InputNumber, Select, Switch } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import axios from "axios";
 import { Component, FC, useEffect, useState, memo } from "react";
 import { data, useOutletContext } from "react-router";
+
+
+
+const ComponentsRender = ({ type, dataMap, constDataMap, componentMap, inputAnalysisMethod, dataKey: dataKey_, data: data_, name, component_id, inputKey, ...rest }: any) => {
+    if (!dataMap) return <div>加载中....</div> //(() => )
+    dataMap = { ...dataMap, ...constDataMap }
+    const componentObj = componentMap[type] //|| (() => <div>未知类型</div>);
+    // if (first_data_key in dataMap_)
+    // if(!dataMap_ && !dataMap_.first_data_key){
+    //     dataMap_.first_data_key  =""
+    // }
+    // const { first_data_key, ...dataMap } = dataMap_
+    if (!componentObj) {
+        return <div>未知类型 {type}</div>
+    }
+    // debugger
+    const { Component, dataKey, ...crest } = componentObj
+    // debugger
+    console.log(crest)
+
+    let data: any = []
+    if (data_) {
+        data = data_
+
+        //下游分析从数据库加载其它数据
+    } else if (inputAnalysisMethod) {
+
+
+        data = dataMap[inputAnalysisMethod]
+
+    } else {
+        if (dataKey_) {
+            if (dataKey_ in dataMap) {
+                data = dataMap[dataKey_]
+            }
+        } else {
+            if (dataKey) {
+                if (dataKey in dataMap) {
+                    data = dataMap[dataKey]
+                }
+
+            } else if ("first_data_key" in dataMap) {
+                data = dataMap[dataMap['first_data_key']]
+            } else {
+                // 上游分析的key
+                if (component_id in dataMap) {
+                    data = dataMap[component_id]
+                }
+            }
+            // if (inputKey) {
+
+
+            // } else {
+
+
+            // }
+
+        }
+    }
+
+    // else{
+    //     console.log(dataKey)
+    //     const values = dataKey['sample_group_list'].map(((it:any)=>it.content.reference))
+    //     console.log(values)
+    // }
+    // console.log(data) 
+    // console.log(dataMap[dataKey])
+    return <Component {...rest} {...crest} data={data} name={name} />;
+};
+
 const FormJsonComp: FC<any> = memo(({ formJson, dataMap }) => {
     if (!formJson) return null
-    const {projectObj} = useOutletContext<any>()
+    const { projectObj } = useOutletContext<any>()
 
     const rank = [
         {
@@ -31,10 +101,10 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap }) => {
             value: "PHYLUM"
         },
     ]
-    const getGroupField = ()=>{
-        if (!projectObj?.metadata_form)return []
-        return projectObj?.metadata_form.map((item:any)=>({
-            label:item.label,
+    const getGroupField = () => {
+        if (!projectObj?.metadata_form) return []
+        return projectObj?.metadata_form.map((item: any) => ({
+            label: item.label,
             value: item.name
         }))
     }
@@ -62,6 +132,8 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap }) => {
         },
         BaseInput: {
             Component: BaseInput,
+        }, BaseSwitch: {
+            Component: BaseSwitch,
         },
         RankSelect: {
             Component: BaseSelect,
@@ -89,78 +161,12 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap }) => {
             dataKey: "sample_group_list"
         }
     };
-    const ComponentsRender = ({ type, dataMap, inputAnalysisMethod, dataKey: dataKey_, data: data_, name,component_id, inputKey, ...rest }: any) => {
-        if (!dataMap) return <div>加载中....</div> //(() => )
-        dataMap = {...dataMap,...constDataMap}
-        const componentObj = componentMap[type] //|| (() => <div>未知类型</div>);
-        // if (first_data_key in dataMap_)
-        // if(!dataMap_ && !dataMap_.first_data_key){
-        //     dataMap_.first_data_key  =""
-        // }
-        // const { first_data_key, ...dataMap } = dataMap_
-        if (!componentObj) {
-            return <div>未知类型 {type}</div>
-        }
-        // debugger
-        const { Component,dataKey, ...crest } = componentObj
-        // debugger
-        console.log(crest)
-
-        let data: any = []
-        if (data_) {
-            data = data_
-
-            //下游分析从数据库加载其它数据
-        } else if (inputAnalysisMethod) {
-
-
-            data = dataMap[inputAnalysisMethod]
-
-        } else {
-            if (dataKey_) {
-                if (dataKey_ in dataMap) {
-                    data = dataMap[dataKey_]
-                }
-            } else {
-                if (dataKey){
-                    if (dataKey in dataMap){
-                        data = dataMap[dataKey]
-                    }
-
-                }else if ("first_data_key" in dataMap) {
-                    data = dataMap[dataMap['first_data_key']]
-                } else {
-                    // 上游分析的key
-                    if (component_id in dataMap) {
-                        data = dataMap[component_id]
-                    }
-                }
-                // if (inputKey) {
-
-
-                // } else {
-
-
-                // }
-
-            }
-        }
-
-        // else{
-        //     console.log(dataKey)
-        //     const values = dataKey['sample_group_list'].map(((it:any)=>it.content.reference))
-        //     console.log(values)
-        // }
-        // console.log(data) 
-        // console.log(dataMap[dataKey])
-        return <Component {...rest} {...crest} data={data} name={name} />;
-    };
 
     return <>
         {/* {JSON.stringify(formJson)} */}
 
         {formJson.map((it: any, index: any) => (
-            <ComponentsRender key={index} {...it} dataMap={dataMap}></ComponentsRender>
+            <ComponentsRender key={index} {...it} dataMap={dataMap} componentMap={componentMap} constDataMap={constDataMap}></ComponentsRender>
         ))}
 
     </>
@@ -299,6 +305,13 @@ const BaseInput: FC<any> = ({ label, name, data, initialValue, rules, ...rest })
         </Form.Item>
     </>
 }
+const BaseSwitch: FC<any> = ({ label, name, data, initialValue, rules, ...rest }) => {
+    return <>
+        <Form.Item initialValue={initialValue} label={label} name={name} rules={rules}>
+            <Switch {...rest} />
+        </Form.Item>
+    </>
+}
 
 const BaseInputNumber: FC<any> = ({ label, name, data, initialValue, rules, ...rest }) => {
     return <>
@@ -309,7 +322,7 @@ const BaseInputNumber: FC<any> = ({ label, name, data, initialValue, rules, ...r
 }
 export const BaseSelect: FC<any> = ({ label, name, data, initialValue, rules, ...rest }) => {
     return <>
-    {/* {JSON.stringify(data)} */}
+        {/* {JSON.stringify(data)} */}
         <Form.Item initialValue={initialValue} label={label} name={name} rules={rules}>
             <BasicSelect {...rest} options={data}></BasicSelect>
             {/* <Select showSearch filterOption={(input: any, option: any) =>

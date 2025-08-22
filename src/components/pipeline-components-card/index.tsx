@@ -22,6 +22,9 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
         if (map){
             item  = map(item)
         }
+        if(item["tags"]){
+            item["tags"] = JSON.parse(item["tags"]) 
+        }
         return {
             id: item.id,
             component_id: item.component_id,

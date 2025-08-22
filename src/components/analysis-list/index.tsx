@@ -266,16 +266,7 @@ const ResultList = forwardRef<any, any>(({
                                     停止
                                 </Button>
                             </Popconfirm>
-                            {record.run_type == "server" && <>
-                                <Tooltip title={<>
-                                        {window.location.protocol}//{window.location.hostname}:{record?.ports}
-                                    </>}>
-                                    < Button size="small" color="cyan" variant="solid" onClick={()=>{
-                                        window.open(`${window.location.protocol}//${window.location.hostname}:${record?.ports}`,"_black")
-                                    }}>打开URL</Button>
-                                </Tooltip>
-                            </>
-                            }
+
                         </> : <>
                             <Popconfirm title={"是否运行!"} onConfirm={() => {
                                 runAnalysis(record, "job")
@@ -286,14 +277,11 @@ const ResultList = forwardRef<any, any>(({
                                     {record.analysis_status == "created" ? "运行" : "重新运行"}
                                 </Button>
                             </Popconfirm>
-                            <Popconfirm title="是否启动服务?" onConfirm={() => {
 
-                                runAnalysis(record, "server")
-                            }}>
-                                <Button size="small" color="cyan" variant="solid">启动服务</Button>
-                            </Popconfirm>
                         </>
                     }
+
+
 
                     {editParams && <Button size="small" color="cyan" variant="solid" onClick={() => editParams(record)}>编辑参数</Button>}
 
@@ -308,16 +296,7 @@ const ResultList = forwardRef<any, any>(({
                             }}>查看结果</Button>
                     }
 
-                    {
-                        isSelected(record, "modalB") ?
-                            <Button size="small" color={"cyan"} variant="solid" onClick={() => {
-                                closeModal()
-                            }}>关闭</Button> :
-                            <Button size="small" color={"cyan"} variant="solid" onClick={() => {
-                                openModal("modalB", record)
-                                // setRecord(record)
-                            }}>详情</Button>
-                    }
+
                     {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                         openModal("modalB", record)
                     }}>查看/运行</Button> */}
@@ -353,6 +332,46 @@ const ResultList = forwardRef<any, any>(({
                     </Popconfirm> */}
                     <Dropdown menu={{
                         items: [
+                            {
+                                key: "1",
+                                label: (<>
+                                    {
+                                        isSelected(record, "modalB") ?
+                                            <a  onClick={() => {
+                                                closeModal()
+                                            }}>关闭</a> :
+                                            <a  onClick={() => {
+                                                openModal("modalB", record)
+                                                // setRecord(record)
+                                            }}>详情</a>
+                                    }
+                                </>)
+                            },
+                            {
+                                key: "2",
+                                label: (<>
+                                    {record.analysis_status == "running" ? <>
+                                        {record.run_type == "server" && <>
+                                            <Tooltip title={<>
+                                                {window.location.protocol}//{window.location.hostname}:{record?.ports}
+                                            </>}>
+                                                <a  onClick={() => {
+                                                    window.open(`${window.location.protocol}//${window.location.hostname}:${record?.ports}`, "_black")
+                                                }}>打开URL</a>
+                                            </Tooltip>
+                                        </>}
+
+                                    </> : <>
+                                        <Popconfirm title="是否启动服务?" onConfirm={() => {
+
+                                            runAnalysis(record, "server")
+                                        }}>
+                                            <a >启动服务</a>
+                                        </Popconfirm>
+                                    </>
+                                    }
+                                </>)
+                            },
                             {
                                 key: '3',
                                 label: (<>

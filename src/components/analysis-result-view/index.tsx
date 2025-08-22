@@ -7,7 +7,7 @@ import LogFile from "../log-file";
 import { QuestionCircleOutlined } from "@ant-design/icons"
 import { MonacoEditor } from "../react-monaco-editor";
 
-export const TableView: FC<any> = ({ data, url }) => {
+export const TableView: FC<any> = ({ data, url, filename }) => {
     const { Search } = Input;
     const [tableData, setTableData] = useState<any>([])
     const getColumns = (data: any) => {
@@ -35,8 +35,9 @@ export const TableView: FC<any> = ({ data, url }) => {
         {Array.isArray(tableData) && <>
             <Table
                 size="small"
-                title={() => <>
+                title={() => <Flex gap={"small"}>
                     <Search
+                        size="small"
                         placeholder="input search text"
                         allowClear
                         onSearch={(value: any) => {
@@ -49,10 +50,12 @@ export const TableView: FC<any> = ({ data, url }) => {
                         style={{ width: 304 }}
                     />
 
-                    {url && <Popover title={`${window.location.origin}${url}`}><Button onClick={() => {
+                    {url && <Popover title={`${window.location.origin}${url}`}><Button  size="small" onClick={() => {
                         window.open(`${url}?t=${Date.now()}`, "_blank")
-                    }} style={{ marginLeft: "1rem" }} type="primary">下载</Button></Popover>}
-                </>}
+                    }}  type="primary">下载</Button></Popover>}
+
+                    <span>{filename}</span>
+                </Flex>}
                 // showHeader={()=>{}}
                 scroll={{ x: 'max-content', y: 55 * 5 }}
                 dataSource={tableData}
@@ -68,16 +71,17 @@ export const TableView: FC<any> = ({ data, url }) => {
     </>
 }
 
-const ImgView: FC<any> = ({ data, url }) => {
+const ImgView: FC<any> = ({ data, url,filename }) => {
     return <div >
         <div style={{ textAlign: "center" }}>
-
-            <Image src={`${data}?t=${Date.now()}`} style={{ maxWidth: "20rem", marginRight: "0.5rem" }}></Image>
+            {}
+            <Image src={filename?.endsWith("pdf")?data:`${data}?t=${Date.now()}`} style={{ maxWidth: "20rem", marginRight: "0.5rem" }}></Image>
 
             {url && <div>
                 <Popover title={`${window.location.origin}${url}`}>
                     <Button size="small" onClick={() => { window.open(`${url}?t=${Date.now()}`, "_blank") }} type="primary">下载</Button>
                 </Popover>
+                {filename}
             </div>}
 
         </div>
@@ -193,7 +197,7 @@ export const ComponentsRender = ({ type, ...rest }: any) => {
 
 //     </>
 // }
-const AnalysisResultView: FC<any> = forwardRef<any, any>(({ params, visible, currentAnalysis, operatePipeline }, ref) => {
+const AnalysisResultView: FC<any> = forwardRef<any, any>(({ params, visible, currentAnalysis, operatePipeline ,onClose}, ref) => {
     const [loading, setLoading] = useState<boolean>(false)
     const [analsyisResult, setAnalsyisResult] = useState<any>(null)
     const { output_dir, analysis_id } = params || {}
@@ -237,6 +241,9 @@ const AnalysisResultView: FC<any> = forwardRef<any, any>(({ params, visible, cur
                 <Flex gap="small">
                     {currentAnalysis?.analysis_status == "failed" && <Tag color="red">分析失败</Tag>}
                     <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        onClose()
+                    }}>关闭</Button>
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
                         loadData()
                     }}>刷新</Button>
                     <QuestionCircleOutlined onClick={() => {
@@ -246,25 +253,25 @@ const AnalysisResultView: FC<any> = forwardRef<any, any>(({ params, visible, cur
 
             }
         >
-
+            {/* {JSON.stringify(currentAnalysis)} */}
 
             {currentAnalysis?.analysis_status == "failed" ? <div style={{ textAlign: "center" }}>
 
                 <LogFile file_path={currentAnalysis?.command_log_path}  ></LogFile>
             </div> : <>
-                {(currentAnalysis?.analysis_status == "running" || loading) ? <Skeleton active></Skeleton> : <>
+                {((currentAnalysis?.analysis_status == "running" && currentAnalysis?.run_type != "server") || loading) ? <Skeleton active></Skeleton> : <>
 
 
 
                     {analsyisResult && <>
 
-                        {analsyisResult.images && <div style={{ display: "flex", justifyContent: "flex-start" }}>
+                        {analsyisResult.images && <div>
 
 
                             {
-
+                                    //  
                                 Array.isArray(analsyisResult.images) ? <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
-                                    {analsyisResult.images.map((it: any, index: any) => (<Col key={index} span={6}>
+                                    {analsyisResult.images.map((it: any, index: any) => (<Col key={index} span={4}>
                                         <ImgView {...it} ></ImgView>
                                     </Col>))}
                                 </Row> :
@@ -283,6 +290,7 @@ const AnalysisResultView: FC<any> = forwardRef<any, any>(({ params, visible, cur
                         </>}
 
                     </>}
+                    <Markdown data={analsyisResult?.description}></Markdown>
                 </>
                 }
 

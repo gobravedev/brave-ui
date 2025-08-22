@@ -122,6 +122,9 @@ const Pipeline: FC<any> = ({ }) => {
             const content = JSON.parse(pipeline['content'])
             pipeline = { ...content, ...pipeline }
         }
+        if(pipeline["tags"]){
+            pipeline["tags"] = JSON.parse( pipeline["tags"] )
+        }
 
         setPipeline(pipeline)
         console.log(pipeline)

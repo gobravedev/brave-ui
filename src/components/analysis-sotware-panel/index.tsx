@@ -800,11 +800,22 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, operatePipeline, chi
     // // 保证 groupField 稳定（通常是字符串，如果来源稳定可省略）
     // const stableGroupField = useMemo(() => groupField, groupField);
 
+    useEffect(()=>{
+        if(downstreamData && currentAnalysisMethod?.downstreamAnalysis){
+            const findDownstreamData =  currentAnalysisMethod?.downstreamAnalysis.find((item:any)=>item.component_id== downstreamData.component_id)
+            // console.log("1111",findDownstreamData)
+            // setDownstreamData(findDownstreamData)
+            plot(findDownstreamData)
+        }
+      
+    },[JSON.stringify(currentAnalysisMethod?.downstreamAnalysis)])
 
-    const plot = async ({ name, origin = false, url, moduleName, params, paramsFun, formDom, formJson, saveAnalysisMethod, sampleSelectComp = false, sampleGroupJSON = true, sampleGroupApI = false, ...rest }: any) => {
+
+    const plot = async (data:any) => {
+        let { origin = false, url, moduleName, params, paramsFun, formDom, formJson, saveAnalysisMethod, sampleSelectComp = false, sampleGroupJSON = true, sampleGroupApI = false, ...rest } = data
         cleanDom()
         setCollapseActiveKey("1")
-        setDownstreamData({ ...rest, moduleName: moduleName })
+        setDownstreamData(data)
         setFormDom(formDom)
         setModuleName(moduleName)
         setParams(params)
@@ -812,7 +823,7 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, operatePipeline, chi
         setFilePlot(undefined)
         setOrigin(origin)
         form.resetFields()
-        form.setFieldValue("analysis_name", name)
+        form.setFieldValue("analysis_name", rest.component_name)
         // setBtnName(name)
         setFormJson(formJson)
         setSampleSelectComp(sampleSelectComp)
@@ -887,9 +898,9 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, operatePipeline, chi
         const { name, analysisType, ...rest } = item
 
         if (record && analysisType == 'one') {
-            return <Button size="small" color="purple" variant={downstreamData?.component_id == rest.component_id ? "solid" : "filled"} onClick={() => plot({ ...rest, name: rest.component_name })}>{rest.component_name}({record.sample_name})</Button>
+            return <Button size="small" color="purple" variant={downstreamData?.component_id == rest.component_id ? "solid" : "filled"} onClick={() => plot({ ...rest })}>{rest.component_name}({record.sample_name})</Button>
         } else {
-            return <Button size="small" color="primary" variant={downstreamData?.component_id == rest.component_id ? "solid" : "filled"} onClick={() => plot({ ...rest, name: rest.component_name })}>{rest.component_name}</Button>
+            return <Button size="small" color="primary" variant={downstreamData?.component_id == rest.component_id ? "solid" : "filled"} onClick={() => plot({ ...rest })}>{rest.component_name}</Button>
 
         }
 
@@ -906,7 +917,7 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, operatePipeline, chi
 
         }
         // }
-    }, [analysisMethod])
+    }, [])
     useEffect(() => {
         if (script) {
             plot({ ...script, name: script.name })
@@ -930,7 +941,7 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, operatePipeline, chi
 
     return <>
         {contextHolder}
-        {/* {JSON.stringify(analysisMethod)} */}
+        {/* {JSON.stringify(analysisMethod.downstreamAnalysis)} */}
 
         {analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 0 && <>
             <ResultList
