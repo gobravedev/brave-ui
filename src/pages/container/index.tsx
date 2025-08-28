@@ -160,6 +160,9 @@ const ContainerModal: FC<any> = ({ visible, params, onClose, callback }) => {
             <Form.Item name={"command"} label="命令">
                 <TextArea ></TextArea>
             </Form.Item>
+            <Form.Item name={"labels"} label="标签">
+                <TextArea ></TextArea>
+            </Form.Item>
             <Form.Item name={"port"} label="端口">
                 <Input ></Input>
             </Form.Item>

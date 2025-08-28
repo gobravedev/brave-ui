@@ -96,7 +96,7 @@ const ResultList = forwardRef<any, any>(({
 
 
 
-    }, [eventSourceRef.current]);
+    }, [eventSourceRef.current,project]);
 
 
 
@@ -197,7 +197,7 @@ const ResultList = forwardRef<any, any>(({
             render: (text: any, record: any) => {
                 return <Popover title={<>
                     <ul>
-                        <li>analysis_id:{record.analysis_name}</li>
+                        <li>analysis_id:{record.analysis_id}</li>
                         <li>analysis_name:{record.analysis_name}</li>
                         <li>pipeline_script:{record.pipeline_script}</li>
                         <li>work_dir:{record.work_dir}</li>
@@ -354,10 +354,10 @@ const ResultList = forwardRef<any, any>(({
                                     {record.analysis_status == "running" ? <>
                                         {record.run_type == "server" && <>
                                             <Tooltip title={<>
-                                                {window.location.protocol}//{window.location.hostname}:{record?.ports}
+                                                {record.url}
                                             </>}>
                                                 <a  onClick={() => {
-                                                    window.open(`${window.location.protocol}//${window.location.hostname}:${record?.ports}`, "_black")
+                                                    window.open(`${record.url}`, "_blank")
                                                 }}>打开URL</a>
                                             </Tooltip>
                                         </>}
