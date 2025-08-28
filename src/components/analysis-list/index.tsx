@@ -407,11 +407,13 @@ const ResultList = forwardRef<any, any>(({
         },
     ]
 
-
+    useEffect(()=>{
+        closeModal()
+    },[project])
 
     useEffect(() => {
         loadData()
-    }, [])
+    }, [project])
     const [searchText, setSearchText] = useState("");
     const filteredData = useMemo(() => {
         if (!searchText) return data;

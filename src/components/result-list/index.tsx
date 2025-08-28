@@ -154,7 +154,7 @@ const ResultList = forwardRef<any, any>(({
         reload()
 
         // initData(currentAnalysisMethod)
-    }, [JSON.stringify(params), JSON.stringify(analysisMethod)])
+    }, [JSON.stringify(params), JSON.stringify(analysisMethod),project])
 
     const onTabChange = (key: any) => {
         setData(groupedData[key])

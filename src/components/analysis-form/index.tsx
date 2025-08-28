@@ -57,6 +57,10 @@ export const AnalysisForm: FC<any> = ({
         }
     }
 
+    useEffect(()=>{
+        form.resetFields()
+    },[project])
+
     // const getData = async (inputAnalysisMethod:any)=>{
     // }
 
