@@ -197,6 +197,7 @@ const ResultList = forwardRef<any, any>(({
             render: (text: any, record: any) => {
                 return <Popover title={<>
                     <ul>
+                        <li>analysis_id:{record.analysis_name}</li>
                         <li>analysis_name:{record.analysis_name}</li>
                         <li>pipeline_script:{record.pipeline_script}</li>
                         <li>work_dir:{record.work_dir}</li>
@@ -207,7 +208,7 @@ const ResultList = forwardRef<any, any>(({
                         <li>workflow_log_file:{record.workflow_log_file}</li>
 
                     </ul>
-                </>}><span style={{ cursor: "pointer" }}>{text}</span></Popover>
+                </>}><span style={{ cursor: "pointer" }}> <span style={{ cursor: "pointer" }} >{String(text).slice(0, 8)}</span></span></Popover>
             }
 
         }, {

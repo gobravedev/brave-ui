@@ -321,6 +321,18 @@ const ResultList = forwardRef<any, any>(({
                 </Tooltip>
             }
 
+        }, {
+            title: '分析ID',
+            dataIndex: 'analysis_id',
+            key: 'analysis_id',
+            width: 50,
+            ellipsis: true,
+            render: (text: any, record: any) => {
+                return <Tooltip title={record.analysis_id}>
+                    <span style={{ cursor: "pointer" }} >{String(text).slice(0, 8)}</span>
+                </Tooltip>
+            }
+
         },
         {
             title: '组件名称',

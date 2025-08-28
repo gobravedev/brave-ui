@@ -800,18 +800,18 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, operatePipeline, chi
     // // 保证 groupField 稳定（通常是字符串，如果来源稳定可省略）
     // const stableGroupField = useMemo(() => groupField, groupField);
 
-    useEffect(()=>{
-        if(downstreamData && currentAnalysisMethod?.downstreamAnalysis){
-            const findDownstreamData =  currentAnalysisMethod?.downstreamAnalysis.find((item:any)=>item.component_id== downstreamData.component_id)
+    useEffect(() => {
+        if (downstreamData && currentAnalysisMethod?.downstreamAnalysis) {
+            const findDownstreamData = currentAnalysisMethod?.downstreamAnalysis.find((item: any) => item.component_id == downstreamData.component_id)
             // console.log("1111",findDownstreamData)
             // setDownstreamData(findDownstreamData)
             plot(findDownstreamData)
         }
-      
-    },[JSON.stringify(currentAnalysisMethod?.downstreamAnalysis)])
+
+    }, [JSON.stringify(currentAnalysisMethod?.downstreamAnalysis)])
 
 
-    const plot = async (data:any) => {
+    const plot = async (data: any) => {
         let { origin = false, url, moduleName, params, paramsFun, formDom, formJson, saveAnalysisMethod, sampleSelectComp = false, sampleGroupJSON = true, sampleGroupApI = false, ...rest } = data
         cleanDom()
         setCollapseActiveKey("1")
@@ -929,14 +929,19 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, operatePipeline, chi
     // const []
     const [scriptMap, setScriptMap] = useState<any>()
     useEffect(() => {
-        const script = analysisMethod.filter((item: any) => "downstreamAnalysis" in item)
-            .map((item: any) => item.downstreamAnalysis).flat(Infinity)
-        const scriptMap: any = script.reduce((acc: any, item: any) => {
-            acc[item.component_id] = item;
-            return acc;
-        }, {});
-        // console.log(script)
-        setScriptMap(scriptMap)
+        if (script) {
+            setScriptMap({[script["component_id"]]:script})
+        } else {
+            const script = analysisMethod.filter((item: any) => "downstreamAnalysis" in item)
+                .map((item: any) => item.downstreamAnalysis).flat(Infinity)
+            const scriptMap: any = script.reduce((acc: any, item: any) => {
+                acc[item.component_id] = item;
+                return acc;
+            }, {});
+            // console.log(script)
+            setScriptMap(scriptMap)
+        }
+
     }, [analysisMethod])
 
     return <>
