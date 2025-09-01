@@ -387,7 +387,7 @@ const ResultList = forwardRef<any, any>(({
                             }, {
                                 key: '4',
                                 label: (<> <Popconfirm title={"是否删除!"} onConfirm={async () => {
-                                    await deleteById(record.id)
+                                    await deleteById(record.analysis_id)
                                     loadData()
                                 }}>
                                     <a >删除</a>

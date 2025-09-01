@@ -4,6 +4,7 @@ import { FC, useEffect, useState } from "react";
 import FormJsonComp from "../form-components";
 import { listAnalysisFiles } from '@/api/analysis-software'
 import { useOutletContext } from "react-router";
+import BioDatabaseForm from "../bio-database-form";
 
 export const AnalysisForm: FC<any> = ({
     pipeline,
@@ -57,14 +58,14 @@ export const AnalysisForm: FC<any> = ({
         }
     }
 
-    useEffect(()=>{
+    useEffect(() => {
         form.resetFields()
-    },[project])
+    }, [project])
 
     // const getData = async (inputAnalysisMethod:any)=>{
     // }
 
-    
+
     // const group_field = [
     //     {
     //         label: "样本分组",
@@ -83,7 +84,7 @@ export const AnalysisForm: FC<any> = ({
     const dataMap_ = {
         // "sample_group_list": sampleGroup,
         "first_data_key": undefined,
-    
+
     }
     const [dataMap, setDataMap] = useState<any>(dataMap_)
 
@@ -223,7 +224,7 @@ export const AnalysisForm: FC<any> = ({
             imgType: imgType,
             software: "python",
             component_id: rest.component_id,
-            data_component_ids:JSON.stringify(dataComponentIds)
+            data_component_ids: JSON.stringify(dataComponentIds)
         }
         const scriptType = rest.script_type || "script"
         console.log(scriptType)
@@ -258,7 +259,7 @@ export const AnalysisForm: FC<any> = ({
         {/* {JSON.stringify(projectObj)} */}
         {/* {JSON.stringify(rest)} */}
         <Form form={form}   >
-            <Form.Item name={"analysis_id"}  label="分析ID" >
+            <Form.Item name={"analysis_id"} label="分析ID" >
                 <Input disabled></Input>
             </Form.Item>
             {/* {sampleSelectComp && resultTableList && analysisMethod.map((it: any, index: any) => (<div key={index}>
@@ -288,6 +289,11 @@ export const AnalysisForm: FC<any> = ({
             {formJson &&
                 <FormJsonComp project={project} formJson={formJson} dataMap={dataMap}></FormJsonComp>
             }
+            {/* {JSON.stringify(rest.databases)} */}
+            {rest.databases && 
+                    <BioDatabaseForm operatePipeline={operatePipeline} formJson={rest.databases}></BioDatabaseForm>
+            }
+    
 
             {formDom &&
                 <>
@@ -305,7 +311,6 @@ export const AnalysisForm: FC<any> = ({
 
                 <Button size="small" color="cyan" variant="solid" onClick={() => {
                     saveUpstreamAnalysis(false)
-
                 }}>查看参数</Button>
 
 
@@ -318,7 +323,7 @@ export const AnalysisForm: FC<any> = ({
                                             runPlot({ moduleName: moduleName, params: params })
                                         }}>执行</Button> */}
 
-                {formId && <Button  size="small" color="cyan" onClick={() => form.setFieldValue("analysis_id", undefined)}>取消更新</Button>}
+                {formId && <Button size="small" color="cyan" onClick={() => form.setFieldValue("analysis_id", undefined)}>取消更新</Button>}
 
             </Flex>
             }

@@ -1,4 +1,4 @@
-import { Button, Card, Flex, Input, Spin, Table, Tabs, Tag, Tooltip, Typography } from "antd"
+import { Button, Card, Flex, Input, Popconfirm, Spin, Table, Tabs, Tag, Tooltip, Typography } from "antd"
 import axios from "axios"
 import { FC, forwardRef, memo, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { useSelector } from "react-redux"
@@ -6,7 +6,7 @@ import { useOutletContext } from "react-router";
 import { SyncOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { SSEContextType } from '@/type/sse'
 import { readFileApi, readLogFileApi } from "@/api/file-operation";
-import { findAnalysisById, runAnalysisApi } from "@/api/analysis";
+import { findAnalysisById, runAnalysisApi, stopAnalysisApi } from "@/api/analysis";
 import FileBrowser from "../file-browser";
 import ResultParse from "../result-parse";
 import { useModal } from "@/hooks/useModal";
@@ -523,7 +523,7 @@ export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
     }
 
     const runAnalysis = async () => {
-        const res = await runAnalysisApi(analysis?.analysis_id,"job")
+        const res = await runAnalysisApi(analysis?.analysis_id, "job")
         messageApi.success("运行成功")
         // setContentMap((prev: any) => ({
         //     ...prev,
@@ -648,13 +648,36 @@ export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
                         readFile(fileTabKey)
                     }}>刷新日志</Button> */}
                 </Tooltip>
-                <Tooltip title={<>
+                {analysis.analysis_status == "running" ?
+                    <>
+                        <Popconfirm title={"是否停止!"} onConfirm={async () => {
+                                await stopAnalysisApi(analysis.analysis_id)
+                                messageApi.success("停止成功")
+
+                        }}>
+                            <Button size="small" color="cyan" variant="solid">
+                                停止
+                            </Button>
+                        </Popconfirm>
+
+                    </> : <>
+                        <Popconfirm title={"是否运行!"} onConfirm={runAnalysis}>
+                            <Button size="small" color="cyan" variant="solid">
+                                {analysis.analysis_status == "created" ? "运行" : "重新运行"}
+                            </Button>
+                        </Popconfirm>
+
+                    </>
+                }
+
+
+                {/* <Tooltip title={<>
                     {analysis?.analysis_id}
                 </>}>
                     <Button disabled={analysis.analysis_status == "running"} size="small" color="cyan" variant="solid" onClick={runAnalysis}>
                         {analysis.analysis_status == "created" ? "运行" : "重新运行"}
                     </Button>
-                </Tooltip>
+                </Tooltip> */}
             </Flex>
 
         } activeKey={fileTabKey} onChange={(key) => {

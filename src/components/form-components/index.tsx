@@ -315,7 +315,7 @@ const BaseSwitch: FC<any> = ({ label, name, data, initialValue, rules, ...rest }
 
 const BaseInputNumber: FC<any> = ({ label, name, data, initialValue, rules, ...rest }) => {
     return <>
-        <Form.Item initialValue={initialValue} label={label} name={name} rules={rules}>
+        <Form.Item  initialValue={initialValue} label={label} name={name} rules={rules}>
             <InputNumber {...rest} />
         </Form.Item>
     </>

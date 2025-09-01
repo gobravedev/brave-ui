@@ -1,4 +1,4 @@
-import { Button, Card, Flex, Splitter, Tabs, Tag, Tooltip, Typography } from "antd";
+import { Button, Card, Flex, Popconfirm, Splitter, Tabs, Tag, Tooltip, Typography } from "antd";
 import { FC, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useOutletContext, useParams } from "react-router";
 import { MonacoEditor } from "@/components/react-monaco-editor";
@@ -10,6 +10,7 @@ import { FileMonitor } from "@/components/pipeline-monitor";
 import { CreateOrUpdatePipelineComponent } from "@/components/create-pipeline";
 import { useModal } from "@/hooks/useModal";
 import { useSSEContext } from "@/context/sse/useSSEContext";
+import axios from "axios";
 
 const SoftwareAnalysisEditor: FC<any> = () => {
     const { analysisId } = useParams()
@@ -160,6 +161,11 @@ const SoftwareAnalysisEditor: FC<any> = () => {
 
                     <Tag color="cyan">{analysis?.analysis_status}</Tag>
                     <Tag color="cyan">{analysis?.analysis_name}</Tag>
+                    <Popconfirm title="是否转换" onConfirm={async ()=>{
+                        await axios.post(`/analysis/convert-ipynb/${analysis.analysis_id}`)
+                    }}>
+                        <Button size="small" color="cyan" variant="solid">生成脚本</Button>
+                    </Popconfirm>
 
                     <Button size="small" color="cyan" variant="solid" onClick={() => {
                        window.open(`http://10.110.1.11:8888/jupyter/notebooks/${analysis.jupyter_notebook_path}`, "_blank")

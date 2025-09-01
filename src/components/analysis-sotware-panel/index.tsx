@@ -549,7 +549,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
                                     {/* {JSON.stringify(inputAnalysisMethod)} */}
                                     <FormJsonComp formJson={inputAnalysisMethod} dataMap={resultTableList}></FormJsonComp>
                                     {/* {JSON.stringify(rest)} */}
-                                    <BioDatabaseForm software={rest} operatePipeline={operatePipeline} formJson={rest.databases}></BioDatabaseForm>
+                                    <BioDatabaseForm  operatePipeline={operatePipeline} formJson={rest.databases}></BioDatabaseForm>
                                     {/* <FormJsonComp formJson={rest.databases} dataMap={resultTableList}></FormJsonComp> */}
 
                                     {/* {resultTableList && inputAnalysisMethod.map((it: any) => (<> */}
@@ -1115,6 +1115,8 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, operatePipeline, chi
                                     }} style={{ cursor: "pointer" }} />
                                 </Flex>
                                 <div style={{ marginBottom: "1rem" }}></div>
+                                {/* {JSON.stringify(downstreamData.databases)} */}
+                                
                                 <AnalysisForm
                                     {...downstreamData}
                                     pipeline={pipeline}
