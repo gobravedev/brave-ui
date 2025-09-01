@@ -749,6 +749,7 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, operatePipeline, chi
 
 
     const [sampleGroupApI, setSampleGroupApI] = useState<any>(false)
+    const analysis_id = Form.useWatch((values: any) => values?.analysis_id, form);
 
 
 
@@ -1062,7 +1063,7 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, operatePipeline, chi
                                     <li>file:{currentAnalysisMethod?.component_id}</li>
                                     <li>script:{downstreamData?.component_id}</li>
                                 </ul>
-                            </>}>执行分析{downstreamData ? `(${downstreamData.component_name})` : ""}</Tooltip>,
+                            </>}>执行分析{downstreamData ? `(${downstreamData.component_name})`  : ""}{analysis_id?`(${analysis_id})`:""}</Tooltip>,
                             children: <>
                                 {/* {import.meta.env.MODE == "development" && <>
                                     <ul>

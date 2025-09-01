@@ -1,4 +1,4 @@
-import { Button, Drawer, Flex, message, Modal, Tabs } from "antd"
+import { Button, Drawer, Flex, message, Modal, Popconfirm, Tabs } from "antd"
 import axios from "axios"
 import { FC, useEffect, useRef, useState } from "react"
 import { message as $message } from 'antd';
@@ -30,8 +30,19 @@ const ModuleEdit: FC<any> = ({ visible, onClose, params, callback }) => {
         {contextHolder}
         <Drawer
             extra={
+
                 <Flex justify="flex-end" gap={"small"}>
-                    <Button color="cyan" variant="solid" onClick={() => {
+                    <Popconfirm title="是否生成脚本" onConfirm={async () => {
+                        await axios.post(`/component/convert-ipynb/${params.component_id}`)
+                        messageApi.success("是否生成脚本成功!")
+                        getModuleContent(params)
+                    }}>
+                        <Button size="small" color="cyan" variant="solid">生成脚本</Button>
+                    </Popconfirm>
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        getModuleContent(params)
+                    }}>刷新</Button>
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
                         editorRef.current.setValue(data?.content)
                     }}>保存</Button>
                 </Flex>
@@ -39,7 +50,7 @@ const ModuleEdit: FC<any> = ({ visible, onClose, params, callback }) => {
             title="查看文件"
             open={visible}
             onClose={onClose} width={"50%"}>
-            {/* {JSON.stringify(data)} */}
+            {/* {JSON.stringify(params)} */}
             <ul>
                 {/* <li>module:{data?.module}</li> */}
                 <li>path:{data?.path}</li>

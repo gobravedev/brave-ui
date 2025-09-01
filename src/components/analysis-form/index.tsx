@@ -1,4 +1,4 @@
-import { Button, Collapse, Flex, Form, Input, message, Select, Typography } from "antd";
+import { Button, Collapse, Flex, Form, Input, message, Select, Typography, Watermark } from "antd";
 import axios from "axios";
 import { FC, useEffect, useState } from "react";
 import FormJsonComp from "../form-components";
@@ -28,7 +28,7 @@ export const AnalysisForm: FC<any> = ({
     ...rest
 }) => {
     const formId = Form.useWatch((values: any) => values?.analysis_id, form);
-    const is_save_analysis_result = Form.useWatch((values: any) => values?.is_save_analysis_result, form);
+    const formValues = Form.useWatch((values: any) => values, form);
     const [sampleGroup, setSampleGroup] = useState<any>([])
     const [tableType, setTableType] = useState<any>("xlsx")
     const [imgType, setImgType] = useState<any>("pdf")
@@ -258,16 +258,17 @@ export const AnalysisForm: FC<any> = ({
         {contextHolder}
         {/* {JSON.stringify(projectObj)} */}
         {/* {JSON.stringify(rest)} */}
-        <Form form={form}   >
-            <Form.Item name={"analysis_id"} label="分析ID" >
-                <Input disabled></Input>
-            </Form.Item>
-            {/* {sampleSelectComp && resultTableList && analysisMethod.map((it: any, index: any) => (<div key={index}>
+        <Watermark content={formId&& `更新分析(${formValues.analysis_name})(${String(formValues.analysis_id).slice(0, 8)})`}>
+            <Form form={form}   >
+                <Form.Item name={"analysis_id"} label="分析ID" >
+                    <Input disabled></Input>
+                </Form.Item>
+                {/* {sampleSelectComp && resultTableList && analysisMethod.map((it: any, index: any) => (<div key={index}>
                 <Form.Item key={it.name} label={it.label} name={it.name}>
                     <SelectComp it={it} resultTableList={resultTableList} ></SelectComp>
                 </Form.Item>
             </div>))} */}
-            {/* 
+                {/* 
             <Form.Item initialValue={false} name={"is_save_analysis_result"} label={"是否保存分析结果"} rules={[{ required: true, message: '该字段不能为空!' }]}>
                 <Select options={[
                     {
@@ -279,71 +280,75 @@ export const AnalysisForm: FC<any> = ({
                     }
                 ]}></Select>
             </Form.Item> */}
-            {/* {is_save_analysis_result &&
+                {/* {is_save_analysis_result &&
              } */}
 
-            <Form.Item label="分析名称" name={"analysis_name"} style={{ maxWidth: 600 }} rules={[{ required: true, message: '该字段不能为空!' }]}>
-                <Input></Input>
-            </Form.Item>
-            {/* {JSON.stringify(dataMap)} */}
-            {formJson &&
-                <FormJsonComp project={project} formJson={formJson} dataMap={dataMap}></FormJsonComp>
-            }
-            {/* {JSON.stringify(rest.databases)} */}
-            {rest.databases && 
+
+                {/* {JSON.stringify(dataMap)} */}
+                {formJson &&
+                    <FormJsonComp project={project} formJson={formJson} dataMap={dataMap}></FormJsonComp>
+                }
+                {/* {JSON.stringify(rest.databases)} */}
+                {rest.databases &&
                     <BioDatabaseForm operatePipeline={operatePipeline} formJson={rest.databases}></BioDatabaseForm>
-            }
-    
-
-            {formDom &&
-                <>
-                    {formDom}
-                </>
-            }
+                }
 
 
-            {(formDom || sampleGroup || formJson) && <Flex gap={"small"}>
-                {/* <Button size="small" type="primary" onClick={() => {
+                {formDom &&
+                    <>
+                        {formDom}
+                    </>
+                }
+                <Form.Item label="分析名称" name={"analysis_name"} style={{ maxWidth: 600 }} rules={[{ required: true, message: '该字段不能为空!' }]}>
+                    <Input></Input>
+                </Form.Item>
+                {/* {JSON.stringify(formValues)} */}
+
+                {(formDom || sampleGroup || formJson) && <Flex gap={"small"}>
+                    {/* <Button size="small" type="primary" onClick={() => {
                     runPlot({ moduleName: rest.moduleName, params: params })
                 }}>{formId ? <>更新</> : is_save_analysis_result ? <>运行并保存</> : <>运行</>}</Button> */}
 
 
 
-                <Button size="small" color="cyan" variant="solid" onClick={() => {
-                    saveUpstreamAnalysis(false)
-                }}>查看参数</Button>
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        saveUpstreamAnalysis(false)
+                    }}>查看参数</Button>
 
 
-                <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>{formId ? <>更新分析</> : <>保存分析</>}</Button>
+                    <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>
+                        {formId ? <>更新分析({formValues.analysis_name})({String(formValues.analysis_id).slice(0, 8)})</> : <>保存分析</>}</Button>
 
 
-                {/* <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true, true)}>{formId ? <>更新运行</> : <>保存运行</>}</Button> */}
+                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true, true)}>{formId ? <>更新运行</> : <>保存运行</>}</Button> */}
 
-                {/* <Button type="primary" onClick={() => {
+                    {/* <Button type="primary" onClick={() => {
                                             runPlot({ moduleName: moduleName, params: params })
                                         }}>执行</Button> */}
 
-                {formId && <Button size="small" color="cyan" onClick={() => form.setFieldValue("analysis_id", undefined)}>取消更新</Button>}
+                    {formId && <Button size="small" color="cyan" onClick={() => form.setFieldValue("analysis_id", undefined)}>取消更新</Button>}
 
-            </Flex>
-            }
-
-            <Collapse ghost items={[
-                {
-                    key: "1",
-                    label: "更多",
-                    children: <>
-                        <Form.Item noStyle shouldUpdate>
-                            {() => (
-                                <Typography>
-                                    <pre>{JSON.stringify(form.getFieldsValue(), null, 2)}</pre>
-                                </Typography>
-                            )}
-                        </Form.Item>
-                    </>
+                </Flex>
                 }
-            ]} />
-        </Form>
+
+                <Collapse ghost items={[
+                    {
+                        key: "1",
+                        label: "更多",
+                        children: <>
+                            <Form.Item noStyle shouldUpdate>
+                                {() => (
+                                    <Typography>
+                                        <pre>{JSON.stringify(form.getFieldsValue(), null, 2)}</pre>
+                                    </Typography>
+                                )}
+                            </Form.Item>
+                        </>
+                    }
+                ]} />
+            </Form>
+        </Watermark>
+
     </>
 }
 

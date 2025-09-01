@@ -161,8 +161,9 @@ const SoftwareAnalysisEditor: FC<any> = () => {
 
                     <Tag color="cyan">{analysis?.analysis_status}</Tag>
                     <Tag color="cyan">{analysis?.analysis_name}</Tag>
-                    <Popconfirm title="是否转换" onConfirm={async ()=>{
+                    <Popconfirm title="是否生成脚本" onConfirm={async ()=>{
                         await axios.post(`/analysis/convert-ipynb/${analysis.analysis_id}`)
+                        messageApi.success("是否生成脚本成功!")
                     }}>
                         <Button size="small" color="cyan" variant="solid">生成脚本</Button>
                     </Popconfirm>
