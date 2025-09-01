@@ -323,7 +323,9 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
                                     style={{ width: '100%' }}
                                 />
                             </Form.Item>
-                            
+                            <Form.Item name={"img"} label="图片">
+                                <Input ></Input>
+                            </Form.Item>
                             <ComponentsRender {...structure} data={component} form={form}></ComponentsRender>
                         </>
                     }, {

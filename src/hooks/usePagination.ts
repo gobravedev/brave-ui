@@ -7,9 +7,14 @@ export const usePagination = ({ pageApi,params,map, initialPageSize = 12 }: any)
     const [totalPage, setTotalPage] = useState(0); // 总页数
     const [loading, setLoading] = useState(false); // 加载状态
     const [pageSize] = useState(initialPageSize); // 每页显示条数
+    const [keywords, setKeywords] = useState<string>(""); // 搜索关键词
+
     // const fetchDataRef = useRef<(page: number) => void>(() => {});
 
-    
+    const search = (kw: string) => {
+        setKeywords(kw);   // 更新关键词
+        setPageNumber(1);  // 搜索时回到第一页
+    };
     // 模拟异步数据获取
     const fetchData = async (page: number) => {
         setLoading(true);
@@ -29,6 +34,7 @@ export const usePagination = ({ pageApi,params,map, initialPageSize = 12 }: any)
                 ...params,
                 page_number: page,
                 page_size: pageSize,
+                keywords: keywords || undefined, // 如果 keywords 有值才传
             })
 
             // "items": find_pipeline,
@@ -60,7 +66,7 @@ export const usePagination = ({ pageApi,params,map, initialPageSize = 12 }: any)
 
     useEffect(() => {
         fetchData(pageNumber); // 获取数据
-    }, [pageNumber]);
+    }, [pageNumber,keywords]);
 
     return {
         data,
@@ -70,5 +76,6 @@ export const usePagination = ({ pageApi,params,map, initialPageSize = 12 }: any)
         setPageNumber, // 更新页码
         pageSize,
         reload,
+        search
     };
 };

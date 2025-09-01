@@ -1,4 +1,4 @@
-import { Button, Card, Col, Empty, Flex, message, notification, Pagination, Popconfirm, Row, Spin, Tag, Tooltip } from "antd"
+import { Button, Card, Col, Empty, Flex, Input, message, notification, Pagination, Popconfirm, Row, Spin, Tag, Tooltip } from "antd"
 import Item from "antd/es/list/Item"
 import { FC, useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
@@ -15,15 +15,19 @@ import { usePagination } from "@/hooks/usePagination"
 import path from "path"
 import { CreateOrUpdateNamespace, InstallNamespace } from "../namespace-operature"
 import DependComponent from "../depend-component"
+
 const PipelineComponentsCard: FC<any> = ({ params, map }) => {
+    const { Search } = Input;
+    // const [searchText, setSearchText] = useState("");
+
     // const [pipelineComponents, setPipelineComponents] = useState<any>([])
-    const {component_type} = params
-    const mapFun = (item:any)=>{
-        if (map){
-            item  = map(item)
+    const { component_type } = params
+    const mapFun = (item: any) => {
+        if (map) {
+            item = map(item)
         }
-        if(item["tags"]){
-            item["tags"] = JSON.parse(item["tags"]) 
+        if (item["tags"]) {
+            item["tags"] = JSON.parse(item["tags"])
         }
         return {
             id: item.id,
@@ -38,10 +42,14 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
             namespace: item.namespace,
             namespace_name: item.namespace_name
         }
-       
-    }
 
-    const { data: pipelineComponents, pageNumber, totalPage, loading, reload, pageSize, setPageNumber } = usePagination({
+    }
+    // const params_ = {
+    //     ...params,
+    //     keywords:searchText
+
+    // }
+    const { data: pipelineComponents, pageNumber, totalPage, loading, reload, pageSize, setPageNumber,search } = usePagination({
         pageApi: pagePipelineComponents,
         params: params || {},
         map: mapFun
@@ -124,11 +132,19 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
         </Flex>
         <div style={{ marginBottom: "2rem" }}>
         </div>
+        <Search
+            placeholder="搜索组件"
+            allowClear
+            enterButton
+            onSearch={(value) => {search(value)}}
+            style={{ marginBottom: "1rem", width: 400 }}
+        />
+        {/* {JSON.stringify(params_)} */}
         <Spin spinning={loading}>
             {Array.isArray(pipelineComponents) && pipelineComponents.length != 0 ? <Row gutter={16} style={{ position: "relative" }}>
 
                 {pipelineComponents.map((item: any, index: any) => (
-                    <Col key={index} lg={4} sm={6} xs={24} style={{ marginBottom: "1rem", cursor: "pointer" }}>
+                    <Col key={index} lg={6} sm={4} xs={24} style={{ marginBottom: "1rem", cursor: "pointer" }}>
                         <Card hoverable
                             // title={item.label}
                             // variant="borderless" 
