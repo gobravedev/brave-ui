@@ -467,6 +467,27 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
 
 
         {!rest?.hiddenUpstreamAnalysis && <>
+            {inputAnalysisMethod && <ResultList
+                {...rest}
+                pipeline={pipeline}
+                software={rest}
+                currentAnalysisMethod={currentAnalysisMethod}
+                setCurrentAnalysisMethod={setCurrentAnalysisMethod}
+                operatePipeline={operatePipeline}
+                relationType="software_input_file"
+                cardExtra={cardExtra}
+                title={`输入文件 ${inputAnalysisMethod.length > 0 ? "" : inputAnalysisMethod.map((it: any) => it.label)}`}
+                activeTabKey={activeTabKey}
+                setActiveTabKey={setActiveTabKey}
+                shouldTrigger={true}
+                analysisType={"sample"}
+                analysisMethod={inputAnalysisMethod}
+                // setRecord={(record: any) => onClickItem(record)}
+                setResultTableList={setResultTableList}></ResultList>
+            }
+
+
+            <div style={{ marginBottom: "1rem" }}></div>
             <Form form={upstreamForm}>
 
                 <Collapse
@@ -498,27 +519,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
 
 
 
-                                {inputAnalysisMethod && <ResultList
-                                    {...rest}
-                                    pipeline={pipeline}
-                                    software={rest}
-                                    currentAnalysisMethod={currentAnalysisMethod}
-                                    setCurrentAnalysisMethod={setCurrentAnalysisMethod}
-                                    operatePipeline={operatePipeline}
-                                    relationType="software_input_file"
-                                    cardExtra={cardExtra}
-                                    title={`输入文件 ${inputAnalysisMethod.length > 0 ? "" : inputAnalysisMethod.map((it: any) => it.label)}`}
-                                    activeTabKey={activeTabKey}
-                                    setActiveTabKey={setActiveTabKey}
-                                    shouldTrigger={true}
-                                    analysisType={"sample"}
-                                    analysisMethod={inputAnalysisMethod}
-                                    // setRecord={(record: any) => onClickItem(record)}
-                                    setResultTableList={setResultTableList}></ResultList>
-                                }
 
-
-                                <div style={{ marginBottom: "1rem" }}></div>
 
 
                                 <Spin spinning={loading}>
@@ -549,7 +550,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
                                     {/* {JSON.stringify(inputAnalysisMethod)} */}
                                     <FormJsonComp formJson={inputAnalysisMethod} dataMap={resultTableList}></FormJsonComp>
                                     {/* {JSON.stringify(rest)} */}
-                                    <BioDatabaseForm  operatePipeline={operatePipeline} formJson={rest.databases}></BioDatabaseForm>
+                                    <BioDatabaseForm operatePipeline={operatePipeline} formJson={rest.databases}></BioDatabaseForm>
                                     {/* <FormJsonComp formJson={rest.databases} dataMap={resultTableList}></FormJsonComp> */}
 
                                     {/* {resultTableList && inputAnalysisMethod.map((it: any) => (<> */}
@@ -713,7 +714,7 @@ export const SelectComp: FC<any> = ({ it, resultTableList, value, onChange }) =>
 
 
 
-export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, operatePipeline, children, project, onClickItem, analysisType, analysisMethod, appendSampleColumns, script, ...rest }) => {
+export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, component_id, component_type, operatePipeline, children, project, onClickItem, analysisType, analysisMethod, appendSampleColumns, script, ...rest }) => {
     const [form] = Form.useForm();
 
     // const [loading, setLoading] = useState(false)
@@ -931,7 +932,7 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, operatePipeline, chi
     const [scriptMap, setScriptMap] = useState<any>()
     useEffect(() => {
         if (script) {
-            setScriptMap({[script["component_id"]]:script})
+            setScriptMap({ [script["component_id"]]: script })
         } else {
             const script = analysisMethod.filter((item: any) => "downstreamAnalysis" in item)
                 .map((item: any) => item.downstreamAnalysis).flat(Infinity)
@@ -947,7 +948,7 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, operatePipeline, chi
 
     return <>
         {contextHolder}
-        {/* {JSON.stringify(analysisMethod.downstreamAnalysis)} */}
+        {/* {JSON.stringify(rest)} */}
 
         {analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 0 && <>
             <ResultList
@@ -974,7 +975,6 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, operatePipeline, chi
 
             ></ResultList>
         </>}
-
         <div style={{ marginBottom: "1rem" }}></div>
 
 
@@ -1063,7 +1063,7 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, operatePipeline, chi
                                     <li>file:{currentAnalysisMethod?.component_id}</li>
                                     <li>script:{downstreamData?.component_id}</li>
                                 </ul>
-                            </>}>执行分析{downstreamData ? `(${downstreamData.component_name})`  : ""}{analysis_id?`(${analysis_id})`:""}</Tooltip>,
+                            </>}>执行分析{downstreamData ? `(${downstreamData.component_name})` : ""}{analysis_id ? `(${analysis_id})` : ""}</Tooltip>,
                             children: <>
                                 {/* {import.meta.env.MODE == "development" && <>
                                     <ul>
@@ -1117,7 +1117,7 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, operatePipeline, chi
                                 </Flex>
                                 <div style={{ marginBottom: "1rem" }}></div>
                                 {/* {JSON.stringify(downstreamData.databases)} */}
-                                
+
                                 <AnalysisForm
                                     {...downstreamData}
                                     pipeline={pipeline}
@@ -1240,3 +1240,13 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, operatePipeline, chi
     </>
 }
 
+
+
+const ScriptComponent: FC<any> = () => {
+
+    return <>
+
+
+    </>
+
+}

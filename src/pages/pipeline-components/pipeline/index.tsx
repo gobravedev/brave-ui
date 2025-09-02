@@ -122,8 +122,8 @@ const Pipeline: FC<any> = ({ }) => {
             const content = JSON.parse(pipeline['content'])
             pipeline = { ...content, ...pipeline }
         }
-        if(pipeline["tags"]){
-            pipeline["tags"] = JSON.parse( pipeline["tags"] )
+        if (pipeline["tags"]) {
+            pipeline["tags"] = JSON.parse(pipeline["tags"])
         }
 
         setPipeline(pipeline)
@@ -379,6 +379,8 @@ const SoftwareComponent = ({ operatePipeline, component, ...rest }: PipelineComp
 
 
     return <>
+
+
         <AnalysisPanel
 
             // inputAnalysisMethod={item.inputAnalysisMethod}
@@ -421,6 +423,7 @@ const ScriptComponent = ({ operatePipeline, component, ...rest }: PipelineCompon
     return <>
         {/* {JSON.stringify(component)} */}
         <UpstreamAnalysisOutput
+            component_type={component.component_type}
             script={component}
             analysisMethod={component.parent || []}
             operatePipeline={operatePipeline}

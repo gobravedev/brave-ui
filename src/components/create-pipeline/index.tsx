@@ -340,9 +340,10 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
                                 <Input ></Input>
                             </Form.Item> */}
                             {/* valuePropName="fileList"  getValueFromEvent={normFile}*/}
-                            <Form.Item label="Upload" name={"img"}  >
-                                <UploadComp component_id={data.component_id}></UploadComp>
-                            </Form.Item>
+                            {data?.component_id && <Form.Item label="Upload" name={"img"}  >
+                                <UploadComp component_id={data?.component_id}></UploadComp>
+                            </Form.Item>}
+
                             <ComponentsRender {...structure} data={component} form={form}></ComponentsRender>
                         </>
                     }, {
