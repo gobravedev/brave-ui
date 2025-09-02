@@ -329,7 +329,7 @@ const ResultList = forwardRef<any, any>(({
             ellipsis: true,
             render: (text: any, record: any) => {
                 return <Tooltip title={record.analysis_id}>
-                    <span style={{ cursor: "pointer" }} >{String(text).slice(0, 8)}</span>
+                    <span style={{ cursor: "pointer" }} >{text?String(text).slice(0, 8):""}</span>
                 </Tooltip>
             }
 

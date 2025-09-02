@@ -421,7 +421,7 @@ const ScriptComponent = ({ operatePipeline, component, ...rest }: PipelineCompon
     return <>
         {/* {JSON.stringify(component)} */}
         <UpstreamAnalysisOutput
-            script={component.script}
+            script={component}
             analysisMethod={component.parent || []}
             operatePipeline={operatePipeline}
             project={project}

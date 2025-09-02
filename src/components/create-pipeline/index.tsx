@@ -1,4 +1,4 @@
-import { Button, Card, Collapse, Divider, Flex, Form, Input, Modal, Popconfirm, Select, Space, Tabs, Typography } from "antd"
+import { Button, Card, Collapse, Divider, Flex, Form, Input, Modal, Popconfirm, Select, Space, Tabs, Typography, Upload, UploadFile, UploadProps } from "antd"
 import TextArea from "antd/es/input/TextArea"
 import axios from "axios"
 import { FC, use, useEffect, useRef, useState } from "react"
@@ -8,6 +8,7 @@ import { data } from "react-router"
 import { useForm } from "antd/es/form/Form"
 import { MonacoEditor } from "../react-monaco-editor"
 import { es } from "@faker-js/faker"
+import { PlusOutlined } from '@ant-design/icons'
 export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClose, params, callback }) => {
     if (!visible) return null;
 
@@ -222,7 +223,7 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
 
         const data = resp.data
         // data['content'] = JSON.parse(data['content']) //JSON.stringify(JSON.parse(data['content']), null, 2)
-        if( data['tags'] ){
+        if (data['tags']) {
             data['tags'] = JSON.parse(data['tags'])
         }
         setComponent(data)
@@ -269,7 +270,7 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
         if (typeof params['content'] == 'string') {
             params['content'] = JSON.parse(params['content'])
         }
-     
+
         return params
     }
     const savePipeline = async () => {
@@ -293,6 +294,18 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
         }
         onClose()
     }
+    const normFile = (e: any) => {
+        console.log(e)
+        if (Array.isArray(e)) {
+            return e;
+        }
+        return [{
+            uid: '-4',
+            name: 'image.png',
+            status: 'done',
+            url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
+        }];
+    };
     return <>
         <Modal
             loading={loading}
@@ -323,8 +336,12 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
                                     style={{ width: '100%' }}
                                 />
                             </Form.Item>
-                            <Form.Item name={"img"} label="图片">
+                            {/* <Form.Item name={"img"} label="图片">
                                 <Input ></Input>
+                            </Form.Item> */}
+                            {/* valuePropName="fileList"  getValueFromEvent={normFile}*/}
+                            <Form.Item label="Upload" name={"img"}  >
+                                <UploadComp component_id={data.component_id}></UploadComp>
                             </Form.Item>
                             <ComponentsRender {...structure} data={component} form={form}></ComponentsRender>
                         </>
@@ -365,6 +382,48 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
 export default CreateORUpdatePipelineCompnentRelation
 
 
+const UploadComp: FC<any> = ({ value, onChange, component_id }) => {
+    const [fileList, setFileList] = useState<any>([])
+
+    const handleChange: UploadProps['onChange'] = ({ file, fileList }) => {
+        // console.log()
+        setFileList([file]);
+        if (file.status === 'done') {
+            console.log(file)
+            onChange(file.response.url)
+
+        }
+
+        // console.log(fileList)
+    }
+
+    useEffect(() => {
+        if (value) {
+            setFileList([{
+                uid: '-1',
+                name: 'image.png',
+                status: 'done',
+                url: `${window.location.origin}${value}`
+            }])
+        }
+
+    }, [value])
+    return <>
+        {/* {value} */}
+        <Upload
+            onChange={handleChange}
+            fileList={fileList}
+            action={`/brave-api/component/upload/${component_id}`} listType="picture-card"  >
+            <button
+                style={{ color: 'inherit', cursor: 'inherit', border: 0, background: 'none' }}
+                type="button"
+            >
+                <PlusOutlined />
+                <div style={{ marginTop: 8 }}>Upload</div>
+            </button>
+        </Upload>
+    </>
+}
 
 const DefaultComponentRelation: FC<any> = ({ data, form, components }) => {
     return <>

@@ -15,7 +15,7 @@ import { usePagination } from "@/hooks/usePagination"
 import path from "path"
 import { CreateOrUpdateNamespace, InstallNamespace } from "../namespace-operature"
 import DependComponent from "../depend-component"
-
+import "./index.css"
 const PipelineComponentsCard: FC<any> = ({ params, map }) => {
     const { Search } = Input;
     // const [searchText, setSearchText] = useState("");
@@ -49,7 +49,7 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
     //     keywords:searchText
 
     // }
-    const { data: pipelineComponents, pageNumber, totalPage, loading, reload, pageSize, setPageNumber,search } = usePagination({
+    const { data: pipelineComponents, pageNumber, totalPage, loading, reload, pageSize, setPageNumber, search } = usePagination({
         pageApi: pagePipelineComponents,
         params: params || {},
         map: mapFun
@@ -136,7 +136,7 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
             placeholder="搜索组件"
             allowClear
             enterButton
-            onSearch={(value) => {search(value)}}
+            onSearch={(value) => { search(value) }}
             style={{ marginBottom: "1rem", width: 400 }}
         />
         {/* {JSON.stringify(params_)} */}
@@ -146,12 +146,23 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
                 {pipelineComponents.map((item: any, index: any) => (
                     <Col key={index} lg={6} sm={4} xs={24} style={{ marginBottom: "1rem", cursor: "pointer" }}>
                         <Card hoverable
+                            className="custom-card"
                             // title={item.label}
                             // variant="borderless" 
                             style={{
-                                height: "100%"
+                                height: "100%",
+                                border: "1px solid #f0f0f0",   // 默认灰色边框
+                                borderRadius: "12px",          // 圆角
+                                overflow: "hidden",
+                                transition: "all 0.3s ease",   // 平滑过渡
+                                
                             }}
-                            cover={<img alt={item.label} src={item.img} />}
+                            bodyStyle={{
+                                padding: "12px 16px",          // 内边距更紧凑
+                            }}
+                            cover={<div style={{height:"15rem"}}>
+                                <img style={{height:"100%",width:"100%",objectFit:"cover"}} alt={item.label} src={item.img} />
+                            </div>}
                             onClick={() => navigate(`${item.path}`)}>
 
 
