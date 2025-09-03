@@ -467,24 +467,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
 
 
         {!rest?.hiddenUpstreamAnalysis && <>
-            {inputAnalysisMethod && <ResultList
-                {...rest}
-                pipeline={pipeline}
-                software={rest}
-                currentAnalysisMethod={currentAnalysisMethod}
-                setCurrentAnalysisMethod={setCurrentAnalysisMethod}
-                operatePipeline={operatePipeline}
-                relationType="software_input_file"
-                cardExtra={cardExtra}
-                title={`输入文件 ${inputAnalysisMethod.length > 0 ? "" : inputAnalysisMethod.map((it: any) => it.label)}`}
-                activeTabKey={activeTabKey}
-                setActiveTabKey={setActiveTabKey}
-                shouldTrigger={true}
-                analysisType={"sample"}
-                analysisMethod={inputAnalysisMethod}
-                // setRecord={(record: any) => onClickItem(record)}
-                setResultTableList={setResultTableList}></ResultList>
-            }
+
 
 
             <div style={{ marginBottom: "1rem" }}></div>
@@ -518,7 +501,24 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
                             </Flex> */}
 
 
-
+                                {inputAnalysisMethod && <ResultList
+                                    {...rest}
+                                    pipeline={pipeline}
+                                    software={rest}
+                                    currentAnalysisMethod={currentAnalysisMethod}
+                                    setCurrentAnalysisMethod={setCurrentAnalysisMethod}
+                                    operatePipeline={operatePipeline}
+                                    relationType="software_input_file"
+                                    cardExtra={cardExtra}
+                                    title={`输入文件 ${inputAnalysisMethod.length > 0 ? "" : inputAnalysisMethod.map((it: any) => it.label)}`}
+                                    activeTabKey={activeTabKey}
+                                    setActiveTabKey={setActiveTabKey}
+                                    shouldTrigger={true}
+                                    analysisType={"sample"}
+                                    analysisMethod={inputAnalysisMethod}
+                                    // setRecord={(record: any) => onClickItem(record)}
+                                    setResultTableList={setResultTableList}></ResultList>
+                                }
 
 
 

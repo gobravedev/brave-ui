@@ -447,7 +447,10 @@ const SoftwareContent: FC<any> = ({ data, form }) => {
     }, [])
     return <>
         <Form.Item name={"container_id"} label="容器">
-            <SelectContainer data={data}></SelectContainer>
+            <SelectContainer container={data?.container}></SelectContainer>
+        </Form.Item>
+        <Form.Item name={"sub_container_id"} label="子容器">
+            <SelectContainer container={data?.sub_container}></SelectContainer>
         </Form.Item>
         <Form.Item name={"content"} label="content">
             <TextAreaComp templete={templete}></TextAreaComp>
@@ -467,7 +470,7 @@ const ScriptContent: FC<any> = ({ data, form }) => {
     }, [])
     return <>
         <Form.Item name={"container_id"} label="容器">
-            <SelectContainer data={data}></SelectContainer>
+            <SelectContainer container={data?.container}></SelectContainer>
         </Form.Item>
         <Form.Item name={"content"} label="content">
             <TextAreaComp templete={templete}></TextAreaComp>
@@ -500,9 +503,9 @@ const FileContent: FC<any> = ({ data, form, structure }) => {
     </>
 }
 
-const SelectContainer: FC<any> = ({ value, onChange, data }) => {
+const SelectContainer: FC<any> = ({ value, onChange, container:container_ }) => {
     const { modal, openModal, closeModal } = useModal()
-    const [container, setContainer] = useState<any>(data?.container)
+    const [container, setContainer] = useState<any>(container_)
     return <>
         <Input value={container?.name} style={{ cursor: "pointer" }} onClick={() => openModal("modalA")}></Input>
         {/* {JSON.stringify(container)}

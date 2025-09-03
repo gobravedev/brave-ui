@@ -183,7 +183,17 @@ const ResultList = forwardRef<any, any>(({
             render: (text: any) => {
                 return <Tag color={text === "success" ? "green" : text === "failed" ? "red" : "blue"}>{text}</Tag>
             }
-        }, {
+        },  {
+            title: "组件名称",
+            dataIndex: 'component_name',
+            key: 'component_name',
+            ellipsis: true,
+            render: (text: any, record: any) => {
+                return <Tooltip title={record.component_id}>
+                    <span style={{ cursor: "pointer" }}>{text}</span>
+                </Tooltip>
+            }
+        },{
             title: "分析名称",
             dataIndex: 'analysis_name',
             key: 'analysis_name',
@@ -212,16 +222,6 @@ const ResultList = forwardRef<any, any>(({
             }
 
         }, {
-            title: "组件名称",
-            dataIndex: 'component_name',
-            key: 'component_name',
-            ellipsis: true,
-            render: (text: any, record: any) => {
-                return <Tooltip title={record.component_id}>
-                    <span style={{ cursor: "pointer" }}>{text}</span>
-                </Tooltip>
-            }
-        }, {
             title: "容器",
             dataIndex: "container_name",
             key: "container_name",
@@ -229,11 +229,12 @@ const ResultList = forwardRef<any, any>(({
             render: (text: any, record: any) => {
                 return <Tooltip title={<>
                     <ul>
-                        <li>{record.container_id}</li>
                         <li>{record.container_image}</li>
+                       {record.sub_container_image &&<li>{record.sub_container_image}</li> } 
                     </ul>
                 </>}>
-                    <span style={{ cursor: "pointer" }}>{text}</span>
+                    <Tag style={{ cursor: "pointer" }}>{text}</Tag> 
+                   {record.sub_container_name && <Tag style={{ cursor: "pointer" }}>{record.sub_container_name}</Tag>} 
                 </Tooltip>
             }
 
