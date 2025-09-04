@@ -45,7 +45,7 @@ const ResultList = forwardRef<any, any>(({
     const { eventSourceRef, status, reconnect } = useSSEContext();
     const [data, setData] = useState<any>([])
     const analysisIdRef = useRef<any>([])
-    const analysisResultRef = useRef<any>(null)
+    // const analysisResultRef = useRef<any>(null)
     const pipelineInfoRef = useRef<any>(null)
     // const [content,setContent] = useState<any>()
     const [loading, setLoading] = useState(false)
@@ -74,9 +74,9 @@ const ResultList = forwardRef<any, any>(({
 
                     if (data.event == "analysis_complete" || data.event == "analysis_failed" || data.event == "analysis_started") {
                         loadData()
-                        if (analysisResultRef.current) {
-                            analysisResultRef.current?.relaod()
-                        }
+                        // if (analysisResultRef.current) {
+                        //     analysisResultRef.current?.relaod()
+                        // }
                         if (pipelineInfoRef.current) {
                             pipelineInfoRef.current?.relaod()
                         }
@@ -198,6 +198,14 @@ const ResultList = forwardRef<any, any>(({
             dataIndex: 'analysis_name',
             key: 'analysis_name',
             ellipsis: true,
+        },{
+            title: "报告",
+            dataIndex: 'is_report',
+            key: 'is_report',
+            ellipsis: true,
+            render: (text: any, record: any) => {
+               return <Tag color={text  ? "green" : "blue"}>{text  ? "报告" : "不报告"}</Tag>
+            }
         },
         {
             title: 'analysis_id',
@@ -393,6 +401,14 @@ const ResultList = forwardRef<any, any>(({
                                 }}>
                                     <a >删除</a>
                                 </Popconfirm></>)
+                            },{
+                                key: '5',
+                                label: (<> <Popconfirm title={record.is_report?"是否取消报告":"是否报告"} onConfirm={async () => {
+                                    await axios.post(`/analysis/update-report/${record.analysis_id}`)
+                                    loadData()
+                                }}>
+                                   {record.is_report?"取消报告":"报告"} 
+                                </Popconfirm></>)
                             }
                         ]
                     }}>
@@ -479,12 +495,9 @@ const ResultList = forwardRef<any, any>(({
         <div style={{ marginBottom: "1rem" }}></div>
 
         <AnalysisResultView
-            ref={analysisResultRef}
+            // ref={analysisResultRef}
             visible={modal.key == "modalA" && modal.visible}
             params={modal.params}
-            currentAnalysis={currentAnalysis}
-            status={record?.analysis_status}
-            operatePipeline={operatePipeline}
             onClose={closeModal}></AnalysisResultView>
         <PipelineInfo
             ref={pipelineInfoRef}

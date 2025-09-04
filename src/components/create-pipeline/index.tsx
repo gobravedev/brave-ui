@@ -1,4 +1,4 @@
-import { Button, Card, Collapse, Divider, Flex, Form, Input, Modal, Popconfirm, Select, Space, Tabs, Typography, Upload, UploadFile, UploadProps } from "antd"
+import { Button, Card, Collapse, Divider, Flex, Form, Input, InputNumber, Modal, Popconfirm, Select, Space, Tabs, Typography, Upload, UploadFile, UploadProps } from "antd"
 import TextArea from "antd/es/input/TextArea"
 import axios from "axios"
 import { FC, use, useEffect, useRef, useState } from "react"
@@ -343,6 +343,9 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
                             {data?.component_id && <Form.Item label="Upload" name={"img"}  >
                                 <UploadComp component_id={data?.component_id}></UploadComp>
                             </Form.Item>}
+                            <Form.Item label="排序" name={"order_index"} initialValue={0}>
+                                <InputNumber ></InputNumber >
+                            </Form.Item>
 
                             <ComponentsRender {...structure} data={component} form={form}></ComponentsRender>
                         </>
@@ -503,7 +506,7 @@ const FileContent: FC<any> = ({ data, form, structure }) => {
     </>
 }
 
-const SelectContainer: FC<any> = ({ value, onChange, container:container_ }) => {
+const SelectContainer: FC<any> = ({ value, onChange, container: container_ }) => {
     const { modal, openModal, closeModal } = useModal()
     const [container, setContainer] = useState<any>(container_)
     return <>

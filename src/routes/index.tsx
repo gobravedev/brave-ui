@@ -55,6 +55,8 @@ const Script = lazy(() => import('@/pages/pipeline-components/script'));
 const Pipeline = lazy(() => import('@/pages/pipeline-components/pipeline'));
 const PipelineComponentsCard = lazy(() => import('@/components/pipeline-components-card'));
 const SoftwareAnalysisEditor = lazy(() => import('@/pages/software-analysis-editor'));
+const AnalysisReport = lazy(() => import('@/pages/analysis-report'));
+
 const ContainerPage  = lazy(() => import('@/pages/container'));
 import axios from "axios";
 import { Skeleton } from "antd";
@@ -84,8 +86,10 @@ const childern = [
         path: "/container-page",
         element: <ContainerPage />
     },
-
-       
+    {
+        path: "/analysis-report",
+        element: <AnalysisReport />
+    },
     {
         path: "/pipeline-card",
         element: <PipelineComponentsCard  params={{component_type:"pipeline"}}/>

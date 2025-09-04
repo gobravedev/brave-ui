@@ -651,8 +651,8 @@ export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
                 {analysis.analysis_status == "running" ?
                     <>
                         <Popconfirm title={"是否停止!"} onConfirm={async () => {
-                                await stopAnalysisApi(analysis.analysis_id)
-                                messageApi.success("停止成功")
+                            await stopAnalysisApi(analysis.analysis_id)
+                            messageApi.success("停止成功")
 
                         }}>
                             <Button size="small" color="cyan" variant="solid">
@@ -706,10 +706,12 @@ const PipelineInfo: FC<any> = forwardRef<any, any>(({ visible, params, onClose, 
     }
     const loadAnalysis = async () => {
         // console.log('11111111111111111params',params)
+        if (analysisId) {
+            const res = await findAnalysisById(analysisId)
+            const analysis = res.data
+            setAnalysis(analysis)
+        }
 
-        const res = await findAnalysisById(analysisId)
-        const analysis = res.data
-        setAnalysis(analysis)
 
     }
     const [analysis, setAnalysis] = useState<any>()

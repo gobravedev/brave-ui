@@ -1,4 +1,4 @@
-import { Button, Collapse, Flex, Form, Input, message, Select, Typography, Watermark } from "antd";
+import { Button, Collapse, Flex, Form, Input, message, Select, Switch, Typography, Watermark } from "antd";
 import axios from "axios";
 import { FC, useEffect, useState } from "react";
 import FormJsonComp from "../form-components";
@@ -258,7 +258,7 @@ export const AnalysisForm: FC<any> = ({
         {contextHolder}
         {/* {JSON.stringify(projectObj)} */}
         {/* {JSON.stringify(rest)} */}
-        <Watermark content={formId&& `更新分析(${formValues.analysis_name})(${String(formValues.analysis_id).slice(0, 8)})`}>
+        <Watermark content={formId && `更新分析(${formValues.analysis_name})(${String(formValues.analysis_id).slice(0, 8)})`}>
             <Form form={form}   >
                 <Form.Item name={"analysis_id"} label="分析ID" >
                     <Input disabled></Input>
@@ -301,6 +301,9 @@ export const AnalysisForm: FC<any> = ({
                 }
                 <Form.Item label="分析名称" name={"analysis_name"} style={{ maxWidth: 600 }} rules={[{ required: true, message: '该字段不能为空!' }]}>
                     <Input></Input>
+                </Form.Item>
+                <Form.Item initialValue={false} label={"是否报告"} name={"is_report"} rules={[{ required: true, message: '该字段不能为空!' }]}>
+                    <Switch />
                 </Form.Item>
                 {/* {JSON.stringify(formValues)} */}
 

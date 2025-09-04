@@ -622,9 +622,9 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
 
 
                                     {/* {markdown} */}
-                                    <AnalysisResultView
+                                    {/* <AnalysisResultView
                                         plotLoading={false}
-                                        markdown={markdown}></AnalysisResultView>
+                                        markdown={markdown}></AnalysisResultView> */}
                                     {/* <Literature params={{
                                     obj_key: analysisPipline,
                                     obj_type: "analysis_img"

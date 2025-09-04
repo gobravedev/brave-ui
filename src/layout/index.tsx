@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { FC, Suspense, useEffect, useState } from 'react';
 import { LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Breadcrumb, Button, Divider, Empty, Flex, Layout, Menu, message, notification, Popconfirm, Select, Skeleton, Space, Tag, theme, Tooltip } from 'antd';
@@ -53,13 +53,14 @@ const App: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [leftMenus, setLeftMenus] = useState<any>([])
-    const [projectList, setProjectList] = useState<any>([])
     const dispatch = useDispatch()
     const [notificationApi, notificationContextHolder] = notification.useNotification();
     const [messageApi, messageContextHolder] = message.useMessage();
     const { modal, openModal, closeModal } = useModal();
-    const [projectMap, setProjectMap] = useState<any>({})
     const [projectObj, setProjectObj] = useState<any>({})
+    const [current, setCurrent] = useState('/');
+    const [menus, setMenus] = useState<any>([])
+    const [selectedKeyMap, setSelectedKeyMap] = useState<any>()
 
     const openNotification = ({ type, message = "", description = "" }: { type: NotificationType, message: string, description?: string }) => {
         notificationApi[type]({
@@ -73,24 +74,9 @@ const App: React.FC = () => {
     const onMenuClick = (key: string) => {
         console.log(key)
         navigate(key);
+        setCurrent(key)
     }
-    const loadProject = async () => {
-        const resp: any = await axios.get("/project/list-project")
-        // console.log(resp.data)
-        setProjectList(resp.data.map((item: any) => {
-            return {
-                label: `${item.project_name}`,
-                value: item.project_id
-            }
-        }))
-        const projectMap = resp.data.reduce((acc: any, item: any) => {
-            acc[item.project_id] = item
-            item.metadata_form = JSON.parse(item.metadata_form)
-            return acc
-        }, {})
-        setProjectMap(projectMap)
-        setProjectObj(projectMap[project_id])
-    }
+
     const getSetting = async () => {
         const resp: any = await axios.get("/setting/get-setting")
         console.log(resp.data)
@@ -169,14 +155,14 @@ const App: React.FC = () => {
 
     // const eventSourceRef :React.RefObject < EventSource | null> = useSSE(openNotification)
     useEffect(() => {
-        loadProject()
+        // loadProject()
         getSetting()
     }, [])
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
 
-    const menu0: MenuProps['items'] = [
+    const menu0: MenuItem[] = [
         {
             key: "/",
             label: "项目介绍"
@@ -188,34 +174,148 @@ const App: React.FC = () => {
 
         {
             key: `/pipeline-card`,
-            label: "分析管道"
+            label: "分析管道",
+            children: [
+                {
+                    key: `/component/pipeline`,
+                    label: "分析报告",
+                    hidden: true
+                }
+            ]
         },
         {
             key: `/software-card`,
-            label: "分析软件"
+            label: "分析软件",
+            children: [
+                {
+                    key: `/component/software`,
+                    label: "分析报告",
+                    hidden: true
+                }
+            ]
         },
         {
             key: `/file-card`,
-            label: "分析文件"
+            label: "分析文件",
+            children: [
+                {
+                    key: `/component/file`,
+                    label: "分析报告",
+                    hidden: true
+                }
+            ]
         },
         {
             key: `/script-card`,
-            label: "分析脚本"
+            label: "分析脚本",
+            children: [
+                {
+                    key: `/component/script`,
+                    label: "分析报告",
+                    hidden: true
+                }
+            ]
+        }, {
+            key: `/analysis-report`,
+            label: "分析报告"
+
         },
         {
-            key: `/pipeline-monitor-panal`,
-            label: "管道监控"
-        }, {
-            key: `/analysis-result`,
-            label: "分析结果"
-        },{
-            key: `/container-page`,
-            label: "容器管理"
-        }, {
-            key: `/literature`,
-            label: "文献资料"
-        },
+            key: `/more`,
+            label: "更多",
+            children: [
+                {
+                    key: `/pipeline-monitor-panal`,
+                    label: "管道监控"
+                },
+                {
+                    key: `/analysis-result`,
+                    label: "分析结果"
+                }, {
+                    key: `/container-page`,
+                    label: "容器管理"
+                }, {
+                    key: `/literature`,
+                    label: "文献资料"
+                },
+            ]
+        }
+
+
     ]
+    type MenuItem = {
+        key: string;
+        label: string;
+        children?: MenuItem[];
+        hidden?: boolean; // 新增字段
+    };
+
+    const filterMenu = (menus: MenuItem[]): MenuItem[] => {
+        return menus
+            .filter(item => !item.hidden)
+            .map(item => {
+                const newItem: MenuItem = { ...item };
+                if (newItem.children) {
+                    newItem.children = filterMenu(newItem.children);
+                    if (newItem.children.length === 0) delete newItem.children;
+                }
+                return newItem;
+            });
+    };
+    // 生成 path -> selectedKey 映射表，同时按 key 长度降序排序
+    const generateSelectedKeyMap = (menus: MenuItem[]) => {
+        const map: { key: string; selectedKey: string }[] = [];
+
+        const traverse = (items: MenuItem[], parentKey?: string) => {
+            for (const item of items) {
+                const mappedKey = item.hidden && parentKey ? parentKey : item.key;
+                map.push({ key: item.key, selectedKey: mappedKey });
+
+                if (item.children) {
+                    traverse(item.children, mappedKey);
+                }
+            }
+        };
+
+        traverse(menus);
+
+        // 按 key 长度降序排序，保证最长前缀匹配优先
+        map.sort((a, b) => b.key.length - a.key.length);
+        return map;
+    };
+
+    // 根据路径快速查找 selectedKey
+    const getSelectedKey = (path: string, selectedKeyMap: { key: string; selectedKey: string }[]) => {
+        for (const item of selectedKeyMap) {
+            if (path.startsWith(item.key)) {
+                return item.selectedKey;
+            }
+        }
+        return "/"; // 默认回退首页
+    };
+    useEffect(() => {
+        // const selectedKeyMap = generateSelectedKeyMap(menu0);
+        // setSelectedKeyMap(selectedKeyMap)
+        const finalMenu = filterMenu(menu0);
+        setMenus(finalMenu)
+    }, [])
+    // 使用示例
+    useEffect(() => {
+        // const pathname = findSelectedKey(menu0, location.pathname)
+
+        if (!selectedKeyMap) {
+            const selectedKeyMap = generateSelectedKeyMap(menu0);
+            setSelectedKeyMap(selectedKeyMap)
+            const pathname = getSelectedKey(location.pathname,selectedKeyMap)
+            console.log("not exist selectedKeyMap", pathname)
+            setCurrent(pathname)
+        } else {
+            // console.log("exist selectedKeyMap",selectedKeyMap)
+            const pathname = getSelectedKey(location.pathname,selectedKeyMap)
+            setCurrent(pathname)
+
+        }
+    }, [location.pathname])
     const menu1: MenuProps['items'] = [
         {
             key: `${project_id}/sample-qc`,
@@ -273,7 +373,7 @@ const App: React.FC = () => {
     const checkProject = () => {
         if (!project_id) {
             // console.log("checkProject",location.pathname)
-            if (location.pathname.startsWith("/component")) {
+            if (location.pathname.startsWith("/component") || location.pathname.startsWith("/analysis-report")) {
                 return false
             }
 
@@ -317,9 +417,13 @@ const App: React.FC = () => {
                     <Menu
                         theme="dark"
                         mode="horizontal"
-                        defaultSelectedKeys={['1']}
-                        items={menu0}
-                        onSelect={k => onMenuClick(k.key)}
+                        // defaultSelectedKeys={['1']}
+                        selectedKeys={[current]}
+                        items={menus}
+                        onSelect={k => {
+                            onMenuClick(k.key)
+                            console.log(k)
+                        }}
                         style={{ flex: 1, minWidth: 0 }}
                     />
                 </div>
@@ -340,68 +444,10 @@ const App: React.FC = () => {
                     }}>
                         sse
                     </Button>
+                    {checkProject() && <>
+                        <ProjectComp project_id={project_id} openModal={openModal} setProjectObj={setProjectObj}></ProjectComp>
 
-                    {Array.isArray(projectList) && projectList.length > 0 ? (
-                        <Select
-                            size='small'
-                            // open={true}
-                            dropdownRender={(menu) => <>
-                                {menu}
-                                <Divider style={{ margin: '8px 0' }} />
-                                <Flex gap={"small"} justify={"space-between"} >
-                                    <Button type='text' size="small" color="cyan" variant='solid' onClick={() => {
-                                        openModal("project")
-                                    }}>创建</Button>
-                                    <Button type='text' size="small" color="cyan" variant='solid' onClick={() => {
-                                        loadProject()
-                                    }}>刷新</Button>
-                                </Flex>
-
-                                {project_id && (
-                                    <>
-                                        <Divider style={{ margin: '8px 0' }} />
-                                        <Tooltip title={project_id} placement='bottom'> 
-
-                                        <Flex gap={"small"} justify={"space-between"} >
-
-                                            <Button type='text' size="small" color="cyan" variant='solid' onClick={() => {
-                                                openModal("project", {project_id:project_id})
-                                            }}>更新</Button>
-                                            <Popconfirm title="确定删除吗？" onConfirm={async () => {
-                                                await deleteProjectApi(project_id)
-                                                messageApi.success("删除成功")
-                                                dispatch(setProject({
-                                                  
-                                                }))
-                                                loadProject()
-                                            }}>
-                                                <Button type='text' size="small" color="danger" variant='solid' >删除</Button>
-                                            </Popconfirm>
-
-                                        </Flex>
-                                        </Tooltip>
-
-                                    </>)}
-                            </>}
-                            onChange={(value: any) => {
-                                console.log("onChange",value)
-                               
-                                dispatch(setProject({
-                                    name: value,
-                                    project_id: value,
-                                }))
-                                setProjectObj(projectMap[value])
-                                // loadProject()
-                            }}
-                            value={project_id}
-                            style={{ width: 120 }}
-                            placeholder="选择项目"
-                            options={projectList}
-                        >
-                        </Select>
-                    ) : <Button size="small" color="cyan" variant='solid' onClick={() => {
-                        openModal("project")
-                    }}>创建项目</Button>}
+                    </>}
                     {/* <Button color="primary"   onClick={() => {
                       openModal("context")
                     }}>
@@ -429,22 +475,25 @@ const App: React.FC = () => {
                 <Content style={{ padding: '0 24px' }}>
                     <Suspense key={location.key} fallback={<Test></Test>}>
                         {checkProject() ? <>
-                            <Outlet context={{ project:project_id,projectObj, messageApi }} />
+                            <Outlet context={{ project: project_id, projectObj, messageApi }} />
                         </> : <Empty description="请先创建/选择项目" image={Empty.PRESENTED_IMAGE_SIMPLE}>
-                            <Button type='primary' onClick={() => {
+                            <ProjectComp project_id={project_id} openModal={openModal} setProjectObj={setProjectObj}></ProjectComp>
+
+                            {/* <Button type='primary' onClick={() => {
                                 openModal("project")
-                            }}>创建项目</Button>
+                            }}>创建项目</Button> */}
                         </Empty>}
                     </Suspense>
                 </Content>
             </Layout>
-            <FormProject callback={(project_id:any)=>{
-                loadProject()
+            <FormProject callback={(project_id: any) => {
+                // loadProject()
                 dispatch(setProject({
                     name: project_id,
                     project_id: project_id,
                 }))
             }} messageApi={messageApi} params={modal.params} visible={modal.visible && modal.key === "project"} onClose={closeModal} />
+
             {/* <ContextModal visible={modal.visible} onClose={closeModal} /> */}
         </Layout>
 
@@ -452,3 +501,98 @@ const App: React.FC = () => {
 };
 
 export default App;
+
+const ProjectComp: FC<any> = ({ project_id, openModal, setProjectObj }) => {
+    const [projectMap, setProjectMap] = useState<any>({})
+    const [projectList, setProjectList] = useState<any>([])
+    const dispatch = useDispatch()
+    const [messageApi, messageContextHolder] = message.useMessage();
+
+    const loadProject = async () => {
+        const resp: any = await axios.get("/project/list-project")
+        // console.log(resp.data)
+        setProjectList(resp.data.map((item: any) => {
+            return {
+                label: `${item.project_name}`,
+                value: item.project_id
+            }
+        }))
+        const projectMap = resp.data.reduce((acc: any, item: any) => {
+            acc[item.project_id] = item
+            item.metadata_form = JSON.parse(item.metadata_form)
+            return acc
+        }, {})
+        setProjectMap(projectMap)
+        setProjectObj(projectMap[project_id])
+    }
+    useEffect(() => {
+        loadProject()
+    }, [])
+    return <>
+        {messageContextHolder}
+        {Array.isArray(projectList) && projectList.length > 0 ? (
+            <Select
+                size='small'
+                // open={true}
+                dropdownRender={(menu) => <>
+                    {menu}
+                    <Divider style={{ margin: '8px 0' }} />
+                    <Flex gap={"small"} justify={"space-between"} >
+                        <Button type='text' size="small" color="cyan" variant='solid' onClick={() => {
+                            openModal("project")
+                        }}>创建</Button>
+                        <Button type='text' size="small" color="cyan" variant='solid' onClick={() => {
+                            loadProject()
+                        }}>刷新</Button>
+                    </Flex>
+
+                    {project_id && (
+                        <>
+                            <Divider style={{ margin: '8px 0' }} />
+                            <Tooltip title={project_id} placement='bottom'>
+
+                                <Flex gap={"small"} justify={"space-between"} >
+
+                                    <Button type='text' size="small" color="cyan" variant='solid' onClick={() => {
+                                        openModal("project", { project_id: project_id })
+                                    }}>更新</Button>
+                                    <Popconfirm title="确定删除吗？" onConfirm={async () => {
+                                        await deleteProjectApi(project_id)
+                                        messageApi.success("删除成功")
+                                        dispatch(setProject({
+
+                                        }))
+                                        loadProject()
+                                    }}>
+                                        <Button type='text' size="small" color="danger" variant='solid' >删除</Button>
+                                    </Popconfirm>
+
+                                </Flex>
+                            </Tooltip>
+
+                        </>)}
+                </>}
+                onChange={(value: any) => {
+                    console.log("onChange", value)
+
+                    dispatch(setProject({
+                        name: value,
+                        project_id: value,
+                    }))
+                    setProjectObj(projectMap[value])
+                    // loadProject()
+                }}
+                value={project_id}
+                style={{ width: 120 }}
+                placeholder="选择项目"
+                options={projectList}
+            >
+            </Select>
+        ) : <Button size="small" color="cyan" variant='solid' onClick={() => {
+            openModal("project")
+        }}>创建项目</Button>}
+
+
+
+    </>
+}
