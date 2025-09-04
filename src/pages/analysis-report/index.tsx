@@ -39,7 +39,7 @@ const AnalysisReport: FC<any> = () => {
     }, [project])
     return <div style={{ maxWidth: "1500px", margin: "0 auto" }}>
 
-        <div style={{ marginBottom: "1rem" }}></div>
+        {/* <div style={{ marginBottom: "1rem" }}></div> */}
 
         <Row>
             <Col span={4}>
@@ -53,14 +53,16 @@ const AnalysisReport: FC<any> = () => {
 
                         </Flex>
                     }>
+                        {/* {JSON.stringify(analysis)} */}
 
                     {/* <Button onClick={() => { setAnalysis(data[0]) }}></Button> */}
                     <LeftPanel onSelect={(val: any) => {
                         if (val.node?.type == "analysis") {
                             setAnalysis(val.node)
                         }
+
                         // console.log(val)
-                    }} treeData={data}></LeftPanel>
+                    }} defaultSelectKey={analysis?.key} treeData={data}></LeftPanel>
                 </Card>
 
 
@@ -68,7 +70,7 @@ const AnalysisReport: FC<any> = () => {
             <Col span={20} style={{ paddingLeft: "1rem" }}>
 
                 {analysis ? <>
-                    <AnalysisResultViewComp  analysis_id={analysis?.key}></AnalysisResultViewComp>
+                    <AnalysisResultViewComp analysis_id={analysis?.key}></AnalysisResultViewComp>
 
 
 
@@ -87,7 +89,7 @@ const AnalysisReport: FC<any> = () => {
 export default AnalysisReport
 
 
-const LeftPanel: FC<any> = ({ treeData, onSelect: onSelect_ }) => {
+const LeftPanel: FC<any> = ({ treeData, defaultSelectKey, onSelect: onSelect_ }) => {
 
     const treeData2: TreeDataNode[] = [
         {
@@ -132,21 +134,26 @@ const LeftPanel: FC<any> = ({ treeData, onSelect: onSelect_ }) => {
             ],
         },
     ];
-
+    const [selectedKey, setSelectedKey] = useState<any>(defaultSelectKey)
 
     const onSelect: TreeProps['onSelect'] = (selectedKeys, info) => {
         // console.log('selected', selectedKeys, info);
         onSelect_(info)
+        setSelectedKey(selectedKeys[0])
     };
 
     return (
-        <Tree
-            showLine
-            switcherIcon={<DownOutlined />}
-            defaultExpandAll
-            // defaultExpandedKeys={['0-0-0']}
-            onSelect={onSelect}
-            treeData={treeData}
-        />
+        <>
+            {defaultSelectKey}
+            <Tree
+                selectedKeys={[selectedKey]}
+                showLine
+                switcherIcon={<DownOutlined />}
+                defaultExpandAll
+                // defaultExpandedKeys={['0-0-0']}
+                onSelect={onSelect}
+                treeData={treeData}
+            />
+        </>
     );
 }

@@ -3,7 +3,7 @@ import FormJsonComp from "../form-components"
 import axios from "axios"
 import { Button, Flex } from "antd"
 
-const BioDatabaseForm: FC<any> = ({ formJson, operatePipeline }) => {
+const BioDatabaseForm: FC<any> = ({ formJson, openModal }) => {
     if (!formJson) return null
     const [data, setData] = useState<any>([])
 
@@ -35,9 +35,7 @@ const BioDatabaseForm: FC<any> = ({ formJson, operatePipeline }) => {
             <div style={{ flex: 1 }}>
                 <FormJsonComp formJson={formJson} dataMap={data}></FormJsonComp>
             </div>
-            <Button size="small" color="cyan" variant="solid" onClick={() => {
-                operatePipeline.openModal("modalE", formJson)
-            }}>配置数据库</Button>
+            <Button size="small" color="cyan" variant="solid" onClick={openModal}>配置数据库</Button>
             <Button onClick={loadData} size="small" type="primary">刷新</Button>
         </Flex>
 

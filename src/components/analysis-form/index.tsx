@@ -5,6 +5,7 @@ import FormJsonComp from "../form-components";
 import { listAnalysisFiles } from '@/api/analysis-software'
 import { useOutletContext } from "react-router";
 import BioDatabaseForm from "../bio-database-form";
+import { CreateOrUpdateParsms } from "../edit-params";
 
 export const AnalysisForm: FC<any> = ({
     pipeline,
@@ -89,50 +90,7 @@ export const AnalysisForm: FC<any> = ({
     const [dataMap, setDataMap] = useState<any>(dataMap_)
 
 
-    // const runPlot = async ({ moduleName, params }: any) => {
-    //     const values = await form.validateFields()
-    //     console.log(values)
-    //     setPlotLoading(true)
 
-    //     const downstreamInput = {
-    //         inputAnalysisMenthod: inputAnalysisMethod,
-    //         moduleName: moduleName,
-    //         params: params
-    //         // analysisMethod:saveAnalysisMethod
-    //     }
-    //     // console.log(downstreamInput)
-
-    //     try {
-    //         const reqParams = {
-    //             ...params,
-    //             ...values,
-    //             project: project,
-    //             analysis_method: saveAnalysisMethod,
-    //             table_type: tableType,
-    //             imgType: imgType,
-    //             ...downstreamInput,
-    //             software: "python",
-    //             component_id: rest.component_id
-    //         }
-    //         if (rest?.moduleDir) {
-    //             reqParams['module_dir'] = rest.moduleDir
-    //         }
-    //         // console.log(reqParams)
-    //         const resp: any = await axios.post(`/fast-api/file-parse-plot/${moduleName}`, reqParams)
-    //         setFilePlot(resp.data)
-    //         if (plotReloadTable && values.is_save_analysis_result) {
-    //             plotReloadTable()
-    //         }
-    //     } catch (error: any) {
-    //         console.log(error)
-    //         if (error.response?.data) {
-    //             messageApi.error(error.response.data.detail)
-    //         }
-    //     }
-
-    //     setPlotLoading(false)
-    //     // console.log(resp.data);
-    // }
     useEffect(() => {
         if (name) {
             form.setFieldValue("analysis_name", name)
@@ -211,20 +169,25 @@ export const AnalysisForm: FC<any> = ({
 
     }, [JSON.stringify(resultTableList)])
 
+    const requestParsms = {
 
+        ...params,
+        project: project,
+        analysis_method: saveAnalysisMethod,
+        table_type: tableType,
+        imgType: imgType,
+        software: "python",
+        component_id: rest.component_id,
+        data_component_ids: JSON.stringify(dataComponentIds)
+
+    }
 
     const saveUpstreamAnalysis = async (save: any, is_submit: any = false) => {
         const values = await form.validateFields()
         const requestParams = {
-            ...params,
+            ...requestParsms,
             ...values,
-            project: project,
-            analysis_method: saveAnalysisMethod,
-            table_type: tableType,
-            imgType: imgType,
-            software: "python",
-            component_id: rest.component_id,
-            data_component_ids: JSON.stringify(dataComponentIds)
+
         }
         const scriptType = rest.script_type || "script"
         console.log(scriptType)
@@ -259,38 +222,25 @@ export const AnalysisForm: FC<any> = ({
         {/* {JSON.stringify(projectObj)} */}
         {/* {JSON.stringify(rest)} */}
         <Watermark content={formId && `更新分析(${formValues.analysis_name})(${String(formValues.analysis_id).slice(0, 8)})`}>
-            <Form form={form}   >
+            {/* {JSON.stringify(dataMap)} */}
+            <CreateOrUpdateParsms
+                form={form}
+                requestParam={requestParsms}
+                dataMap={dataMap}
+                formJson={formJson}
+                databases={rest.databases}
+                callback={callback} ></CreateOrUpdateParsms>
+
+            {/* <Form form={form}   >
                 <Form.Item name={"analysis_id"} label="分析ID" >
                     <Input disabled></Input>
                 </Form.Item>
-                {/* {sampleSelectComp && resultTableList && analysisMethod.map((it: any, index: any) => (<div key={index}>
-                <Form.Item key={it.name} label={it.label} name={it.name}>
-                    <SelectComp it={it} resultTableList={resultTableList} ></SelectComp>
-                </Form.Item>
-            </div>))} */}
-                {/* 
-            <Form.Item initialValue={false} name={"is_save_analysis_result"} label={"是否保存分析结果"} rules={[{ required: true, message: '该字段不能为空!' }]}>
-                <Select options={[
-                    {
-                        label: "保存",
-                        value: true
-                    }, {
-                        label: "不保存",
-                        value: false
-                    }
-                ]}></Select>
-            </Form.Item> */}
-                {/* {is_save_analysis_result &&
-             } */}
-
-
-                {/* {JSON.stringify(dataMap)} */}
+                
                 {formJson &&
                     <FormJsonComp project={project} formJson={formJson} dataMap={dataMap}></FormJsonComp>
                 }
-                {/* {JSON.stringify(rest.databases)} */}
                 {rest.databases &&
-                    <BioDatabaseForm operatePipeline={operatePipeline} formJson={rest.databases}></BioDatabaseForm>
+                    <BioDatabaseForm openModal={() => operatePipeline.openModal("modalE", rest.databases)} formJson={rest.databases}></BioDatabaseForm>
                 }
 
 
@@ -305,13 +255,9 @@ export const AnalysisForm: FC<any> = ({
                 <Form.Item initialValue={false} label={"是否报告"} name={"is_report"} rules={[{ required: true, message: '该字段不能为空!' }]}>
                     <Switch />
                 </Form.Item>
-                {/* {JSON.stringify(formValues)} */}
 
                 {(formDom || sampleGroup || formJson) && <Flex gap={"small"}>
-                    {/* <Button size="small" type="primary" onClick={() => {
-                    runPlot({ moduleName: rest.moduleName, params: params })
-                }}>{formId ? <>更新</> : is_save_analysis_result ? <>运行并保存</> : <>运行</>}</Button> */}
-
+                 
 
 
                     <Button size="small" color="cyan" variant="solid" onClick={() => {
@@ -321,14 +267,6 @@ export const AnalysisForm: FC<any> = ({
 
                     <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>
                         {formId ? <>更新分析({formValues.analysis_name})({String(formValues.analysis_id).slice(0, 8)})</> : <>保存分析</>}</Button>
-
-
-                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true, true)}>{formId ? <>更新运行</> : <>保存运行</>}</Button> */}
-
-                    {/* <Button type="primary" onClick={() => {
-                                            runPlot({ moduleName: moduleName, params: params })
-                                        }}>执行</Button> */}
-
                     {formId && <Button size="small" color="cyan" onClick={() => form.setFieldValue("analysis_id", undefined)}>取消更新</Button>}
 
                 </Flex>
@@ -349,7 +287,7 @@ export const AnalysisForm: FC<any> = ({
                         </>
                     }
                 ]} />
-            </Form>
+            </Form> */}
         </Watermark>
 
     </>

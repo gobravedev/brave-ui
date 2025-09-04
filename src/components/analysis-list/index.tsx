@@ -12,6 +12,7 @@ import { useSSEContext } from "@/context/sse/useSSEContext"
 import { DownOutlined, LineChartOutlined } from '@ant-design/icons'
 export const readHdfsAPi = (contentPath: any) => axios.get(`/api/read-hdfs?path=${contentPath}`)
 export const readJsonAPi = (contentPath: any) => axios.get(`/fast-api/read-json?path=${contentPath}`)
+import EditParams from '../edit-params'
 
 const ResultList = forwardRef<any, any>(({
     title,
@@ -96,7 +97,7 @@ const ResultList = forwardRef<any, any>(({
 
 
 
-    }, [eventSourceRef.current,project]);
+    }, [eventSourceRef.current, project]);
 
 
 
@@ -183,7 +184,7 @@ const ResultList = forwardRef<any, any>(({
             render: (text: any) => {
                 return <Tag color={text === "success" ? "green" : text === "failed" ? "red" : "blue"}>{text}</Tag>
             }
-        },  {
+        }, {
             title: "组件名称",
             dataIndex: 'component_name',
             key: 'component_name',
@@ -193,18 +194,18 @@ const ResultList = forwardRef<any, any>(({
                     <span style={{ cursor: "pointer" }}>{text}</span>
                 </Tooltip>
             }
-        },{
+        }, {
             title: "分析名称",
             dataIndex: 'analysis_name',
             key: 'analysis_name',
             ellipsis: true,
-        },{
+        }, {
             title: "报告",
             dataIndex: 'is_report',
             key: 'is_report',
             ellipsis: true,
             render: (text: any, record: any) => {
-               return <Tag color={text  ? "green" : "blue"}>{text  ? "报告" : "不报告"}</Tag>
+                return <Tag color={text ? "green" : "blue"}>{text ? "报告" : "不报告"}</Tag>
             }
         },
         {
@@ -238,11 +239,11 @@ const ResultList = forwardRef<any, any>(({
                 return <Tooltip title={<>
                     <ul>
                         <li>{record.container_image}</li>
-                       {record.sub_container_image &&<li>{record.sub_container_image}</li> } 
+                        {record.sub_container_image && <li>{record.sub_container_image}</li>}
                     </ul>
                 </>}>
-                    <Tag style={{ cursor: "pointer" }}>{text}</Tag> 
-                   {record.sub_container_name && <Tag style={{ cursor: "pointer" }}>{record.sub_container_name}</Tag>} 
+                    <Tag style={{ cursor: "pointer" }}>{text}</Tag>
+                    {record.sub_container_name && <Tag style={{ cursor: "pointer" }}>{record.sub_container_name}</Tag>}
                 </Tooltip>
             }
 
@@ -293,8 +294,8 @@ const ResultList = forwardRef<any, any>(({
 
 
 
-                    {editParams && <Button size="small" color="cyan" variant="solid" onClick={() => editParams(record)}>编辑参数</Button>}
-
+                    {/* {editParams && <Button size="small" color="cyan" variant="solid" onClick={() => editParams(record)}>编辑参数</Button>} */}
+                    <Button size="small" color="cyan" variant="solid" onClick={() =>openModal("editParams",record.analysis_id)}>编辑参数</Button>
                     {
                         isSelected(record, "modalA") ?
                             <Button size="small" color={"cyan"} variant="solid" onClick={() => {
@@ -347,10 +348,10 @@ const ResultList = forwardRef<any, any>(({
                                 label: (<>
                                     {
                                         isSelected(record, "modalB") ?
-                                            <a  onClick={() => {
+                                            <a onClick={() => {
                                                 closeModal()
                                             }}>关闭</a> :
-                                            <a  onClick={() => {
+                                            <a onClick={() => {
                                                 openModal("modalB", record)
                                                 // setRecord(record)
                                             }}>详情</a>
@@ -365,7 +366,7 @@ const ResultList = forwardRef<any, any>(({
                                             <Tooltip title={<>
                                                 {record.url}
                                             </>}>
-                                                <a  onClick={() => {
+                                                <a onClick={() => {
                                                     window.open(`${record.url}`, "_blank")
                                                 }}>打开URL</a>
                                             </Tooltip>
@@ -401,13 +402,13 @@ const ResultList = forwardRef<any, any>(({
                                 }}>
                                     <a >删除</a>
                                 </Popconfirm></>)
-                            },{
+                            }, {
                                 key: '5',
-                                label: (<> <Popconfirm title={record.is_report?"是否取消报告":"是否报告"} onConfirm={async () => {
+                                label: (<> <Popconfirm title={record.is_report ? "是否取消报告" : "是否报告"} onConfirm={async () => {
                                     await axios.post(`/analysis/update-report/${record.analysis_id}`)
                                     loadData()
                                 }}>
-                                   {record.is_report?"取消报告":"报告"} 
+                                    {record.is_report ? "取消报告" : "报告"}
                                 </Popconfirm></>)
                             }
                         ]
@@ -424,9 +425,9 @@ const ResultList = forwardRef<any, any>(({
         },
     ]
 
-    useEffect(()=>{
+    useEffect(() => {
         closeModal()
-    },[project])
+    }, [project])
 
     useEffect(() => {
         loadData()
@@ -505,7 +506,12 @@ const ResultList = forwardRef<any, any>(({
             params={modal.params}
             onClose={closeModal}
             callback={loadData}></PipelineInfo>
-
+        <EditParams
+            callback={loadData}
+            visible={modal.key == "editParams" && modal.visible}
+            params={modal.params}
+            onClose={closeModal}
+        ></EditParams>
         {/* <ResultParse
             visible={modal.key == "modalA" && modal.visible}
             onClose={closeModal}

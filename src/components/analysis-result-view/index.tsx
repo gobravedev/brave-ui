@@ -1,4 +1,4 @@
-import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm } from "antd";
+import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { FC, forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import Markdown from '../markdown'
@@ -8,7 +8,14 @@ import { QuestionCircleOutlined } from "@ant-design/icons"
 import { MonacoEditor } from "../react-monaco-editor";
 import { useNavigate, useOutletContext } from "react-router";
 import { useSSEContext } from "@/context/sse/useSSEContext";
-import { runAnalysisApi, stopAnalysisApi } from "@/api/analysis";
+import { findAnalysisById, runAnalysisApi, stopAnalysisApi } from "@/api/analysis";
+import { useModal, useModals } from "@/hooks/useModal";
+import FormJsonComp from "../form-components";
+import ParamsView from "../params-view";
+import Project from "@/pages/project";
+import BioDatabaseForm from "../bio-database-form";
+import BioDatabases from "../bio-databases";
+import EditParams from '../edit-params'
 
 export const TableView: FC<any> = ({ data, url, filename }) => {
     const { Search } = Input;
@@ -247,6 +254,8 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose }) => {
     const analysisIdRef = useRef<any>(null)
     const sseAnalysisIdRef = useRef<any>(null)
     const { messageApi } = useOutletContext<any>()
+    const { modals, openModals, closeModals } = useModals(["editParams"]);
+
 
     const loadData = async (analysis_id: any) => {
         setLoading(true)
@@ -314,6 +323,11 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose }) => {
                 <Flex gap={"small"}>
                     {onClose && <Button size="small" color="cyan" variant="solid" onClick={() => onClose()}>关闭</Button>}
                     {analsyisResult && <>
+                        <Button size="small" color="cyan" variant="solid" onClick={() => {
+                            openModals("editParams", analsyisResult.analysis_id)
+                        }}>
+                            编辑参数
+                        </Button>
                         {analsyisResult?.analysis_status == "running" ?
                             <>
                                 <Popconfirm title={"是否停止!"} onConfirm={async () => {
@@ -342,7 +356,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose }) => {
                     </>}
 
 
-                    <Button size="small" color="cyan" variant="solid" onClick={()=>loadData(analysis_id)}>刷新</Button>
+                    <Button size="small" color="cyan" variant="solid" onClick={() => loadData(analysis_id)}>刷新</Button>
 
                 </Flex>
             }>
@@ -363,13 +377,20 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose }) => {
 
             </>}
 
-
-
+            <EditParams
+                callback={() => loadData(analysis_id)}
+                visible={modals.editParams.visible}
+                params={modals.editParams.params}
+                onClose={()=>closeModals("editParams")}
+            ></EditParams>
+        
         </Card>
 
     </>
 
 }
+
+
 
 const AnalysisResultDisplay: FC<any> = ({ analsyisResult, loading }) => {
     return <Spin spinning={loading}>
