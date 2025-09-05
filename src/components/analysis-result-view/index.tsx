@@ -246,7 +246,7 @@ const AnalysisResultView: FC<any> = forwardRef<any, any>(({ params, visible, onC
     </>
 })
 
-export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose }) => {
+export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose ,cancalReportCallback}) => {
     const [loading, setLoading] = useState<boolean>(false)
     const [analsyisResult, setAnalsyisResult] = useState<any>(null)
     const navigate = useNavigate()
@@ -310,10 +310,9 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose }) => {
                     <Tag>{analsyisResult?.analysis_status}</Tag>
                     {analysisIdRef.current == sseAnalysisIdRef.current?.analysis_id && <Tag> <>{sseAnalysisIdRef.current?.event}</>
                     </Tag>}
-                </> : <>
-                    <Spin spinning>
 
-                    </Spin>
+                </> : <>
+
                 </>}
 
 
@@ -344,6 +343,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose }) => {
                                 <Popconfirm title={"是否运行!"} onConfirm={async () => {
                                     await runAnalysisApi(analsyisResult.analysis_id, "job")
                                     messageApi.success("运行成功")
+                                 
 
                                 }}>
                                     <Button size="small" color="cyan" variant="solid">
@@ -355,7 +355,17 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose }) => {
                         }
                     </>}
 
-
+                    <Popconfirm title={analsyisResult?.is_report ? "是否取消报告" : "是否报告"} onConfirm={async () => {
+                        await axios.post(`/analysis/update-report/${analsyisResult?.analysis_id}`)
+                        messageApi.success("操作成功!")
+                        setAnalsyisResult(null)
+                        if(cancalReportCallback){
+                            cancalReportCallback()
+                        }
+                        // loadData()
+                    }}>
+                        <Button size="small" color={"cyan"} variant="solid">{analsyisResult?.is_report ? "取消报告" : "报告"}</Button>
+                    </Popconfirm>
                     <Button size="small" color="cyan" variant="solid" onClick={() => loadData(analysis_id)}>刷新</Button>
 
                 </Flex>
@@ -381,9 +391,9 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose }) => {
                 callback={() => loadData(analysis_id)}
                 visible={modals.editParams.visible}
                 params={modals.editParams.params}
-                onClose={()=>closeModals("editParams")}
+                onClose={() => closeModals("editParams")}
             ></EditParams>
-        
+
         </Card>
 
     </>

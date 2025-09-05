@@ -42,7 +42,7 @@ const AnalysisReport: FC<any> = () => {
         {/* <div style={{ marginBottom: "1rem" }}></div> */}
 
         <Row>
-            <Col span={4}>
+            <Col lg={6} sm={6} xs={24} >
                 <Card
                     loading={loading}
                     title={projectObj?.project_name}
@@ -67,10 +67,12 @@ const AnalysisReport: FC<any> = () => {
 
 
             </Col>
-            <Col span={20} style={{ paddingLeft: "1rem" }}>
+            <Col lg={18} sm={18} xs={24}  style={{ paddingLeft: "1rem" }}>
 
                 {analysis ? <>
-                    <AnalysisResultViewComp analysis_id={analysis?.key}></AnalysisResultViewComp>
+                    <AnalysisResultViewComp cancalReportCallback={()=>{
+                        loadData()
+                    }} analysis_id={analysis?.key}></AnalysisResultViewComp>
 
 
 
@@ -144,7 +146,7 @@ const LeftPanel: FC<any> = ({ treeData, defaultSelectKey, onSelect: onSelect_ })
 
     return (
         <>
-            {defaultSelectKey}
+            {/* {defaultSelectKey} */}
             <Tree
                 selectedKeys={[selectedKey]}
                 showLine

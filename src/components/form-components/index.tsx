@@ -163,7 +163,7 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap }) => {
     };
 
     return <>
-        {/* {JSON.stringify(formJson)} */}
+        {/* {JSON.stringify(dataMap)} */}
 
         {formJson.map((it: any, index: any) => (
             <ComponentsRender key={index} {...it} dataMap={dataMap} componentMap={componentMap} constDataMap={constDataMap}></ComponentsRender>

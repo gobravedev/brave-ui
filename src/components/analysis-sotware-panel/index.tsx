@@ -403,6 +403,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
         const requestParams = {
             ...values,
             project: project,
+            inputFormJson:inputAnalysisMethod,
             // analysis_pipline: analysisPipline,
             // parse_analysis_module: rest.parse_analysis_module,
             component_id: rest.component_id,
@@ -547,6 +548,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
                                     {/* <pre>
                                 {JSON.stringify(resultTableList,null,2)}
                                 </pre> */}
+                                    {/* {JSON.stringify(inputAnalysisMethod)} */}
                                     {/* {JSON.stringify(inputAnalysisMethod)} */}
                                     <FormJsonComp formJson={inputAnalysisMethod} dataMap={resultTableList}></FormJsonComp>
                                     {/* {JSON.stringify(rest)} */}

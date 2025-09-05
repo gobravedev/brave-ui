@@ -26,28 +26,35 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
 
     const [data, setData] = useState<any>()
     const [resultData, setResultData] = useState<any>()
-
+    const onSubmit = ()=>{
+        onClose()
+        if(callback){
+            callback()
+        }
+    }
     const navigate = useNavigate()
     const [loading, setLoading] = useState<any>()
 
     const [form] = Form.useForm()
     const { messageApi, project } = useOutletContext<any>()
-    const loadAnalysisResult = async (componentIdList: any) => {
-        let resp: any = await axios.post(`/analysis-result/list-analysis-result-grouped`, {
-            project: project,
-            component_ids: componentIdList,
-        })
-        setResultData(resp.data)
-    }
+    // const loadAnalysisResult = async (componentIdList: any) => {
+    //     let resp: any = await axios.post(`/analysis-result/list-analysis-result-grouped`, {
+    //         project: project,
+    //         component_ids: componentIdList,
+    //     })
+    //     setResultData(resp.data)
+    // }
     const loadData = async () => {
         setLoading(true)
         const resp = await axios.get(`/analysis/edit-params/${params}`)
-       
+
         setData(resp.data)
         // await loadAnalysisResult(JSON.parse(resp.data.request_param.data_component_ids))
         setResultData(resp.data.analysis_result)
         form.setFieldsValue(resp.data.request_param)
-
+        // console.log([...resp.data.content?.formJson || [],...resp.data?.inputFormJson || []])
+        // console.log(resp.data.content?.formJson)
+        // console.log(resp.data?.inputFormJson)
         setLoading(false)
 
 
@@ -77,6 +84,7 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
                     <Tag>{data?.component_name}</Tag>
                     <Tag>{data?.analysis_name}</Tag>
                     <Tag>{String(data?.analysis_id).slice(0, 8)}</Tag>
+                
                 </>}
 
             </>
@@ -86,11 +94,13 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
 
                 <CreateOrUpdateParsms
                     form={form}
-                    requestParam={{...data.request_param,analysis_id:data?.analysis_id}}
+                    requestParam={{ ...data.request_param, analysis_id: data?.analysis_id }}
                     dataMap={{ ...resultData, first_data_key: getFirstKey(resultData) }}
-                    formJson={data.content.formJson}
-                    databases={data.content.databases}
-                    callback={callback} ></CreateOrUpdateParsms>
+                    formJson={[...data.content?.formJson || [],...data.content?.upstreamFormJson || [],...data?.inputFormJson || []]}
+                    databases={data.content?.databases}
+                    // inputFormJson={data?.inputFormJson}
+                    upstreamFormJson={data?.upstreamFormJson}
+                    callback={onSubmit} ></CreateOrUpdateParsms>
 
             </>}
         </Drawer>
@@ -109,8 +119,8 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, for
 
     const initForm = () => {
         if (Array.isArray(formJson_)) {
-            const formJson = formJson_.filter((item: any) => !item?.required && !item?.db)
-            const dbFormJson = formJson_.filter((item: any) => item?.required || item?.db )
+            const formJson = formJson_.filter((item: any) => !item?.required && !item?.db && !item.component_id)
+            const dbFormJson = formJson_.filter((item: any) => item?.required || item?.db || item.component_id)
             setDbFormJson(dbFormJson)
             setFormJson(formJson)
         }
@@ -155,15 +165,16 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, for
 
     return <>
         <Form form={form}>
-            {JSON.stringify(requestParam)}
+            {/* {JSON.stringify(formJson_)} */}
             <Tabs
                 // ={true}
                 items={[
                     {
                         key: "1",
                         label: "必填参数",
-                        forceRender:true,
+                        forceRender: true,
                         children: <>
+
                             <FormJsonComp formJson={[{
                                 "name": "group_field",
                                 "label": "分组列",
@@ -182,7 +193,7 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, for
                     }, {
                         key: "2",
                         label: "可选参数",
-                        forceRender:true,
+                        forceRender: true,
                         children: <>
                             {/* {data.request_param.data_component_ids} */}
                             <FormJsonComp formJson={formJson} dataMap={{}} ></FormJsonComp>
