@@ -306,12 +306,12 @@ const App: React.FC = () => {
         if (!selectedKeyMap) {
             const selectedKeyMap = generateSelectedKeyMap(menu0);
             setSelectedKeyMap(selectedKeyMap)
-            const pathname = getSelectedKey(location.pathname,selectedKeyMap)
+            const pathname = getSelectedKey(location.pathname, selectedKeyMap)
             console.log("not exist selectedKeyMap", pathname)
             setCurrent(pathname)
         } else {
             // console.log("exist selectedKeyMap",selectedKeyMap)
-            const pathname = getSelectedKey(location.pathname,selectedKeyMap)
+            const pathname = getSelectedKey(location.pathname, selectedKeyMap)
             setCurrent(pathname)
 
         }
@@ -410,10 +410,17 @@ const App: React.FC = () => {
                     style={{ flex: 1, minWidth: 0 }}
                 />
             </Header> */}
-            <Header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Header style={{
+                position: 'sticky',
+                top: 0,
+                zIndex: 10,
+                width: '100%',
+                
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+            }}>
                 {/* 左侧：LOGO + 菜单 */}
                 <div style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0 }}>
-                    <div style={{ color: "#fff", marginRight: "1rem", whiteSpace: 'nowrap' }} onClick={async ()=>{
+                    <div style={{ color: "#fff", marginRight: "1rem", whiteSpace: 'nowrap' }} onClick={async () => {
                         await axios.get("/send-test")
                     }}>BRAVE</div>
                     <Menu
