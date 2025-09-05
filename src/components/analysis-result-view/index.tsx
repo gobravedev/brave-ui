@@ -1,4 +1,4 @@
-import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form } from "antd";
+import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Alert } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { FC, forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import Markdown from '../markdown'
@@ -108,6 +108,19 @@ const StringView: FC<any> = ({ data }) => {
         {/* <Paragraph style={{ background: "#13c2c2", padding: "1rem", border: "1px solid #1677ff" }}>{data}</Paragraph> */}
     </>
 }
+const InfoView: FC<any> = ({ data }) => {
+
+    return <div style={{padding:"1rem"}}>
+        <Alert closable message={data} type="info" showIcon />
+
+        {/* <Typography>
+            <pre style={{ margin: 0 }}>
+                {data}
+            </pre>
+        </Typography> */}
+
+    </div>
+}
 const TextView: FC<any> = ({ data }) => {
 
     return <>
@@ -141,7 +154,8 @@ const componentMap: any = {
     string: StringView,
     html: HtmlView,
     json: JSONView,
-    text: TextView
+    text: TextView,
+    info:InfoView
 };
 
 export const ComponentsRender = ({ type, ...rest }: any) => {

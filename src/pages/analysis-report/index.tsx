@@ -146,8 +146,11 @@ const LeftPanel: FC<any> = ({ treeData, defaultSelectKey, onSelect: onSelect_ })
 
     const onSelect: TreeProps['onSelect'] = (selectedKeys, info) => {
         // console.log('selected', selectedKeys, info);
-        onSelect_(info)
-        setSelectedKey(selectedKeys[0])
+        if(selectedKeys.length>0){
+            onSelect_(info)
+            setSelectedKey(selectedKeys[0])
+        }
+       
     };
 
     return (

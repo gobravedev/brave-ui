@@ -51,6 +51,7 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
         setData(resp.data)
         // await loadAnalysisResult(JSON.parse(resp.data.request_param.data_component_ids))
         setResultData(resp.data.analysis_result)
+        form.resetFields()
         form.setFieldsValue(resp.data.request_param)
         // console.log([...resp.data.content?.formJson || [],...resp.data?.inputFormJson || []])
         // console.log(resp.data.content?.formJson)
