@@ -11,6 +11,11 @@ const AnalysisReport: FC<any> = () => {
     const [analysis, setAnalysis] = useState<any>()
     const resultRef = useRef<any>(null)
     const navigate = useNavigate()
+    // const [components,setComponents] = useState<any>()
+    // const loadComponents = async (componentId:any) => {
+    //     const resp = await axios.post("/find-pipeline", { component_id: componentId })
+    //     setComponents(resp.data)
+    // }
 
     const loadData = async () => {
         setLoading(true)
@@ -53,35 +58,35 @@ const AnalysisReport: FC<any> = () => {
 
                         </Flex>
                     }>
-                        {/* {JSON.stringify(analysis)} */}
+                    {/* {JSON.stringify(analysis)} */}
 
                     {/* <Button onClick={() => { setAnalysis(data[0]) }}></Button> */}
-                    {Array.isArray(data) && data.length !=0 ?<>
+                    {Array.isArray(data) && data.length != 0 ? <>
                         <LeftPanel onSelect={(val: any) => {
-                        if (val.node?.type == "analysis") {
-                            setAnalysis(val.node)
-                        }
+                            if (val.node?.type == "analysis") {
+                                setAnalysis(val.node)
+                            } else if (val.node?.type == "components") {
+                                console.log(val.node)
+                                // loadComponents(val.node.key)
+                            }
 
-                        // console.log(val)
-                    }} defaultSelectKey={analysis?.key} treeData={data}></LeftPanel>
-                    
-                    </>:<>
-                    <Empty></Empty>
+                            // console.log(val)
+                        }} defaultSelectKey={analysis?.key} treeData={data}></LeftPanel>
+
+                    </> : <>
+                        <Empty></Empty>
                     </>}
-         
+
                 </Card>
 
 
             </Col>
-            <Col lg={18} sm={18} xs={24}  style={{ paddingLeft: "1rem" }}>
+            <Col lg={18} sm={18} xs={24} style={{ paddingLeft: "1rem" }}>
 
                 {analysis ? <>
-                    <AnalysisResultViewComp cancalReportCallback={()=>{
+                    <AnalysisResultViewComp cancalReportCallback={() => {
                         loadData()
                     }} analysis_id={analysis?.key}></AnalysisResultViewComp>
-
-
-
                 </> : <>
                     <Card size="small">
                         <Empty></Empty>
@@ -96,7 +101,11 @@ const AnalysisReport: FC<any> = () => {
 
 export default AnalysisReport
 
-
+// const ComponentsView:FC<any> = ({components})=>{
+//     return <>
+    
+//     </>
+// }
 const LeftPanel: FC<any> = ({ treeData, defaultSelectKey, onSelect: onSelect_ }) => {
 
     const treeData2: TreeDataNode[] = [
@@ -146,11 +155,11 @@ const LeftPanel: FC<any> = ({ treeData, defaultSelectKey, onSelect: onSelect_ })
 
     const onSelect: TreeProps['onSelect'] = (selectedKeys, info) => {
         // console.log('selected', selectedKeys, info);
-        if(selectedKeys.length>0){
+        if (selectedKeys.length > 0) {
             onSelect_(info)
             setSelectedKey(selectedKeys[0])
         }
-       
+
     };
 
     return (
