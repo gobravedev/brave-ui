@@ -413,7 +413,9 @@ const App: React.FC = () => {
             <Header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 {/* 左侧：LOGO + 菜单 */}
                 <div style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0 }}>
-                    <div style={{ color: "#fff", marginRight: "1rem", whiteSpace: 'nowrap' }}>BRAVE</div>
+                    <div style={{ color: "#fff", marginRight: "1rem", whiteSpace: 'nowrap' }} onClick={async ()=>{
+                        await axios.get("/send-test")
+                    }}>BRAVE</div>
                     <Menu
                         theme="dark"
                         mode="horizontal"
@@ -439,11 +441,11 @@ const App: React.FC = () => {
                         onClick={reconnect} >
                         {status === "open" ? "已连接" : status === "connecting" ? "连接中" : "连接失败"}
                     </Button>
-                    <Button size="small" onClick={async () => {
+                    {/* <Button size="small" onClick={async () => {
                         await axios.get("/send-test")
                     }}>
                         sse
-                    </Button>
+                    </Button> */}
                     {checkProject() && <>
                         <ProjectComp project_id={project_id} openModal={openModal} setProjectObj={setProjectObj}></ProjectComp>
 

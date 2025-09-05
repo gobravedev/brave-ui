@@ -56,13 +56,19 @@ const AnalysisReport: FC<any> = () => {
                         {/* {JSON.stringify(analysis)} */}
 
                     {/* <Button onClick={() => { setAnalysis(data[0]) }}></Button> */}
-                    <LeftPanel onSelect={(val: any) => {
+                    {Array.isArray(data) && data.length !=0 ?<>
+                        <LeftPanel onSelect={(val: any) => {
                         if (val.node?.type == "analysis") {
                             setAnalysis(val.node)
                         }
 
                         // console.log(val)
                     }} defaultSelectKey={analysis?.key} treeData={data}></LeftPanel>
+                    
+                    </>:<>
+                    <Empty></Empty>
+                    </>}
+         
                 </Card>
 
 

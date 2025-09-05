@@ -70,7 +70,7 @@ const ComponentsRender = ({ type, dataMap, constDataMap, componentMap, inputAnal
     // }
     // console.log(data) 
     // console.log(dataMap[dataKey])
-    return <Component {...rest} {...crest} data={data} name={name} />;
+    return <Component {...crest}  {...rest} data={data} name={name} />;
 };
 
 const FormJsonComp: FC<any> = memo(({ formJson, dataMap }) => {
@@ -322,8 +322,8 @@ const BaseInputNumber: FC<any> = ({ label, name, data, initialValue, rules, ...r
 }
 export const BaseSelect: FC<any> = ({ label, name, data, initialValue, rules, ...rest }) => {
     return <>
-        {/* {JSON.stringify(data)} */}
-        <Form.Item initialValue={initialValue} label={label} name={name} rules={rules}>
+        {/* {JSON.stringify(initialValue)} */}
+        <Form.Item initialValue={initialValue?initialValue:null} label={label} name={name} rules={rules}>
             <BasicSelect {...rest} options={data}></BasicSelect>
             {/* <Select showSearch filterOption={(input: any, option: any) =>
                 (option?.label ?? '').toLowerCase().includes(input.toLowerCase())} {...rest} options={data}></Select> */}
