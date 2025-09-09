@@ -804,6 +804,7 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, component_id, compon
     // // 保证 groupField 稳定（通常是字符串，如果来源稳定可省略）
     // const stableGroupField = useMemo(() => groupField, groupField);
 
+    // 更新参数表单
     useEffect(() => {
         if (downstreamData && currentAnalysisMethod?.downstreamAnalysis) {
             const findDownstreamData = currentAnalysisMethod?.downstreamAnalysis.find((item: any) => item.component_id == downstreamData.component_id)

@@ -178,7 +178,9 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap }) => {
         // // return prevProps === nextProps; // 自定义比较逻辑
         // console.log(prevProps)
         // console.log(nextProps)
-        console.log(JSON.stringify(prevProps) === JSON.stringify(nextProps))
+        // return false
+        console.log("prevProps==nextProps: ",JSON.stringify(prevProps) === JSON.stringify(nextProps)) //  === JSON.stringify(nextProps)
+        // console.log("nextProps",JSON.stringify(nextProps)) 
         return JSON.stringify(prevProps) === JSON.stringify(nextProps) // JSON.stringify(prevProps.formJson) === JSON.stringify(nextProps.formJson) 
     }
 )
@@ -315,7 +317,7 @@ const BaseSwitch: FC<any> = ({ label, name, data, initialValue, rules, ...rest }
 
 const BaseInputNumber: FC<any> = ({ label, name, data, initialValue, rules, ...rest }) => {
     return <>
-        <Form.Item  initialValue={initialValue} label={label} name={name} rules={rules}>
+        <Form.Item initialValue={initialValue} label={label} name={name} rules={rules}>
             <InputNumber {...rest} />
         </Form.Item>
     </>
@@ -323,7 +325,7 @@ const BaseInputNumber: FC<any> = ({ label, name, data, initialValue, rules, ...r
 export const BaseSelect: FC<any> = ({ label, name, data, initialValue, rules, ...rest }) => {
     return <>
         {/* {JSON.stringify(initialValue)} */}
-        <Form.Item initialValue={initialValue?initialValue:null} label={label} name={name} rules={rules}>
+        <Form.Item initialValue={initialValue ? initialValue : null} label={label} name={name} rules={rules}>
             <BasicSelect {...rest} options={data}></BasicSelect>
             {/* <Select showSearch filterOption={(input: any, option: any) =>
                 (option?.label ?? '').toLowerCase().includes(input.toLowerCase())} {...rest} options={data}></Select> */}
@@ -333,6 +335,8 @@ export const BaseSelect: FC<any> = ({ label, name, data, initialValue, rules, ..
 export const GroupSelectSampleButton: FC<any> = ({ label, name, rules, data, filter, group, groupField: groupField_ }) => {
     const [sampleGrouped, setSampleGrouped] = useState<any>()
     const [options, setOptions] = useState<any>([])
+    // const {  project } = useOutletContext<any>()
+
     // const [sampleGroupedOptions, setSampleGroupedOptions] = useState<any>([])
     const form = Form.useFormInstance();
     let filterName: any = []
@@ -407,6 +411,7 @@ export const GroupSelectSampleButton: FC<any> = ({ label, name, rules, data, fil
         // }
     }, [data, groupField, customFilterValue])
     return <>
+        {/* {JSON.stringify(groupField)} */}
         <Form.Item label={label} name={[name, "sample"]} rules={rules}>
             <GroupSelectSample sampleGrouped={sampleGrouped} sampleGroup={options} watch={[name, "group"]}></GroupSelectSample>
         </Form.Item>

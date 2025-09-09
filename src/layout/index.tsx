@@ -61,6 +61,7 @@ const App: React.FC = () => {
     const [current, setCurrent] = useState('/');
     const [menus, setMenus] = useState<any>([])
     const [selectedKeyMap, setSelectedKeyMap] = useState<any>()
+    const [projectList, setProjectList] = useState<any>()
 
     const openNotification = ({ type, message = "", description = "" }: { type: NotificationType, message: string, description?: string }) => {
         notificationApi[type]({
@@ -454,7 +455,7 @@ const App: React.FC = () => {
                         sse
                     </Button> */}
                     {checkProject() && <>
-                        <ProjectComp project_id={project_id} openModal={openModal} setProjectObj={setProjectObj}></ProjectComp>
+                        <ProjectComp  onProjectLoad={setProjectList} project_id={project_id} openModal={openModal} setProjectObj={setProjectObj}></ProjectComp>
 
                     </>}
                     {/* <Button color="primary"   onClick={() => {
@@ -484,9 +485,9 @@ const App: React.FC = () => {
                 <Content style={{ padding: '0 24px' }}>
                     <Suspense key={location.key} fallback={<Test></Test>}>
                         {checkProject() ? <>
-                            <Outlet context={{ project: project_id, projectObj, messageApi }} />
+                            <Outlet context={{ project: project_id, projectObj,projectList, messageApi }} />
                         </> : <Empty description="请先创建/选择项目" image={Empty.PRESENTED_IMAGE_SIMPLE}>
-                            <ProjectComp project_id={project_id} openModal={openModal} setProjectObj={setProjectObj}></ProjectComp>
+                            <ProjectComp onProjectLoad={setProjectList}  project_id={project_id} openModal={openModal} setProjectObj={setProjectObj}></ProjectComp>
 
                             {/* <Button type='primary' onClick={() => {
                                 openModal("project")
@@ -495,7 +496,7 @@ const App: React.FC = () => {
                     </Suspense>
                 </Content>
             </Layout>
-            <FormProject callback={(project_id: any) => {
+            <FormProject  callback={(project_id: any) => {
                 // loadProject()
                 dispatch(setProject({
                     name: project_id,
@@ -511,7 +512,7 @@ const App: React.FC = () => {
 
 export default App;
 
-const ProjectComp: FC<any> = ({ project_id, openModal, setProjectObj }) => {
+const ProjectComp: FC<any> = ({ project_id, openModal, setProjectObj ,onProjectLoad}) => {
     const [projectMap, setProjectMap] = useState<any>({})
     const [projectList, setProjectList] = useState<any>([])
     const dispatch = useDispatch()
@@ -520,12 +521,16 @@ const ProjectComp: FC<any> = ({ project_id, openModal, setProjectObj }) => {
     const loadProject = async () => {
         const resp: any = await axios.get("/project/list-project")
         // console.log(resp.data)
-        setProjectList(resp.data.map((item: any) => {
+        const projectList = resp.data.map((item: any) => {
             return {
                 label: `${item.project_name}`,
                 value: item.project_id
             }
-        }))
+        })
+        setProjectList(projectList)
+        if (onProjectLoad){
+            onProjectLoad(projectList)
+        }
         const projectMap = resp.data.reduce((acc: any, item: any) => {
             acc[item.project_id] = item
             item.metadata_form = JSON.parse(item.metadata_form)

@@ -18,25 +18,28 @@ import BioDatabases from "../bio-databases";
 
 
 const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
+    const [form] = Form.useForm()
+    const { messageApi, project } = useOutletContext<any>()
+    // const addedProject = Form.useWatch((values: any) => values?.addedProject, form);
+
     useEffect(() => {
         if (visible) {
             loadData()
         }
     }, [params])
-
+    // form.()
     const [data, setData] = useState<any>()
     const [resultData, setResultData] = useState<any>()
-    const onSubmit = ()=>{
+    const onSubmit = () => {
         onClose()
-        if(callback){
+        if (callback) {
             callback()
         }
     }
-    const navigate = useNavigate()
+    // const navigate = useNavigate()
     const [loading, setLoading] = useState<any>()
 
-    const [form] = Form.useForm()
-    const { messageApi, project } = useOutletContext<any>()
+
     // const loadAnalysisResult = async (componentIdList: any) => {
     //     let resp: any = await axios.post(`/analysis-result/list-analysis-result-grouped`, {
     //         project: project,
@@ -46,7 +49,7 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
     // }
     const loadData = async () => {
         setLoading(true)
-        const resp = await axios.get(`/analysis/edit-params/${params}`)
+        const resp = await axios.post(`/analysis/edit-params/${params}`)
 
         setData(resp.data)
         // await loadAnalysisResult(JSON.parse(resp.data.request_param.data_component_ids))
@@ -56,6 +59,7 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
         // console.log([...resp.data.content?.formJson || [],...resp.data?.inputFormJson || []])
         // console.log(resp.data.content?.formJson)
         // console.log(resp.data?.inputFormJson)
+        
         setLoading(false)
 
 
@@ -85,11 +89,12 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
                     <Tag>{data?.component_name}</Tag>
                     <Tag>{data?.analysis_name}</Tag>
                     <Tag>{String(data?.analysis_id).slice(0, 8)}</Tag>
-                
                 </>}
 
             </>
         } width={"50%"} open={visible} onClose={onClose} >
+            {/* {JSON.stringify(addedProject)} */}
+
             {data && <>
 
 
@@ -97,9 +102,14 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
                     form={form}
                     requestParam={{ ...data.request_param, analysis_id: data?.analysis_id }}
                     dataMap={{ ...resultData, first_data_key: getFirstKey(resultData) }}
-                    formJson={[...data.content?.formJson || [],...data.content?.upstreamFormJson || [],...data?.inputFormJson || []]}
+                    formJson={[...data.content?.formJson || [], ...data.content?.upstreamFormJson || [], ...data?.inputFormJson || []]}
                     databases={data.content?.databases}
                     // inputFormJson={data?.inputFormJson}
+                    // onChangeAddProject={(value:any)=>{
+                    //     // loadData(value)
+                    //     // console.log(value)
+
+                    // }}
                     upstreamFormJson={data?.upstreamFormJson}
                     callback={onSubmit} ></CreateOrUpdateParsms>
 
@@ -116,7 +126,13 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, for
     const { modals, openModals, closeModals } = useModals(["paramsView", "bioDatabases"]);
     const [dbFormJson, setDbFormJson] = useState<any>([])
     const [formJson, setFormJson] = useState<any>([])
-    const { messageApi, project } = useOutletContext<any>()
+    const { messageApi, projectList: projectList_, project } = useOutletContext<any>()
+    // useEffect(()=>{
+
+    // },[project])
+    useEffect(() => {
+        initForm()
+    }, [JSON.stringify(formJson_)])
 
     const initForm = () => {
         if (Array.isArray(formJson_)) {
@@ -127,9 +143,7 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, for
         }
     }
 
-    useEffect(() => {
-        initForm()
-    }, [])
+
     const getRequestParams = (values: any) => {
         const requestParams = {
             ...requestParam,
@@ -163,9 +177,18 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, for
         }
 
     }
-
+    
     return <>
-        <Form form={form}>
+        <Form form={form} onValuesChange={(changedValues, allValues) => {
+            // onChange(allFields);
+            // console.log(_)
+            // if(changedValues?.addedProject){
+            //     // console.log(onChangeAddProject)
+
+               
+            // }
+
+        }}>
             {/* {JSON.stringify(formJson_)} */}
             <Tabs
                 // ={true}
@@ -176,17 +199,7 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, for
                         forceRender: true,
                         children: <>
 
-                            <FormJsonComp formJson={[{
-                                "name": "group_field",
-                                "label": "分组列",
-                                "rules": [
-                                    {
-                                        "required": true,
-                                        "message": "该字段不能为空!"
-                                    }
-                                ],
-                                "type": "GroupFieldSelect"
-                            }, ...dbFormJson]} dataMap={dataMap} ></FormJsonComp>
+                            <FormJsonComp formJson={[ ...dbFormJson]} dataMap={dataMap} ></FormJsonComp>
                             {databases && <BioDatabaseForm openModal={() => {
                                 openModals("bioDatabases", databases)
                             }} formJson={databases}></BioDatabaseForm>}
@@ -197,7 +210,17 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, for
                         forceRender: true,
                         children: <>
                             {/* {data.request_param.data_component_ids} */}
-                            <FormJsonComp formJson={formJson} dataMap={{}} ></FormJsonComp>
+                            <FormJsonComp formJson={[
+                                // {
+                                //     "name": "addedProject",
+                                //     "label": "项目",
+                                //     "required": true,
+                                //     "mode": "multiple",
+                                //     "type": "BaseSelect",
+                                //     "data": projectList
+                                // },
+                                ...formJson
+                            ]} dataMap={{}} ></FormJsonComp>
 
                             {/* {JSON.stringify(dbFormJson)} */}
                         </>

@@ -154,7 +154,7 @@ const ResultList = forwardRef<any, any>(({
         reload()
 
         // initData(currentAnalysisMethod)
-    }, [JSON.stringify(params), JSON.stringify(analysisMethod),project])
+    }, [JSON.stringify(params), JSON.stringify(analysisMethod), project])
 
     const onTabChange = (key: any) => {
         setData(groupedData[key])
@@ -329,7 +329,7 @@ const ResultList = forwardRef<any, any>(({
             ellipsis: true,
             render: (text: any, record: any) => {
                 return <Tooltip title={record.analysis_id}>
-                    <span style={{ cursor: "pointer" }} >{text?String(text).slice(0, 8):""}</span>
+                    <span style={{ cursor: "pointer" }} >{text ? String(text).slice(0, 8) : ""}</span>
                 </Tooltip>
             }
 
@@ -472,9 +472,9 @@ const ResultList = forwardRef<any, any>(({
                             if (setRecord) {
                                 setRecord(record)
                             }
-                            if (cleanDom) {
-                                cleanDom(undefined)
-                            }
+                            // if (cleanDom) {
+                            //     cleanDom(undefined)
+                            // }
                             operatePipeline.openModal("openFile", { content: record.content, description: currentAnalysisMethod.description })
 
                             // const param = JSON.parse(record.request_param)

@@ -1,8 +1,8 @@
 import { Venn } from "@ant-design/plots"
-import { Button, Card, Dropdown, Flex, Input, message, Popconfirm, Popover, Space, Table, Tag, Tooltip } from "antd"
+import { Button, Card, Dropdown, Flex, Form, Input, message, Modal, Popconfirm, Popover, Select, Space, Table, Tag, Tooltip } from "antd"
 import axios from "axios"
 import { FC, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
-import { useLocation, useNavigate, useParams } from "react-router"
+import { useLocation, useNavigate, useOutletContext, useParams } from "react-router"
 import ResultParse from "../result-parse"
 import { useModal } from "@/hooks/useModal"
 import PipelineInfo from "../pipeline-monitor"
@@ -295,7 +295,7 @@ const ResultList = forwardRef<any, any>(({
 
 
                     {/* {editParams && <Button size="small" color="cyan" variant="solid" onClick={() => editParams(record)}>编辑参数</Button>} */}
-                    <Button size="small" color="cyan" variant="solid" onClick={() =>openModal("editParams",record.analysis_id)}>编辑参数</Button>
+                    <Button size="small" color="cyan" variant="solid" onClick={() => openModal("editParams", record.analysis_id)}>编辑参数</Button>
                     {
                         isSelected(record, "modalA") ?
                             <Button size="small" color={"cyan"} variant="solid" onClick={() => {
@@ -410,6 +410,14 @@ const ResultList = forwardRef<any, any>(({
                                 }}>
                                     {record.is_report ? "取消报告" : "报告"}
                                 </Popconfirm></>)
+                            },
+                            {
+                                key: '6',
+                                label: (<>
+                                    <a onClick={() => {
+                                        openModal("addProject", record)
+                                    }}>添加项目</a>
+                                </>)
                             }
                         ]
                     }}>
@@ -512,6 +520,12 @@ const ResultList = forwardRef<any, any>(({
             params={modal.params}
             onClose={closeModal}
         ></EditParams>
+        <AddProject
+            callback={loadData}
+            visible={modal.key == "addProject" && modal.visible}
+            params={modal.params}
+            onClose={closeModal}
+        ></AddProject>
         {/* <ResultParse
             visible={modal.key == "modalA" && modal.visible}
             onClose={closeModal}
@@ -523,4 +537,46 @@ const ResultList = forwardRef<any, any>(({
 })
 
 export default ResultList
+
+
+const AddProject: FC<any> = ({ visible, params, onClose, callback }) => {
+    const [projectList, setProjectList] = useState<any>([])
+    const { messageApi, projectList: projectList_, project } = useOutletContext<any>()
+    const [form] = Form.useForm()
+
+    useEffect(() => {
+        if (projectList_) {
+            setProjectList(projectList_.filter((item: any) => item.value != project))
+
+        }
+        form.resetFields()
+        if (params?.extra_project_ids) {
+            form.setFieldValue("project", JSON.parse(params?.extra_project_ids))
+
+        }
+    }, [project])
+    const updateProject = async () => {
+
+        const values = await form.validateFields()
+        await axios.post(`/analysis/update-extra-project/${params?.analysis_id}`, values)
+        messageApi.success("添加成功!")
+        if (callback) {
+            callback()
+        }
+    }
+
+    return <Modal
+        onOk={updateProject}
+        title={`添加项目(${params?.analysis_name})`}
+        open={visible}
+        onCancel={onClose}
+        onClose={onClose} >
+        {/* {JSON.stringify(params)} */}
+        <Form form={form}>
+            <Form.Item name={"project"} label="项目">
+                <Select options={projectList} mode="multiple"></Select>
+            </Form.Item>
+        </Form>
+    </Modal>
+}
 
