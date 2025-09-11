@@ -220,6 +220,14 @@ const App: React.FC = () => {
             key: `/analysis-report`,
             label: "分析报告"
 
+        },{
+            key: `/entity-page`,
+            label: "研究实体"
+
+        },{
+            key: `/entity-relation`,
+            label: "实体关系"
+
         },
         {
             key: `/more`,
@@ -467,7 +475,7 @@ const App: React.FC = () => {
                 </Flex>
             </Header>
             <Layout
-                style={{ padding: '24px 0', background: colorBgContainer, borderRadius: borderRadiusLG }}
+                style={{ padding: '0 0 0  0', background: colorBgContainer, borderRadius: borderRadiusLG }}
             >
                 {/* <Sider style={{ background: colorBgContainer }} width={120}>
                     <Menu
@@ -482,7 +490,7 @@ const App: React.FC = () => {
                 </Sider> */}
                 {/* {JSON.stringify(location)} */}
                 {/* {JSON.stringify(projectObj)} */}
-                <Content style={{ padding: '0 24px' }}>
+                <Content style={{ }}>
                     <Suspense key={location.key} fallback={<Test></Test>}>
                         {checkProject() ? <>
                             <Outlet context={{ project: project_id, projectObj,projectList, messageApi }} />

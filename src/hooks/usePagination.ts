@@ -1,7 +1,8 @@
+import axios from 'axios';
 import React, { useState, useEffect, useRef } from 'react';
 
 // 自定义 hook：分页逻辑
-export const usePagination = ({ pageApi,params,map, initialPageSize = 12 }: any) => {
+export const usePagination = ({ url, pageApi, params, map, initialPageSize = 12 }: any) => {
     const [data, setData] = useState<any[]>([]);  // 存储数据
     const [pageNumber, setPageNumber] = useState(1); // 当前页码
     const [totalPage, setTotalPage] = useState(0); // 总页数
@@ -30,27 +31,43 @@ export const usePagination = ({ pageApi,params,map, initialPageSize = 12 }: any)
             //       resolve({ data: newData, total: totalItems });
             //     }, 1000);
             //   });
-            const response = await pageApi({
-                ...params,
-                page_number: page,
-                page_size: pageSize,
-                keywords: keywords || undefined, // 如果 keywords 有值才传
-            })
+            let response;
+            if (url) {
+                // const pageContainerApi = async (params: any) => {
+                //     const resp: any = await axios.post(`/entity/page/${entityType}`, params)
+                //     return resp
+                // }
+                response = await axios.post(url,
+                    {
+                        ...params,
+                        page_number: page,
+                        page_size: pageSize,
+                        keywords: keywords || undefined, // 如果 keywords 有值才传
+                    })
+            } else {
+                response = await pageApi({
+                    ...params,
+                    page_number: page,
+                    page_size: pageSize,
+                    keywords: keywords || undefined, // 如果 keywords 有值才传
+                })
+            }
+
 
             // "items": find_pipeline,
             // "total":total,
             // "page_number":query.page_number,
             // "page_size":query.page_size
-            const {items,total,...rest} = response.data
+            const { items, total, ...rest } = response.data
 
-            if(map){
+            if (map) {
                 response.data = items.map(map)
                 setData(response.data);
-            }else{
+            } else {
                 setData(response.data.items);
             }
 
- // 设置数据
+            // 设置数据
             // setTotalPage(Math.ceil(response.total / pageSize)); // 计算总页数\
             setTotalPage(total)
         } catch (error) {
@@ -59,14 +76,17 @@ export const usePagination = ({ pageApi,params,map, initialPageSize = 12 }: any)
             setLoading(false);
         }
     };
-    const reload= ()=>{
+    const reload = () => {
         fetchData(pageNumber)
     }
-
+    useEffect(()=>{
+        fetchData(1); 
+        setPageNumber(1)
+    },[url])
 
     useEffect(() => {
         fetchData(pageNumber); // 获取数据
-    }, [pageNumber,keywords]);
+    }, [pageNumber, keywords]);
 
     return {
         data,

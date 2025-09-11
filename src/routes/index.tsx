@@ -56,6 +56,9 @@ const Pipeline = lazy(() => import('@/pages/pipeline-components/pipeline'));
 const PipelineComponentsCard = lazy(() => import('@/components/pipeline-components-card'));
 const SoftwareAnalysisEditor = lazy(() => import('@/pages/software-analysis-editor'));
 const AnalysisReport = lazy(() => import('@/pages/analysis-report'));
+const EntityPage = lazy(() => import('@/pages/entity'));
+const EntityRelation = lazy(() => import('@/pages/entity-relation'));
+
 
 const ContainerPage  = lazy(() => import('@/pages/container'));
 import axios from "axios";
@@ -93,7 +96,8 @@ const childern = [
     {
         path: "/pipeline-card",
         element: <PipelineComponentsCard  params={{component_type:"pipeline"}}/>
-    }, 
+    },
+    
     {
         path: "/software-card",
         element: <PipelineComponentsCard  
@@ -165,8 +169,14 @@ const childern = [
     {
         path: "/script/:scriptId",
         element: <Script />
-    },
-
+    }, {
+        path: "/entity-page",
+        element: <EntityPage />
+    }, {
+        path: "/entity-relation",
+        element: <EntityRelation />
+    }, 
+    
 
 
     {
