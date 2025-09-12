@@ -15,7 +15,7 @@ interface LineageInlineProps {
 const LineageInline: React.FC<LineageInlineProps> = ({ data }) => {
   return (
     <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 4 }}>
-      {data.map((item, index) => (
+      {Array.isArray(data) &&  data.map((item, index) => (
         <React.Fragment key={item.tax_id}>
           <Tooltip title={`${item.rank} (tax_id: ${item.tax_id})`}>
             <span

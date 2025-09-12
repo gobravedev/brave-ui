@@ -8,6 +8,20 @@ export const getColumns = (entityType: any) => {
             title: "entity_name",
             dataIndex: "entity_name",
             key: "entity_name"
+        },{
+            title: "has_children",
+            dataIndex: "has_children",
+            key: "has_children",
+            render: (text: any, record: any) => {
+                return text?"存在":"不存在"
+            }
+        },{
+            title: "is_exist_graph",
+            dataIndex: "is_exist_graph",
+            key: "is_exist_graph",
+            render: (text: any, record: any) => {
+                return text?"存在":"不存在"
+            }
         }
     ]
     switch (entityType) {
