@@ -1,6 +1,6 @@
 
-import React, { FC, forwardRef, lazy, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
-import { Form, Select, Button, Card, Input, message, Collapse, Typography, Flex, Modal, Splitter, ConfigProvider, Drawer } from "antd";
+import React, { FC, forwardRef, lazy, memo, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { Form, Select, Button, Card, Input, message, Collapse, Typography, Flex, Modal, Splitter, ConfigProvider, Drawer, Popover, Skeleton, Spin, Dropdown, Space, Checkbox } from "antd";
 import axios from "axios";
 import ForceGraph2D, { ForceGraphMethods } from "react-force-graph-2d";
 const { Option } = Select;
@@ -10,33 +10,75 @@ import { useModal } from "@/hooks/useModal";
 import { useOutletContext } from "react-router";
 import ForceGraph3D from "react-force-graph-3d";
 import { useResizeDetector } from 'react-resize-detector';
-
+import { DownOutlined, InfoCircleOutlined } from "@ant-design/icons"
 // import * as THREE from "three";
 import SpriteText from "three-spritetext";
+import { tr } from "@faker-js/faker";
+import { useDispatch, useSelector } from "react-redux";
+import { setDisplayNode } from '@/store/graphSlice'
+
+const nodeLabelOptions = [
+    { label: "Disease", value: "disease" },
+    { label: "Taxonomy", value: "taxonomy" },
+    { label: "Diet_and_food", value: "diet_and_food" },
+    { label: "Study", value: "study" },
+];
+
 
 const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) => {
     const [graphData, setGraphData] = useState({ nodes: [], links: [] });
     const [selectedLink, setSelectedLink] = useState<any>();
-
-    const [searchText, setSearchText] = useState("");
+    // const spriteCache = new Map<string, any>();
+    const spriteCacheRef = useRef<Map<string, any>>(new Map());
+    console.log('GraphView mounted')
+    const [searchText, setSearchText] = useState<any>();
     const fgRef = useRef<any>(null);
     const [labelFilter, setLabelFilter] = useState("");
     const { modal, openModal, closeModal } = useModal();
     const { width, ref: divRef } = useResizeDetector<HTMLDivElement>();
-    const [is3D, setIs3D] = useState(true); // 2D/3D 切换
+    const [is3D, setIs3D] = useState<any>(null); // 2D/3D 切换
     const [hoverNode, setHoverNode] = useState(null);
+    const [loading, setLoading] = useState<any>(false)
     // const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
     const [contextNode, setContextNode] = useState<any>(null);
     const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
     const [openRightMenu, setOpenRightMenu] = useState(false);
     const { messageApi } = useOutletContext<any>()
+    const [webglInfo, setWebglInfo] = useState<any>(null);
+    const [modalApi, contextHolder] = Modal.useModal();
+    const dispatch = useDispatch()
 
+    const { displayNode } = useSelector((state: any) => state.graph)
+
+
+    const [selectedLabels, setSelectedLabels] = useState<string[]>(displayNode);
+
+
+    const updateWebglInfo = () => {
+        if (fgRef.current?.renderer) {
+            const renderer = fgRef.current.renderer();
+            console.log(renderer.info)
+            setWebglInfo({
+                geometries: renderer.info.memory.geometries,
+                textures: renderer.info.memory.textures,
+                programs: renderer.info.programs?.length || 0,
+                renderCalls: renderer.info.render.calls,
+            });
+        }
+    };
+    // useEffect(() => {
+    //     const interval = setInterval(() => {
+    //         updateWebglInfo();
+    //     }, 1000); // 每秒更新一次
+
+    //     return () => clearInterval(interval);
+    // }, []);
     // const [selectedNode, setSelectedNode] = useState<null>(null);
 
     useImperativeHandle(ref, () => ({
         reload: fetchGraph,
-        cancelSelectLink:()=>setSelectedLink(null),
-        cancelSelectNode:()=>setContextNode(null)
+        cancelSelectLink: () => setSelectedLink(null),
+        cancelSelectNode: () => setContextNode(null)
     }))
 
     const menuItems = [{
@@ -73,17 +115,12 @@ const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) =
             window.removeEventListener('click', handleClickOutside);
         };
     }, [contextNode]);
-    function isWebGLAvailable() {
+    const isWebGLAvailable = () => {
+        console.log("isWebGLAvailable")
         try {
             const canvas = document.createElement("canvas");
-            const isAvailable = !!(
-                window.WebGLRenderingContext
-            );
-            if (!isAvailable) {
-                setIs3D(false)
-            }
-            return isAvailable
-        } catch (e) {
+            return !!window.WebGLRenderingContext && !!canvas.getContext("webgl");
+        } catch {
             return false;
         }
     }
@@ -104,25 +141,185 @@ const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) =
     //     return () => window.removeEventListener("resize", handleResize);
     // }, []);
     // 获取图数据
-    const fetchGraph = async (keyword?: string) => {
+    const fetchGraph = async () => {
+        setLoading(true)
+        // disposeGraph3D(); 
+        console.log(selectedLabels)
         const res = await axios.post("/entity-relation/graph", {
             label: labelFilter || undefined,
-            keyword: keyword || undefined,
-            entity_id: entity_id || undefined
+            keyword: searchText || undefined,
+            entity_id: entity_id || undefined,
+            nodes: selectedLabels
         });
         setGraphData(res.data);
+        setLoading(false)
+        // fgRef.current.refresh()
+
     };
-    useEffect(() => {
-        return () => {
-            if (fgRef.current?.renderer) {
-                fgRef.current.renderer().dispose();
-                fgRef.current = null;
-            }
+
+    const nodeTreeObject = useCallback((node: any) => {
+        const key = String(node.id ?? node.node_id ?? node.entity_id ?? node.entity_name);
+        const cache = spriteCacheRef.current;
+        // console.log(cache.has(key))
+        if (!cache.has(key)) {
+            const color = labelColorMap[node.label] || "#888888";
+            const sprite: any = new SpriteText(node.entity_name ?? node.id ?? key);
+            sprite.color = color;
+            sprite.textHeight = 8;
+            if (sprite.center) sprite.center.y = -0.6;
+            cache.set(key, sprite);
         }
+        return cache.get(key);
+    }, [])
+    // const disposeGraph3D = () => {
+    //     if (!fgRef.current) return;
+    //     // 释放 renderer
+    //     const renderer = fgRef.current.renderer?.();
+    //     if (renderer) renderer.dispose();
+
+    //     // 释放 scene 中的 geometry / material / spriteText
+    //     const scene = fgRef.current.scene?.();
+    //     if (scene) {
+    //         scene.traverse((obj: any) => {
+    //             if (obj.geometry) obj.geometry.dispose();
+    //             if (obj.material) {
+    //                 if (Array.isArray(obj.material)) obj.material.forEach((m: any) => m.dispose());
+    //                 else obj.material.dispose();
+    //             }
+    //             // SpriteText 会生成 THREE 对象
+    //             if (obj.text) obj.text = null;
+    //         });
+    //     }
+
+    //     fgRef.current = null;
+    // };
+    // const getWebGLInfo = () => {
+    //     // console.log(fgRef.current)
+    //     if (fgRef.current?.renderer) {
+    //         const renderer = fgRef.current.renderer();
+    //         console.log('Info:', renderer.info);
+    //         return renderer.info
+    //         // renderer.info.memory.geometries, .textures, .programs
+    //     }
+    //     return null
+    // }
+    // const disposeGraph3D = () => {
+    //     if (!fgRef.current) return;
+    //     // if (fgRef.current?.renderer) {
+    //     //     const renderer = fgRef.current.renderer();
+    //     //     console.log('Info:', renderer.info);
+    //     //     // renderer.info.memory.geometries, .textures, .programs
+    //     // }
+    //     // 释放 renderer
+    //     const renderer = fgRef.current.renderer?.();
+    //     if (renderer) renderer.dispose();
+
+    //     // 遍历场景释放几何体和材质
+    //     const scene = fgRef.current.scene?.();
+    //     if (scene) {
+    //         scene.traverse((obj: any) => {
+    //             if (obj.geometry) obj.geometry.dispose();
+    //             if (obj.material) {
+    //                 if (Array.isArray(obj.material)) obj.material.forEach((m: any) => m.dispose());
+    //                 else obj.material.dispose();
+    //             }
+    //         });
+    //     }
+
+    //     // fgRef.current = null;
+    // };
+    const disposeGraph3D = () => {
+        const fg = fgRef.current;
+        if (!fg) return;
+
+        // 清理 SpriteText 缓存
+        spriteCacheRef.current.forEach(sprite => {
+            if (sprite && sprite.dispose) sprite.dispose();
+        });
+        spriteCacheRef.current.clear();
+
+        // 遍历场景释放几何体和材质
+        const scene = fg.scene?.();
+        if (scene) {
+            scene.traverse((obj: any) => {
+                if (obj.geometry) obj.geometry.dispose();
+                if (obj.material) {
+                    if (Array.isArray(obj.material)) obj.material.forEach((m: any) => m.dispose());
+                    else obj.material.dispose();
+                }
+                // if (obj.text) obj.text = null; // SpriteText
+            });
+        }
+
+        // 清理渲染器内存（不 dispose 渲染器）
+        const renderer = fg.renderer?.();
+        if (renderer) {
+            renderer.renderLists?.dispose();
+        }
+    };
+    // const disposeGraph3D = () => {
+    //     if (!fgRef.current) return;
+
+    //     const fg = fgRef.current;
+
+    //     // 停止动画循环
+    //     if (fg.pauseAnimation) fg.pauseAnimation();
+
+    //     // 释放 renderer
+    //     const renderer = fg.renderer?.();
+    //     if (renderer) renderer.dispose();
+
+    //     // 释放场景中的几何体和材质
+    //     const scene = fg.scene?.();
+    //     if (scene) {
+    //         scene.traverse((obj: any) => {
+    //             if (obj.geometry) obj.geometry.dispose();
+    //             if (obj.material) {
+    //                 if (Array.isArray(obj.material)) obj.material.forEach((m: any) => m.dispose());
+    //                 else obj.material.dispose();
+    //             }
+    //             // if (obj.text) obj.text = null; // SpriteText
+    //         });
+    //     }
+
+    //     // 清空缓存
+    //     spriteCacheRef.current.clear();
+
+    //     // fgRef.current = null; // 一定要清掉
+    // };
+
+    useEffect(() => {
+        if (!isWebGLAvailable()) {
+            setIs3D(false)
+        } else {
+            setIs3D(true)
+        }
+        return () => {
+            disposeGraph3D();
+        };
     }, []);
+    // useEffect(() => {
+    //     getWebGLInfo()
+    //     if (fgRef.current) {
+
+    //         // 清理旧资源
+    //         disposeGraph3D();
+    //     }
+    // }, [width, height]); // 每次 resize 前清理
+
+    const toggle3D = () => {
+        if (is3D) disposeGraph3D(); // 释放旧 3D 资源
+        // console.log(is3D)
+        if (isWebGLAvailable()) setIs3D(!is3D);
+        else {
+            setIs3D(false);
+            messageApi.error("WebGL not available!");
+        }
+    };
+
     useEffect(() => {
         fetchGraph();
-    }, [labelFilter,entity_id]); // labelFilter 改变时刷新数据
+    }, [labelFilter, entity_id, selectedLabels,searchText]); // labelFilter 改变时刷新数据
 
     // 搜索节点，高亮 & 缩放
     const handleSearchNode = (keyword: string) => {
@@ -142,21 +339,29 @@ const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) =
     };
 
     // 防抖搜索
-    const debouncedSearch = useMemo(() => {
-        return debounce((value: string) => {
-            fetchGraph(value);         // 拉取后端数据
-            handleSearchNode(value);   // 高亮节点
-        }, 500); // 500ms 防抖
-    }, [graphData, labelFilter]);
+    // const debouncedSearch = useMemo(() => {
+    //     return debounce((value: string) => {
+    //         fetchGraph();         // 拉取后端数据
+    //         handleSearchNode(value);   // 高亮节点
+    //     }, 500); // 500ms 防抖
+    // }, [graphData, labelFilter,searchText]);
+    // const labelColorMap: Record<string, string> = {
+    //     "study": "#1f77b4",
+    //     "disease": "#ff7f0e",
+    //     "taxonomy": "#2ca02c",
+    //     "association": "blue"
+    // };
     const labelColorMap: Record<string, string> = {
-        "study": "#1f77b4",
-        "disease": "#ff7f0e",
-        "taxonomy": "#2ca02c",
+        study: "#6a5acd",        // SlateBlue，文献
+        disease: "#ff6347",      // Tomato，疾病
+        taxonomy: "#3cb371",     // MediumSeaGreen，菌
+        association: "#ffa500"   // Orange，Association 证据
     };
     const nodeOperation = {
         onNodeClick: (node: any) => {
             openView("details", { id: node.id, label: node.label, entity_name: node.entity_name, node_id: node.node_id })
             setContextNode(node)
+            setSelectedLink(null)
             // openModal("nodeView", { id: node.id, label: node.label, entity_name: node.entity_name })
         },
         // onNodeHover={(node) => setHoverNode(node)}
@@ -167,23 +372,37 @@ const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) =
             openView("relation", link)
             setSelectedLink(link); //
         },
-        linkColor:(link: any) =>{
+        linkColor: (link: any) => {
             // console.log(link)
-            if(selectedLink){
+            if (selectedLink) {
                 return link.relation_id === selectedLink.relation_id ? "red" : "rgba(200,200,200,0.5)"
             }
-            return  "rgba(200,200,200,0.5)"
+            return "rgba(200,200,200,0.5)"
+        },
+        onNodeDragEnd: (node: any) => {
+            node.fx = node.x;
+            node.fy = node.y;
+            node.fz = node.z;
         }
         // (link: any) =>{
         //     selectedLink && link.relation_id === selectedLink.relation_id ? "red" : "rgba(200,200,200,0.5)"
         // }
-            
-        
+
+
     }
 
+    useEffect(() => {
+        if (!fgRef.current) return;
+      
+        const fg = fgRef.current;
+      
+        // 设置节点之间距离
+        fg.d3Force("link")!.distance(50);   // 连接线长度
+        fg.d3Force("charge")!.strength(-50); // 节点斥力，越负节点越远
+      }, [graphData]);
     return (
         <>
-
+            {contextHolder}
             <div
                 style={{
                     width: "100%",
@@ -193,40 +412,46 @@ const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) =
 
                 }}
             >
+                {/* {JSON.stringify(displayNode)} */}
 
                 {/* <div style={{ marginBottom: "1rem" }}> </div> */}
-
                 <Card
                     styles={{ body: { padding: 0 } }}
                     size="small"
                     extra={<>
                         <Flex justify="flex-end" gap="small">
+
+                            <NodeFilterDropdown
+                                loading={loading}
+                                selectedLabels={selectedLabels}
+                                setSelectedLabels={setSelectedLabels}
+                                onChange={(labels: any) => {
+                                    setSelectedLabels(labels);
+                                    dispatch(setDisplayNode(labels))
+
+                                }}
+                            />
                             <Button
                                 size="small"
                                 color="blue"
                                 variant="solid"
-                                onClick={() => {
-
-                                    const isAvailable = isWebGLAvailable()
-                                    if (isAvailable) {
-                                        setIs3D(!is3D)
-                                    } else {
-                                        setIs3D(false)
-                                        messageApi.error("WebGL not available!")
-                                    }
-
-                                }}
+                                onClick={toggle3D}
                             >
                                 切换到 {is3D ? "2D" : "3D"}
                             </Button>
+                            {/* <Button onClick={() => { getWebGLInfo() }}>aa</Button> */}
                             <Button size="small" color="cyan" variant="solid" onClick={() => {
                                 openView("chat")
-                            }}>打开对话框</Button>
+                            }}>AI</Button>
 
                             <Button size="small" color="cyan" variant="solid" onClick={() => {
                                 openModal("entityRelationForm")
                             }}>新增</Button>
                             <Button size="small" color="cyan" variant="solid" onClick={() => fetchGraph()}>刷新</Button>
+                            <InfoCircleOutlined onClick={() => {
+                                updateWebglInfo()
+                                openModal("webGLInfo")
+                            }} />
                         </Flex>
                     </>}
                     style={{
@@ -254,112 +479,131 @@ const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) =
 
                         <Search
                             placeholder="搜索..."
-                            value={searchText}
-                            onChange={(e) => {
-                                const val = e.target.value;
-                                setSearchText(val);
-                                debouncedSearch(val); // 输入即触发防抖搜索
-                            }}
+                            allowClear
+                            // value={searchText}
+                            // onChange={(e) => {
+                            //     const val = e.target.value;
+                            //     setSearchText(val);
+                            //     // debouncedSearch(val); // 输入即触发防抖搜索
+                            // }}
                             onSearch={(val) => {
                                 setSearchText(val);
-                                debouncedSearch(val); // 输入即触发防抖搜索
+                                // debouncedSearch(val); // 输入即触发防抖搜索
                             }}
                             style={{ flex: 1 }}
                         />
                     </div>
                     {/* 关系图 */}
-                    <div ref={divRef} style={{}}
+                    <div ref={divRef} style={{ height: `${height}px`, background: "#111111" }}
                     // onMouseMove={(e) => setMousePos({ x: e.clientX, y: e.clientY })}
                     >
+                        <Spin spinning={loading && is3D == null}>
+
+                            {(!loading && is3D != null) &&
+                                <>
+                                    {(is3D) ? (
+                                        <ForceGraph3D
+
+                                            ref={fgRef}
+                                            graphData={graphData}
+                                            nodeAutoColorBy="label"
+                                            nodeLabel={(node: any) => `${node.label}: ${node.entity_name || node.id}`}
+                                            linkLabel={(link: any) => link.type}
+                                            width={width}
+                                            height={height}
+                                            backgroundColor="#111111" // 黑色背景
+                                            // linkColor={() => "rgba(200,200,200,0.5)"} // 浅灰色连线
+                                            linkWidth={2}
+                                            nodeThreeObjectExtend={true}
+                                            linkAutoColorBy={"type"}
+                                            nodeColor={(node: any) => {
+                                                if (searchText && (node.entity_name?.includes(searchText) || node.id.includes(searchText))) {
+                                                    return "red";
+                                                }
+                                                if (node.id.includes(contextNode?.id)) {
+                                                    return "red";
+                                                }
+
+                                                return node.label && labelColorMap[node.label] ? labelColorMap[node.label] : "#888888";
+                                            }
+                                            }
+                                            nodeVal={(node: any) => {
+                                                // debugger
+                                                if(node.label =="association"){
+                                                    return 1
+                                                }
+                                                if (searchText && (node.entity_name?.includes(searchText) || node.id.includes(searchText))) {
+                                                    return 10; // 放大球体半径
+                                                }
+                                                return 4; // 普通大小
+                                            }}
+
+                           
+                                            nodeThreeObject={nodeTreeObject}
+                                            // nodeThreeObject={(node: any) => {
+                                            //     const color = node.label && labelColorMap[node.label] ? labelColorMap[node.label] : "#888888"; // 获取节点颜色
+                                            //     const sprite: any = new SpriteText(node.entity_name || node.id);
+                                            //     sprite.color = color; // 白色文字
+                                            //     sprite.textHeight = 8;
+                                            //     sprite.center.y = -0.6; // 放在球体上方
+                                            //     return sprite;
+                                            // }}
+                                            {...nodeOperation}
+
+                                        />
+                                    ) : (
+                                        <ForceGraph2D
+                                            ref={fgRef}
+                                            graphData={graphData}
+                                            nodeAutoColorBy="label"
+                                            nodeLabel={(node: any) => `${node.label}: ${node.entity_name || node.id}`}
+                                            linkLabel={(link: any) => link.type}
+                                            width={width}
+                                            // nodeObjectExtend={true}
+                                            height={height}
+                                            backgroundColor="#111111" // 黑色背景
+                                            // linkColor={() => "rgba(200,200,200,0.5)"} // 浅灰色连线
+                                            linkWidth={2}
+                                            nodeRelSize={8}
+
+
+                                            nodeCanvasObject={(node, ctx, globalScale) => {
+                                                const label = node.entity_name || node.id;
+                                                const color = node.label && labelColorMap[node.label] ? labelColorMap[node.label] : "#888888" // 节点和文字同色
+                                                const fontSize = 12 / globalScale;
+
+                                                ctx.fillStyle = color;
+                                                ctx.beginPath();
+                                                ctx.arc(node.x!, node.y!, 6, 0, 2 * Math.PI);
+                                                ctx.fill();
+
+                                                // 搜索高亮描边
+                                                if (searchText && label.includes(searchText)) {
+                                                    ctx.strokeStyle = "#ff0000";
+                                                    ctx.lineWidth = 2;
+                                                    ctx.beginPath();
+                                                    ctx.arc(node.x!, node.y!, 8, 0, 2 * Math.PI);
+                                                    ctx.stroke();
+                                                }
+
+                                                ctx.fillStyle = color; // 文字同节点颜色
+                                                ctx.font = `${fontSize}px Sans-Serif`;
+                                                ctx.fillText(label, node.x! + 8, node.y! + 4);
+                                            }}
+                                            {...nodeOperation}
+                                        // onNodeHover={(node) => setHoverNode(node)}
+                                        // onNodeRightClick={handleRightClick}
+                                        />
+                                    )}
+                                </>
+
+
+                            }
+
+                        </Spin>
                         {/* {width}-{height} */}
                         {/* {JSON.stringify(contextNode)} */}
-                        {(is3D && isWebGLAvailable()) ? (
-                            <ForceGraph3D
-                                ref={fgRef}
-                                graphData={graphData}
-                                nodeAutoColorBy="label"
-                                nodeLabel={(node: any) => `${node.label}: ${node.entity_name || node.id}`}
-                                linkLabel={(link: any) => link.type}
-                                width={width}
-                                height={height}
-                                backgroundColor="#111111" // 黑色背景
-                                // linkColor={() => "rgba(200,200,200,0.5)"} // 浅灰色连线
-                                linkWidth={2}
-                                nodeThreeObjectExtend={true}
-                                linkAutoColorBy={"type"}
-                                nodeColor={(node: any) => {
-                                    if (searchText && (node.entity_name?.includes(searchText) || node.id.includes(searchText))) {
-                                        return "red";
-                                    }
-                                    if (node.id.includes(contextNode?.id)) {
-                                        return "red";
-                                    }
 
-                                    return node.label && labelColorMap[node.label] ? labelColorMap[node.label] : "#888888";
-                                }
-                                }
-                                nodeVal={(node: any) => {
-                                    if (searchText && (node.entity_name?.includes(searchText) || node.id.includes(searchText))) {
-                                        return 10; // 放大球体半径
-                                    }
-                                    return 4; // 普通大小
-                                }}
-                               
-                                nodeThreeObject={(node: any) => {
-                                    const color = node.label && labelColorMap[node.label] ? labelColorMap[node.label] : "#888888"; // 获取节点颜色
-                                    const sprite: any = new SpriteText(node.entity_name || node.id);
-                                    sprite.color = color; // 白色文字
-                                    sprite.textHeight = 8;
-                                    sprite.center.y = -0.6; // 放在球体上方
-                                    return sprite;
-                                }}
-                                {...nodeOperation}
-
-                            />
-                        ) : (
-                            <ForceGraph2D
-                                ref={fgRef}
-                                graphData={graphData}
-                                nodeAutoColorBy="label"
-                                nodeLabel={(node: any) => `${node.label}: ${node.entity_name || node.id}`}
-                                linkLabel={(link: any) => link.type}
-                                width={width}
-                                // nodeObjectExtend={true}
-                                height={height}
-                                backgroundColor="#111111" // 黑色背景
-                                // linkColor={() => "rgba(200,200,200,0.5)"} // 浅灰色连线
-                                linkWidth={2}
-                                nodeRelSize={8}
-
-
-                                nodeCanvasObject={(node, ctx, globalScale) => {
-                                    const label = node.entity_name || node.id;
-                                    const color = node.label && labelColorMap[node.label] ? labelColorMap[node.label] : "#888888" // 节点和文字同色
-                                    const fontSize = 12 / globalScale;
-
-                                    ctx.fillStyle = color;
-                                    ctx.beginPath();
-                                    ctx.arc(node.x!, node.y!, 6, 0, 2 * Math.PI);
-                                    ctx.fill();
-
-                                    // 搜索高亮描边
-                                    if (searchText && label.includes(searchText)) {
-                                        ctx.strokeStyle = "#ff0000";
-                                        ctx.lineWidth = 2;
-                                        ctx.beginPath();
-                                        ctx.arc(node.x!, node.y!, 8, 0, 2 * Math.PI);
-                                        ctx.stroke();
-                                    }
-
-                                    ctx.fillStyle = color; // 文字同节点颜色
-                                    ctx.font = `${fontSize}px Sans-Serif`;
-                                    ctx.fillText(label, node.x! + 8, node.y! + 4);
-                                }}
-                                {...nodeOperation}
-                            // onNodeHover={(node) => setHoverNode(node)}
-                            // onNodeRightClick={handleRightClick}
-                            />
-                        )}
                         {(openRightMenu && contextNode) && (
                             <div
                                 style={{
@@ -437,6 +681,11 @@ const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) =
                     closeModal()
                 }}
             ></NodeView>
+            <WebGLInfo
+                webglInfo={webglInfo}
+                visible={modal.key == "webGLInfo" && modal.visible}
+                onClose={closeModal}
+            ></WebGLInfo>
         </>
     );
 };
@@ -458,7 +707,18 @@ const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) =
 
 //    return sphere;
 //  }}
+const WebGLInfo: FC<any> = ({ webglInfo, visible, onClose }) => {
 
+    return <Modal title={"webGL"} footer={null} open={visible} onCancel={onClose} onClose={onClose}>
+        {webglInfo && <ul>
+            <li>geometries: {webglInfo.geometries}</li>
+            <li>textures: {webglInfo.textures}</li>
+            <li>programs: {webglInfo.programs}</li>
+            <li>renderCalls: {webglInfo.renderCalls}</li>
+
+        </ul>}
+    </Modal>
+}
 
 const NodeView: FC<any> = ({ visible, params, onClose, callback }) => {
 
@@ -615,5 +875,67 @@ const EntityRelationForm: React.FC<any> = ({ visible, params, onClose, callback 
         </Modal>
     );
 };
+// export default memo(forwardRef(GraphView), (prevProps, nextProps) => {return true});
 
 export default forwardRef<any, any>(GraphView)
+
+const NodeFilterDropdown: FC<any> = ({ onChange, selectedLabels, setSelectedLabels, loading }) => {
+
+    return (
+        <Dropdown
+            trigger={["hover"]}
+            dropdownRender={() => (
+                <div
+                    style={{
+                        padding: 12,
+                        backgroundColor: "#1f1f1f", // 深色背景
+                        borderRadius: 8,           // 圆角
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.3)", // 阴影
+                        // width: 200,
+                        color: "#fff",             // 文字白色
+                    }}
+                >
+                    <Spin spinning={loading}>
+                        <Checkbox.Group
+                            style={{ display: "flex", flexDirection: "column", gap: 8 }}
+                            options={nodeLabelOptions.map(opt => ({
+                                label: opt.label,
+                                value: opt.value,
+                                style: { color: "#fff" } // checkbox文字白色
+                            }))}
+                            value={selectedLabels}
+                            onChange={(checkedValues) => {
+                                setSelectedLabels(checkedValues as string[]);
+                                onChange(checkedValues as string[]);
+                            }}
+                        /></Spin>
+                    <div style={{ marginTop: 12, textAlign: "center" }}>
+                        <Button
+                            size="small"
+                            type="primary"
+                            onClick={() => {
+                                if (selectedLabels.length === nodeLabelOptions.length) {
+                                    setSelectedLabels([]);
+                                    onChange([]);
+                                } else {
+                                    const all = nodeLabelOptions.map(o => o.value);
+                                    setSelectedLabels(all);
+                                    onChange(all);
+                                }
+                            }}
+                        >
+                            {selectedLabels.length === nodeLabelOptions.length ? "全不选" : "全选"}
+                        </Button>
+                    </div>
+                </div>
+            )}
+        >
+            <a onClick={(e) => e.preventDefault()}>
+                <Space>
+                    节点类型
+                    <DownOutlined />
+                </Space>
+            </a>
+        </Dropdown>
+    );
+}

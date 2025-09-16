@@ -197,6 +197,12 @@ const EntityView: FC<any> = () => {
                 }, {
                     key: "disease",
                     label: "Psychiatric Disorder"
+                },{
+                    key: "chemicals_and_drugs",
+                    label: "chemicals_and_drugs"
+                },{
+                    key: "diet_and_food",
+                    label: "diet_and_food"
                 },
                 //  {
                 //     key: "inteventions",
