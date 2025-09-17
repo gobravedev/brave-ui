@@ -644,10 +644,11 @@ const GraphView = ({ openView, height, activeView, updateQueryParams, entity_id 
                                                 // debugger
                                                 if (node.label == "association") {
                                                     return 1
-                                                } else if (node.label === "taxonomy") {
-                                                    // 最小 4，最大 20，可根据实际数据调整
-                                                    return Math.min(Math.max(node.taxonomy_links || 1, 4), 20);
-                                                }
+                                                } 
+                                                // else if (node.label === "taxonomy") {
+                                                //     // 最小 4，最大 20，可根据实际数据调整
+                                                //     return Math.min(Math.max(node.taxonomy_links || 1, 4), 20);
+                                                // }
                                                 if (searchText && (node.entity_name?.includes(searchText) || node.id.includes(searchText))) {
                                                     return 10; // 放大球体半径
                                                 }
