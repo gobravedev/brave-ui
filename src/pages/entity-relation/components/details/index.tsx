@@ -1,6 +1,6 @@
 import { Button, Card, Divider, Empty, Flex, message, Popconfirm, Tag } from "antd"
 import { FC, useEffect, useState } from "react"
-import { CloseOutlined, RedoOutlined, DeleteOutlined } from '@ant-design/icons'
+import { CloseOutlined, RedoOutlined, DeleteOutlined, AimOutlined, DeploymentUnitOutlined } from '@ant-design/icons'
 import axios from "axios"
 import Taxonomy from './components/taxonomy'
 export const viewMapping: {
@@ -20,12 +20,12 @@ export const ComponentsRender: FC<{ data: any, view: string }> = ({ data, view }
     const { component: Component, key, ...rest } = item
     // const Component = item.component;
 
-    return <Component data={data} {...rest}  />
+    return <Component data={data} {...rest} />
 };
 
 
 
-const DetailsView: FC<any> = ({ data: params, close, height,graphOpt, ...rest }) => {
+const DetailsView: FC<any> = ({ data: params, close, height, graphOpt, queryParams, ...rest }) => {
     const [data, setData] = useState<any>()
     const [loading, setLoading] = useState<boolean>(false)
     const [messageApi, messageContextHolder] = message.useMessage();
@@ -34,7 +34,9 @@ const DetailsView: FC<any> = ({ data: params, close, height,graphOpt, ...rest })
         if (params?.label && params?.id) {
             try {
                 setLoading(true)
-                const resp = await axios.get(`/entity/details/${params?.label}/${params?.id}`)
+                const resp = await axios.post(`/entity/details/${params?.label}/${params?.id}`,{
+                    nodes:queryParams.nodes
+                })
                 setData(resp.data)
                 // setLoading(false)
             } catch (error) {
@@ -78,6 +80,14 @@ const DetailsView: FC<any> = ({ data: params, close, height,graphOpt, ...rest })
             extra={<>
                 {/* <Button size="small" color="cyan" variant="solid">关闭对话框</Button> */}
                 <Flex gap="small">
+
+                    {/* <button onClick={graphOpt.loadGraph}>aa</button> */}
+                    {queryParams?.entity_id ?
+                        <DeploymentUnitOutlined  onClick={() => { graphOpt.updateQueryParam("entity_id",undefined) }}/>
+                        :
+                        <AimOutlined onClick={() => { graphOpt.updateQueryParam("entity_id", params?.id) }} />
+                    }
+                    <RedoOutlined onClick={loadData} />
                     <Popconfirm title={`删除${params?.entity_name} (${params?.node_id})?`} onConfirm={async () => {
                         await axios.delete(`/entity/node-id/${params?.node_id}`)
                         messageApi.success("删除成功")
@@ -86,8 +96,6 @@ const DetailsView: FC<any> = ({ data: params, close, height,graphOpt, ...rest })
                     }}>
                         <DeleteOutlined />
                     </Popconfirm>
-                    {/* <button onClick={graphOpt.loadGraph}>aa</button> */}
-                    <RedoOutlined onClick={loadData} />
                     <CloseOutlined onClick={close} />
                 </Flex>
 
@@ -100,7 +108,7 @@ const DetailsView: FC<any> = ({ data: params, close, height,graphOpt, ...rest })
                 height: height,
             }}
         >
-
+            {/* {JSON.stringify(params)} */}
             <div style={{ height: "100%", overflowY: "auto", }}>
 
                 {data ? <>
@@ -109,6 +117,8 @@ const DetailsView: FC<any> = ({ data: params, close, height,graphOpt, ...rest })
 
                 </> : <Empty description={JSON.stringify(params)}>
                 </Empty>}
+                {/* <Button  >详情</Button> */}
+
             </div>
         </Card>
     </div>

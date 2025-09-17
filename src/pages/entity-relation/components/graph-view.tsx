@@ -1,6 +1,6 @@
 
 import React, { FC, forwardRef, lazy, memo, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
-import { Form, Select, Button, Card, Input, message, Collapse, Typography, Flex, Modal, Splitter, ConfigProvider, Drawer, Popover, Skeleton, Spin, Dropdown, Space, Checkbox } from "antd";
+import { Form, Select, Button, Card, Input, message, Collapse, Typography, Flex, Modal, Splitter, ConfigProvider, Drawer, Popover, Skeleton, Spin, Dropdown, Space, Checkbox, Tag, Tooltip } from "antd";
 import axios from "axios";
 import ForceGraph2D, { ForceGraphMethods } from "react-force-graph-2d";
 const { Option } = Select;
@@ -10,7 +10,7 @@ import { useModal } from "@/hooks/useModal";
 import { useOutletContext } from "react-router";
 import ForceGraph3D from "react-force-graph-3d";
 import { useResizeDetector } from 'react-resize-detector';
-import { DownOutlined, InfoCircleOutlined } from "@ant-design/icons"
+import { DownOutlined, FilterOutlined, InfoCircleOutlined, PlusCircleOutlined, RedoOutlined, RobotOutlined } from "@ant-design/icons"
 // import * as THREE from "three";
 import SpriteText from "three-spritetext";
 import { tr } from "@faker-js/faker";
@@ -25,15 +25,15 @@ const nodeLabelOptions = [
 ];
 
 
-const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) => {
+const GraphView = ({ openView, height, activeView, updateQueryParams, entity_id }: any, ref: any) => {
     const [graphData, setGraphData] = useState({ nodes: [], links: [] });
     const [selectedLink, setSelectedLink] = useState<any>();
     // const spriteCache = new Map<string, any>();
     const spriteCacheRef = useRef<Map<string, any>>(new Map());
     console.log('GraphView mounted')
-    const [searchText, setSearchText] = useState<any>();
+    // const [searchText, setSearchText] = useState<any>();
     const fgRef = useRef<any>(null);
-    const [labelFilter, setLabelFilter] = useState("");
+    // const [labelFilter, setLabelFilter] = useState("");
     const { modal, openModal, closeModal } = useModal();
     const { width, ref: divRef } = useResizeDetector<HTMLDivElement>();
     const [is3D, setIs3D] = useState<any>(null); // 2D/3D 切换
@@ -46,12 +46,13 @@ const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) =
     const { messageApi } = useOutletContext<any>()
     const [webglInfo, setWebglInfo] = useState<any>(null);
     const [modalApi, contextHolder] = Modal.useModal();
+    // const [entityId, setEntityId] = useState<any>(entity_id)
     const dispatch = useDispatch()
 
     const { displayNode } = useSelector((state: any) => state.graph)
 
 
-    const [selectedLabels, setSelectedLabels] = useState<string[]>(displayNode);
+    // const [selectedLabels, setSelectedLabels] = useState<string[]>(displayNode);
 
 
     const updateWebglInfo = () => {
@@ -78,7 +79,9 @@ const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) =
     useImperativeHandle(ref, () => ({
         reload: fetchGraph,
         cancelSelectLink: () => setSelectedLink(null),
-        cancelSelectNode: () => setContextNode(null)
+        cancelSelectNode: () => setContextNode(null),
+        updateQueryParam: updateQueryParam,
+        queryParams
     }))
 
     const menuItems = [{
@@ -97,7 +100,9 @@ const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) =
     const handleMenuClick = (action: any) => {
         // alert(`Action "${action}" on node "${contextNode.name}"`);
         if (action.key == "details") {
-            // console.log(contextNode)
+            console.log(action)
+            console.log(contextNode)
+            updateQueryParam("entity_id", contextNode.id)
             // openModal("nodeView", { id: contextNode.id, label: contextNode.label, entity_name: contextNode.entity_name })
         }
         setOpenRightMenu(false)// close menu
@@ -141,20 +146,57 @@ const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) =
     //     return () => window.removeEventListener("resize", handleResize);
     // }, []);
     // 获取图数据
-    const fetchGraph = async () => {
-        setLoading(true)
-        // disposeGraph3D(); 
-        console.log(selectedLabels)
-        const res = await axios.post("/entity-relation/graph", {
-            label: labelFilter || undefined,
-            keyword: searchText || undefined,
-            entity_id: entity_id || undefined,
-            nodes: selectedLabels
-        });
-        setGraphData(res.data);
-        setLoading(false)
-        // fgRef.current.refresh()
+    // const fetchGraph = async () => {
+    //     setLoading(true)
+    //     // disposeGraph3D(); 
+    //     console.log(selectedLabels)
+    //     const res = await axios.post("/entity-relation/graph", {
+    //         label: labelFilter || undefined,
+    //         keyword: searchText || undefined,
+    //         entity_id: entityId || undefined,
+    //         nodes: selectedLabels
+    //     });
+    //     setGraphData(res.data);
+    //     setLoading(false)
+    //     // fgRef.current.refresh()
 
+    // };
+
+    // 通用查询参数 state
+    const [queryParams, setQueryParams] = useState({
+        label: "" as string | undefined,
+        keyword: undefined as string | undefined,
+        entity_id: entity_id as string | undefined,
+        nodes: displayNode as string[],
+        nodes_dict: undefined as any[] | undefined,
+        nodes_dict_condition: "OR" as string,
+    });
+
+    // 通用更新函数
+    const updateQueryParam = <K extends keyof typeof queryParams>(
+        key: K,
+        value: (typeof queryParams)[K]
+    ) => {
+        // console.log("aaaaaaaaaaaaaaaa",key,value)
+        setQueryParams(prev => ({
+            ...prev,
+            [key]: value || undefined, // 统一处理空值 → undefined
+        }));
+    };
+
+    // 调用接口
+    const fetchGraph = async () => {
+        // console.log(fgRef.current)
+        disposeGraph3D()
+        // fgRef.current?.refresh()
+        setLoading(true);
+        console.log("请求参数:", queryParams);
+
+        const res = await axios.post("/entity-relation/graph", queryParams);
+
+        setGraphData(res.data);
+        setLoading(false);
+    
     };
 
     const nodeTreeObject = useCallback((node: any) => {
@@ -171,6 +213,13 @@ const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) =
         }
         return cache.get(key);
     }, [])
+
+    const removeQueryParam = (key: Exclude<keyof typeof queryParams, "nodes">) => {
+        setQueryParams(prev => ({
+            ...prev,
+            [key]: undefined,
+        }));
+    };
     // const disposeGraph3D = () => {
     //     if (!fgRef.current) return;
     //     // 释放 renderer
@@ -228,7 +277,7 @@ const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) =
 
     //     // fgRef.current = null;
     // };
-    const disposeGraph3D = () => {
+    const disposeGraph3D2 = () => {
         const fg = fgRef.current;
         if (!fg) return;
 
@@ -257,36 +306,36 @@ const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) =
             renderer.renderLists?.dispose();
         }
     };
-    // const disposeGraph3D = () => {
-    //     if (!fgRef.current) return;
+    const disposeGraph3D = () => {
+        if (!fgRef.current) return;
 
-    //     const fg = fgRef.current;
+        const fg = fgRef.current;
 
-    //     // 停止动画循环
-    //     if (fg.pauseAnimation) fg.pauseAnimation();
+        // 停止动画循环
+        if (fg.pauseAnimation) fg.pauseAnimation();
 
-    //     // 释放 renderer
-    //     const renderer = fg.renderer?.();
-    //     if (renderer) renderer.dispose();
+        // 释放 renderer
+        const renderer = fg.renderer?.();
+        if (renderer) renderer.dispose();
 
-    //     // 释放场景中的几何体和材质
-    //     const scene = fg.scene?.();
-    //     if (scene) {
-    //         scene.traverse((obj: any) => {
-    //             if (obj.geometry) obj.geometry.dispose();
-    //             if (obj.material) {
-    //                 if (Array.isArray(obj.material)) obj.material.forEach((m: any) => m.dispose());
-    //                 else obj.material.dispose();
-    //             }
-    //             // if (obj.text) obj.text = null; // SpriteText
-    //         });
-    //     }
+        // 释放场景中的几何体和材质
+        const scene = fg.scene?.();
+        if (scene) {
+            scene.traverse((obj: any) => {
+                if (obj.geometry) obj.geometry.dispose();
+                if (obj.material) {
+                    if (Array.isArray(obj.material)) obj.material.forEach((m: any) => m.dispose());
+                    else obj.material.dispose();
+                }
+                // if (obj.text) obj.text = null; // SpriteText
+            });
+        }
 
-    //     // 清空缓存
-    //     spriteCacheRef.current.clear();
+        // 清空缓存
+        spriteCacheRef.current.clear();
 
-    //     // fgRef.current = null; // 一定要清掉
-    // };
+        // fgRef.current = null; // 一定要清掉
+    };
 
     useEffect(() => {
         if (!isWebGLAvailable()) {
@@ -319,7 +368,8 @@ const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) =
 
     useEffect(() => {
         fetchGraph();
-    }, [labelFilter, entity_id, selectedLabels,searchText]); // labelFilter 改变时刷新数据
+        updateQueryParams(queryParams)
+    }, [queryParams]); // labelFilter 改变时刷新数据
 
     // 搜索节点，高亮 & 缩放
     const handleSearchNode = (keyword: string) => {
@@ -355,7 +405,8 @@ const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) =
         study: "#6a5acd",        // SlateBlue，文献
         disease: "#ff6347",      // Tomato，疾病
         taxonomy: "#3cb371",     // MediumSeaGreen，菌
-        association: "#ffa500"   // Orange，Association 证据
+        association: "#ffa500",   // Orange，Association 证据
+        diet_and_food: "#20b2aa"
     };
     const nodeOperation = {
         onNodeClick: (node: any) => {
@@ -393,13 +444,13 @@ const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) =
 
     useEffect(() => {
         if (!fgRef.current) return;
-      
+
         const fg = fgRef.current;
-      
+
         // 设置节点之间距离
         fg.d3Force("link")!.distance(50);   // 连接线长度
         fg.d3Force("charge")!.strength(-50); // 节点斥力，越负节点越远
-      }, [graphData]);
+    }, [graphData]);
     return (
         <>
             {contextHolder}
@@ -416,6 +467,40 @@ const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) =
 
                 {/* <div style={{ marginBottom: "1rem" }}> </div> */}
                 <Card
+                    title={<div >
+                        {/* 遍历普通参数 */}
+                        {Object.entries(queryParams)
+                            .filter(
+                                ([key, value]) =>
+                                    key !== "nodes" && key !== "label" && key !== "nodes_dict" && key != "nodes_dict_condition" && value !== undefined
+                            )
+                            .map(([key, value]) => (
+                                <Tag
+                                    key={key}
+                                    closable
+                                    color="blue"
+                                    onClose={() => removeQueryParam(key as any)}
+                                    style={{ marginBottom: 8 }}
+                                >
+                                    {key}: {String(value)}
+                                </Tag>
+                            ))}
+
+                        {/* nodes_dict 支持 */}
+                        {queryParams.nodes_dict &&
+                            Object.entries(queryParams.nodes_dict)
+                                .filter(([nodeLabel, ids]: [string, any[]]) => ids && ids.length > 0)
+                                .map(([nodeLabel, ids]: [string, any[]]) => (
+                                    <Tag
+                                        key={nodeLabel}
+                                        onClick={() => openView("dataFilter")}
+                                        color="green"
+                                        style={{ marginBottom: "0.5rem", cursor: "pointer" }}
+                                    >
+                                        {nodeLabel}: {ids.length}
+                                    </Tag>
+                                ))}
+                    </div>}
                     styles={{ body: { padding: 0 } }}
                     size="small"
                     extra={<>
@@ -423,31 +508,45 @@ const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) =
 
                             <NodeFilterDropdown
                                 loading={loading}
-                                selectedLabels={selectedLabels}
-                                setSelectedLabels={setSelectedLabels}
+                                selectedLabels={queryParams.nodes}
+                                setSelectedLabels={(val: any) => updateQueryParam("nodes", val)}
                                 onChange={(labels: any) => {
-                                    setSelectedLabels(labels);
+                                    // setSelectedLabels(labels);
+                                    updateQueryParam("nodes", labels)
                                     dispatch(setDisplayNode(labels))
 
                                 }}
                             />
-                            <Button
-                                size="small"
-                                color="blue"
-                                variant="solid"
+                            <a
+
                                 onClick={toggle3D}
                             >
-                                切换到 {is3D ? "2D" : "3D"}
-                            </Button>
+                                {is3D ? "2D" : "3D"}
+                            </a>
                             {/* <Button onClick={() => { getWebGLInfo() }}>aa</Button> */}
-                            <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                openView("chat")
-                            }}>AI</Button>
+                            {/* <Button size="small" color="cyan" variant="solid" >AI</Button> */}
+                            <Tooltip title="筛选" >
+                                <FilterOutlined onClick={() => {
+                                    openView("dataFilter")
+                                }} />
+                            </Tooltip>
+                            <Tooltip title="AI">
+                                <RobotOutlined onClick={() => {
+                                    openView("chat")
+                                }} />
+                            </Tooltip>
 
-                            <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                openModal("entityRelationForm")
-                            }}>新增</Button>
-                            <Button size="small" color="cyan" variant="solid" onClick={() => fetchGraph()}>刷新</Button>
+                            {/* <Button size="small" color="cyan" variant="solid" >新增</Button> */}
+                            <Tooltip title="新增">
+                                <PlusCircleOutlined onClick={() => {
+                                    openModal("entityRelationForm")
+                                }} />
+                            </Tooltip>
+
+                            <Tooltip title="刷新">
+                                <RedoOutlined onClick={() => fetchGraph()} />
+                            </Tooltip>
+                            {/* <Button size="small" color="cyan" variant="solid" >刷新</Button> */}
                             <InfoCircleOutlined onClick={() => {
                                 updateWebglInfo()
                                 openModal("webGLInfo")
@@ -464,18 +563,20 @@ const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) =
                         width: "100%"
                     }}
                 >
+
+                    {/* {JSON.stringify(queryParams)} */}
                     {/* 下拉框 + 搜索框 */}
                     <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-                        <Select
-                            value={labelFilter}
-                            onChange={(value) => setLabelFilter(value)}
+                        {/* <Select
+                            value={queryParams.label}
+                            onChange={(value) => updateQueryParam("label", value)}
                             style={{ width: 200 }}
                         >
                             <Option value="">全部节点类型</Option>
                             <Option value="Study">Study</Option>
                             <Option value="Disease">Disease</Option>
                             <Option value="Taxonomy">Taxonomy</Option>
-                        </Select>
+                        </Select> */}
 
                         <Search
                             placeholder="搜索..."
@@ -487,7 +588,8 @@ const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) =
                             //     // debouncedSearch(val); // 输入即触发防抖搜索
                             // }}
                             onSearch={(val) => {
-                                setSearchText(val);
+                                // setSearchText(val);
+                                updateQueryParam("keyword", val)
                                 // debouncedSearch(val); // 输入即触发防抖搜索
                             }}
                             style={{ flex: 1 }}
@@ -498,8 +600,8 @@ const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) =
                     // onMouseMove={(e) => setMousePos({ x: e.clientX, y: e.clientY })}
                     >
                         <Spin spinning={loading && is3D == null}>
-
-                            {(!loading && is3D != null) &&
+                        {/* !loading &&  */}
+                            {( !loading &&  is3D != null) &&
                                 <>
                                     {(is3D) ? (
                                         <ForceGraph3D
@@ -517,20 +619,34 @@ const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) =
                                             nodeThreeObjectExtend={true}
                                             linkAutoColorBy={"type"}
                                             nodeColor={(node: any) => {
+
+                                                const searchText = queryParams.keyword
                                                 if (searchText && (node.entity_name?.includes(searchText) || node.id.includes(searchText))) {
                                                     return "red";
                                                 }
                                                 if (node.id.includes(contextNode?.id)) {
                                                     return "red";
                                                 }
+                                                if (node.label === "taxonomy") {
+                                                    const maxLinks = 50; // 假设最大链接数为50，用于归一化
+                                                    const count = node.taxonomy_links || 1;
+                                                    const intensity = Math.min(count / maxLinks, 1); // 0~1
+                                                    // 绿色渐变：亮 -> 深
+                                                    return `rgb(${56 * (1 - intensity)}, ${205 * (1 - intensity)}, ${113 * (1 - intensity)})`;
+                                                }
 
                                                 return node.label && labelColorMap[node.label] ? labelColorMap[node.label] : "#888888";
                                             }
                                             }
                                             nodeVal={(node: any) => {
+                                                const searchText = queryParams.keyword
+
                                                 // debugger
-                                                if(node.label =="association"){
+                                                if (node.label == "association") {
                                                     return 1
+                                                } else if (node.label === "taxonomy") {
+                                                    // 最小 4，最大 20，可根据实际数据调整
+                                                    return Math.min(Math.max(node.taxonomy_links || 1, 4), 20);
                                                 }
                                                 if (searchText && (node.entity_name?.includes(searchText) || node.id.includes(searchText))) {
                                                     return 10; // 放大球体半径
@@ -538,7 +654,7 @@ const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) =
                                                 return 4; // 普通大小
                                             }}
 
-                           
+
                                             nodeThreeObject={nodeTreeObject}
                                             // nodeThreeObject={(node: any) => {
                                             //     const color = node.label && labelColorMap[node.label] ? labelColorMap[node.label] : "#888888"; // 获取节点颜色
@@ -568,6 +684,8 @@ const GraphView = ({ openView, height, activeView, entity_id }: any, ref: any) =
 
 
                                             nodeCanvasObject={(node, ctx, globalScale) => {
+                                                const searchText = queryParams.keyword
+
                                                 const label = node.entity_name || node.id;
                                                 const color = node.label && labelColorMap[node.label] ? labelColorMap[node.label] : "#888888" // 节点和文字同色
                                                 const fontSize = 12 / globalScale;

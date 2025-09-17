@@ -4,17 +4,19 @@ import { FC, lazy, Suspense, useEffect, useState } from "react";
 const ChatView = lazy(() => import('./chat'));
 const NodeView = lazy(() => import('./details'));
 const RelationView = lazy(() => import('./relation'));
+const DataFiletr = lazy(()=>import('./data-filter'))
 export const viewMapping: {
     key: string;
     label: string;
-    component: React.ComponentType<{ close: () => void,data:any ,height:any,graphOpt:any}>;
+    component: React.ComponentType<{ close: () => void,data:any ,queryParams:any,height:any,graphOpt:any}>;
 }[] = [
         { key: "chat", label: "聊天窗口", component: ChatView },
         { key: "details", label: "详情", component: NodeView },
         { key: "relation", label: "关系", component: RelationView },
+        { key: "dataFilter", label: "数据筛选", component: DataFiletr },
     ];
 
-export const ComponentsRender: FC<{ graphOpt:any,height:any,data:any,view: string; close: () => void }> = ({graphOpt,height,data, view, close }) => {
+export const ComponentsRender: FC<{ graphOpt:any,height:any,data:any,queryParams:any,view: string; close: () => void }> = ({graphOpt,height,data,queryParams, view, close }) => {
     if (!view) return <div onClick={close}>未知类型</div>;
     const item = viewMapping.find((v) => v.key === view);
     if (!item) return <div>未知类型</div>;
@@ -23,6 +25,6 @@ export const ComponentsRender: FC<{ graphOpt:any,height:any,data:any,view: strin
 
     return <Suspense fallback={<Skeleton active></Skeleton>}>
         
-        <Component close={close} data={data} {...rest} height={height} graphOpt={graphOpt}/>
+        <Component close={close} data={data} queryParams={queryParams} {...rest} height={height} graphOpt={graphOpt}/>
     </Suspense>
 };

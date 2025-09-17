@@ -20,6 +20,9 @@ const Panel: FC<any> = () => {
     const [activeView, setActiveView] = useState<string | null>(null);
     const [data, setData] = useState<any>();
     const graphViewRef = useRef<any>(null)
+    const [queryParams, updateQueryParams] = useState({
+        
+    });
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [innerHeight, setInnerHeight] = useState<any>(null);
@@ -35,13 +38,18 @@ const Panel: FC<any> = () => {
         }
     }
     const cancelSelectLink = () => {
-        if(graphViewRef.current){
+        if (graphViewRef.current) {
             graphViewRef.current.cancelSelectLink()
         }
     }
     const cancelSelectNode = () => {
-        if(graphViewRef.current){
+        if (graphViewRef.current) {
             graphViewRef.current.cancelSelectNode()
+        }
+    }
+    const updateQueryParam = (key:any,value:any) => {
+        if (graphViewRef.current) {
+            graphViewRef.current.updateQueryParam(key,value)
         }
     }
     // useEffect(() => {
@@ -56,6 +64,8 @@ const Panel: FC<any> = () => {
             //   window.removeEventListener("scroll", updateHeight);
         };
     }, []);
+
+
 
     return <div style={{ backgroundColor: "#f0f2f5", padding: "1rem 1rem 0 1rem  " }}>
         <div ref={containerRef}>
@@ -80,6 +90,7 @@ const Panel: FC<any> = () => {
                         <GraphView
                             ref={graphViewRef}
                             height={innerHeight}
+                            updateQueryParams={updateQueryParams}
                             openView={(view: string, data?: any) => {
                                 setActiveView(view)
                                 // if (view == "details") {
@@ -104,12 +115,15 @@ const Panel: FC<any> = () => {
                         }} /> */}
                             <ComponentsRender
                                 graphOpt={{
-                                    loadGraph:loadGraph,
-                                    cancelSelectLink:cancelSelectLink,
-                                    cancelSelectNode:cancelSelectNode
+                                    loadGraph: loadGraph,
+                                    
+                                    updateQueryParam:updateQueryParam,
+                                    cancelSelectLink: cancelSelectLink,
+                                    cancelSelectNode: cancelSelectNode
                                 }}
+                                queryParams={queryParams}
                                 // loadGraph={loadGraph}
-                                height={innerHeight} data={data} view={activeView} 
+                                height={innerHeight} data={data} view={activeView}
                                 close={() => {
                                     setActiveView(null)
                                     setData(null)
