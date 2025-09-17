@@ -73,10 +73,10 @@ const TableView: FC<any> = ({ data }) => {
                     />
                 </Flex>}
                 // showHeader={()=>{}}
-                scroll={{ x: 'max-content', y: 55 * 5 }}
+                scroll={{ x: 'max-content' }}
                 dataSource={filteredData}
                 pagination={false}
-                virtual
+                // virtual
                 columns={getColumns(data[0])}
                 footer={() => `一共${filteredData?.length}条记录`}
             ></Table>
