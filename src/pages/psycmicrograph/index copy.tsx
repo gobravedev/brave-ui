@@ -574,7 +574,7 @@ const LINK_COLOR_BY_MECH: Record<string, string> = {
 };
 
 export default function PsycMicroGraphSchemaVis() {
-  const fgRef = useRef<any>();
+  const fgRef = useRef<any>(null);
   const [nodes] = useState<GNode[]>(SAMPLE_NODES);
   const [links] = useState<GLink[]>(SAMPLE_LINKS);
 

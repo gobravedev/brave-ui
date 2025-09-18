@@ -16,6 +16,9 @@ import { useSSEContext } from '@/context/sse/useSSEContext';
 import FormProject from '@/components/form-project';
 import { deleteProjectApi } from '@/api/project';
 import { Project } from '@/type/project';
+import { useI18n } from '@/hooks/useI18n';
+import LanguageSelector from '@/components/setting-switcher/language';
+import ThemeSelector from '@/components/setting-switcher/theme';
 
 const { Content, Sider } = Layout;
 
@@ -62,6 +65,12 @@ const App: React.FC = () => {
     const [menus, setMenus] = useState<any>([])
     const [selectedKeyMap, setSelectedKeyMap] = useState<any>()
     const [projectList, setProjectList] = useState<any>()
+    const { t, locale } = useI18n();
+    const { theme } = useSelector((state: any) => state.user); // 'light' | 'dark'
+
+    const isDark = theme === 'dark';
+    const bgColor = isDark ? '#001529' : '#fff'; // 深色/白色
+    const textColor = isDark ? '#fff' : '#000';
 
     const openNotification = ({ type, message = "", description = "" }: { type: NotificationType, message: string, description?: string }) => {
         notificationApi[type]({
@@ -159,9 +168,9 @@ const App: React.FC = () => {
         // loadProject()
         getSetting()
     }, [])
-    const {
-        token: { colorBgContainer, borderRadiusLG },
-    } = theme.useToken();
+    // const {
+    //     token: { colorBgContainer, borderRadiusLG },
+    // } = theme.useToken();
 
     const menu0: MenuItem[] = [
         {
@@ -220,15 +229,19 @@ const App: React.FC = () => {
             key: `/analysis-report`,
             label: "分析报告"
 
-        },{
-            key: `/entity-page`,
-            label: "研究实体"
-
-        },{
-            key: `/entity-relation`,
-            label: "实体关系"
-
+        }, {
+            key: `/psycmicrograph`,
+            label: "菌群知识库"
         },
+        // {
+        //     key: `/entity-page`,
+        //     label: "研究实体"
+
+        // }, {
+        //     key: `/entity-relation`,
+        //     label: "实体关系"
+
+        // },
         {
             key: `/more`,
             label: "更多",
@@ -404,7 +417,7 @@ const App: React.FC = () => {
         },
     ]
     return (
-        <Layout>
+        <Layout style={{ minHeight: '100vh' }}>
             {notificationContextHolder}
             {messageContextHolder}
             {/* <Header style={{ display: 'flex', alignItems: 'center' }}>
@@ -420,29 +433,39 @@ const App: React.FC = () => {
                 />
             </Header> */}
             <Header style={{
+
                 position: 'sticky',
                 top: 0,
                 zIndex: 10,
                 width: '100%',
-                
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                background: bgColor,
+                color: textColor,
+                boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+
+
             }}>
                 {/* 左侧：LOGO + 菜单 */}
                 <div style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0 }}>
-                    <div style={{ color: "#fff", marginRight: "1rem", whiteSpace: 'nowrap' }} onClick={async () => {
+                    <div style={{ color: textColor, marginRight: '1rem', cursor: 'pointer' }} onClick={async () => {
                         await axios.get("/send-test")
                     }}>BRAVE</div>
                     <Menu
-                        theme="dark"
                         mode="horizontal"
                         // defaultSelectedKeys={['1']}
                         selectedKeys={[current]}
                         items={menus}
                         onSelect={k => {
+                            if(k.key=="/psycmicrograph"){
+                                window.open(`/psycmicrograph.html`, "_blank")
+                                return 
+                            }
                             onMenuClick(k.key)
                             console.log(k)
                         }}
-                        style={{ flex: 1, minWidth: 0 }}
+                        style={{ flex: 1, minWidth: 0, background: 'transparent' }}
                     />
                 </div>
 
@@ -462,10 +485,13 @@ const App: React.FC = () => {
                     }}>
                         sse
                     </Button> */}
+             
                     {checkProject() && <>
-                        <ProjectComp  onProjectLoad={setProjectList} project_id={project_id} openModal={openModal} setProjectObj={setProjectObj}></ProjectComp>
+                        <ProjectComp onProjectLoad={setProjectList} project_id={project_id} openModal={openModal} setProjectObj={setProjectObj}></ProjectComp>
 
                     </>}
+                    <LanguageSelector></LanguageSelector>
+                    <ThemeSelector></ThemeSelector>
                     {/* <Button color="primary"   onClick={() => {
                       openModal("context")
                     }}>
@@ -475,7 +501,7 @@ const App: React.FC = () => {
                 </Flex>
             </Header>
             <Layout
-                style={{ padding: '0 0 0  0', background: colorBgContainer, borderRadius: borderRadiusLG }}
+                style={{ padding: '0 0 0  0' }}
             >
                 {/* <Sider style={{ background: colorBgContainer }} width={120}>
                     <Menu
@@ -490,12 +516,12 @@ const App: React.FC = () => {
                 </Sider> */}
                 {/* {JSON.stringify(location)} */}
                 {/* {JSON.stringify(projectObj)} */}
-                <Content style={{ }}>
+                <Content style={{}}>
                     <Suspense key={location.key} fallback={<Test></Test>}>
                         {checkProject() ? <>
-                            <Outlet context={{ project: project_id, projectObj,projectList, messageApi }} />
+                            <Outlet context={{ project: project_id, projectObj, projectList, messageApi }} />
                         </> : <Empty description="请先创建/选择项目" image={Empty.PRESENTED_IMAGE_SIMPLE}>
-                            <ProjectComp onProjectLoad={setProjectList}  project_id={project_id} openModal={openModal} setProjectObj={setProjectObj}></ProjectComp>
+                            <ProjectComp onProjectLoad={setProjectList} project_id={project_id} openModal={openModal} setProjectObj={setProjectObj}></ProjectComp>
 
                             {/* <Button type='primary' onClick={() => {
                                 openModal("project")
@@ -504,7 +530,7 @@ const App: React.FC = () => {
                     </Suspense>
                 </Content>
             </Layout>
-            <FormProject  callback={(project_id: any) => {
+            <FormProject callback={(project_id: any) => {
                 // loadProject()
                 dispatch(setProject({
                     name: project_id,
@@ -520,7 +546,7 @@ const App: React.FC = () => {
 
 export default App;
 
-const ProjectComp: FC<any> = ({ project_id, openModal, setProjectObj ,onProjectLoad}) => {
+const ProjectComp: FC<any> = ({ project_id, openModal, setProjectObj, onProjectLoad }) => {
     const [projectMap, setProjectMap] = useState<any>({})
     const [projectList, setProjectList] = useState<any>([])
     const dispatch = useDispatch()
@@ -536,7 +562,7 @@ const ProjectComp: FC<any> = ({ project_id, openModal, setProjectObj ,onProjectL
             }
         })
         setProjectList(projectList)
-        if (onProjectLoad){
+        if (onProjectLoad) {
             onProjectLoad(projectList)
         }
         const projectMap = resp.data.reduce((acc: any, item: any) => {

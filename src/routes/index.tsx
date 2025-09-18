@@ -68,7 +68,7 @@ import { useDispatch } from "react-redux";
 
 const rootElement = document.getElementById("root")!;
 const appType = rootElement.getAttribute("data-app");
-console.log(appType)
+console.log("data-app: ",appType)
 let routes: RouteObject[] = []
 if (appType == "index") {
     const children = [
