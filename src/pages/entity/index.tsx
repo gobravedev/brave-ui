@@ -1,4 +1,4 @@
-import { Button, Card, Col, Collapse, Empty, Flex, Form, Input, message, Modal, notification, Pagination, Popconfirm, Row, Segmented, Select, Skeleton, Space, Spin, Table, Tabs, Tag, Tooltip, Typography } from "antd"
+import { Button, Card, Col, Collapse, Drawer, Empty, Flex, Form, Input, message, Modal, notification, Pagination, Popconfirm, Row, Segmented, Select, Skeleton, Space, Spin, Table, Tabs, Tag, Tooltip, Typography } from "antd"
 import Item from "antd/es/list/Item"
 import { FC, forwardRef, lazy, Suspense, useEffect, useImperativeHandle, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
@@ -9,7 +9,7 @@ import Meta from "antd/es/card/Meta"
 import { colors } from '@/utils/utils'
 import { pageContainerApi } from '@/api/container'
 import axios from "axios"
-import { useModal } from "@/hooks/useModal"
+import { useModal, useModals } from "@/hooks/useModal"
 import { usePagination } from "@/hooks/usePagination"
 import { NamespaceSelect } from '@/components/create-pipeline'
 import TextArea from "antd/es/input/TextArea"
@@ -21,8 +21,8 @@ import { EntityRef } from './components/interface'
 // const GraphView = lazy()
 const GraphView = lazy(() => import('@/pages/entity-relation/components/graph-view'));
 
-const EntityPage = forwardRef<EntityRef, { openModal: any; entityType: any }>(({ openModal, entityType }, ref) => {
-    // const [pipelineComponents, setPipelineComponents] = useState<any>([])
+// const [pipelineComponents, setPipelineComponents] = useState<any>([])
+const EntityPage = forwardRef<EntityRef, { openModal: any; entityType: any,rowSelection?:any }>(({rowSelection, openModal, entityType }, ref) => {
 
     const { data, pageNumber, totalPage, loading, reload, pageSize, setPageNumber, search } = usePagination({
         // pag?eApi: pageContainerApi,
@@ -46,48 +46,52 @@ const EntityPage = forwardRef<EntityRef, { openModal: any; entityType: any }>(({
             width: 200,
             render: (_: any, record: any) => (
                 <Space size="middle">
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        openModal("modalA", { entityType: entityType, entityId: record.entity_id })
-                    }}>更新</Button>
-
-
-                    {record.is_exist_graph ? <>
+                    {openModal && <>
                         <Button size="small" color="cyan" variant="solid" onClick={() => {
-                            openModal("graphView", { entityType: entityType, entityId: record.entity_id, entityName: record.entity_name })
-                        }}>网络</Button>
-                        <Popconfirm title="确认删除节点?"
+                            openModal("modalA", { entityType: entityType, entityId: record.entity_id })
+                        }}>更新</Button>
+
+
+                        {record.is_exist_graph ? <>
+                            <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                openModal("graphView", { entityType: entityType, entityId: record.entity_id, entityName: record.entity_name })
+                            }}>网络</Button>
+                            <Popconfirm title="确认删除节点?"
+                                onConfirm={async () => {
+                                    // deleteContainer(record)
+                                    try {
+                                        await axios.delete(`/entity/delete-node/${entityType}/${record.entity_id}`)
+                                        messageApi.success("删除成功!")
+                                        reload()
+                                    } catch (error: any) {
+                                        console.log(error?.response?.data?.detail)
+                                        messageApi.error(error?.response?.data?.detail)
+                                    }
+                                }}>
+                                <Button size="small" danger variant="solid">删除节点</Button>
+                            </Popconfirm>
+
+                        </> : <Popconfirm title="确认删除?"
+
                             onConfirm={async () => {
                                 // deleteContainer(record)
                                 try {
-                                    await axios.delete(`/entity/delete-node/${entityType}/${record.entity_id}`)
+                                    await axios.delete(`/entity/delete/${entityType}/${record.entity_id}`)
                                     messageApi.success("删除成功!")
                                     reload()
                                 } catch (error: any) {
                                     console.log(error?.response?.data?.detail)
                                     messageApi.error(error?.response?.data?.detail)
                                 }
+
                             }}>
-                            <Button size="small" danger variant="solid">删除节点</Button>
+                            <Button size="small" danger variant="solid">删除</Button>
                         </Popconfirm>
+                        }
 
-                    </> : <Popconfirm title="确认删除?"
 
-                        onConfirm={async () => {
-                            // deleteContainer(record)
-                            try {
-                                await axios.delete(`/entity/delete/${entityType}/${record.entity_id}`)
-                                messageApi.success("删除成功!")
-                                reload()
-                            } catch (error: any) {
-                                console.log(error?.response?.data?.detail)
-                                messageApi.error(error?.response?.data?.detail)
-                            }
 
-                        }}>
-                        <Button size="small" danger variant="solid">删除</Button>
-                    </Popconfirm>
-                    }
-
+                    </>}
 
 
 
@@ -113,7 +117,8 @@ const EntityPage = forwardRef<EntityRef, { openModal: any; entityType: any }>(({
                     style={{ width: 300 }}
                 />
             )}
-            rowKey={(it: any) => it.id}
+            rowSelection={rowSelection}
+            rowKey={(it: any) => it.entity_id}
             size="small"
             bordered
             // rowSelection={rowSelection}
@@ -147,21 +152,91 @@ const EntityPage = forwardRef<EntityRef, { openModal: any; entityType: any }>(({
 
 
 
-const EntityView: FC<any> = () => {
-    const [entityType, setEntityType] = useState<any>("taxonomy")
-    const { modal, openModal, closeModal } = useModal();
+const EntityViewPanel: FC<any> = () => {
+    const { modals, openModals, closeModals } = useModals(["entityPage", "entityModal", "graphView", "entityDrawer"]);
+    const entityRef = useRef<EntityRef>(null)
+    const reload = () => {
+        entityRef.current?.reload()
+    }
+    return <>
+        <EntityView ref={entityRef} openModals={openModals}></EntityView>
+        <EntityModal
+            openModals={openModals}
+            callback={reload}
+            visible={modals.entityModal.visible}
+            params={modals.entityModal.params}
+            onClose={() => closeModals("entityModal")}
+        ></EntityModal>
+        <GraphViewModal
+            callback={reload}
+            visible={modals.graphView.visible}
+            params={modals.graphView.params}
+            onClose={() => closeModals("graphView")}
+        ></GraphViewModal>
+
+      
+    </>
+}
+
+export default EntityViewPanel
+
+export const EntityView: FC<any> = forwardRef<any, any>(({ openModals,rowSelection,hiddenAssociation=false }, ref) => {
+    const items:any[] = [
+        {
+           key: "taxonomy",
+           label: "Microbiota"
+       }, {
+           key: "study",
+           label: "Study"
+       }, {
+           key: "disease",
+           label: "Psychiatric Disorder"
+       }, {
+           key: "chemicals_and_drugs",
+           label: "chemicals_and_drugs"
+       }, {
+           key: "diet_and_food",
+           label: "diet_and_food"
+       },
+       //  {
+       //     key: "inteventions",
+       //     label: "Inteventions"
+       // }
+   ]
+   if(!hiddenAssociation){
+       items.unshift({
+           key: "association",
+           label: "association"
+       })
+   }
+
+    const [entityType, setEntityType] = useState<any>(items[0].key)
+    // const { modal, openModal, closeModal } = useModal();
+
     const entityRef = useRef<EntityRef>(null)
     const [showStyle, setShowStyle] = useState<any>("table")
 
     const reload = () => {
         entityRef.current?.reload()
     }
+    useImperativeHandle(ref, () => ({
+        reload
+    }))
+
+    // const association = {
+    //     key: "association",
+    //     label: "association"
+    // }
+   
 
     return <div style={{ maxWidth: "1500px", margin: "1rem auto" }}>
         <Flex justify="flex-end" gap="small">
-            <Button size="small" color="cyan" variant="solid" onClick={() => {
-                openModal("modalA", { entityType: entityType })
-            }}>新增</Button>
+            {openModals && <>
+                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                    openModals("entityModal", { entityType: entityType })
+                }}>新增</Button>
+            </>}
+
             <Button size="small" color="cyan" variant="solid" onClick={reload}>刷新</Button>
         </Flex>
         <div style={{ marginBottom: "1rem" }}> </div>
@@ -187,51 +262,23 @@ const EntityView: FC<any> = () => {
                     ]} />
 
             </>}
-            items={[
-                {
-                    key: "taxonomy",
-                    label: "Microbiota"
-                }, {
-                    key: "study",
-                    label: "Study"
-                }, {
-                    key: "disease",
-                    label: "Psychiatric Disorder"
-                },{
-                    key: "chemicals_and_drugs",
-                    label: "chemicals_and_drugs"
-                },{
-                    key: "diet_and_food",
-                    label: "diet_and_food"
-                },
-                //  {
-                //     key: "inteventions",
-                //     label: "Inteventions"
-                // }
-            ]}></Tabs>
+            items={items}></Tabs>
         {/* {showStyle} */}
         {/* <TableTree></TableTree> */}
+        {/* {entityType} */}
         {showStyle == "table" && <>
-            <EntityPage ref={entityRef} openModal={openModal} entityType={entityType}></EntityPage>
+            <EntityPage rowSelection={rowSelection} ref={entityRef} openModal={openModals} entityType={entityType}></EntityPage>
         </>}
         {showStyle == "tree" && <>
             <TableTree ref={entityRef} entityType={entityType}></TableTree>
         </>}
-        <EntityModal
-            callback={reload}
-            visible={modal.key == "modalA" && modal.visible}
-            params={modal.params}
-            onClose={closeModal}
-        ></EntityModal>
-        <GraphViewModal
-            callback={reload}
-            visible={modal.key == "graphView" && modal.visible}
-            params={modal.params}
-            onClose={closeModal}
-        ></GraphViewModal>
+
     </div>
-}
-export default EntityView
+})
+
+
+
+
 
 const GraphViewModal: FC<any> = ({ visible, params, onClose, callback }) => {
 
@@ -245,7 +292,7 @@ const GraphViewModal: FC<any> = ({ visible, params, onClose, callback }) => {
 }
 
 
-const EntityModal: FC<any> = ({ visible, params, onClose, callback }) => {
+const EntityModal: FC<any> = ({ visible, params, onClose, openModals,record, callback }) => {
     const [form] = Form.useForm()
     const { messageApi } = useOutletContext<any>()
     const [loading, setLoading] = useState<any>(false)
@@ -286,10 +333,8 @@ const EntityModal: FC<any> = ({ visible, params, onClose, callback }) => {
         width={"50%"} open={visible} onClose={onClose} onCancel={onClose}>
         {/* {params} */}
         <Form form={form}>
-            <Form.Item name={"entity_name"} label="实体名称">
-                <Input></Input>
-            </Form.Item>
-            <ComponentsRender type={params?.entityType}></ComponentsRender>
+
+            <ComponentsRender type={params?.entityType} openModals={openModals} record={record}></ComponentsRender>
             <Collapse ghost items={[
                 {
                     key: "1",

@@ -1,0 +1,8 @@
+flowchart LR
+    A[Microbe] -- produces --> B1[Metabolite]
+    A -- activates --> B2[Immune / Inflammation]
+    A -- stimulates --> B3[Neural Routes]
+
+    B1 -- modulates --> C[Brain Function / Disease]
+    B2 -- affects --> C
+    B3 -- modulates --> C

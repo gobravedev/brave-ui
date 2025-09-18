@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import path from 'path';
+import { resolve } from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -8,6 +9,15 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.join(__dirname, 'src'),
+    },
+  }, build: {
+    // commonjsOptions: { transformMixedEsModules: true }, // Change
+    rollupOptions: {
+      input: {
+        index: resolve(__dirname, 'index.html'),
+        psycmicrograph: resolve(__dirname, 'psycmicrograph.html')
+        // nested: resolve(__dirname, 'nested/index.html'),
+      },
     },
   },
   plugins: [react()],

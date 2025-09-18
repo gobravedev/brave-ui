@@ -1,6 +1,7 @@
 // https://reactrouter.com/start/data/installation
 import { FC, lazy, useEffect, useState } from "react";
 import Layout from "@/layout";
+import MicroGraphLayout from '@/layout/psycmicrograph'
 import {
     // createBrowserRouter,
     RouteObject,
@@ -58,177 +59,358 @@ const SoftwareAnalysisEditor = lazy(() => import('@/pages/software-analysis-edit
 const AnalysisReport = lazy(() => import('@/pages/analysis-report'));
 const EntityPage = lazy(() => import('@/pages/entity'));
 const EntityRelation = lazy(() => import('@/pages/entity-relation'));
+const PsycMicroGraphHome = lazy(()=>import("@/pages/psycmicrograph"))
 
-
-const ContainerPage  = lazy(() => import('@/pages/container'));
+const ContainerPage = lazy(() => import('@/pages/container'));
 import axios from "axios";
 import { Skeleton } from "antd";
 import { useDispatch } from "react-redux";
 
+const rootElement = document.getElementById("root")!;
+const appType = rootElement.getAttribute("data-app");
+console.log(appType)
+let routes: RouteObject[] = []
+if (appType == "index") {
+    const children = [
 
-const childern = [
-    {
-        path: "/",
-        element: <Project />
-    },{
-        path: "/sample",
-        element: <Sample />
-    }, {
-        path: "/sample-qc",
-        element: <SampleQC />
-    }, {
-        path: "/analysis-result",
-        element: <AnalysisResult />
-    }, {
-        path: "/literature",
-        element: <Literature />
-    },  {
-        path: "/pipeline-monitor-panal",
-        element: <PielineMonitorPanal />
-    }, {
-        path: "/container-page",
-        element: <ContainerPage />
-    },
-    {
-        path: "/analysis-report",
-        element: <AnalysisReport />
-    },
-    {
-        path: "/pipeline-card",
-        element: <PipelineComponentsCard  params={{component_type:"pipeline"}}/>
-    },
-    
-    {
-        path: "/software-card",
-        element: <PipelineComponentsCard  
-        map={(item: any) => ({
-            id: item.id,
-            component_id: item.component_id,
-            name: item.component_name,
-            category: item.category,
-            img: item.img,
-            tags: item.tags,
-            description: item.description,
-            order: item.order_index,
-            path: `/software/${item.component_id}`,
-            namespace: item.namespace,
-            namespace_name: item.namespace_name
-        })}
-        params={{component_type:"software"}}/>
-    },  {
-        path: "/file-card",
-        element: <PipelineComponentsCard 
-        map={(item: any) => ({
-            id: item.id,
-            component_id: item.component_id,
-            name: item.component_name,
-            category: item.category,
-            img: item.img,
-            tags: item.tags,
-            description: item.description,
-            order: item.order_index,
-            path: `/file/${item.component_id}`,
-            namespace: item.namespace,
-            namespace_name: item.namespace_name
-        })}
-        params={{component_type:"file"}}/>
-    },  {
-        path: "/script-card",
-        element: <PipelineComponentsCard 
-        map={(item: any) => ({
-            id: item.id,
-            component_id: item.component_id,
-            name: item.component_name,
-            category: item.category,
-            img: item.img,
-            tags: item.tags,
-            description: item.description,
-            order: item.order_index,
-            path: `/script/${item.component_id}`,
-            namespace: item.namespace,
-            namespace_name: item.namespace_name
-        })}
-        params={{component_type:"script"}}/> 
-    }, 
-    {
-        path: "/software-analysis-editor/:analysisId",
-        element: <SoftwareAnalysisEditor />
-    },
+        {
+            path: "/",
+            element: <Project />
+        }, {
+            path: "/sample",
+            element: <Sample />
+        }, {
+            path: "/sample-qc",
+            element: <SampleQC />
+        }, {
+            path: "/analysis-result",
+            element: <AnalysisResult />
+        }, {
+            path: "/literature",
+            element: <Literature />
+        }, {
+            path: "/pipeline-monitor-panal",
+            element: <PielineMonitorPanal />
+        }, {
+            path: "/container-page",
+            element: <ContainerPage />
+        },
+        {
+            path: "/analysis-report",
+            element: <AnalysisReport />
+        },
+        {
+            path: "/pipeline-card",
+            element: <PipelineComponentsCard params={{ component_type: "pipeline" }} />
+        },
 
-    {
-        path: "/component/:component_type/:component_id",
-        element: <Pipeline />
-    },{
-        path: "/software/:softwareId",
-        element: <AnalysisSoftware />
-    },
-    {
-        path: "/file/:fileId",
-        element: <AnalysisFile />
-    },
-    {
-        path: "/script/:scriptId",
-        element: <Script />
-    }, {
-        path: "/entity-page",
-        element: <EntityPage />
-    }, {
-        path: "/entity-relation",
-        element: <EntityRelation />
-    }, 
-    
+        {
+            path: "/software-card",
+            element: <PipelineComponentsCard
+                map={(item: any) => ({
+                    id: item.id,
+                    component_id: item.component_id,
+                    name: item.component_name,
+                    category: item.category,
+                    img: item.img,
+                    tags: item.tags,
+                    description: item.description,
+                    order: item.order_index,
+                    path: `/software/${item.component_id}`,
+                    namespace: item.namespace,
+                    namespace_name: item.namespace_name
+                })}
+                params={{ component_type: "software" }} />
+        }, {
+            path: "/file-card",
+            element: <PipelineComponentsCard
+                map={(item: any) => ({
+                    id: item.id,
+                    component_id: item.component_id,
+                    name: item.component_name,
+                    category: item.category,
+                    img: item.img,
+                    tags: item.tags,
+                    description: item.description,
+                    order: item.order_index,
+                    path: `/file/${item.component_id}`,
+                    namespace: item.namespace,
+                    namespace_name: item.namespace_name
+                })}
+                params={{ component_type: "file" }} />
+        }, {
+            path: "/script-card",
+            element: <PipelineComponentsCard
+                map={(item: any) => ({
+                    id: item.id,
+                    component_id: item.component_id,
+                    name: item.component_name,
+                    category: item.category,
+                    img: item.img,
+                    tags: item.tags,
+                    description: item.description,
+                    order: item.order_index,
+                    path: `/script/${item.component_id}`,
+                    namespace: item.namespace,
+                    namespace_name: item.namespace_name
+                })}
+                params={{ component_type: "script" }} />
+        },
+        {
+            path: "/software-analysis-editor/:analysisId",
+            element: <SoftwareAnalysisEditor />
+        },
+
+        {
+            path: "/component/:component_type/:component_id",
+            element: <Pipeline />
+        }, {
+            path: "/software/:softwareId",
+            element: <AnalysisSoftware />
+        },
+        {
+            path: "/file/:fileId",
+            element: <AnalysisFile />
+        },
+        {
+            path: "/script/:scriptId",
+            element: <Script />
+        }, {
+            path: "/entity-page",
+            element: <EntityPage />
+        }, {
+            path: "/entity-relation",
+            element: <EntityRelation />
+        },
 
 
-    {
-        path: "/:project/meta_genome/reads-based-abundance-analysis",
-        element: <ReadsBasedAbundanceAnalysis />
-    }, {
-        path: "/:project/meta_genome/remove-host",
-        element: <RemoveHost />
-    }, {
-        path: "/:project/meta_genome/recovering-mag",
-        element: <RecoveringMag />
-    },
-    {
-        path: "/:project/meta_genome/abundance-meta",
-        element: <AbundanceMeta />
-    },
-    {
-        path: "/:project/meta_genome/abundance",
-        element: <Abundance />
-    }, {
-        path: "/:project/meta_genome/function-analysis",
-        element: <FunctionAnalysis />
-    },
 
-    {
-        path: "/:project/single_genome/mutation",
-        element: <Mutation />
-    }, {
-        path: "/:project/single_genome/mutation-compare",
-        element: <MutationCompare />
-    }, {
-        path: "/:project/single_genome/assembly",
-        element: <Assembly />
-    }, {
-        path: "/:project/single_genome/gene-prediction",
-        element: <GenePrediction />
-    }, {
-        path: "/:project/single_genome/gene-annotation",
-        element: <GeneAnnotation />
-    }, {
-        path: "/:project/single_genome/gene-expression",
-        element: <GeneExpressison />
-    }
-]
+        {
+            path: "/:project/meta_genome/reads-based-abundance-analysis",
+            element: <ReadsBasedAbundanceAnalysis />
+        }, {
+            path: "/:project/meta_genome/remove-host",
+            element: <RemoveHost />
+        }, {
+            path: "/:project/meta_genome/recovering-mag",
+            element: <RecoveringMag />
+        },
+        {
+            path: "/:project/meta_genome/abundance-meta",
+            element: <AbundanceMeta />
+        },
+        {
+            path: "/:project/meta_genome/abundance",
+            element: <Abundance />
+        }, {
+            path: "/:project/meta_genome/function-analysis",
+            element: <FunctionAnalysis />
+        },
 
-import {listPipeline} from '@/api/pipeline'
+        {
+            path: "/:project/single_genome/mutation",
+            element: <Mutation />
+        }, {
+            path: "/:project/single_genome/mutation-compare",
+            element: <MutationCompare />
+        }, {
+            path: "/:project/single_genome/assembly",
+            element: <Assembly />
+        }, {
+            path: "/:project/single_genome/gene-prediction",
+            element: <GenePrediction />
+        }, {
+            path: "/:project/single_genome/gene-annotation",
+            element: <GeneAnnotation />
+        }, {
+            path: "/:project/single_genome/gene-expression",
+            element: <GeneExpressison />
+        }
+    ]
+    routes = [
+        {
+            path: "/",
+            element: <Layout />,
+            children: [
+                ...children,
+            ]
+        },
+    ]
+} else if (appType == "micrograph") {
+    const children = [
+
+        {
+            path: "/",
+            element: <PsycMicroGraphHome />
+        }, {
+            path: "/sample",
+            element: <Sample />
+        }, {
+            path: "/sample-qc",
+            element: <SampleQC />
+        }, {
+            path: "/analysis-result",
+            element: <AnalysisResult />
+        }, {
+            path: "/literature",
+            element: <Literature />
+        }, {
+            path: "/pipeline-monitor-panal",
+            element: <PielineMonitorPanal />
+        }, {
+            path: "/container-page",
+            element: <ContainerPage />
+        },
+        {
+            path: "/analysis-report",
+            element: <AnalysisReport />
+        },
+        {
+            path: "/pipeline-card",
+            element: <PipelineComponentsCard params={{ component_type: "pipeline" }} />
+        },
+
+        {
+            path: "/software-card",
+            element: <PipelineComponentsCard
+                map={(item: any) => ({
+                    id: item.id,
+                    component_id: item.component_id,
+                    name: item.component_name,
+                    category: item.category,
+                    img: item.img,
+                    tags: item.tags,
+                    description: item.description,
+                    order: item.order_index,
+                    path: `/software/${item.component_id}`,
+                    namespace: item.namespace,
+                    namespace_name: item.namespace_name
+                })}
+                params={{ component_type: "software" }} />
+        }, {
+            path: "/file-card",
+            element: <PipelineComponentsCard
+                map={(item: any) => ({
+                    id: item.id,
+                    component_id: item.component_id,
+                    name: item.component_name,
+                    category: item.category,
+                    img: item.img,
+                    tags: item.tags,
+                    description: item.description,
+                    order: item.order_index,
+                    path: `/file/${item.component_id}`,
+                    namespace: item.namespace,
+                    namespace_name: item.namespace_name
+                })}
+                params={{ component_type: "file" }} />
+        }, {
+            path: "/script-card",
+            element: <PipelineComponentsCard
+                map={(item: any) => ({
+                    id: item.id,
+                    component_id: item.component_id,
+                    name: item.component_name,
+                    category: item.category,
+                    img: item.img,
+                    tags: item.tags,
+                    description: item.description,
+                    order: item.order_index,
+                    path: `/script/${item.component_id}`,
+                    namespace: item.namespace,
+                    namespace_name: item.namespace_name
+                })}
+                params={{ component_type: "script" }} />
+        },
+        {
+            path: "/software-analysis-editor/:analysisId",
+            element: <SoftwareAnalysisEditor />
+        },
+
+        {
+            path: "/component/:component_type/:component_id",
+            element: <Pipeline />
+        }, {
+            path: "/software/:softwareId",
+            element: <AnalysisSoftware />
+        },
+        {
+            path: "/file/:fileId",
+            element: <AnalysisFile />
+        },
+        {
+            path: "/script/:scriptId",
+            element: <Script />
+        }, {
+            path: "/entity-page",
+            element: <EntityPage />
+        }, {
+            path: "/entity-relation",
+            element: <EntityRelation />
+        },
+
+
+
+        {
+            path: "/:project/meta_genome/reads-based-abundance-analysis",
+            element: <ReadsBasedAbundanceAnalysis />
+        }, {
+            path: "/:project/meta_genome/remove-host",
+            element: <RemoveHost />
+        }, {
+            path: "/:project/meta_genome/recovering-mag",
+            element: <RecoveringMag />
+        },
+        {
+            path: "/:project/meta_genome/abundance-meta",
+            element: <AbundanceMeta />
+        },
+        {
+            path: "/:project/meta_genome/abundance",
+            element: <Abundance />
+        }, {
+            path: "/:project/meta_genome/function-analysis",
+            element: <FunctionAnalysis />
+        },
+
+        {
+            path: "/:project/single_genome/mutation",
+            element: <Mutation />
+        }, {
+            path: "/:project/single_genome/mutation-compare",
+            element: <MutationCompare />
+        }, {
+            path: "/:project/single_genome/assembly",
+            element: <Assembly />
+        }, {
+            path: "/:project/single_genome/gene-prediction",
+            element: <GenePrediction />
+        }, {
+            path: "/:project/single_genome/gene-annotation",
+            element: <GeneAnnotation />
+        }, {
+            path: "/:project/single_genome/gene-expression",
+            element: <GeneExpressison />
+        }
+    ]
+    routes = [
+        {
+            path: "/",
+            element: <MicroGraphLayout />,
+            children: [
+                ...children,
+            ]
+        },
+    ]
+}
+
+import { listPipeline } from '@/api/pipeline'
 const RenderRouter: FC = () => {
     // const [routes, setRoutes] = useState<RouteObject[] | null>([]);
     // const dispatch = useDispatch()
 
-   
-    
+
+
     // const loadData = async () => {
     //     const data:any = await listPipeline(dispatch)
     //     const routes = data.flatMap((group:any) =>
@@ -264,20 +446,20 @@ const RenderRouter: FC = () => {
     // }, [])
     // const element = routes ? useRoutes(routes) : null;
 
-    const routes: RouteObject[] = [
-        {
-            path: "/",
-            element: <Layout />,
-            children: [
-                ...childern,
-            ]
-        },
-    ]
+    // const routes: RouteObject[] = [
+    // {
+    //     path: "/",
+    //     element: <Layout />,
+    //     children: [
+    //         ...childern,
+    //     ]
+    // },
+    // ]
 
     // const element = useRoutes(router);
     const element = useRoutes(routes)
 
-    return element ;
+    return element;
     // return element;
 };
 

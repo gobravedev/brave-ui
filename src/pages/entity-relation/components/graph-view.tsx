@@ -10,7 +10,7 @@ import { useModal } from "@/hooks/useModal";
 import { useOutletContext } from "react-router";
 import ForceGraph3D from "react-force-graph-3d";
 import { useResizeDetector } from 'react-resize-detector';
-import { DownOutlined, FilterOutlined, InfoCircleOutlined, PlusCircleOutlined, RedoOutlined, RobotOutlined } from "@ant-design/icons"
+import { DownOutlined, FilterOutlined, InfoCircleOutlined, LoadingOutlined, PlusCircleOutlined, RedoOutlined, RobotOutlined } from "@ant-design/icons"
 // import * as THREE from "three";
 import SpriteText from "three-spritetext";
 import { tr } from "@faker-js/faker";
@@ -50,6 +50,8 @@ const GraphView = ({ openView, height, activeView, updateQueryParams, entity_id 
     const dispatch = useDispatch()
 
     const { displayNode } = useSelector((state: any) => state.graph)
+
+    const [graphReady, setGraphReady] = useState(false);
 
 
     // const [selectedLabels, setSelectedLabels] = useState<string[]>(displayNode);
@@ -190,13 +192,14 @@ const GraphView = ({ openView, height, activeView, updateQueryParams, entity_id 
         disposeGraph3D()
         // fgRef.current?.refresh()
         setLoading(true);
+        setGraphReady(false)
         console.log("请求参数:", queryParams);
 
         const res = await axios.post("/entity-relation/graph", queryParams);
 
         setGraphData(res.data);
         setLoading(false);
-    
+
     };
 
     const nodeTreeObject = useCallback((node: any) => {
@@ -306,6 +309,7 @@ const GraphView = ({ openView, height, activeView, updateQueryParams, entity_id 
             renderer.renderLists?.dispose();
         }
     };
+
     const disposeGraph3D = () => {
         if (!fgRef.current) return;
 
@@ -368,7 +372,9 @@ const GraphView = ({ openView, height, activeView, updateQueryParams, entity_id 
 
     useEffect(() => {
         fetchGraph();
-        updateQueryParams(queryParams)
+        if(updateQueryParams){
+            updateQueryParams(queryParams)
+        }
     }, [queryParams]); // labelFilter 改变时刷新数据
 
     // 搜索节点，高亮 & 缩放
@@ -434,6 +440,12 @@ const GraphView = ({ openView, height, activeView, updateQueryParams, entity_id 
             node.fx = node.x;
             node.fy = node.y;
             node.fz = node.z;
+        },
+        onEngineTick:() => {
+            if(!graphReady){
+                setGraphReady(true);
+                console.log("graphReady")
+            }
         }
         // (link: any) =>{
         //     selectedLink && link.relation_id === selectedLink.relation_id ? "red" : "rgba(200,200,200,0.5)"
@@ -563,7 +575,7 @@ const GraphView = ({ openView, height, activeView, updateQueryParams, entity_id 
                         width: "100%"
                     }}
                 >
-
+                    {/* {graphReady && <>aaaaaaaaaaaaaa</>} */}
                     {/* {JSON.stringify(queryParams)} */}
                     {/* 下拉框 + 搜索框 */}
                     <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
@@ -599,13 +611,13 @@ const GraphView = ({ openView, height, activeView, updateQueryParams, entity_id 
                     <div ref={divRef} style={{ height: `${height}px`, background: "#111111" }}
                     // onMouseMove={(e) => setMousePos({ x: e.clientX, y: e.clientY })}
                     >
-                        <Spin spinning={loading && is3D == null}>
-                        {/* !loading &&  */}
-                            {( !loading &&  is3D != null) &&
+                        <Spin  indicator={<LoadingOutlined spin />} spinning={loading || is3D == null ||  !graphReady}>
+                            {/* !loading &&  */}
+                            {(!loading && is3D != null) &&
                                 <>
                                     {(is3D) ? (
                                         <ForceGraph3D
-
+                                          
                                             ref={fgRef}
                                             graphData={graphData}
                                             nodeAutoColorBy="label"
@@ -644,7 +656,7 @@ const GraphView = ({ openView, height, activeView, updateQueryParams, entity_id 
                                                 // debugger
                                                 if (node.label == "association") {
                                                     return 1
-                                                } 
+                                                }
                                                 // else if (node.label === "taxonomy") {
                                                 //     // 最小 4，最大 20，可根据实际数据调整
                                                 //     return Math.min(Math.max(node.taxonomy_links || 1, 4), 20);

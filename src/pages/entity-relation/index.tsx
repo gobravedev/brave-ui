@@ -67,7 +67,7 @@ const Panel: FC<any> = () => {
 
 
 
-    return <div style={{ backgroundColor: "#f0f2f5", padding: "1rem 1rem 0 1rem  " }}>
+    return <div style={{  padding: "1rem 1rem 0 1rem  " }}>
         <div ref={containerRef}>
             {/* {innerHeight} */}
             <ConfigProvider
