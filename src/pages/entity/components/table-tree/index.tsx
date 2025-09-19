@@ -2,7 +2,7 @@ import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } f
 import { Tree, Input, Spin, Tooltip, Skeleton } from 'antd';
 import axios from 'axios';
 import { RedoOutlined } from '@ant-design/icons'
-import {EntityRef} from '../interface'
+import { EntityRef } from '../interface'
 
 interface DataNode {
     title: React.ReactNode;
@@ -22,32 +22,61 @@ const updateTreeData = (list: DataNode[], key: React.Key, children: DataNode[]):
         return node;
     });
 
-const App = forwardRef<EntityRef, { entityType: any }>(({ entityType }, ref) => {
+const App = forwardRef<EntityRef, { entityType: any, params: any }>(({ entityType, params }, ref) => {
     const [treeData, setTreeData] = useState<DataNode[]>();
     const [loadingKeys, setLoadingKeys] = useState<Set<number>>(new Set());
     const [children, setChildren] = useState<any>()
-    const [parentId, setParentId] = useState<any>(1)
+    const [parentId, setParentId] = useState<any>("default")
 
     const fetchChildren = async (parentId: number, page: number, size: number, keyword = ""): Promise<{ children: DataNode[]; total: number }> => {
         const res = await axios.post(`/entity/page/${entityType}`, {
             page_number: page,
             page_size: size,
-            parent_id: parentId,
-            keyword, // 👈 给接口传搜索条件
+            parent_id: String(parentId),
+            keyword, //  给接口传搜索条件
+            ...params
         });
 
         const { items, total } = res.data;
-        const children: DataNode[] = items.map((item: any) => ({
-            title: <>
-                <Tooltip title={`${item.entity_name}(${item.rank})(${item.tax_id})`}>
-                    {item.entity_name} ({item.rank})
-                </Tooltip>
-            </>,
-            key: item.tax_id,
-            isLeaf: !item.has_children,
-        }));
-        setChildren(children)
-        return { children, total };
+        if (entityType == "taxonomy") {
+            const children: DataNode[] = items.map((item: any) => ({
+                title: <>
+                    <Tooltip title={`${item.entity_name}(${item.rank})(${item.tax_id})`}>
+                        {item.entity_name} ({item.rank})
+                    </Tooltip>
+                </>,
+                key: item.tax_id,
+                isLeaf: !item.has_children,
+            }));
+            setChildren(children)
+            return { children, total };
+        } else if (entityType == "mesh") {
+            const children: DataNode[] = items.map((item: any) => ({
+                title: <>
+                    <Tooltip title={`${item.entity_name}`}>
+                        {item.entity_name}({item.entity_id})
+                    </Tooltip>
+                </>,
+                key: item.tree_number,
+                isLeaf: !item.has_children,
+            }));
+            setChildren(children)
+            return { children, total };
+        } else {
+            const children: DataNode[] = items.map((item: any) => ({
+                title: <>
+                    <Tooltip title={`${item.entity_name}`}>
+                        {item.entity_name}
+                    </Tooltip>
+                </>,
+                key: item.entity_id,
+                isLeaf: !item.has_children,
+            }));
+            setChildren(children)
+            return { children, total };
+        }
+
+
     };
     const loadData = async () => {
         const { children: newChildren } = await fetchChildren(parentId, 1, -1);
@@ -63,9 +92,9 @@ const App = forwardRef<EntityRef, { entityType: any }>(({ entityType }, ref) => 
 
     const onLoadData = async ({ key, children }: any) => {
         if (children) return;
-
+        // debugger
         setLoadingKeys((prev) => new Set(prev).add(key));
-        const { children: newChildren } = await fetchChildren(Number(key), 1, -1);
+        const { children: newChildren } = await fetchChildren(key, 1, -1);
         setTreeData((origin: any) =>
             updateTreeData(origin, key, [
                 // {

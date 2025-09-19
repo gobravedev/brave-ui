@@ -37,7 +37,41 @@ export const getColumns = (entityType: any) => {
                 }
             ]
             break;
-          
+        case "disease":
+            entityColumns = [
+                ...entityColumns,
+                {
+                    title: "entity_id",
+                    dataIndex: "entity_id",
+                    key: "taxonomy_id"
+                },{
+                    title: "mesh_id",
+                    dataIndex: "mesh_id",
+                    key: "mesh_id",
+                    render:(text: any, record: any) => {
+                        return <a href={`https://meshb.nlm.nih.gov/record/ui?ui=${text}`}  target="_blank">{text}</a>
+                    }
+                },{
+                    title: "entity_name",
+                    dataIndex: "entity_name",
+                    key: "entity_name"
+                },{
+                    title: "has_children",
+                    dataIndex: "has_children",
+                    key: "has_children",
+                    render: (text: any, record: any) => {
+                        return text?"存在":"不存在"
+                    }
+                },{
+                    title: "is_exist_graph",
+                    dataIndex: "is_exist_graph",
+                    key: "is_exist_graph",
+                    render: (text: any, record: any) => {
+                        return text?"存在":"不存在"
+                    }
+                }
+            ]
+            break;
         case "association":
             entityColumns = [
                 {

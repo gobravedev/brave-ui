@@ -459,7 +459,7 @@ const App: React.FC = () => {
                         items={menus}
                         onSelect={k => {
                             if(k.key=="/psycmicrograph"){
-                                window.open(`/psycmicrograph.html`, "_blank")
+                                window.open(`${window.location.origin}${window.location.pathname}psycmicrograph.html`, "_blank")
                                 return 
                             }
                             onMenuClick(k.key)

@@ -611,7 +611,7 @@ const GraphView = ({ openView, height, activeView, updateQueryParams, entity_id 
                     <div ref={divRef} style={{ height: `${height}px`, background: "#111111" }}
                     // onMouseMove={(e) => setMousePos({ x: e.clientX, y: e.clientY })}
                     >
-                        <Spin  indicator={<LoadingOutlined spin />} spinning={loading || is3D == null ||  !graphReady}>
+                        <Spin  style={{ height: `${height}px`}} indicator={<LoadingOutlined spin />} spinning={loading || is3D == null ||  !graphReady}>
                             {/* !loading &&  */}
                             {(!loading && is3D != null) &&
                                 <>

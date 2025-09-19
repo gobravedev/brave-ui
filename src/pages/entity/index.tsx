@@ -22,12 +22,14 @@ import { EntityRef } from './components/interface'
 const GraphView = lazy(() => import('@/pages/entity-relation/components/graph-view'));
 
 // const [pipelineComponents, setPipelineComponents] = useState<any>([])
-const EntityPage = forwardRef<EntityRef, { openModal: any; entityType: any,rowSelection?:any }>(({rowSelection, openModal, entityType }, ref) => {
+const EntityPage = forwardRef<EntityRef, { openModal: any; entityType: any,rowSelection?:any ,params?:any}>(({rowSelection, openModal, entityType,params }, ref) => {
 
     const { data, pageNumber, totalPage, loading, reload, pageSize, setPageNumber, search } = usePagination({
         // pag?eApi: pageContainerApi,
         url: `/entity/page/${entityType}`,
-        params: {}
+        params: {
+            ...params
+        }
     })
     useImperativeHandle(ref, () => ({
         reload: reload
@@ -183,14 +185,17 @@ export default EntityViewPanel
 export const EntityView: FC<any> = forwardRef<any, any>(({ openModals,rowSelection,hiddenAssociation=false }, ref) => {
     const items:any[] = [
         {
+            key: "mesh-F03",
+            label: "Mental Disorders"
+        },  {
+            key: "mmesh-B",
+            label: "Organisms"
+        },{
            key: "taxonomy",
            label: "Microbiota"
        }, {
            key: "study",
            label: "Study"
-       }, {
-           key: "disease",
-           label: "Psychiatric Disorder"
        }, {
            key: "chemicals_and_drugs",
            label: "chemicals_and_drugs"
@@ -211,6 +216,8 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals,rowSelecti
    }
 
     const [entityType, setEntityType] = useState<any>(items[0].key)
+    const [params, setParams] = useState<any>()
+
     // const { modal, openModal, closeModal } = useModal();
 
     const entityRef = useRef<EntityRef>(null)
@@ -245,7 +252,25 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals,rowSelecti
 
         <Tabs size="small"
             onChange={(key: any) => {
-                setEntityType(key)
+                if(key.startsWith("mesh")){
+                    // debugger
+                    setEntityType("mesh")
+                    const category = key.split("-")[1]
+                    // setCategory(category)
+                    setParams({
+                        category:category
+                    })
+                }else if(key.startsWith("mmesh")){
+                    setEntityType("mesh")
+                    const category = key.split("-")[1]
+                    // setCategory(category)
+                    setParams({
+                        major_category:category
+                    })
+                }else{
+                    setEntityType(key)
+                }
+               
                 // reload()
             }}
             tabBarExtraContent={<>
@@ -267,10 +292,10 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals,rowSelecti
         {/* <TableTree></TableTree> */}
         {/* {entityType} */}
         {showStyle == "table" && <>
-            <EntityPage rowSelection={rowSelection} ref={entityRef} openModal={openModals} entityType={entityType}></EntityPage>
+            <EntityPage rowSelection={rowSelection} ref={entityRef} openModal={openModals} params={params} entityType={entityType}></EntityPage>
         </>}
         {showStyle == "tree" && <>
-            <TableTree ref={entityRef} entityType={entityType}></TableTree>
+            <TableTree ref={entityRef} entityType={entityType} params={params}></TableTree>
         </>}
 
     </div>

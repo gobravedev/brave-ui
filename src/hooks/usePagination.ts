@@ -82,7 +82,7 @@ export const usePagination = ({ url, pageApi, params, map, initialPageSize = 12 
     useEffect(()=>{
         fetchData(1); 
         setPageNumber(1)
-    },[url])
+    },[url,JSON.stringify(params)])
 
     useEffect(() => {
         fetchData(pageNumber); // 获取数据
