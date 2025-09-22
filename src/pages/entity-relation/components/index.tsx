@@ -10,10 +10,10 @@ export const viewMapping: {
     label: string;
     component: React.ComponentType<{ close: () => void,data:any ,queryParams:any,height:any,graphOpt:any}>;
 }[] = [
-        { key: "chat", label: "聊天窗口", component: ChatView },
-        { key: "details", label: "详情", component: NodeView },
-        { key: "relation", label: "关系", component: RelationView },
-        { key: "dataFilter", label: "数据筛选", component: DataFiletr },
+        { key: "chat", label: "ai chat", component: ChatView },
+        { key: "details", label: "details", component: NodeView },
+        { key: "relation", label: "relationship", component: RelationView },
+        { key: "dataFilter", label: "data screening", component: DataFiletr },
     ];
 
 export const ComponentsRender: FC<{ graphOpt:any,height:any,data:any,queryParams:any,view: string; close: () => void }> = ({graphOpt,height,data,queryParams, view, close }) => {

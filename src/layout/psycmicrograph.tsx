@@ -419,7 +419,7 @@ const App: React.FC = () => {
                         color={status === "open" ? "green" : status === "connecting" ? "blue" : "red"}
                         variant="solid"
                         onClick={reconnect} >
-                        {status === "open" ? "已连接" : status === "connecting" ? "连接中" : "连接失败"}
+                        {status === "open" ? "connected" : status === "connecting" ? "connecting" : "connection fail"}
                     </Button>
                     {/* <Button size="small" onClick={async () => {
                         await axios.get("/send-test")

@@ -135,13 +135,13 @@ const ChekboxComponents: FC<any> = ({ title, label, value, onChange }) => {
     return <>
 
         <Card size="small" loading={loading} title={title} style={{ marginBottom: "1rem" }} extra={<Space>
-            <Tooltip title={"搜索"}>
+            <Tooltip title={"Search"}>
                 <SearchOutlined style={{ cursor: "pointer" }} onClick={() => { setVisible(!visible); if (visible) setSearch("") }} />
             </Tooltip>
-            <Tooltip title={"清空选择"}>
+            <Tooltip title={"Clear Selection"}>
                 <ClearOutlined style={{ cursor: "pointer" }} onClick={() => { onChange(undefined) }} />
             </Tooltip>
-            <Tooltip title={"刷新接口"}>
+            <Tooltip title={"Refresh"}>
                 <UndoOutlined style={{ cursor: "pointer" }} onClick={loadData} />
             </Tooltip>
         </Space>} >

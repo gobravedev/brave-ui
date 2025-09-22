@@ -88,7 +88,7 @@ const GraphView = ({ openView, height, activeView, updateQueryParams, entity_id 
 
     const menuItems = [{
         key: "details",
-        label: "详情"
+        label: "details"
     }];
 
     const handleRightClick = (node: any, event: any) => {
@@ -537,7 +537,7 @@ const GraphView = ({ openView, height, activeView, updateQueryParams, entity_id 
                             </a>
                             {/* <Button onClick={() => { getWebGLInfo() }}>aa</Button> */}
                             {/* <Button size="small" color="cyan" variant="solid" >AI</Button> */}
-                            <Tooltip title="筛选" >
+                            <Tooltip title="data screening" >
                                 <FilterOutlined onClick={() => {
                                     openView("dataFilter")
                                 }} />
@@ -549,13 +549,13 @@ const GraphView = ({ openView, height, activeView, updateQueryParams, entity_id 
                             </Tooltip>
 
                             {/* <Button size="small" color="cyan" variant="solid" >新增</Button> */}
-                            <Tooltip title="新增">
+                            <Tooltip title="create">
                                 <PlusCircleOutlined onClick={() => {
                                     openModal("entityRelationForm")
                                 }} />
                             </Tooltip>
 
-                            <Tooltip title="刷新">
+                            <Tooltip title="refresh">
                                 <RedoOutlined onClick={() => fetchGraph()} />
                             </Tooltip>
                             {/* <Button size="small" color="cyan" variant="solid" >刷新</Button> */}
@@ -1063,7 +1063,7 @@ const NodeFilterDropdown: FC<any> = ({ onChange, selectedLabels, setSelectedLabe
         >
             <a onClick={(e) => e.preventDefault()}>
                 <Space>
-                    节点类型
+                node type
                     <DownOutlined />
                 </Space>
             </a>

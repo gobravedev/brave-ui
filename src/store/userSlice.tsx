@@ -12,7 +12,7 @@ const contextSlice = createSlice({
         locale: locale
             ? locale  // 如果存在，从 localStorage 解析
             : 'en_US',
-        theme:theme?theme:"dark"
+        theme:theme?theme:"light"
     },
     reducers: {
         setUserItem(state, action: PayloadAction<Partial<UserState>>) {

@@ -45,19 +45,58 @@ const Taxonomy: FC<any> = ({ }) => {
     //     };
     //     return payload
     // }
-
+    // subject、object、observed_in、evidenced_in、participates_in_pathway、produces_metabolite、regulates_gene
     return <>
-        <Form.Item label="Subject" name={"subject"}>
-            <Input onClick={() => openModals("entityDrawer", { name: "subject" })}></Input>
-            {/* <Select value={fromLabel} onChange={setFromLabel}>
-                <Option value="study">Study</Option>
-                <Option value="disease">Disease</Option>
-                <Option value="taxonomy">Taxonomy</Option>
-            </Select> */}
+        <Form.Item label="Subject" name={"subject"} >
+            <Input placeholder="who does something" style={{ cursor: "pointer" }}
+                onClick={() => openModals("entityDrawer", { name: "subject" })}></Input>
+        </Form.Item>
+        <Form.Item label="Object" name={"object"}>
+            <Input placeholder="who receives the effect" style={{ cursor: "pointer" }}
+                onClick={() => openModals("entityDrawer", { name: "object" })}></Input>
+        </Form.Item>
+        <Form.Item label="Observed_in" name={"observed_in"}>
+            <Input
+                placeholder="where the phenomenon is observed (e.g., patient group, tissue, condition)"
+                style={{ cursor: "pointer" }}
+                onClick={() => openModals("entityDrawer", { name: "observed_in" })}
+            />
+        </Form.Item>
+
+        <Form.Item label="Evidenced_in" name={"evidenced_in"}>
+            <Input
+                placeholder="which study or reference provides evidence"
+                style={{ cursor: "pointer" }}
+                onClick={() => openModals("entityDrawer", { name: "evidenced_in" })}
+            />
+        </Form.Item>
+
+        <Form.Item label="Participates in pathway" name={"participates_in_pathway"}>
+            <Input
+                placeholder="which biological pathway the entity is involved in (e.g., TLR signaling, lipid metabolism)"
+                style={{ cursor: "pointer" }}
+                onClick={() => openModals("entityDrawer", { name: "participates_in_pathway" })}
+            />
+        </Form.Item>
+
+        <Form.Item label="Produces metabolite" name={"produces_metabolite"}>
+            <Input
+                placeholder="which metabolite is generated (e.g., SCFAs, ceramide, lactate)"
+                style={{ cursor: "pointer" }}
+                onClick={() => openModals("entityDrawer", { name: "produces_metabolite" })}
+            />
+        </Form.Item>
+
+        <Form.Item label="Regulates gene" name={"regulates_gene"}>
+            <Input
+                placeholder="which gene expression is affected (e.g., upregulation of TNF-α, downregulation of PPARγ)"
+                style={{ cursor: "pointer" }}
+                onClick={() => openModals("entityDrawer", { name: "regulates_gene" })}
+            />
         </Form.Item>
         {/* <Button onClick={() => openModals("entityDrawer")}>aa</Button>
         {JSON.stringify(record)} */}
-        <Form.Item name="from_entity" label="选择 From 实体" rules={[{ required: true }]}>
+        {/* <Form.Item name="from_entity" label="选择 From 实体" rules={[{ required: true }]}>
             <Select
                 showSearch
                 placeholder="输入关键词搜索实体"
@@ -72,7 +111,6 @@ const Taxonomy: FC<any> = ({ }) => {
             </Select>
         </Form.Item>
 
-        {/* To 实体 */}
         <Form.Item label="To 实体类型">
             <Select value={toLabel} onChange={setToLabel}>
                 <Option value="study">Study</Option>
@@ -94,19 +132,18 @@ const Taxonomy: FC<any> = ({ }) => {
                     </Option>
                 ))}
             </Select>
-        </Form.Item>
+        </Form.Item> */}
 
         {/* 关系类型 */}
-        <Form.Item
+        {/* <Form.Item
             name="relation_type"
             label="关系类型"
             rules={[{ required: true, message: "请输入关系类型" }]}
         >
-            {/* <Input placeholder="例如: ASSOCIATED_WITH" /> */}
             <Select options={[
                 { value: "ASSOCIATED_WITH", label: "ASSOCIATED_WITH" }
             ]}></Select>
-        </Form.Item>
+        </Form.Item> */}
         <EntityDrawer
             form={form}
             setRecord={setRecord}
@@ -120,14 +157,14 @@ const Taxonomy: FC<any> = ({ }) => {
 export default Taxonomy
 
 
-const EntityDrawer: FC<any> = ({ visible, setRecord,form, params, onClose, callback }) => {
+const EntityDrawer: FC<any> = ({ visible, setRecord, form, params, onClose, callback }) => {
 
     return <>
         <Drawer open={visible} onClose={onClose} width={"50%"}>
             <EntityView hiddenAssociation={true} rowSelection={{
                 onChange: (selectedRowKeys: any, selectedRows: any) => {
                     // console.log(form,selectedRows, params.name)
-                    form.setFieldValue( params.name,selectedRows[0].entity_id)
+                    form.setFieldValue(params.name, selectedRows[0].entity_id)
                     // setRecord({...selectedRows[0],fieldName:})
                     onClose()
                 }, type: "radio"

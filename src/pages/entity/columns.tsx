@@ -25,14 +25,14 @@ export const getColumns = (entityType: any) => {
                     dataIndex: "has_children",
                     key: "has_children",
                     render: (text: any, record: any) => {
-                        return text?"存在":"不存在"
+                        return text?"exist":"non-existent"
                     }
                 },{
                     title: "is_exist_graph",
                     dataIndex: "is_exist_graph",
                     key: "is_exist_graph",
                     render: (text: any, record: any) => {
-                        return text?"存在":"不存在"
+                        return text?"exist":"non-existent"
                     }
                 }
             ]
@@ -60,14 +60,14 @@ export const getColumns = (entityType: any) => {
                     dataIndex: "has_children",
                     key: "has_children",
                     render: (text: any, record: any) => {
-                        return text?"存在":"不存在"
+                        return text?"exist":"non-existent"
                     }
                 },{
                     title: "is_exist_graph",
                     dataIndex: "is_exist_graph",
                     key: "is_exist_graph",
                     render: (text: any, record: any) => {
-                        return text?"存在":"不存在"
+                        return text?"exist":"non-existent"
                     }
                 }
             ]
@@ -112,14 +112,14 @@ export const getColumns = (entityType: any) => {
                     dataIndex: "has_children",
                     key: "has_children",
                     render: (text: any, record: any) => {
-                        return text?"存在":"不存在"
+                        return text?"exist":"non-existent"
                     }
                 },{
                     title: "is_exist_graph",
                     dataIndex: "is_exist_graph",
                     key: "is_exist_graph",
                     render: (text: any, record: any) => {
-                        return text?"存在":"不存在"
+                        return text?"exist":"non-existent"
                     }
                 }
             ]

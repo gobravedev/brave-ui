@@ -22,7 +22,7 @@ import { EntityRef } from './components/interface'
 const GraphView = lazy(() => import('@/pages/entity-relation/components/graph-view'));
 
 // const [pipelineComponents, setPipelineComponents] = useState<any>([])
-const EntityPage = forwardRef<EntityRef, { openModal: any; entityType: any,rowSelection?:any ,params?:any}>(({rowSelection, openModal, entityType,params }, ref) => {
+const EntityPage = forwardRef<EntityRef, { openModal: any; entityType: any, rowSelection?: any, params?: any }>(({ rowSelection, openModal, entityType, params }, ref) => {
 
     const { data, pageNumber, totalPage, loading, reload, pageSize, setPageNumber, search } = usePagination({
         // pag?eApi: pageContainerApi,
@@ -51,13 +51,13 @@ const EntityPage = forwardRef<EntityRef, { openModal: any; entityType: any,rowSe
                     {openModal && <>
                         <Button size="small" color="cyan" variant="solid" onClick={() => {
                             openModal("modalA", { entityType: entityType, entityId: record.entity_id })
-                        }}>更新</Button>
+                        }}>update</Button>
 
 
                         {record.is_exist_graph ? <>
                             <Button size="small" color="cyan" variant="solid" onClick={() => {
                                 openModal("graphView", { entityType: entityType, entityId: record.entity_id, entityName: record.entity_name })
-                            }}>网络</Button>
+                            }}>network</Button>
                             <Popconfirm title="确认删除节点?"
                                 onConfirm={async () => {
                                     // deleteContainer(record)
@@ -70,16 +70,16 @@ const EntityPage = forwardRef<EntityRef, { openModal: any; entityType: any,rowSe
                                         messageApi.error(error?.response?.data?.detail)
                                     }
                                 }}>
-                                <Button size="small" danger variant="solid">删除节点</Button>
+                                <Button size="small" danger variant="solid">delete</Button>
                             </Popconfirm>
 
-                        </> : <Popconfirm title="确认删除?"
+                        </> : <Popconfirm title="Confirm deletion?"
 
                             onConfirm={async () => {
                                 // deleteContainer(record)
                                 try {
                                     await axios.delete(`/entity/delete/${entityType}/${record.entity_id}`)
-                                    messageApi.success("删除成功!")
+                                    messageApi.success("Delete successfully!")
                                     reload()
                                 } catch (error: any) {
                                     console.log(error?.response?.data?.detail)
@@ -87,7 +87,7 @@ const EntityPage = forwardRef<EntityRef, { openModal: any; entityType: any,rowSe
                                 }
 
                             }}>
-                            <Button size="small" danger variant="solid">删除</Button>
+                            <Button size="small" danger variant="solid">delete</Button>
                         </Popconfirm>
                         }
 
@@ -109,7 +109,7 @@ const EntityPage = forwardRef<EntityRef, { openModal: any; entityType: any,rowSe
             title={() => (
                 <Input.Search
                     size="small"
-                    placeholder="搜索..."
+                    placeholder="search..."
                     allowClear
                     enterButton
                     onSearch={(value) => { search(value) }}
@@ -131,7 +131,7 @@ const EntityPage = forwardRef<EntityRef, { openModal: any; entityType: any,rowSe
             dataSource={data}
             footer={() => (<>
                 {totalPage != 0 && <Flex style={{ marginTop: "1rem" }} align="center">
-                    一共{totalPage}条数据 &nbsp;
+                A total of {totalPage} data &nbsp;
                     <Pagination
                         size="small"
                         current={pageNumber}
@@ -176,46 +176,15 @@ const EntityViewPanel: FC<any> = () => {
             onClose={() => closeModals("graphView")}
         ></GraphViewModal>
 
-      
+
     </>
 }
 
 export default EntityViewPanel
 
-export const EntityView: FC<any> = forwardRef<any, any>(({ openModals,rowSelection,hiddenAssociation=false }, ref) => {
-    const items:any[] = [
-        {
-            key: "mesh-F03",
-            label: "Mental Disorders"
-        },  {
-            key: "mmesh-B",
-            label: "Organisms"
-        },{
-           key: "taxonomy",
-           label: "Microbiota"
-       }, {
-           key: "study",
-           label: "Study"
-       }, {
-           key: "chemicals_and_drugs",
-           label: "chemicals_and_drugs"
-       }, {
-           key: "diet_and_food",
-           label: "diet_and_food"
-       },
-       //  {
-       //     key: "inteventions",
-       //     label: "Inteventions"
-       // }
-   ]
-   if(!hiddenAssociation){
-       items.unshift({
-           key: "association",
-           label: "association"
-       })
-   }
+export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelection, hiddenAssociation = false }, ref) => {
 
-    const [entityType, setEntityType] = useState<any>(items[0].key)
+    const [entityType, setEntityType] = useState<any>()
     const [params, setParams] = useState<any>()
 
     // const { modal, openModal, closeModal } = useModal();
@@ -226,6 +195,91 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals,rowSelecti
     const reload = () => {
         entityRef.current?.reload()
     }
+    const items: any[] = [
+        {
+            key: "mesh-F03",
+            label: "Mental Disorders"
+        },{
+            key: "taxonomy",
+            label: "Microbe"
+        },
+        {
+            key: "mesh-KEGG",
+            label: "KEGG"
+        },
+        // {
+        //     key: "organisms",
+        //     label: "Organisms"
+        // },
+        {
+            key: "chemicals_and_drugs",
+            label: "Chemicals and Drugs"
+        }, {
+            key: "study",
+            label: "Study"
+        },
+         {
+            key: "diet_and_food",
+            label: "diet_and_food"
+        },
+        //  {
+        //     key: "inteventions",
+        //     label: "Inteventions"
+        // }
+    ]
+    if (!hiddenAssociation) {
+        items.unshift({
+            key: "association",
+            label: "Association"
+        })
+    }
+    const onKeyChange = (key: any) => {
+        if (key.startsWith("mesh")) {
+            // debugger
+            setEntityType("mesh")
+            const category = key.split("-")[1]
+            // setCategory(category)
+            setParams({
+                category: category
+            })
+        } else if (key == "organisms") {
+            setEntityType("mesh")
+            setParams({
+                category: ["B01", "B02", "B03", "B04"]
+            })
+        } else if (key == "chemicals_and_drugs") {
+            // 化学品和药物 [D] 
+            // 无机化学品 [D01] 
+            // 有机化学品 [D02] 
+            // 杂环化合物 [D03] 
+            // 多环化合物 [D04] 
+            // 大分子物质 [D05] 
+            // 激素、激素替代物和激素拮抗剂 [D06] 
+            // 酶和辅酶 [D08] 
+            // 碳水化合物 [D09] 
+            // 脂质 [D10] 
+            // 氨基酸、肽和蛋白质 [D12] 
+            // 核酸、核苷酸和核苷 [D13] 
+            // 复杂混合物 [D20] 
+            // 生物因素 [D23] 
+            // 生物医学和牙科材料 [D25] 
+            // 药物制剂 [D26] 
+            // 化学作用及用途 [D27] 
+            setEntityType("mesh")
+            setParams({
+                category: ["D01", "D02", "D03", "D04", "D05", "D06", "D08", "D09", "D10", "D12", "D13", "D20", "D23", "D25", "D26", "D27"]
+            })
+        } else {
+            setEntityType(key)
+        }
+
+        // reload()
+    }
+
+    useEffect(() => {
+        onKeyChange(items[0].key)
+    }, [])
+
     useImperativeHandle(ref, () => ({
         reload
     }))
@@ -234,17 +288,17 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals,rowSelecti
     //     key: "association",
     //     label: "association"
     // }
-   
+
 
     return <div style={{ maxWidth: "1500px", margin: "1rem auto" }}>
         <Flex justify="flex-end" gap="small">
             {openModals && <>
                 <Button size="small" color="cyan" variant="solid" onClick={() => {
                     openModals("entityModal", { entityType: entityType })
-                }}>新增</Button>
+                }}>create</Button>
             </>}
 
-            <Button size="small" color="cyan" variant="solid" onClick={reload}>刷新</Button>
+            <Button size="small" color="cyan" variant="solid" onClick={reload}>refresh</Button>
         </Flex>
         <div style={{ marginBottom: "1rem" }}> </div>
 
@@ -252,26 +306,7 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals,rowSelecti
 
         <Tabs size="small"
             onChange={(key: any) => {
-                if(key.startsWith("mesh")){
-                    // debugger
-                    setEntityType("mesh")
-                    const category = key.split("-")[1]
-                    // setCategory(category)
-                    setParams({
-                        category:category
-                    })
-                }else if(key.startsWith("mmesh")){
-                    setEntityType("mesh")
-                    const category = key.split("-")[1]
-                    // setCategory(category)
-                    setParams({
-                        major_category:category
-                    })
-                }else{
-                    setEntityType(key)
-                }
-               
-                // reload()
+                onKeyChange(key)
             }}
             tabBarExtraContent={<>
                 <Segmented size="small" value={showStyle}
@@ -291,11 +326,15 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals,rowSelecti
         {/* {showStyle} */}
         {/* <TableTree></TableTree> */}
         {/* {entityType} */}
-        {showStyle == "table" && <>
-            <EntityPage rowSelection={rowSelection} ref={entityRef} openModal={openModals} params={params} entityType={entityType}></EntityPage>
-        </>}
-        {showStyle == "tree" && <>
-            <TableTree ref={entityRef} entityType={entityType} params={params}></TableTree>
+        {entityType && <>
+            {showStyle == "table" && <>
+                <EntityPage rowSelection={rowSelection} ref={entityRef} openModal={openModals} params={params} entityType={entityType}></EntityPage>
+            </>}
+            {showStyle == "tree" && <>
+                <TableTree ref={entityRef} entityType={entityType} params={params}></TableTree>
+            </>}
+
+
         </>}
 
     </div>
@@ -317,7 +356,7 @@ const GraphViewModal: FC<any> = ({ visible, params, onClose, callback }) => {
 }
 
 
-const EntityModal: FC<any> = ({ visible, params, onClose, openModals,record, callback }) => {
+const EntityModal: FC<any> = ({ visible, params, onClose, openModals, record, callback }) => {
     const [form] = Form.useForm()
     const { messageApi } = useOutletContext<any>()
     const [loading, setLoading] = useState<any>(false)
@@ -353,7 +392,7 @@ const EntityModal: FC<any> = ({ visible, params, onClose, openModals,record, cal
         }
         messageApi.success("操作成功!")
     }
-    return <Modal loading={loading} title={params?.entityId ? `编辑实体` : "创建实体"}
+    return <Modal loading={loading} title={params?.entityId ? `update entity` : "create entity"}
         onOk={save}
         width={"50%"} open={visible} onClose={onClose} onCancel={onClose}>
         {/* {params} */}
@@ -363,7 +402,7 @@ const EntityModal: FC<any> = ({ visible, params, onClose, openModals,record, cal
             <Collapse ghost items={[
                 {
                     key: "1",
-                    label: "更多",
+                    label: "more",
                     children: <>
                         <Form.Item noStyle shouldUpdate>
                             {() => (
