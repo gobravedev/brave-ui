@@ -8,7 +8,7 @@ export const viewMapping: {
     label: string;
     component: React.ComponentType<{ data: any }>;
 }[] = [
-        { key: "taxonomy", label: "taxonomy", component: Taxonomy },
+        { key: "Microbe", label: "taxonomy", component: Taxonomy },
         // { key: "details", label: "详情", component: DetailsView },
         // { key: "setting", label: "设置窗口", component: ChatView },
     ];
@@ -31,10 +31,11 @@ const DetailsView: FC<any> = ({ data: params, close, height, graphOpt, queryPara
     const [messageApi, messageContextHolder] = message.useMessage();
 
     const loadData = async () => {
-        if (params?.label && params?.id) {
+        // console.log(params)
+        if ( params?.id) {
             try {
                 setLoading(true)
-                const resp = await axios.post(`/entity/details/${params?.label}/${params?.id}`,{
+                const resp = await axios.post(`/entity/details/mesh/${params?.id}`,{
                     nodes:queryParams.nodes
                 })
                 setData(resp.data)
@@ -67,8 +68,8 @@ const DetailsView: FC<any> = ({ data: params, close, height, graphOpt, queryPara
         <Card
             loading={loading}
             title={<>
-                {`${rest?.label}(${params?.entity_name})`}
-                <Tag style={{ marginLeft: "0.5rem" }}>{params?.label}</Tag>
+                {data?.entity_name}
+                <Tag style={{ marginLeft: "0.5rem" }}>{data?.entity_type}</Tag>
             </>}
             styles={{
                 body: {
@@ -112,7 +113,7 @@ const DetailsView: FC<any> = ({ data: params, close, height, graphOpt, queryPara
             <div style={{ height: "100%", overflowY: "auto", }}>
 
                 {data ? <>
-                    <ComponentsRender data={data} view={params.label}  ></ComponentsRender>
+                    <ComponentsRender data={data} view={data?.entity_type}  ></ComponentsRender>
                     <Divider />
 
                 </> : <Empty description={JSON.stringify(params)}>

@@ -1,10 +1,11 @@
-import { Button, Drawer, Form, Input, Select } from "antd";
+import { Button, Drawer, Form, Input, Modal, Select } from "antd";
 import axios from "axios";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 const { Option } = Select;
-import { EntityView } from '@/pages/entity/index'
+// import { EntityView, } from '@/pages/entity/index'
+import EntityViewPanel from '@/pages/entity/index'
 import { useModals } from "@/hooks/useModal";
-const Taxonomy: FC<any> = ({ }) => {
+const Association: FC<any> = ({ }) => {
 
     const [fromLabel, setFromLabel] = useState<string>("study");
     const [toLabel, setToLabel] = useState<string>("disease");
@@ -47,30 +48,70 @@ const Taxonomy: FC<any> = ({ }) => {
     // }
     // subject、object、observed_in、evidenced_in、participates_in_pathway、produces_metabolite、regulates_gene
     return <>
-        <Form.Item label="Subject" name={"subject"} >
-            <Input placeholder="who does something" style={{ cursor: "pointer" }}
-                onClick={() => openModals("entityDrawer", { name: "subject" })}></Input>
-        </Form.Item>
-        <Form.Item label="Object" name={"object"}>
-            <Input placeholder="who receives the effect" style={{ cursor: "pointer" }}
-                onClick={() => openModals("entityDrawer", { name: "object" })}></Input>
-        </Form.Item>
-        <Form.Item label="Observed_in" name={"observed_in"}>
-            <Input
-                placeholder="where the phenomenon is observed (e.g., patient group, tissue, condition)"
-                style={{ cursor: "pointer" }}
-                onClick={() => openModals("entityDrawer", { name: "observed_in" })}
-            />
-        </Form.Item>
-
-        <Form.Item label="Evidenced_in" name={"evidenced_in"}>
+        <Form.Item label="Study" name={"study_id"}>
             <Input
                 placeholder="which study or reference provides evidence"
                 style={{ cursor: "pointer" }}
-                onClick={() => openModals("entityDrawer", { name: "evidenced_in" })}
+                onClick={() => openModals("entityDrawer", { name: "study_id" })}
+            />
+        </Form.Item>
+        <Form.Item label="Subject" name={"subject_id"} >
+            <Input placeholder="who does something" style={{ cursor: "pointer" }}
+                onClick={() => openModals("entityDrawer", { name: "subject_id" })}></Input>
+        </Form.Item>
+        <Form.Item label="Object" name={"object_id"}>
+            <Input placeholder="who receives the effect" style={{ cursor: "pointer" }}
+                onClick={() => openModals("entityDrawer", { name: "object_id" })}></Input>
+        </Form.Item>
+        <Form.Item label="Predicate" name={"predicate"} >
+            <Select
+                allowClear
+                options={[
+                    {
+                        value: "CORRELATED_WITH",
+                        label: "CORRELATED_WITH"
+                    }, {
+                        value: "PRODUCES",
+                        label: "PRODUCES"
+                    }, {
+                        value: "MODULATES",
+                        label: "MODULATES"
+                    }, {
+                        value: "ACTIVATES",
+                        label: "ACTIVATES"
+                    }, {
+                        value: "INHIBITS",
+                        label: "INHIBITS"
+                    }
+                ]}
             />
         </Form.Item>
 
+        <Form.Item label="effect" name={"effect"} >
+            <Select
+                allowClear
+                options={[
+                    {
+                        value: "Up",
+                        label: "Up"
+                    }, {
+                        value: "Down",
+                        label: "Down"
+                    }
+                ]}
+            />
+        </Form.Item>
+
+        <Form.Item label="Observed" name={"observed_id"}>
+            <Input
+                placeholder="where the phenomenon is observed (e.g., patient group, tissue, condition)"
+                style={{ cursor: "pointer" }}
+                onClick={() => openModals("entityDrawer", { name: "observed_id" })}
+            />
+        </Form.Item>
+
+
+        {/* 
         <Form.Item label="Participates in pathway" name={"participates_in_pathway"}>
             <Input
                 placeholder="which biological pathway the entity is involved in (e.g., TLR signaling, lipid metabolism)"
@@ -93,7 +134,7 @@ const Taxonomy: FC<any> = ({ }) => {
                 style={{ cursor: "pointer" }}
                 onClick={() => openModals("entityDrawer", { name: "regulates_gene" })}
             />
-        </Form.Item>
+        </Form.Item> */}
         {/* <Button onClick={() => openModals("entityDrawer")}>aa</Button>
         {JSON.stringify(record)} */}
         {/* <Form.Item name="from_entity" label="选择 From 实体" rules={[{ required: true }]}>
@@ -154,24 +195,29 @@ const Taxonomy: FC<any> = ({ }) => {
     </>
 }
 
-export default Taxonomy
+export default Association
 
 
 const EntityDrawer: FC<any> = ({ visible, setRecord, form, params, onClose, callback }) => {
 
     return <>
-        <Drawer open={visible} onClose={onClose} width={"50%"}>
-            <EntityView hiddenAssociation={true} rowSelection={{
-                onChange: (selectedRowKeys: any, selectedRows: any) => {
-                    // console.log(form,selectedRows, params.name)
-                    form.setFieldValue(params.name, selectedRows[0].entity_id)
-                    // setRecord({...selectedRows[0],fieldName:})
-                    onClose()
-                }, type: "radio"
+        <Drawer open={visible} onClose={onClose} width={"80%"}>
+            {visible &&
+                <EntityViewPanel disableWidth={true}  rowSelection={{
+                    onChange: (selectedRowKeys: any, selectedRows: any) => {
+                        // console.log(form,selectedRows, params.name)
+                        form.setFieldValue(params.name, selectedRows[0].entity_id)
+                        // setRecord({...selectedRows[0],fieldName:})
+                        onClose()
+                    }, type: "radio"
 
-            }}></EntityView>
+                }}></EntityViewPanel>
+            }
+
 
         </Drawer>
     </>
 
 }
+
+

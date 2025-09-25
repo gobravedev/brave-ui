@@ -2,12 +2,12 @@ import axios from 'axios';
 import React, { useState, useEffect, useRef } from 'react';
 
 // 自定义 hook：分页逻辑
-export const usePagination = ({ url, pageApi, params, map, initialPageSize = 12 }: any) => {
+export const usePagination = ({ url, pageApi, params, map, initialPageSize = 10 }: any) => {
     const [data, setData] = useState<any[]>([]);  // 存储数据
     const [pageNumber, setPageNumber] = useState(1); // 当前页码
     const [totalPage, setTotalPage] = useState(0); // 总页数
     const [loading, setLoading] = useState(false); // 加载状态
-    const [pageSize] = useState(initialPageSize); // 每页显示条数
+    const [pageSize,setPageSize] = useState(initialPageSize); // 每页显示条数
     const [keywords, setKeywords] = useState<string>(""); // 搜索关键词
 
     // const fetchDataRef = useRef<(page: number) => void>(() => {});
@@ -79,14 +79,12 @@ export const usePagination = ({ url, pageApi, params, map, initialPageSize = 12 
     const reload = () => {
         fetchData(pageNumber)
     }
-    useEffect(()=>{
-        fetchData(1); 
-        setPageNumber(1)
-    },[url,JSON.stringify(params)])
-
+    // useEffect(() => {
+    //     setPageNumber(1);
+    // }, [url, JSON.stringify(params)]);
     useEffect(() => {
         fetchData(pageNumber); // 获取数据
-    }, [pageNumber, keywords]);
+    }, [pageNumber, keywords,pageSize,url,JSON.stringify(params)]);
 
     return {
         data,
@@ -94,6 +92,7 @@ export const usePagination = ({ url, pageApi, params, map, initialPageSize = 12 
         totalPage,
         loading,
         setPageNumber, // 更新页码
+        setPageSize,
         pageSize,
         reload,
         search

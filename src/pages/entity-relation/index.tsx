@@ -11,8 +11,9 @@ import ForceGraph3D from "react-force-graph-3d";
 import { useResizeDetector } from 'react-resize-detector';
 // import * as THREE from "three";
 import SpriteText from "three-spritetext";
-import { ComponentsRender } from './components'
-import GraphView from './components/graph-view'
+import { GraphRender, ComponentsRender } from './components'
+import { AssociationModal } from "../entity/components";
+// import GraphView from './components/graph-view'
 // const  AIChat  = lazy(() => import('@/components/chat'));
 const Panel: FC<any> = () => {
     // const [chatOpen, setChatOpen] = useState(false);
@@ -20,9 +21,17 @@ const Panel: FC<any> = () => {
     const [activeView, setActiveView] = useState<string | null>(null);
     const [data, setData] = useState<any>();
     const graphViewRef = useRef<any>(null)
+    const compRef = useRef<any>(null)
     const [queryParams, updateQueryParams] = useState({
-        
+
     });
+    const { modal, openModal, closeModal } = useModal();
+    
+    const compReload = () => {
+        if(compRef.current?.reload){
+            compRef.current?.reload()
+        }
+    }
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [innerHeight, setInnerHeight] = useState<any>(null);
@@ -47,11 +56,17 @@ const Panel: FC<any> = () => {
             graphViewRef.current.cancelSelectNode()
         }
     }
-    const updateQueryParam = (key:any,value:any) => {
+    const updateQueryParam = (key: any, value: any) => {
         if (graphViewRef.current) {
-            graphViewRef.current.updateQueryParam(key,value)
+            graphViewRef.current.updateQueryParam(key, value)
         }
     }
+    // const openModal = (value: any, params?: any) => {
+    //     if (graphViewRef.current) {
+    //         graphViewRef.current.openModal(value, params)
+    //     }
+    // }
+
     // useEffect(() => {
 
     // }, []);
@@ -67,7 +82,7 @@ const Panel: FC<any> = () => {
 
 
 
-    return <div style={{  padding: "1rem 1rem 0 1rem  " }}>
+    return <div style={{ padding: "1rem 1rem 0 1rem  " }}>
         <div ref={containerRef}>
             {/* {innerHeight} */}
             <ConfigProvider
@@ -87,24 +102,19 @@ const Panel: FC<any> = () => {
                 // }}
                 >
                     <Splitter.Panel size={sizes[0]} min={"20%"} style={{ paddingRight: `${activeView ? "0.5rem" : "0"}` }}>
-                        <GraphView
+                        <GraphRender
                             ref={graphViewRef}
                             height={innerHeight}
+                            openGlobalModal={openModal}
                             updateQueryParams={updateQueryParams}
                             openView={(view: string, data?: any) => {
                                 setActiveView(view)
-                                // if (view == "details") {
-                                //     setSizes(['70%', '30%'])
-
-                                // } else {
-                                //     setSizes(['80%', '20%'])
-
-                                // }
                                 setSizes(['70%', '30%'])
                                 if (data) {
                                     setData(data)
                                 }
                             }} activeView={activeView} />
+
                     </Splitter.Panel>
 
                     {activeView && (
@@ -114,10 +124,11 @@ const Panel: FC<any> = () => {
                             setSizes(['100%', '0%'])
                         }} /> */}
                             <ComponentsRender
+                                ref={compRef}
                                 graphOpt={{
                                     loadGraph: loadGraph,
-                                    
-                                    updateQueryParam:updateQueryParam,
+                                    openModal: openModal,
+                                    updateQueryParam: updateQueryParam,
                                     cancelSelectLink: cancelSelectLink,
                                     cancelSelectNode: cancelSelectNode
                                 }}
@@ -135,6 +146,14 @@ const Panel: FC<any> = () => {
                     )}
                 </Splitter>
             </ConfigProvider>
+
+            <AssociationModal
+                callback={() =>{compReload();loadGraph()} }
+                visible={modal.key == "optModal" && modal.visible}
+                params={modal.params}
+                onClose={closeModal}
+            ></AssociationModal>
+
         </div>
 
         {/* {chatOpen?"aaa":"bbb"} */}

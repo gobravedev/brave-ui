@@ -88,7 +88,7 @@ const App = forwardRef<EntityRef, { entityType: any, params: any }>(({ entityTyp
 
     useEffect(() => {
         loadData()
-    }, [entityType])
+    }, [entityType,JSON.stringify(params)])
 
     const onLoadData = async ({ key, children }: any) => {
         if (children) return;

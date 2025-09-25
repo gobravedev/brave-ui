@@ -23,6 +23,7 @@ import {
   TeamOutlined,
 } from "@ant-design/icons";
 import axis from "@/assets/axis.svg";
+import gut_brain_axis from "@/assets/gut_brain_axis.png";
 
 const { Title, Paragraph } = Typography;
 
@@ -136,13 +137,20 @@ const PsycMicroGraphHome: FC<any> = () => {
         </Col>
         <Col xs={24} md={12}>
           <img
-            src={axis}
+            src={gut_brain_axis}
             alt="Human Microbiome"
             style={{
               width: "100%",
               maxWidth: 700,
               display: "block",
               margin: "0 auto",
+              // filter: "drop-shadow(0 0 20px rgba(0,0,0,0.3))", // 可选投影
+              // borderRadius: "15px", // 圆角更柔和
+              borderRadius: "15px",
+              WebkitMaskImage: "radial-gradient(circle, rgba(0,0,0,1) 80%, rgba(0,0,0,0) 100%)",
+              WebkitMaskRepeat: "no-repeat",
+              WebkitMaskPosition: "center",
+              WebkitMaskSize: "cover",
             }}
           />
         </Col>

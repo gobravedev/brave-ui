@@ -1,21 +1,22 @@
 
-import React, { FC, forwardRef, lazy, memo, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
-import { Form, Select, Button, Card, Input, message, Collapse, Typography, Flex, Modal, Splitter, ConfigProvider, Drawer, Popover, Skeleton, Spin, Dropdown, Space, Checkbox, Tag, Tooltip } from "antd";
+import React, { FC, forwardRef, lazy, memo, Suspense, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { Form, Select, Button, Card, Input, message, Collapse, Typography, Flex, Modal, Splitter, ConfigProvider, Drawer, Popover, Skeleton, Spin, Dropdown, Space, Checkbox, Tag, Tooltip, Radio } from "antd";
 import axios from "axios";
-import ForceGraph2D, { ForceGraphMethods } from "react-force-graph-2d";
+
 const { Option } = Select;
 const { Search } = Input;
 import debounce from "lodash.debounce";
 import { useModal } from "@/hooks/useModal";
 import { useOutletContext } from "react-router";
-import ForceGraph3D from "react-force-graph-3d";
 import { useResizeDetector } from 'react-resize-detector';
-import { DownOutlined, FilterOutlined, InfoCircleOutlined, LoadingOutlined, PlusCircleOutlined, RedoOutlined, RobotOutlined } from "@ant-design/icons"
+import { DownOutlined, FilterOutlined, InfoCircleOutlined, LoadingOutlined, NodeIndexOutlined, PlusCircleOutlined, RadarChartOutlined, RedoOutlined, RobotOutlined, TableOutlined } from "@ant-design/icons"
 // import * as THREE from "three";
-import SpriteText from "three-spritetext";
-import { tr } from "@faker-js/faker";
+
 import { useDispatch, useSelector } from "react-redux";
 import { setDisplayNode } from '@/store/graphSlice'
+import { useI18n } from "@/hooks/useI18n";
+import { AssociationModal } from "@/pages/entity/components";
+// import TextSprite from 'three-spritetext';
 
 const nodeLabelOptions = [
     { label: "Disease", value: "disease" },
@@ -25,14 +26,42 @@ const nodeLabelOptions = [
 ];
 
 
-const GraphView = ({ openView, height, activeView, updateQueryParams, entity_id }: any, ref: any) => {
+const ForceGraphView = lazy(() => import('./force-graph'))
+const VisNetwork = lazy(() => import('./vis-network'))
+
+export const graphViewMapping: {
+    key: string;
+    label: string;
+    component: React.ComponentType<any>;
+}[] = [
+        { key: "forceGraphView", label: "ai chat", component: ForceGraphView },
+        { key: "visNetwork", label: "details", component: VisNetwork },
+    ];
+
+
+export const GraphRender: FC<any> = ({ view, ...rest }) => {
+    if (!view) return <div onClick={close}>未知类型</div>;
+    const item = graphViewMapping.find((v) => v.key === view);
+    if (!item) return <div>未知类型</div>;
+    const { component: Component, key, ...crest } = item
+    // const Component = item.component;
+
+    return <Suspense fallback={<Skeleton active></Skeleton>}>
+        <Component  {...crest}  {...rest} />
+    </Suspense>
+};
+
+const GraphView0 = ({ openView, height, activeView, updateQueryParams, entity_id,openGlobalModal, ...rest }: any, ref: any) => {
     const [graphData, setGraphData] = useState({ nodes: [], links: [] });
     const [selectedLink, setSelectedLink] = useState<any>();
+    const [view, setView] = useState<any>("visNetwork")
     // const spriteCache = new Map<string, any>();
     const spriteCacheRef = useRef<Map<string, any>>(new Map());
     console.log('GraphView mounted')
     // const [searchText, setSearchText] = useState<any>();
     const fgRef = useRef<any>(null);
+    const { locale } = useI18n()
+
     // const [labelFilter, setLabelFilter] = useState("");
     const { modal, openModal, closeModal } = useModal();
     const { width, ref: divRef } = useResizeDetector<HTMLDivElement>();
@@ -91,13 +120,7 @@ const GraphView = ({ openView, height, activeView, updateQueryParams, entity_id 
         label: "details"
     }];
 
-    const handleRightClick = (node: any, event: any) => {
-        event.preventDefault(); // prevent default browser menu
-        setContextNode(node)
-        // console.log(node)
-        setOpenRightMenu(true)
-        setMenuPos({ x: event.clientX, y: event.clientY });
-    };
+
 
     const handleMenuClick = (action: any) => {
         // alert(`Action "${action}" on node "${contextNode.name}"`);
@@ -172,6 +195,7 @@ const GraphView = ({ openView, height, activeView, updateQueryParams, entity_id 
         nodes: displayNode as string[],
         nodes_dict: undefined as any[] | undefined,
         nodes_dict_condition: "OR" as string,
+
     });
 
     // 通用更新函数
@@ -195,27 +219,18 @@ const GraphView = ({ openView, height, activeView, updateQueryParams, entity_id 
         setGraphReady(false)
         console.log("请求参数:", queryParams);
 
-        const res = await axios.post("/entity-relation/graph", queryParams);
+        const res = await axios.post("/entity-relation/graph", {
+            ...queryParams,
+            locale: locale
+        });
 
         setGraphData(res.data);
         setLoading(false);
 
     };
 
-    const nodeTreeObject = useCallback((node: any) => {
-        const key = String(node.id ?? node.node_id ?? node.entity_id ?? node.entity_name);
-        const cache = spriteCacheRef.current;
-        // console.log(cache.has(key))
-        if (!cache.has(key)) {
-            const color = labelColorMap[node.label] || "#888888";
-            const sprite: any = new SpriteText(node.entity_name ?? node.id ?? key);
-            sprite.color = color;
-            sprite.textHeight = 8;
-            if (sprite.center) sprite.center.y = -0.6;
-            cache.set(key, sprite);
-        }
-        return cache.get(key);
-    }, [])
+
+
 
     const removeQueryParam = (key: Exclude<keyof typeof queryParams, "nodes">) => {
         setQueryParams(prev => ({
@@ -372,10 +387,10 @@ const GraphView = ({ openView, height, activeView, updateQueryParams, entity_id 
 
     useEffect(() => {
         fetchGraph();
-        if(updateQueryParams){
+        if (updateQueryParams) {
             updateQueryParams(queryParams)
         }
-    }, [queryParams]); // labelFilter 改变时刷新数据
+    }, [queryParams, locale]); // labelFilter 改变时刷新数据
 
     // 搜索节点，高亮 & 缩放
     const handleSearchNode = (keyword: string) => {
@@ -414,55 +429,40 @@ const GraphView = ({ openView, height, activeView, updateQueryParams, entity_id 
         association: "#ffa500",   // Orange，Association 证据
         diet_and_food: "#20b2aa"
     };
-    const nodeOperation = {
-        onNodeClick: (node: any) => {
-            openView("details", { id: node.id, label: node.label, entity_name: node.entity_name, node_id: node.node_id })
-            setContextNode(node)
-            setSelectedLink(null)
-            // openModal("nodeView", { id: node.id, label: node.label, entity_name: node.entity_name })
-        },
-        // onNodeHover={(node) => setHoverNode(node)}
-        onNodeRightClick: handleRightClick,
-        onLinkClick: (link: any) => {
-            // console.log(link)
-            setContextNode(null)
-            openView("relation", link)
-            setSelectedLink(link); //
-        },
-        linkColor: (link: any) => {
-            // console.log(link)
-            if (selectedLink) {
-                return link.relation_id === selectedLink.relation_id ? "red" : "rgba(200,200,200,0.5)"
-            }
-            return "rgba(200,200,200,0.5)"
-        },
-        onNodeDragEnd: (node: any) => {
-            node.fx = node.x;
-            node.fy = node.y;
-            node.fz = node.z;
-        },
-        onEngineTick:() => {
-            if(!graphReady){
-                setGraphReady(true);
-                console.log("graphReady")
-            }
-        }
-        // (link: any) =>{
-        //     selectedLink && link.relation_id === selectedLink.relation_id ? "red" : "rgba(200,200,200,0.5)"
-        // }
 
 
+    // useEffect(() => {
+    //     if (!fgRef.current) return;
+
+    //     const fg = fgRef.current;
+
+    //     // 设置节点之间距离
+    //     fg.d3Force("link")!.distance(50);   // 连接线长度
+    //     fg.d3Force("charge")!.strength(-50); // 节点斥力，越负节点越远
+    // }, [graphData]);
+
+
+    const params = {
+        loading,
+        is3D,
+        fgRef,
+        graphData,
+        width,
+        height,
+        queryParams,
+        contextNode,
+        labelColorMap,
+        spriteCacheRef,
+        graphReady,
+        openView,
+        setContextNode,
+        setSelectedLink,
+        setOpenRightMenu,
+        setMenuPos,
+        selectedLink,
+        setGraphReady
     }
 
-    useEffect(() => {
-        if (!fgRef.current) return;
-
-        const fg = fgRef.current;
-
-        // 设置节点之间距离
-        fg.d3Force("link")!.distance(50);   // 连接线长度
-        fg.d3Force("charge")!.strength(-50); // 节点斥力，越负节点越远
-    }, [graphData]);
     return (
         <>
             {contextHolder}
@@ -517,9 +517,31 @@ const GraphView = ({ openView, height, activeView, updateQueryParams, entity_id 
                     size="small"
                     extra={<>
                         <Flex justify="flex-end" gap="small">
+                            {view == "forceGraphView" &&
+                                <span
+                                    style={{ cursor: "pointer" }}
+                                    onClick={toggle3D}
+                                >
+                                    {is3D ? "2D" : "3D"}
+                                </span>
+                            }
+                            <RadioDropdown options={[
+                                {
+                                    label: "VisNetwork",
+                                    value: "visNetwork"
+                                }, {
+                                    label: "ForceGraphView",
+                                    value: "forceGraphView"
+                                }
+                            ]}
+                                onChange={() => { }}
+                                selectedLabel={view}
+                                setSelectedLabel={setView}
+                                loading={loading}></RadioDropdown>
 
                             <NodeFilterDropdown
                                 loading={loading}
+                                options={nodeLabelOptions}
                                 selectedLabels={queryParams.nodes}
                                 setSelectedLabels={(val: any) => updateQueryParam("nodes", val)}
                                 onChange={(labels: any) => {
@@ -529,12 +551,12 @@ const GraphView = ({ openView, height, activeView, updateQueryParams, entity_id 
 
                                 }}
                             />
-                            <a
 
-                                onClick={toggle3D}
-                            >
-                                {is3D ? "2D" : "3D"}
-                            </a>
+                            <Tooltip title="association page" >
+                                <TableOutlined onClick={() => {
+                                    openView("associationPage")
+                                }} />
+                            </Tooltip>
                             {/* <Button onClick={() => { getWebGLInfo() }}>aa</Button> */}
                             {/* <Button size="small" color="cyan" variant="solid" >AI</Button> */}
                             <Tooltip title="data screening" >
@@ -551,7 +573,7 @@ const GraphView = ({ openView, height, activeView, updateQueryParams, entity_id 
                             {/* <Button size="small" color="cyan" variant="solid" >新增</Button> */}
                             <Tooltip title="create">
                                 <PlusCircleOutlined onClick={() => {
-                                    openModal("entityRelationForm")
+                                    openGlobalModal("optModal", { entityType: "association" })
                                 }} />
                             </Tooltip>
 
@@ -608,173 +630,61 @@ const GraphView = ({ openView, height, activeView, updateQueryParams, entity_id 
                         />
                     </div>
                     {/* 关系图 */}
-                    <div ref={divRef} style={{ height: `${height}px`, background: "#111111" }}
-                    // onMouseMove={(e) => setMousePos({ x: e.clientX, y: e.clientY })}
-                    >
-                        <Spin  style={{ height: `${height}px`}} indicator={<LoadingOutlined spin />} spinning={loading || is3D == null ||  !graphReady}>
+                    <Spin indicator={<LoadingOutlined spin />}
+                        spinning={loading || is3D == null}>
+                        {/* || !graphReady */}
+                        <div ref={divRef} style={{ height: `${height}px` }}  //,background:"#111111"
+                        // onMouseMove={(e) => setMousePos({ x: e.clientX, y: e.clientY })}
+                        >
+
                             {/* !loading &&  */}
-                            {(!loading && is3D != null) &&
-                                <>
-                                    {(is3D) ? (
-                                        <ForceGraph3D
-                                          
-                                            ref={fgRef}
-                                            graphData={graphData}
-                                            nodeAutoColorBy="label"
-                                            nodeLabel={(node: any) => `${node.label}: ${node.entity_name || node.id}`}
-                                            linkLabel={(link: any) => link.type}
-                                            width={width}
-                                            height={height}
-                                            backgroundColor="#111111" // 黑色背景
-                                            // linkColor={() => "rgba(200,200,200,0.5)"} // 浅灰色连线
-                                            linkWidth={2}
-                                            nodeThreeObjectExtend={true}
-                                            linkAutoColorBy={"type"}
-                                            nodeColor={(node: any) => {
+                            {/* <ForceGraphView {...params}></ForceGraphView> */}
 
-                                                const searchText = queryParams.keyword
-                                                if (searchText && (node.entity_name?.includes(searchText) || node.id.includes(searchText))) {
-                                                    return "red";
-                                                }
-                                                if (node.id.includes(contextNode?.id)) {
-                                                    return "red";
-                                                }
-                                                if (node.label === "taxonomy") {
-                                                    const maxLinks = 50; // 假设最大链接数为50，用于归一化
-                                                    const count = node.taxonomy_links || 1;
-                                                    const intensity = Math.min(count / maxLinks, 1); // 0~1
-                                                    // 绿色渐变：亮 -> 深
-                                                    return `rgb(${56 * (1 - intensity)}, ${205 * (1 - intensity)}, ${113 * (1 - intensity)})`;
-                                                }
+                            <GraphRender {...params} {...rest} view={view}></GraphRender>
 
-                                                return node.label && labelColorMap[node.label] ? labelColorMap[node.label] : "#888888";
-                                            }
-                                            }
-                                            nodeVal={(node: any) => {
-                                                const searchText = queryParams.keyword
+                            {/* {width}-{height} */}
+                            {/* {JSON.stringify(contextNode)} */}
 
-                                                // debugger
-                                                if (node.label == "association") {
-                                                    return 1
-                                                }
-                                                // else if (node.label === "taxonomy") {
-                                                //     // 最小 4，最大 20，可根据实际数据调整
-                                                //     return Math.min(Math.max(node.taxonomy_links || 1, 4), 20);
-                                                // }
-                                                if (searchText && (node.entity_name?.includes(searchText) || node.id.includes(searchText))) {
-                                                    return 10; // 放大球体半径
-                                                }
-                                                return 4; // 普通大小
+                            {(openRightMenu && contextNode) && (
+                                <div
+                                    style={{
+                                        position: 'fixed',
+                                        top: menuPos.y,
+                                        left: menuPos.x,
+                                        background: '#222',
+                                        border: '1px solid #444',
+                                        borderRadius: '8px',
+                                        boxShadow: '0 5px 15px rgba(0,0,0,0.5)',
+                                        zIndex: 100,
+                                        padding: '4px 0',
+                                        minWidth: '160px',
+                                        color: 'white',
+                                    }}
+                                >
+                                    {menuItems.map((item) => (
+                                        <div
+                                            key={item.key}
+                                            onClick={() => handleMenuClick(item)}
+                                            style={{
+                                                padding: '8px 16px',
+                                                cursor: 'pointer',
+                                                transition: 'background 0.2s, color 0.2s',
                                             }}
-
-
-                                            nodeThreeObject={nodeTreeObject}
-                                            // nodeThreeObject={(node: any) => {
-                                            //     const color = node.label && labelColorMap[node.label] ? labelColorMap[node.label] : "#888888"; // 获取节点颜色
-                                            //     const sprite: any = new SpriteText(node.entity_name || node.id);
-                                            //     sprite.color = color; // 白色文字
-                                            //     sprite.textHeight = 8;
-                                            //     sprite.center.y = -0.6; // 放在球体上方
-                                            //     return sprite;
-                                            // }}
-                                            {...nodeOperation}
-
-                                        />
-                                    ) : (
-                                        <ForceGraph2D
-                                            ref={fgRef}
-                                            graphData={graphData}
-                                            nodeAutoColorBy="label"
-                                            nodeLabel={(node: any) => `${node.label}: ${node.entity_name || node.id}`}
-                                            linkLabel={(link: any) => link.type}
-                                            width={width}
-                                            // nodeObjectExtend={true}
-                                            height={height}
-                                            backgroundColor="#111111" // 黑色背景
-                                            // linkColor={() => "rgba(200,200,200,0.5)"} // 浅灰色连线
-                                            linkWidth={2}
-                                            nodeRelSize={8}
-
-
-                                            nodeCanvasObject={(node, ctx, globalScale) => {
-                                                const searchText = queryParams.keyword
-
-                                                const label = node.entity_name || node.id;
-                                                const color = node.label && labelColorMap[node.label] ? labelColorMap[node.label] : "#888888" // 节点和文字同色
-                                                const fontSize = 12 / globalScale;
-
-                                                ctx.fillStyle = color;
-                                                ctx.beginPath();
-                                                ctx.arc(node.x!, node.y!, 6, 0, 2 * Math.PI);
-                                                ctx.fill();
-
-                                                // 搜索高亮描边
-                                                if (searchText && label.includes(searchText)) {
-                                                    ctx.strokeStyle = "#ff0000";
-                                                    ctx.lineWidth = 2;
-                                                    ctx.beginPath();
-                                                    ctx.arc(node.x!, node.y!, 8, 0, 2 * Math.PI);
-                                                    ctx.stroke();
-                                                }
-
-                                                ctx.fillStyle = color; // 文字同节点颜色
-                                                ctx.font = `${fontSize}px Sans-Serif`;
-                                                ctx.fillText(label, node.x! + 8, node.y! + 4);
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.background = '#555';
+                                                e.currentTarget.style.color = '#fff';
                                             }}
-                                            {...nodeOperation}
-                                        // onNodeHover={(node) => setHoverNode(node)}
-                                        // onNodeRightClick={handleRightClick}
-                                        />
-                                    )}
-                                </>
-
-
-                            }
-
-                        </Spin>
-                        {/* {width}-{height} */}
-                        {/* {JSON.stringify(contextNode)} */}
-
-                        {(openRightMenu && contextNode) && (
-                            <div
-                                style={{
-                                    position: 'fixed',
-                                    top: menuPos.y,
-                                    left: menuPos.x,
-                                    background: '#222',
-                                    border: '1px solid #444',
-                                    borderRadius: '8px',
-                                    boxShadow: '0 5px 15px rgba(0,0,0,0.5)',
-                                    zIndex: 100,
-                                    padding: '4px 0',
-                                    minWidth: '160px',
-                                    color: 'white',
-                                }}
-                            >
-                                {menuItems.map((item) => (
-                                    <div
-                                        key={item.key}
-                                        onClick={() => handleMenuClick(item)}
-                                        style={{
-                                            padding: '8px 16px',
-                                            cursor: 'pointer',
-                                            transition: 'background 0.2s, color 0.2s',
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.background = '#555';
-                                            e.currentTarget.style.color = '#fff';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.background = 'transparent';
-                                            e.currentTarget.style.color = 'white';
-                                        }}
-                                    >
-                                        {item.label}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                        {/* {hoverNode && (
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.background = 'transparent';
+                                                e.currentTarget.style.color = 'white';
+                                            }}
+                                        >
+                                            {item.label}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            {/* {hoverNode && (
                             <div
                                 style={{
                                     position: 'fixed',
@@ -792,17 +702,19 @@ const GraphView = ({ openView, height, activeView, updateQueryParams, entity_id 
                                 <div>Additional info...</div>
                             </div>
                         )} */}
-                    </div>
+                        </div>
+                    </Spin>
                     {/* {JSON.stringify(hoverNode)} */}
                 </Card>
             </div>
 
-            <EntityRelationForm
+            {/* <EntityRelationForm
                 callback={() => fetchGraph()}
                 visible={modal.key == "entityRelationForm" && modal.visible}
                 params={modal.params}
                 onClose={closeModal}
-            ></EntityRelationForm>
+            ></EntityRelationForm> */}
+     
             <NodeView
                 callback={() => fetchGraph()}
                 visible={modal.key == "nodeView" && modal.visible}
@@ -860,157 +772,175 @@ const NodeView: FC<any> = ({ visible, params, onClose, callback }) => {
 }
 
 
-const EntityRelationForm: React.FC<any> = ({ visible, params, onClose, callback }) => {
-    const [form] = Form.useForm();
-    const { messageApi } = useOutletContext<any>()
+// const EntityRelationForm: React.FC<any> = ({ visible, params, onClose, callback }) => {
+//     const [form] = Form.useForm();
+//     const { messageApi } = useOutletContext<any>()
 
-    const [fromLabel, setFromLabel] = useState<string>("study");
-    const [toLabel, setToLabel] = useState<string>("disease");
+//     const [fromLabel, setFromLabel] = useState<string>("study");
+//     const [toLabel, setToLabel] = useState<string>("disease");
 
-    const [fromOptions, setFromOptions] = useState<any[]>([]);
-    const [toOptions, setToOptions] = useState<any[]>([]);
+//     const [fromOptions, setFromOptions] = useState<any[]>([]);
+//     const [toOptions, setToOptions] = useState<any[]>([]);
 
-    // 实时搜索实体
-    const handleSearch = async (label: string, keywords: string, setOptions: any) => {
-        if (!keywords) return;
-        try {
-            const res = await axios.get(`/entity/find-by-name/${label}/${keywords}`);
-            setOptions(res.data || []);
-        } catch (err) {
-            console.error(err);
-        }
-    };
+//     // 实时搜索实体
+//     const handleSearch = async (label: string, keywords: string, setOptions: any) => {
+//         if (!keywords) return;
+//         try {
+//             const res = await axios.get(`/entity/find-by-name/${label}/${keywords}`);
+//             setOptions(res.data || []);
+//         } catch (err) {
+//             console.error(err);
+//         }
+//     };
 
-    const getRequest = (values: any) => {
-        const fromEntity = fromOptions.find((e) => e.entity_id === values.from_entity);
-        const toEntity = toOptions.find((e) => e.entity_id === values.to_entity);
+//     const getRequest = (values: any) => {
+//         const fromEntity = fromOptions.find((e) => e.entity_id === values.from_entity);
+//         const toEntity = toOptions.find((e) => e.entity_id === values.to_entity);
 
-        const payload = {
-            from_entity: {
-                label: fromLabel,// .charAt(0).toUpperCase() + fromLabel.slice(1), // Study/Disease/Taxonomy
-                entity_id: fromEntity.entity_id,
-                properties: fromEntity,
-            },
-            to_entity: {
-                label: toLabel,//.charAt(0).toUpperCase() + toLabel.slice(1),
-                entity_id: toEntity.entity_id,
-                properties: toEntity,
-            },
-            relation_type: values.relation_type,
-        };
-        return payload
-    }
-    const onSubmit = async () => {
-        const values = await form.validateFields()
-        const payload = getRequest(values)
-        // console.log("生成的 JSON:", payload);
-        // message.success("生成 JSON 已打印在控制台");
-        await axios.post("/entity-relation/relationships", payload)
-        messageApi.success("关系创建成功");
-        onClose()
-        if (callback) {
-            callback()
+//         const payload = {
+//             from_entity: {
+//                 label: fromLabel,// .charAt(0).toUpperCase() + fromLabel.slice(1), // Study/Disease/Taxonomy
+//                 entity_id: fromEntity.entity_id,
+//                 properties: fromEntity,
+//             },
+//             to_entity: {
+//                 label: toLabel,//.charAt(0).toUpperCase() + toLabel.slice(1),
+//                 entity_id: toEntity.entity_id,
+//                 properties: toEntity,
+//             },
+//             relation_type: values.relation_type,
+//         };
+//         return payload
+//     }
+//     const onSubmit = async () => {
+//         const values = await form.validateFields()
+//         const payload = getRequest(values)
+//         // console.log("生成的 JSON:", payload);
+//         // message.success("生成 JSON 已打印在控制台");
+//         await axios.post("/entity-relation/relationships", payload)
+//         messageApi.success("关系创建成功");
+//         onClose()
+//         if (callback) {
+//             callback()
 
-        }
-    };
+//         }
+//     };
 
-    return (
-        <Modal open={visible} onCancel={onClose} onClose={onClose} onOk={onSubmit}>
-            {/* <Card title="创建实体关系" className="w-[600px] mx-auto mt-10"> */}
-            <Form form={form} layout="vertical" >
-                {/* From 实体 */}
-                <Form.Item label="From 实体类型">
-                    <Select value={fromLabel} onChange={setFromLabel}>
-                        <Option value="study">Study</Option>
-                        <Option value="disease">Disease</Option>
-                        <Option value="taxonomy">Taxonomy</Option>
-                    </Select>
-                </Form.Item>
+//     return (
+//         <Modal open={visible} onCancel={onClose} onClose={onClose} onOk={onSubmit}>
+//             {/* <Card title="创建实体关系" className="w-[600px] mx-auto mt-10"> */}
+//             <Form form={form} layout="vertical" >
+//                 {/* From 实体 */}
+//                 <Form.Item label="From 实体类型">
+//                     <Select value={fromLabel} onChange={setFromLabel}>
+//                         <Option value="study">Study</Option>
+//                         <Option value="disease">Disease</Option>
+//                         <Option value="taxonomy">Taxonomy</Option>
+//                     </Select>
+//                 </Form.Item>
 
-                <Form.Item name="from_entity" label="选择 From 实体" rules={[{ required: true }]}>
-                    <Select
-                        showSearch
-                        placeholder="输入关键词搜索实体"
-                        filterOption={false}
-                        onSearch={(val) => handleSearch(fromLabel, val, setFromOptions)}
-                    >
-                        {fromOptions.map((e) => (
-                            <Option key={e.entity_id} value={e.entity_id}>
-                                {e.entity_name || e.title || e.rank || e.entity_id}
-                            </Option>
-                        ))}
-                    </Select>
-                </Form.Item>
+//                 <Form.Item name="from_entity" label="选择 From 实体" rules={[{ required: true }]}>
+//                     <Select
+//                         showSearch
+//                         placeholder="输入关键词搜索实体"
+//                         filterOption={false}
+//                         onSearch={(val) => handleSearch(fromLabel, val, setFromOptions)}
+//                     >
+//                         {fromOptions.map((e) => (
+//                             <Option key={e.entity_id} value={e.entity_id}>
+//                                 {e.entity_name || e.title || e.rank || e.entity_id}
+//                             </Option>
+//                         ))}
+//                     </Select>
+//                 </Form.Item>
 
-                {/* To 实体 */}
-                <Form.Item label="To 实体类型">
-                    <Select value={toLabel} onChange={setToLabel}>
-                        <Option value="study">Study</Option>
-                        <Option value="disease">Disease</Option>
-                        <Option value="taxonomy">Taxonomy</Option>
-                    </Select>
-                </Form.Item>
+//                 {/* To 实体 */}
+//                 <Form.Item label="To 实体类型">
+//                     <Select value={toLabel} onChange={setToLabel}>
+//                         <Option value="study">Study</Option>
+//                         <Option value="disease">Disease</Option>
+//                         <Option value="taxonomy">Taxonomy</Option>
+//                     </Select>
+//                 </Form.Item>
 
-                <Form.Item name="to_entity" label="选择 To 实体" rules={[{ required: true }]}>
-                    <Select
-                        showSearch
-                        placeholder="输入关键词搜索实体"
-                        filterOption={false}
-                        onSearch={(val) => handleSearch(toLabel, val, setToOptions)}
-                    >
-                        {toOptions.map((e) => (
-                            <Option key={e.entity_id} value={e.entity_id}>
-                                {e.entity_name || e.title || e.rank || e.entity_id}
-                            </Option>
-                        ))}
-                    </Select>
-                </Form.Item>
+//                 <Form.Item name="to_entity" label="选择 To 实体" rules={[{ required: true }]}>
+//                     <Select
+//                         showSearch
+//                         placeholder="输入关键词搜索实体"
+//                         filterOption={false}
+//                         onSearch={(val) => handleSearch(toLabel, val, setToOptions)}
+//                     >
+//                         {toOptions.map((e) => (
+//                             <Option key={e.entity_id} value={e.entity_id}>
+//                                 {e.entity_name || e.title || e.rank || e.entity_id}
+//                             </Option>
+//                         ))}
+//                     </Select>
+//                 </Form.Item>
 
-                {/* 关系类型 */}
-                <Form.Item
-                    name="relation_type"
-                    label="关系类型"
-                    rules={[{ required: true, message: "请输入关系类型" }]}
-                >
-                    {/* <Input placeholder="例如: ASSOCIATED_WITH" /> */}
-                    <Select options={[
-                        { value: "ASSOCIATED_WITH", label: "ASSOCIATED_WITH" }
-                    ]}></Select>
-                </Form.Item>
+//                 {/* 关系类型 */}
+//                 <Form.Item
+//                     name="relation_type"
+//                     label="关系类型"
+//                     rules={[{ required: true, message: "请输入关系类型" }]}
+//                 >
+//                     {/* <Input placeholder="例如: ASSOCIATED_WITH" /> */}
+//                     <Select options={[
+//                         { value: "ASSOCIATED_WITH", label: "ASSOCIATED_WITH" }
+//                     ]}></Select>
+//                 </Form.Item>
 
-                {/* <Form.Item>
-                        <Button type="primary" htmlType="submit">
-                            创建关系
-                        </Button>
-                    </Form.Item> */}
-                <Collapse ghost items={[
-                    {
-                        key: "1",
-                        label: "更多",
-                        children: <>
-                            <Form.Item noStyle shouldUpdate>
-                                {() => (
-                                    <Typography>
-                                        <pre>{JSON.stringify(getRequest(form.getFieldsValue()), null, 2)}</pre>
-                                    </Typography>
-                                )}
-                            </Form.Item>
-                        </>
-                    }
-                ]} />
-            </Form>
+//                 {/* <Form.Item>
+//                         <Button type="primary" htmlType="submit">
+//                             创建关系
+//                         </Button>
+//                     </Form.Item> */}
+//                 <Collapse ghost items={[
+//                     {
+//                         key: "1",
+//                         label: "更多",
+//                         children: <>
+//                             <Form.Item noStyle shouldUpdate>
+//                                 {() => (
+//                                     <Typography>
+//                                         <pre>{JSON.stringify(getRequest(form.getFieldsValue()), null, 2)}</pre>
+//                                     </Typography>
+//                                 )}
+//                             </Form.Item>
+//                         </>
+//                     }
+//                 ]} />
+//             </Form>
 
 
-            {/* </Card> */}
-            {/* <GraphView></GraphView> */}
-        </Modal>
-    );
-};
+//             {/* </Card> */}
+//             {/* <GraphView></GraphView> */}
+//         </Modal>
+//     );
+// };
 // export default memo(forwardRef(GraphView), (prevProps, nextProps) => {return true});
 
-export default forwardRef<any, any>(GraphView)
+const GraphView = forwardRef<any, any>(GraphView0)
 
-const NodeFilterDropdown: FC<any> = ({ onChange, selectedLabels, setSelectedLabels, loading }) => {
+// const ForceGraphView: FC<any> = ({graphViewRef, }) => {
+
+//     return <>
+//         <GraphView
+//             ref={graphViewRef}
+//             height={innerHeight}
+//             updateQueryParams={updateQueryParams}
+//             openView={(view: string, data?: any) => {
+//                 setActiveView(view)
+//                 setSizes(['70%', '30%'])
+//                 if (data) {
+//                     setData(data)
+//                 }
+//             }} activeView={activeView} />
+//     </>
+// }
+export default GraphView
+
+const NodeFilterDropdown: FC<any> = ({ options, onChange, selectedLabels, setSelectedLabels, loading }) => {
 
     return (
         <Dropdown
@@ -1029,7 +959,7 @@ const NodeFilterDropdown: FC<any> = ({ onChange, selectedLabels, setSelectedLabe
                     <Spin spinning={loading}>
                         <Checkbox.Group
                             style={{ display: "flex", flexDirection: "column", gap: 8 }}
-                            options={nodeLabelOptions.map(opt => ({
+                            options={options.map((opt: any) => ({
                                 label: opt.label,
                                 value: opt.value,
                                 style: { color: "#fff" } // checkbox文字白色
@@ -1055,18 +985,58 @@ const NodeFilterDropdown: FC<any> = ({ onChange, selectedLabels, setSelectedLabe
                                 }
                             }}
                         >
-                            {selectedLabels.length === nodeLabelOptions.length ? "全不选" : "全选"}
+                            {selectedLabels.length === nodeLabelOptions.length ? " Unselect All" : "Select All"}
                         </Button>
                     </div>
                 </div>
             )}
         >
-            <a onClick={(e) => e.preventDefault()}>
-                <Space>
-                node type
-                    <DownOutlined />
-                </Space>
-            </a>
+            <NodeIndexOutlined />
         </Dropdown>
     );
 }
+
+
+
+const RadioDropdown: FC<any> = ({
+    options,
+    onChange,
+    selectedLabel,
+    setSelectedLabel,
+    loading = false,
+}) => {
+    return (
+        <Dropdown
+            trigger={["hover"]}
+            dropdownRender={() => (
+                <div
+                    style={{
+                        padding: 12,
+                        backgroundColor: "#1f1f1f", // 深色背景
+                        borderRadius: 8,           // 圆角
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.3)", // 阴影
+                        color: "#fff",             // 文字白色
+                    }}
+                >
+                    <Spin spinning={loading}>
+                        <Radio.Group
+                            style={{ display: "flex", flexDirection: "column", gap: 8 }}
+                            options={options.map((opt: any) => ({
+                                label: opt.label,
+                                value: opt.value,
+                                style: { color: "#fff" }, // radio文字白色
+                            }))}
+                            value={selectedLabel}
+                            onChange={(e) => {
+                                setSelectedLabel(e.target.value);
+                                onChange(e.target.value);
+                            }}
+                        />
+                    </Spin>
+                </div>
+            )}
+        >
+          <RadarChartOutlined />
+        </Dropdown>
+    );
+};

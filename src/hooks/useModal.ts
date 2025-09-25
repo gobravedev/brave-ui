@@ -15,6 +15,7 @@ export function useModal() {
 
   const openModal = (key: string, params?: any) => {
     setModal({ key, visible: true, params });
+    
   };
 
   const closeModal = () => {

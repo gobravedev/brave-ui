@@ -1,191 +1,32 @@
-import { Button, Card, Col, Collapse, Drawer, Empty, Flex, Form, Input, message, Modal, notification, Pagination, Popconfirm, Row, Segmented, Select, Skeleton, Space, Spin, Table, Tabs, Tag, Tooltip, Typography } from "antd"
+import { Button, Card, Col, Collapse, Drawer, Empty, Flex, Form, Input, message, Modal, notification, Pagination, Popconfirm, Row, Segmented, Select, Skeleton, Space, Spin, Switch, Table, Tabs, Tag, Tooltip, Tree, Typography } from "antd"
 import Item from "antd/es/list/Item"
 import { FC, forwardRef, lazy, Suspense, useEffect, useImperativeHandle, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate, useOutletContext, useParams } from "react-router"
 import { ApartmentOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import DataPage from './components/data-page'
 
 import Meta from "antd/es/card/Meta"
 import { colors } from '@/utils/utils'
 import { pageContainerApi } from '@/api/container'
 import axios from "axios"
 import { useModal, useModals } from "@/hooks/useModal"
-import { usePagination } from "@/hooks/usePagination"
-import { NamespaceSelect } from '@/components/create-pipeline'
-import TextArea from "antd/es/input/TextArea"
-import { getColumns } from './columns'
-import ComponentsRender from './components'
-import { el } from "@faker-js/faker"
+
+import {EntityModal} from './components'
 import TableTree from '@/pages/entity/components/table-tree'
 import { EntityRef } from './components/interface'
 // const GraphView = lazy()
 const GraphView = lazy(() => import('@/pages/entity-relation/components/graph-view'));
 
 // const [pipelineComponents, setPipelineComponents] = useState<any>([])
-const EntityPage = forwardRef<EntityRef, { openModal: any; entityType: any, rowSelection?: any, params?: any }>(({ rowSelection, openModal, entityType, params }, ref) => {
 
-    const { data, pageNumber, totalPage, loading, reload, pageSize, setPageNumber, search } = usePagination({
-        // pag?eApi: pageContainerApi,
-        url: `/entity/page/${entityType}`,
-        params: {
-            ...params
-        }
-    })
-    useImperativeHandle(ref, () => ({
-        reload: reload
-    }));
+export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelection,disableWidth=false }, ref) => {
 
+    const [entityType, setEntityType] = useState<any>("mesh")
+    const [columnType, setColumnType] = useState<any>()
 
-    const navigate = useNavigate();
-    const { messageApi } = useOutletContext<any>()
-
-    const columns: any[] = [
-        ...getColumns(entityType),
-        {
-            title: '操作',
-            key: 'action',
-            fixed: "right",
-            width: 200,
-            render: (_: any, record: any) => (
-                <Space size="middle">
-                    {openModal && <>
-                        <Button size="small" color="cyan" variant="solid" onClick={() => {
-                            openModal("modalA", { entityType: entityType, entityId: record.entity_id })
-                        }}>update</Button>
-
-
-                        {record.is_exist_graph ? <>
-                            <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                openModal("graphView", { entityType: entityType, entityId: record.entity_id, entityName: record.entity_name })
-                            }}>network</Button>
-                            <Popconfirm title="确认删除节点?"
-                                onConfirm={async () => {
-                                    // deleteContainer(record)
-                                    try {
-                                        await axios.delete(`/entity/delete-node/${entityType}/${record.entity_id}`)
-                                        messageApi.success("删除成功!")
-                                        reload()
-                                    } catch (error: any) {
-                                        console.log(error?.response?.data?.detail)
-                                        messageApi.error(error?.response?.data?.detail)
-                                    }
-                                }}>
-                                <Button size="small" danger variant="solid">delete</Button>
-                            </Popconfirm>
-
-                        </> : <Popconfirm title="Confirm deletion?"
-
-                            onConfirm={async () => {
-                                // deleteContainer(record)
-                                try {
-                                    await axios.delete(`/entity/delete/${entityType}/${record.entity_id}`)
-                                    messageApi.success("Delete successfully!")
-                                    reload()
-                                } catch (error: any) {
-                                    console.log(error?.response?.data?.detail)
-                                    messageApi.error(error?.response?.data?.detail)
-                                }
-
-                            }}>
-                            <Button size="small" danger variant="solid">delete</Button>
-                        </Popconfirm>
-                        }
-
-
-
-                    </>}
-
-
-
-
-
-                </Space>
-            ),
-        },
-    ]
-
-    return <div >
-        <Table
-            title={() => (
-                <Input.Search
-                    size="small"
-                    placeholder="search..."
-                    allowClear
-                    enterButton
-                    onSearch={(value) => { search(value) }}
-
-                    // value={searchText}
-                    // onChange={(e: any) => setSearchText(e.target.value)}
-                    style={{ width: 300 }}
-                />
-            )}
-            rowSelection={rowSelection}
-            rowKey={(it: any) => it.entity_id}
-            size="small"
-            bordered
-            // rowSelection={rowSelection}
-            pagination={false}
-            loading={loading}
-            // scroll={{ x: 'max-content', y: 55 * 5 }}
-            columns={columns}
-            dataSource={data}
-            footer={() => (<>
-                {totalPage != 0 && <Flex style={{ marginTop: "1rem" }} align="center">
-                A total of {totalPage} data &nbsp;
-                    <Pagination
-                        size="small"
-                        current={pageNumber}
-                        pageSize={pageSize}
-                        total={totalPage}
-                        onChange={(p) => setPageNumber(p)}
-                        showSizeChanger={false}
-                    />
-                </Flex>}
-            </>
-            )}
-        />
-
-
-
-
-    </div>
-})
-
-
-
-
-const EntityViewPanel: FC<any> = () => {
-    const { modals, openModals, closeModals } = useModals(["entityPage", "entityModal", "graphView", "entityDrawer"]);
-    const entityRef = useRef<EntityRef>(null)
-    const reload = () => {
-        entityRef.current?.reload()
-    }
-    return <>
-        <EntityView ref={entityRef} openModals={openModals}></EntityView>
-        <EntityModal
-            openModals={openModals}
-            callback={reload}
-            visible={modals.entityModal.visible}
-            params={modals.entityModal.params}
-            onClose={() => closeModals("entityModal")}
-        ></EntityModal>
-        <GraphViewModal
-            callback={reload}
-            visible={modals.graphView.visible}
-            params={modals.graphView.params}
-            onClose={() => closeModals("graphView")}
-        ></GraphViewModal>
-
-
-    </>
-}
-
-export default EntityViewPanel
-
-export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelection, hiddenAssociation = false }, ref) => {
-
-    const [entityType, setEntityType] = useState<any>()
     const [params, setParams] = useState<any>()
+    const [tabKey,setTabKey] = useState<any>("mental_disorders")
 
     // const { modal, openModal, closeModal } = useModal();
 
@@ -195,44 +36,52 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelect
     const reload = () => {
         entityRef.current?.reload()
     }
+    const setPageNumber = (value:any)=>{
+        if(entityRef.current){
+            entityRef.current?.setPageNumber(value)
+
+        }
+    }
     const items: any[] = [
         {
-            key: "mesh-F03",
+            key: "mental_disorders",
             label: "Mental Disorders"
         },{
-            key: "taxonomy",
+            key: "organisms",
             label: "Microbe"
         },
+       
         {
             key: "mesh-KEGG",
             label: "KEGG"
         },
-        // {
-        //     key: "organisms",
-        //     label: "Organisms"
-        // },
+        
         {
             key: "chemicals_and_drugs",
             label: "Chemicals and Drugs"
         }, {
-            key: "study",
-            label: "Study"
-        },
-         {
-            key: "diet_and_food",
-            label: "diet_and_food"
-        },
+            key: "evidence",
+            label: "Research Evidence"
+        },  
+        // {
+        //     key: "taxonomy",
+        //     label: "Microbe"
+        // },
+        // {
+        //     key: "diet_and_food",
+        //     label: "diet_and_food"
+        // },
         //  {
         //     key: "inteventions",
         //     label: "Inteventions"
         // }
     ]
-    if (!hiddenAssociation) {
-        items.unshift({
-            key: "association",
-            label: "Association"
-        })
-    }
+    // if (!hiddenAssociation) {
+    //     items.unshift({
+    //         key: "association",
+    //         label: "Association"
+    //     })
+    // }
     const onKeyChange = (key: any) => {
         if (key.startsWith("mesh")) {
             // debugger
@@ -240,13 +89,21 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelect
             const category = key.split("-")[1]
             // setCategory(category)
             setParams({
-                category: category
+                category: [category]
             })
         } else if (key == "organisms") {
             setEntityType("mesh")
+            setColumnType("organisms")
             setParams({
-                category: ["B01", "B02", "B03", "B04"]
+                category: ["B02", "B03", "B04"],
+                registry_join:"taxonomy"
             })
+        } else if (key == "mental_disorders") {
+            setEntityType("mesh")
+            setParams({
+                category: ["F03", "C10", "F01"]
+            })
+
         } else if (key == "chemicals_and_drugs") {
             // 化学品和药物 [D] 
             // 无机化学品 [D01] 
@@ -269,16 +126,21 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelect
             setParams({
                 category: ["D01", "D02", "D03", "D04", "D05", "D06", "D08", "D09", "D10", "D12", "D13", "D20", "D23", "D25", "D26", "D27"]
             })
-        } else {
+        } else if(key =="evidence"){
+            setEntityType("mesh")
+            setParams({
+                category: ["evidence"]
+            })
+        }else {
             setEntityType(key)
         }
 
         // reload()
     }
 
-    useEffect(() => {
-        onKeyChange(items[0].key)
-    }, [])
+    // useEffect(() => {
+    //     onKeyChange(items[0].key)
+    // }, [])
 
     useImperativeHandle(ref, () => ({
         reload
@@ -290,23 +152,26 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelect
     // }
 
 
-    return <div style={{ maxWidth: "1500px", margin: "1rem auto" }}>
-        <Flex justify="flex-end" gap="small">
+    return <div style={disableWidth?{}:{ maxWidth: "1500px", margin: "1rem auto" }}>
+        {/* <Flex justify="flex-end" gap="small">
             {openModals && <>
                 <Button size="small" color="cyan" variant="solid" onClick={() => {
-                    openModals("entityModal", { entityType: entityType })
+                    openModals("entityModal", { entityType: entityType,category:params?.category, })
                 }}>create</Button>
             </>}
 
             <Button size="small" color="cyan" variant="solid" onClick={reload}>refresh</Button>
-        </Flex>
+        </Flex> */}
         <div style={{ marginBottom: "1rem" }}> </div>
 
         {/* {JSON.stringify(data)} */}
 
         <Tabs size="small"
+            activeKey={tabKey}
             onChange={(key: any) => {
                 onKeyChange(key)
+                setTabKey(key)
+                setPageNumber(1)
             }}
             tabBarExtraContent={<>
                 <Segmented size="small" value={showStyle}
@@ -326,19 +191,61 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelect
         {/* {showStyle} */}
         {/* <TableTree></TableTree> */}
         {/* {entityType} */}
-        {entityType && <>
-            {showStyle == "table" && <>
-                <EntityPage rowSelection={rowSelection} ref={entityRef} openModal={openModals} params={params} entityType={entityType}></EntityPage>
-            </>}
-            {showStyle == "tree" && <>
-                <TableTree ref={entityRef} entityType={entityType} params={params}></TableTree>
-            </>}
-
-
+        {showStyle == "table" && <>
+            <DataPage columnType={columnType} rowSelection={rowSelection} ref={entityRef} openModal={openModals} params={params} entityType={entityType}></DataPage>
         </>}
+        {showStyle == "tree" && <>
+            <TableTree ref={entityRef} entityType={entityType} params={params}></TableTree>
+        </>}
+
+
+
 
     </div>
 })
+
+
+const EntityViewPanel: FC<any> = ({...rest}) => {
+    const { modals, openModals, closeModals } = useModals(["entityPage", "optModal", "graphView", "entityDrawer", "entityDetailsModal"]);
+    const entityRef = useRef<EntityRef>(null)
+    const reload = () => {
+        entityRef.current?.reload()
+    }
+    return <>
+        <EntityView {...rest} ref={entityRef} openModals={openModals} ></EntityView>
+        <EntityModal
+            openModals={openModals}
+            callback={reload}
+            visible={modals.optModal.visible}
+            params={modals.optModal.params}
+            onClose={() => closeModals("optModal")}
+        ></EntityModal>
+        <GraphViewModal
+            callback={reload}
+            visible={modals.graphView.visible}
+            params={modals.graphView.params}
+            onClose={() => closeModals("graphView")}
+        ></GraphViewModal>
+
+        <EntityDetailsModal
+            openModals={openModals}
+            callback={reload}
+            visible={modals.entityDetailsModal.visible}
+            params={modals.entityDetailsModal.params}
+            onClose={() => closeModals("entityDetailsModal")}
+        ></EntityDetailsModal>
+    </>
+}
+
+
+
+
+export default EntityViewPanel
+
+
+
+
+
 
 
 
@@ -356,65 +263,59 @@ const GraphViewModal: FC<any> = ({ visible, params, onClose, callback }) => {
 }
 
 
-const EntityModal: FC<any> = ({ visible, params, onClose, openModals, record, callback }) => {
-    const [form] = Form.useForm()
-    const { messageApi } = useOutletContext<any>()
+
+
+const EntityDetailsModal: FC<any> = ({ visible, params, onClose }) => {
     const [loading, setLoading] = useState<any>(false)
-    useEffect(() => {
-        if (visible && params?.entityId) {
-            loadData()
-        } else {
-            form.resetFields()
-        }
-    }, [visible])
+    const [data, setData] = useState<any>()
+    const [treeData, setTreeData] = useState<any>()
+
+    const convertToTreeData = (nodes: any) => {
+        return nodes.map((node: any) => ({
+            title: node.entity_name,
+            key: node.entity_id,
+            children: node.children ? convertToTreeData(node.children) : [],
+        }));
+    };
+
+
+    // const treeData = convertToTreeData(data);
+
+
+
     const loadData = async () => {
         setLoading(true)
         // entityType:entityType,entityId:record.entity_id
         const resp: any = await axios.get(`/entity/get/${params.entityType}/${params.entityId}`)
-        form.setFieldsValue(resp.data)
+        const data = convertToTreeData(resp.data.parents);
+        setTreeData(data)
         setLoading(false)
     }
-    const save = async () => {
-        const values = await form.validateFields()
+    useEffect(() => {
         if (params?.entityId) {
-            await axios.put(`/entity/update/${params.entityType}/${params.entityId}`, values)
-        } else {
-            await axios.post(`/entity/add/${params.entityType}`, values)
+            loadData()
         }
-        // console.log(values)
-        // if (params) {
-        //     values.container_id = params
-        // }
-        // await axios.post(`/container/add-or-update-container`, values)
-        onClose()
-        if (callback) {
-            callback()
-        }
-        messageApi.success("操作成功!")
-    }
-    return <Modal loading={loading} title={params?.entityId ? `update entity` : "create entity"}
-        onOk={save}
-        width={"50%"} open={visible} onClose={onClose} onCancel={onClose}>
-        {/* {params} */}
-        <Form form={form}>
 
-            <ComponentsRender type={params?.entityType} openModals={openModals} record={record}></ComponentsRender>
-            <Collapse ghost items={[
-                {
-                    key: "1",
-                    label: "more",
-                    children: <>
-                        <Form.Item noStyle shouldUpdate>
-                            {() => (
-                                <Typography>
-                                    <pre>{JSON.stringify(form.getFieldsValue(), null, 2)}</pre>
-                                </Typography>
-                            )}
-                        </Form.Item>
-                    </>
-                }
-            ]} />
-        </Form>
+    }, [params?.entityId])
+    return <Drawer open={visible} onClose={onClose} width="40%" loading={loading}>
+        {treeData && <>
 
-    </Modal>
+            {/* {JSON.stringify(data.parents)} */}
+            {/* {data.parents.map((item: any, index: any) => (<span key={index}>
+
+                <Tag>{item.entity_name}({item.entity_id})</Tag>-
+
+            </span>))} */}
+
+
+            <Tree
+
+                treeData={treeData}
+                defaultExpandAll
+                showLine
+                selectable
+            />
+        </>}
+
+    </Drawer>
 }
