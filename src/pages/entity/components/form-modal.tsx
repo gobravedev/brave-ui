@@ -4,7 +4,7 @@ import { FC, useEffect, useState } from "react"
 import { useOutletContext } from "react-router"
 
 
-const FormModal: FC<any> = ({ visible, params, onClose, record, callback, children }) => {
+const FormModal: FC<any> = ({ visible, params, onClose, record, callback, children ,entityType="mesh"}) => {
     const [form] = Form.useForm()
     const { messageApi } = useOutletContext<any>()
     const [loading, setLoading] = useState<any>(false)
@@ -19,7 +19,7 @@ const FormModal: FC<any> = ({ visible, params, onClose, record, callback, childr
     const loadData = async () => {
         setLoading(true)
         // entityType:entityType,entityId:record.entity_id
-        const resp: any = await axios.get(`/entity/get/${params.entityType}/${params.entityId}`)
+        const resp: any = await axios.get(`/entity/get/${entityType}/${params.entityId}`)
         form.setFieldsValue(resp.data)
         setLoading(false)
     }

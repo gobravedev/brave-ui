@@ -33,77 +33,13 @@ const DataPage = forwardRef<EntityRef, { openModal: any; entityType: any, rowSel
     const { messageApi } = useOutletContext<any>()
 
     const columns: any[] = [
-        ...getColumns(columnType || entityType),
-        {
-            title: '操作',
-            key: 'action',
-            fixed: "right",
-            width: 200,
-            render: (_: any, record: any) => (
-                <Space size="middle">
-                    {openModal && <>
-                        <Button size="small" color="cyan" variant="solid" onClick={() => {
-                            openModal("entityDetailsModal", { entityType: entityType, entityId: record.entity_id })
-                        }}>details</Button>
-
-                        <Button size="small" color="cyan" variant="solid" onClick={() => {
-                            console.log("update:", record)
-                            openModal("optModal", { entityType: entityType, entityId: record.entity_id })
-                        }}>update</Button>
-
-
-                        {record.is_exist_graph ? <>
-                            <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                openModal("graphView", { entityType: entityType, entityId: record.entity_id, entityName: record.entity_name })
-                            }}>network</Button>
-                            <Popconfirm title="确认删除节点?"
-                                onConfirm={async () => {
-                                    // deleteContainer(record)
-                                    try {
-                                        await axios.delete(`/entity/delete-node/${entityType}/${record.entity_id}`)
-                                        messageApi.success("删除成功!")
-                                        reload()
-                                    } catch (error: any) {
-                                        console.log(error?.response?.data?.detail)
-                                        messageApi.error(error?.response?.data?.detail)
-                                    }
-                                }}>
-                                <Button size="small" danger variant="solid">delete</Button>
-                            </Popconfirm>
-
-                        </> : <Popconfirm title="Confirm deletion?"
-
-                            onConfirm={async () => {
-                                // deleteContainer(record)
-                                try {
-                                    await axios.delete(`/entity/delete/${entityType}/${record.entity_id}`)
-                                    messageApi.success("Delete successfully!")
-                                    reload()
-                                } catch (error: any) {
-                                    console.log(error?.response?.data?.detail)
-                                    messageApi.error(error?.response?.data?.detail)
-                                }
-
-                            }}>
-                            <Button size="small" danger variant="solid">delete</Button>
-                        </Popconfirm>
-                        }
-
-
-
-                    </>}
-
-
-
-
-
-                </Space>
-            ),
-        },
+        ...getColumns(columnType || entityType,openModal,reload,messageApi)
+     
     ]
 
     return <div >
         {/* {locale} */}
+        {entityType}
         <Table
             title={() => (
                 <Flex justify={"space-between"}>

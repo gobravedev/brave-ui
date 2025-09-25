@@ -192,6 +192,7 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelect
         {/* <TableTree></TableTree> */}
         {/* {entityType} */}
         {showStyle == "table" && <>
+
             <DataPage columnType={columnType} rowSelection={rowSelection} ref={entityRef} openModal={openModals} params={params} entityType={entityType}></DataPage>
         </>}
         {showStyle == "tree" && <>

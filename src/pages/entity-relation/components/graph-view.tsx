@@ -80,7 +80,7 @@ const GraphView0 = ({ openView, height, activeView, updateQueryParams, entity_id
 
     const { displayNode } = useSelector((state: any) => state.graph)
 
-    const [graphReady, setGraphReady] = useState(false);
+    const [graphReady, setGraphReady] = useState(true);
 
 
     // const [selectedLabels, setSelectedLabels] = useState<string[]>(displayNode);
@@ -216,7 +216,7 @@ const GraphView0 = ({ openView, height, activeView, updateQueryParams, entity_id
         disposeGraph3D()
         // fgRef.current?.refresh()
         setLoading(true);
-        setGraphReady(false)
+        
         console.log("请求参数:", queryParams);
 
         const res = await axios.post("/entity-relation/graph", {
@@ -628,11 +628,11 @@ const GraphView0 = ({ openView, height, activeView, updateQueryParams, entity_id
                             }}
                             style={{ flex: 1 }}
                         />
-                    </div>
-                    {/* 关系图 */}
+                    </div>  
+                    {/* 关系图 */} 
                     <Spin indicator={<LoadingOutlined spin />}
-                        spinning={loading || is3D == null}>
-                        {/* || !graphReady */}
+                        spinning={loading || is3D == null || !graphReady  }>
+                        {/* */}
                         <div ref={divRef} style={{ height: `${height}px` }}  //,background:"#111111"
                         // onMouseMove={(e) => setMousePos({ x: e.clientX, y: e.clientY })}
                         >

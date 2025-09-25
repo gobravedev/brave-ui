@@ -51,7 +51,7 @@ export const EntityModal: FC<any> = ({ ...rest }) => {
 
 export const AssociationModal: FC<any> = ({ ...rest }) => {
     return <>
-        <FormModal {...rest}>
+        <FormModal {...rest} entityType="association">
             <Association></Association>
         </FormModal>
     </>

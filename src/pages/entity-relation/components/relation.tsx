@@ -4,20 +4,23 @@ import { CloseOutlined, DeleteOutlined, RedoOutlined } from '@ant-design/icons'
 import axios from "axios"
 import { useOutletContext } from "react-router"
 
-const RelationView: FC<any> = ({ close, height, data: params,loadGraph, ...rest }) => {
+const RelationView: FC<any> = ({ close, height, data: params, loadGraph, ...rest }) => {
     const [data, setData] = useState<any>()
     const [loading, setLoading] = useState<boolean>(false)
     const { messageApi } = useOutletContext<any>()
 
     const loadData = async () => {
         setLoading(true)
-        const resp = await axios.get(`/entity-relation/relation/${params?.relation_id}`)
+        const resp = await axios.get(`/entity-relation/find-by-paired-entity/${params?.fromNode?.id}/${params?.toNode?.id}`)
         setData(resp.data)
         setLoading(false)
     }
     useEffect(() => {
-        loadData()
-    }, [params?.relation_id])
+        if (params?.fromNode && params?.toNode) {
+            loadData()
+        }
+
+    }, [params?.fromNode, params?.toNode])
     return <Card
         loading={loading}
         styles={{
@@ -28,14 +31,14 @@ const RelationView: FC<any> = ({ close, height, data: params,loadGraph, ...rest 
             }
         }}
         title={<>
-            {`${rest?.label} (${data?.from_name})-[${data?.type}]-(${data?.to_name})`}
+            {`${rest?.label} (${params?.fromNode?.label})->(${params?.toNode?.label})`}
             {/* <Tag style={{ marginLeft: "0.5rem" }}>{params?.label}</Tag> */}
         </>}
         size="small"
         extra={<>
             <Flex gap="small">
                 <Popconfirm title={`删除(${data?.from_name})-[${data?.type}]-(${data?.to_name})?`} onConfirm={async () => {
-                     await axios.delete(`/entity-relation/relation/${data.rid}`)
+                    await axios.delete(`/entity-relation/relation/${data.rid}`)
                     messageApi.success("删除成功")
                     close()
                     loadGraph()
