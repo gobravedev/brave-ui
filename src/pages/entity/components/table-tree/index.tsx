@@ -22,7 +22,7 @@ const updateTreeData = (list: DataNode[], key: React.Key, children: DataNode[]):
         return node;
     });
 
-const App = forwardRef<EntityRef, { entityType: any, params: any }>(({ entityType, params }, ref) => {
+const App = forwardRef<any, { entityType: any, params: any }>(({ entityType, params }, ref) => {
     const [treeData, setTreeData] = useState<DataNode[]>();
     const [loadingKeys, setLoadingKeys] = useState<Set<number>>(new Set());
     const [children, setChildren] = useState<any>()
@@ -84,7 +84,7 @@ const App = forwardRef<EntityRef, { entityType: any, params: any }>(({ entityTyp
     }
     useImperativeHandle(ref, () => ({
         reload: loadData
-    }));
+    }))
 
     useEffect(() => {
         loadData()
