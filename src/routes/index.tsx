@@ -60,6 +60,7 @@ const AnalysisReport = lazy(() => import('@/pages/analysis-report'));
 const EntityPage = lazy(() => import('@/pages/entity'));
 const EntityRelation = lazy(() => import('@/pages/entity-relation'));
 const PsycMicroGraphHome = lazy(()=>import("@/pages/psycmicrograph"))
+const Test = lazy(()=>import("@/pages/test"))
 
 const ContainerPage = lazy(() => import('@/pages/container'));
 import axios from "axios";
@@ -238,7 +239,7 @@ if (appType == "index") {
     ]
 } else if (appType == "micrograph") {
     const children = [
-
+       
         {
             path: "/",
             element: <PsycMicroGraphHome />
@@ -400,6 +401,9 @@ if (appType == "index") {
             children: [
                 ...children,
             ]
+        }, {
+            path: "/test",
+            element: <Test />
         },
     ]
 }

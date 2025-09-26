@@ -26,9 +26,9 @@ const Panel: FC<any> = () => {
 
     });
     const { modal, openModal, closeModal } = useModal();
-    
+
     const compReload = () => {
-        if(compRef.current?.reload){
+        if (compRef.current?.reload) {
             compRef.current?.reload()
         }
     }
@@ -79,7 +79,12 @@ const Panel: FC<any> = () => {
             //   window.removeEventListener("scroll", updateHeight);
         };
     }, []);
+    const [animatedSizes, setAnimatedSizes] = useState<(number | string)[]>(sizes);
 
+    useEffect(() => {
+        const frame = requestAnimationFrame(() => setAnimatedSizes(sizes));
+        return () => cancelAnimationFrame(frame);
+    }, [sizes]);
 
 
     return <div style={{ padding: "1rem 1rem 0 1rem  " }}>
@@ -96,12 +101,13 @@ const Panel: FC<any> = () => {
                 }}
             >
                 <Splitter
+                    
                     onResize={setSizes}
                 // splitterStyle={{
 
                 // }}
                 >
-                    <Splitter.Panel size={sizes[0]} min={"20%"} style={{ paddingRight: `${activeView ? "0.5rem" : "0"}` }}>
+                    <Splitter.Panel size={animatedSizes[0]} min={"20%"} style={{ paddingRight: `${activeView ? "0.5rem" : "0"}` }}>
                         <GraphRender
                             ref={graphViewRef}
                             height={innerHeight}
@@ -118,7 +124,15 @@ const Panel: FC<any> = () => {
                     </Splitter.Panel>
 
                     {activeView && (
-                        <Splitter.Panel size={sizes[1]} min={"20%"} style={{ paddingLeft: `${activeView ? "0.5rem" : "0"}` }}>
+
+                        <Splitter.Panel size={animatedSizes[1]} min={"20%"} style={{
+                            paddingLeft: `${activeView ? "0.5rem" : "0"}`,
+                            // flexBasis: sizes[1],
+                            // transition: "flex-basis 0.5s ease",
+                            // transition: "flex-basis 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+                            // transition: "width 5s cubic-bezier(0.4,0,0.2,1)",
+                            overflow: "hidden", // 防止内容溢出闪烁
+                        }}>
                             {/* <ChatView closeChat={() => {
                             setChatOpen(false)
                             setSizes(['100%', '0%'])
@@ -148,7 +162,7 @@ const Panel: FC<any> = () => {
             </ConfigProvider>
 
             <AssociationModal
-                callback={() =>{compReload();loadGraph()} }
+                callback={() => { compReload(); loadGraph() }}
                 visible={modal.key == "optModal" && modal.visible}
                 params={modal.params}
                 onClose={closeModal}

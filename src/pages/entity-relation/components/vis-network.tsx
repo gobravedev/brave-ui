@@ -189,7 +189,8 @@ const App: FC<any> = ({
         },
         height: `${height}px`,
         width: `${width}px`,
-        groups: groups
+        groups: groups,
+        autoResize:true
         //  {
         //         Disease: {
         //             shape: "triangle",
@@ -213,6 +214,14 @@ const App: FC<any> = ({
         //         // },
         //     },
     };
+    // useEffect(()=>{
+    //     if(networkRef.current){
+    //         const networkInstance: any = networkRef.current
+    //         networkInstance.setSize(width,height)
+    //         console.log("redraw")
+    //     }
+
+    // },[width])
 
     const events = {
         click: (event: any) => {
@@ -260,7 +269,7 @@ const App: FC<any> = ({
         }
     };
     return (
-        <div style={{ position: "relative" }}>
+        <div style={{ position: "relative", width: width, height: height }}>
             {/* , width: width, height: height  */}
             {/* Floating Legend */}
             <div
@@ -350,6 +359,8 @@ const App: FC<any> = ({
 
             {/* {JSON.stringify()} */}
             <Graph
+                width={ `${width}px`}
+                height={ `${height}px`}
                 networkRef={networkRef}
                 setGraphReady={setGraphReady}
                 graph={graphData}

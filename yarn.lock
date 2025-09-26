@@ -5390,6 +5390,11 @@ react-redux@^9.2.0:
     "@types/use-sync-external-store" "^0.0.6"
     use-sync-external-store "^1.4.0"
 
+react-resizable-panels@^3.0.6:
+  version "3.0.6"
+  resolved "https://registry.npmmirror.com/react-resizable-panels/-/react-resizable-panels-3.0.6.tgz#8183132ea13a09821e9c93962ed49f240cdcfd3f"
+  integrity sha512-b3qKHQ3MLqOgSS+FRYKapNkJZf5EQzuf6+RLiq1/IlTHw99YrZ2NJZLk4hQIzTnnIkRg2LUqyVinu6YWWpUYew==
+
 react-resize-detector@^12.3.0:
   version "12.3.0"
   resolved "https://registry.npmmirror.com/react-resize-detector/-/react-resize-detector-12.3.0.tgz#f273586fccef9da5282909a160ce1ff44c7d5669"
