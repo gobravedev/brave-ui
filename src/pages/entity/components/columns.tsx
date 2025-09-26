@@ -1,117 +1,8 @@
 import { Button, Popconfirm, Space, Tag, Tooltip } from "antd"
 import axios from "axios"
 
-export const getColumns = (entityType: any, openModal: any, reload: any, messageApi: any) => {
-    const action = [{
-        title: '操作',
-        key: 'action',
-        fixed: "right",
-        width: 200,
-        render: (_: any, record: any) => (
-            <Space size="middle">
-                {openModal && <>
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        openModal("entityDetailsModal", { entityType: entityType, entityId: record.entity_id })
-                    }}>details</Button>
+export const getColumns = (entityType: any) => {
 
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        console.log("update:", record)
-                        openModal("optModal", { entityType: entityType, entityId: record.entity_id })
-                    }}>update</Button>
-
-
-                    {record.is_exist_graph ? <>
-                        <Button size="small" color="cyan" variant="solid" onClick={() => {
-                            openModal("graphView", { entityType: entityType, entityId: record.entity_id, entityName: record.entity_name })
-                        }}>network</Button>
-                        <Popconfirm title="确认删除节点?"
-                            onConfirm={async () => {
-                                // deleteContainer(record)
-                                try {
-                                    await axios.delete(`/entity/delete-node/${entityType}/${record.entity_id}`)
-                                    messageApi.success("删除成功!")
-                                    reload()
-                                } catch (error: any) {
-                                    console.log(error?.response?.data?.detail)
-                                    messageApi.error(error?.response?.data?.detail)
-                                }
-                            }}>
-                            <Button size="small" danger variant="solid">delete</Button>
-                        </Popconfirm>
-
-                    </> : <Popconfirm title="Confirm deletion?"
-
-                        onConfirm={async () => {
-                            // deleteContainer(record)
-                            try {
-                                await axios.delete(`/entity/delete/${entityType}/${record.entity_id}`)
-                                messageApi.success("Delete successfully!")
-                                reload()
-                            } catch (error: any) {
-                                console.log(error?.response?.data?.detail)
-                                messageApi.error(error?.response?.data?.detail)
-                            }
-
-                        }}>
-                        <Button size="small" danger variant="solid">delete</Button>
-                    </Popconfirm>
-                    }
-
-
-
-                </>}
-
-
-
-
-
-            </Space>
-        ),
-    }]
-    const assoAction = [{
-        title: '操作',
-        key: 'action',
-        fixed: "right",
-        width: 200,
-        render: (_: any, record: any) => (
-            <Space size="middle">
-                {openModal && <>
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        openModal("entityDetailsModal", { entityType: entityType, entityId: record.entity_id })
-                    }}>details</Button>
-
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        console.log("update:", record)
-                        openModal("optModal", { entityType: entityType, entityId: record.entity_id })
-                    }}>update</Button>
-
-
-                    <Popconfirm title="Confirm deletion?"
-
-                        onConfirm={async () => {
-                            // deleteContainer(record)
-                            try {
-                                await axios.delete(`/entity-relation/delete-association/${record.entity_id}`)
-                                messageApi.success("Delete successfully!")
-                                reload()
-                            } catch (error: any) {
-                                console.log(error?.response?.data?.detail)
-                                messageApi.error(error?.response?.data?.detail)
-                            }
-
-                        }}>
-                        <Button size="small" danger variant="solid">delete</Button>
-                    </Popconfirm>
-
-                </>}
-
-
-
-
-
-            </Space>
-        ),
-    }]
     let entityColumns: any[] = []
     switch (entityType) {
         case "organisms":
@@ -166,7 +57,7 @@ export const getColumns = (entityType: any, openModal: any, reload: any, message
                     render: (text: any, record: any) => {
                         return text ? "exist" : "non-existent"
                     }
-                }, ...action
+                },
             ]
             break;
         case "mesh":
@@ -247,7 +138,7 @@ export const getColumns = (entityType: any, openModal: any, reload: any, message
                             </Tag>)}
                         </>
                     )
-                }, ...action
+                },
 
                 // ,{
                 //     title: "parent_trees",
@@ -312,7 +203,7 @@ export const getColumns = (entityType: any, openModal: any, reload: any, message
                     title: "created_at",
                     dataIndex: "created_at",
                     key: "created_at"
-                }, ...assoAction
+                },
                 //  {
                 //     title: "participates_in_pathway",
                 //     dataIndex: "participates_in_pathway",
@@ -364,4 +255,128 @@ export const getColumns = (entityType: any, openModal: any, reload: any, message
             ]
     }
     return entityColumns
+}
+
+export const getAction = (entityType: any, openModal: any, reload: any, messageApi: any) => {
+    let action:any = []
+    // const assoAction = 
+    switch (entityType) {
+        case "association":
+            action = [{
+                title: '操作',
+                key: 'action',
+                fixed: "right",
+                width: 200,
+                render: (_: any, record: any) => (
+                    <Space size="middle">
+                        {openModal && <>
+                            {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                openModal("entityDetailsModal", { entityType: entityType, entityId: record.entity_id })
+                            }}>details</Button> */}
+
+                            <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                console.log("update:", record)
+                                openModal("optModal", { entityType: entityType, entityId: record.entity_id })
+                            }}>update</Button>
+
+
+                            <Popconfirm title="Confirm deletion?"
+
+                                onConfirm={async () => {
+                                    // deleteContainer(record)
+                                    try {
+                                        await axios.delete(`/entity-relation/delete-association/${record.entity_id}`)
+                                        messageApi.success("Delete successfully!")
+                                        reload()
+                                    } catch (error: any) {
+                                        console.log(error?.response?.data?.detail)
+                                        messageApi.error(error?.response?.data?.detail)
+                                    }
+
+                                }}>
+                                <Button size="small" danger variant="solid">delete</Button>
+                            </Popconfirm>
+
+                        </>}
+
+
+
+
+
+                    </Space>
+                ),
+            }]
+            break;
+        case "mesh":
+            action = [{
+                title: '操作',
+                key: 'action',
+                fixed: "right",
+                width: 200,
+                render: (_: any, record: any) => (
+                    <Space size="middle">
+                        {openModal && <>
+                            <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                openModal("entityDetailsModal", { entityType: entityType, entityId: record.entity_id })
+                            }}>details</Button>
+
+                            <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                console.log("update:", record)
+                                openModal("optModal", { entityType: entityType, entityId: record.entity_id })
+                            }}>update</Button>
+
+
+                            {record.is_exist_graph ? <>
+                                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                    openModal("graphView", { entityType: entityType, entityId: record.entity_id, entityName: record.entity_name })
+                                }}>network</Button>
+                                <Popconfirm title="确认删除节点?"
+                                    onConfirm={async () => {
+                                        // deleteContainer(record)
+                                        try {
+                                            await axios.delete(`/entity/delete-node/${entityType}/${record.entity_id}`)
+                                            messageApi.success("删除成功!")
+                                            reload()
+                                        } catch (error: any) {
+                                            console.log(error?.response?.data?.detail)
+                                            messageApi.error(error?.response?.data?.detail)
+                                        }
+                                    }}>
+                                    <Button size="small" danger variant="solid">delete</Button>
+                                </Popconfirm>
+
+                            </> : <Popconfirm title="Confirm deletion?"
+
+                                onConfirm={async () => {
+                                    // deleteContainer(record)
+                                    try {
+                                        await axios.delete(`/entity/delete/${entityType}/${record.entity_id}`)
+                                        messageApi.success("Delete successfully!")
+                                        reload()
+                                    } catch (error: any) {
+                                        console.log(error?.response?.data?.detail)
+                                        messageApi.error(error?.response?.data?.detail)
+                                    }
+
+                                }}>
+                                <Button size="small" danger variant="solid">delete</Button>
+                            </Popconfirm>
+                            }
+
+
+
+                        </>}
+
+
+
+
+
+                    </Space>
+                ),
+            }]
+            break
+        default:
+            break;
+    }
+    return action
 }

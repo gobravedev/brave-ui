@@ -36,6 +36,7 @@ export const NetworkGraph: React.FC<NetworkGraphProps> = ({
 
     useEffect(() => {
         if (!containerRef.current) return;
+        console.log("render NetworkGraph",graph)
         setGraphReady(false)
         const nodes = graph.nodes
         const edges = graph.edges

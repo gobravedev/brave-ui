@@ -12,21 +12,24 @@ import { pageContainerApi } from '@/api/container'
 import axios from "axios"
 import { useModal, useModals } from "@/hooks/useModal"
 
-import {EntityModal} from './components'
+import { EntityModal } from './components'
 import TableTree from '@/pages/entity/components/table-tree'
 import { EntityRef } from './components/interface'
 // const GraphView = lazy()
 const GraphView = lazy(() => import('@/pages/entity-relation/components/graph-view'));
+import { getColumns, getAction } from './components/columns'
 
 // const [pipelineComponents, setPipelineComponents] = useState<any>([])
 
-export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelection,disableWidth=false }, ref) => {
+export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelection, disableWidth = false }, ref) => {
 
-    const [entityType, setEntityType] = useState<any>("mesh")
-    const [columnType, setColumnType] = useState<any>()
+    // const [entityType, setEntityType] = useState<any>("mesh")
+    const [columnType, setColumnType] = useState<any>("mesh")
 
-    const [params, setParams] = useState<any>()
-    const [tabKey,setTabKey] = useState<any>("mental_disorders")
+    const [params, setParams] = useState<any>({
+        category: ["F03", "C10", "F01"]
+    })
+    const [tabKey, setTabKey] = useState<any>("mental_disorders")
 
     // const { modal, openModal, closeModal } = useModal();
 
@@ -36,8 +39,8 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelect
     const reload = () => {
         entityRef.current?.reload()
     }
-    const setPageNumber = (value:any)=>{
-        if(entityRef.current){
+    const setPageNumber = (value: any) => {
+        if (entityRef.current) {
             entityRef.current?.setPageNumber(value)
 
         }
@@ -46,23 +49,23 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelect
         {
             key: "mental_disorders",
             label: "Mental Disorders"
-        },{
+        }, {
             key: "organisms",
             label: "Microbe"
         },
-       
+
         {
             key: "mesh-KEGG",
             label: "KEGG"
         },
-        
+
         {
             key: "chemicals_and_drugs",
             label: "Chemicals and Drugs"
         }, {
             key: "evidence",
             label: "Research Evidence"
-        },  
+        },
         // {
         //     key: "taxonomy",
         //     label: "Microbe"
@@ -85,25 +88,26 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelect
     const onKeyChange = (key: any) => {
         if (key.startsWith("mesh")) {
             // debugger
-            setEntityType("mesh")
+            // setEntityType("mesh")
             const category = key.split("-")[1]
             // setCategory(category)
             setParams({
                 category: [category]
             })
+            setColumnType("mesh")
         } else if (key == "organisms") {
-            setEntityType("mesh")
+            // setEntityType("mesh")
             setColumnType("organisms")
             setParams({
                 category: ["B02", "B03", "B04"],
-                registry_join:"taxonomy"
+                registry_join: "taxonomy"
             })
         } else if (key == "mental_disorders") {
-            setEntityType("mesh")
+            // setEntityType("mesh")
             setParams({
                 category: ["F03", "C10", "F01"]
             })
-
+            setColumnType("mesh")
         } else if (key == "chemicals_and_drugs") {
             // 化学品和药物 [D] 
             // 无机化学品 [D01] 
@@ -122,17 +126,19 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelect
             // 生物医学和牙科材料 [D25] 
             // 药物制剂 [D26] 
             // 化学作用及用途 [D27] 
-            setEntityType("mesh")
+            // setEntityType("mesh")
             setParams({
                 category: ["D01", "D02", "D03", "D04", "D05", "D06", "D08", "D09", "D10", "D12", "D13", "D20", "D23", "D25", "D26", "D27"]
             })
-        } else if(key =="evidence"){
-            setEntityType("mesh")
+            setColumnType("mesh")
+        } else if (key == "evidence") {
+            // setEntityType("mesh")
             setParams({
                 category: ["evidence"]
             })
-        }else {
-            setEntityType(key)
+            setColumnType("mesh")
+        } else {
+            // setEntityType(key)
         }
 
         // reload()
@@ -152,7 +158,7 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelect
     // }
 
 
-    return <div style={disableWidth?{}:{ maxWidth: "1500px", margin: "1rem auto" }}>
+    return <div style={disableWidth ? {} : { maxWidth: "1500px", margin: "1rem auto" }}>
         {/* <Flex justify="flex-end" gap="small">
             {openModals && <>
                 <Button size="small" color="cyan" variant="solid" onClick={() => {
@@ -193,10 +199,17 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelect
         {/* {entityType} */}
         {showStyle == "table" && <>
 
-            <DataPage columnType={columnType} rowSelection={rowSelection} ref={entityRef} openModal={openModals} params={params} entityType={entityType}></DataPage>
+            <DataPage
+                columns={({ openModal, reload, messageApi }:any) => {
+                    const columns = getColumns(columnType)
+                    const action = getAction("mesh", openModal, reload, messageApi)
+                    return [...columns,...action]
+                }}
+                rowSelection={rowSelection} ref={entityRef} openModal={openModals} params={params}
+                api={`/entity/page/mesh`}></DataPage>
         </>}
         {showStyle == "tree" && <>
-            <TableTree ref={entityRef} entityType={entityType} params={params}></TableTree>
+            <TableTree ref={entityRef} entityType={"mesh"} params={params}></TableTree>
         </>}
 
 
@@ -206,7 +219,7 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelect
 })
 
 
-const EntityViewPanel: FC<any> = ({...rest}) => {
+const EntityViewPanel: FC<any> = ({ ...rest }) => {
     const { modals, openModals, closeModals } = useModals(["entityPage", "optModal", "graphView", "entityDrawer", "entityDetailsModal"]);
     const entityRef = useRef<EntityRef>(null)
     const reload = () => {

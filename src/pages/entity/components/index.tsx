@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from "react"
 import Taxonomy from './taxonomy'
-import Association from './association'
+import Association from '../../entity-relation/association/association'
 import MentalDisorders from './mentalDisorders'
 import { Collapse, Form, Input, Modal, Select, Switch, Typography } from "antd"
 import { useOutletContext } from "react-router"
@@ -44,6 +44,7 @@ export const EntityModal: FC<any> = ({ ...rest }) => {
             <Form.Item label="entity_name" name={"entity_name"} rules={[{ required: true, message: '该字段不能为空!' }]}>
                 <Input></Input>
             </Form.Item>
+            {/* {params?.entityType} */}
             <ComponentsRender type={params?.entityType} record={record}></ComponentsRender>
         </FormModal>
     </>

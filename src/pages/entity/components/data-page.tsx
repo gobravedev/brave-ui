@@ -1,20 +1,34 @@
-import { forwardRef, useImperativeHandle, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from "react";
 import { EntityRef } from './interface'
 import { useI18n } from "@/hooks/useI18n";
 import { useNavigate, useOutletContext } from "react-router";
-import { getColumns } from './columns'
+import { getColumns, getAction } from './columns'
 import { Button, Flex, Input, Pagination, Popconfirm, Select, Space, Switch, Table, Tooltip } from "antd";
 import axios from "axios";
 import { usePagination } from "@/hooks/usePagination";
 import { CloseOutlined, PlusCircleOutlined, RedoOutlined } from "@ant-design/icons"
-const DataPage = forwardRef<EntityRef, { openModal: any; entityType: any, rowSelection?: any, params?: any, columnType?: any, close?: any }>(({ columnType, rowSelection, openModal, entityType, params, close }, ref) => {
+
+interface DataPageParams {
+    openModal: any;
+    // entityType: any, 
+    rowSelection?: any,
+    params?: any,
+    // columnType?: any,
+    hiddenSwitch?:boolean,
+    close?: any,
+    api: any,
+    columns:any
+}
+const DataPage = forwardRef<EntityRef, DataPageParams>(({
+   rowSelection, openModal, api, params, close,columns:columns_ ,hiddenSwitch=false}, ref) => {
     const [isResearch, setIsResearch] = useState<boolean>(true)
     const { locale } = useI18n()
     const [initPageSize] = useState(30); // 每页显示条数
+    // const [columns, setColumns] = useState<any>([])
 
     const { data, pageNumber, totalPage, loading, reload, pageSize, setPageSize, setPageNumber, search } = usePagination({
         // pag?eApi: pageContainerApi,
-        url: `/entity/page/${entityType}`,
+        url: api,
         initialPageSize: initPageSize,
         params: {
             ...params,
@@ -31,21 +45,44 @@ const DataPage = forwardRef<EntityRef, { openModal: any; entityType: any, rowSel
 
     const navigate = useNavigate();
     const { messageApi } = useOutletContext<any>()
+    
+    // useEffect(() => {
+    //     // console.log(columnType)
+    //     // const columns = getColumns(columnType)
+    //     // let columnsRes: any = []
+    //     // console.log(columnType)
+    //     // if (columnType == "association") {
+    //     //     columnsRes = [
+    //     //         ...columns,
+    //     //         ...getAction("association", openModal, reload, messageApi)
 
-    const columns: any[] = [
-        ...getColumns(columnType || entityType,openModal,reload,messageApi)
-     
-    ]
+    //     //     ]
+    //     // } else {
+    //     //     columnsRes = [
+    //     //         ...columns,
+    //     //         ...getAction("mesh", openModal, reload, messageApi)
 
+    //     //     ]
+    //     // }
+       
+    //     setColumns(columns)
+    //     // console.log(columnType)
+
+    // }, [columnType])
+    // const columns = columns_({openModal, reload, messageApi})
+    const columns = useMemo(() => {
+        // console.log("3333333333333")
+        return columns_({ openModal, reload, messageApi });
+      }, [params?.category]);
     return <div >
         {/* {locale} */}
-        {entityType}
+        {/* {entityType} */}
         <Table
             title={() => (
                 <Flex justify={"space-between"}>
 
                     <Flex gap={"small"} align={"center"}>
-                        {entityType != "association" &&
+                        {!hiddenSwitch &&
                             <Switch
                                 value={isResearch}
                                 onChange={setIsResearch}
@@ -72,9 +109,9 @@ const DataPage = forwardRef<EntityRef, { openModal: any; entityType: any, rowSel
                             <PlusCircleOutlined onClick={() => {
 
                                 if (params?.category) {
-                                    openModal("optModal", { entityType: entityType, category: params?.category })
+                                    openModal("optModal", { entityType: "mesh", category: params?.category })
                                 } else {
-                                    openModal("optModal", { entityType: entityType })
+                                    openModal("optModal", { entityType: "mesh" })
                                 }
 
 

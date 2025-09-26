@@ -1,15 +1,15 @@
-import { Collapse, Form, Modal, Typography } from "antd"
+import { Collapse, Form, Input, Modal, Select, Typography } from "antd"
 import axios from "axios"
 import { FC, useEffect, useState } from "react"
 import { useOutletContext } from "react-router"
 
 
-const FormModal: FC<any> = ({ visible, params, onClose, record, callback, children ,entityType="mesh"}) => {
+const FormModal: FC<any> = ({ visible, params, onClose, record, callback, children, entityType = "mesh" }) => {
     const [form] = Form.useForm()
     const { messageApi } = useOutletContext<any>()
     const [loading, setLoading] = useState<any>(false)
     useEffect(() => {
-        console.log("11111",params)
+        // console.log("11111",params)
         if (visible && params?.entityId) {
             loadData()
         } else {
@@ -24,13 +24,20 @@ const FormModal: FC<any> = ({ visible, params, onClose, record, callback, childr
         setLoading(false)
     }
     const save = async () => {
-        setLoading(true)
+
         const values = await form.validateFields()
-        if (params?.entityId) {
-            await axios.put(`/entity/update/${params.entityType}/${params.entityId}`, values)
-        } else {
-            await axios.post(`/entity/add/${params.entityType}`, values)
+        setLoading(true)
+        try {
+            if (params?.entityId) {
+                await axios.put(`/entity/update/${params.entityType}/${params.entityId}`, values)
+            } else {
+                await axios.post(`/entity/add/${params.entityType}`, values)
+            }
+        } catch (error) {
+            setLoading(false)
+            messageApi.error("error!")
         }
+
         // console.log(values)
         // if (params) {
         //     values.container_id = params
@@ -41,7 +48,7 @@ const FormModal: FC<any> = ({ visible, params, onClose, record, callback, childr
         if (callback) {
             callback()
         }
- 
+
         messageApi.success("操作成功!")
     }
     return <Modal loading={loading} title={params?.entityId ? `update entity` : "create entity"}
@@ -50,6 +57,7 @@ const FormModal: FC<any> = ({ visible, params, onClose, record, callback, childr
         {/* {params} */}
         <Form form={form}>
             {children}
+
             {/* <ComponentsRender type={params?.entityType} record={record}></ComponentsRender> */}
             <Collapse ghost items={[
                 {

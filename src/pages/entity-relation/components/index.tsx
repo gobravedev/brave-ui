@@ -5,7 +5,7 @@ const ChatView = lazy(() => import('./chat'));
 const NodeView = lazy(() => import('./details'));
 const RelationView = lazy(() => import('./relation'));
 const DataFiletr = lazy(()=>import('./data-filter'))
-const AssociationPage = lazy(()=>import('@/pages/entity/components/association-page'))
+const AssociationPage = lazy(()=>import('@/pages/entity-relation/association/association-page'))
 export const viewMapping: {
     key: string;
     label: string;

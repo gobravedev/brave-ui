@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useRef, useState } from "react";
+import React, { FC, useEffect, useMemo, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 // import Graph from "react-graph-vis-ts";
 
@@ -133,8 +133,13 @@ const App: FC<any> = ({
     // useEffect(()=>{
 
     // },[])
-    const graphData = transformToVis(graphData_)
-    console.log(graphData)
+    const graphData = useMemo(() => {
+        const graphData = transformToVis(graphData_)
+        console.log(graphData)
+        return graphData
+    },[graphData_])
+
+
     // const graph = {
     //     nodes: [
     //         { id: 1, label: "Node 1", title: "node 1 tootip text" },
@@ -219,7 +224,7 @@ const App: FC<any> = ({
                 console.log("clicked node:", nodeId);
                 openView("details", { id: nodeId });
             } else if (event.edges.length > 0 && networkRef.current) {
-                const networkInstance:any = networkRef.current
+                const networkInstance: any = networkRef.current
                 // console.log(networkInstance)
                 // 点击边
                 const edgeId = event.edges[0];
@@ -230,7 +235,7 @@ const App: FC<any> = ({
                 const toNode = networkInstance.body.data.nodes.get(connectedNodes[1]);
                 // const edge = networkInstance.body.data.edges.get(edgeId);
                 // console.log(edge)
-                openView("relation", { fromNode: fromNode, toNode: toNode});
+                openView("relation", { fromNode: fromNode, toNode: toNode });
             }
         },
         // click: (event: any) => {
