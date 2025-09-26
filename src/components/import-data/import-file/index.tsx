@@ -102,7 +102,7 @@ const ImportFile: FC<{ component_type: any, component_id: any, component_name: a
         }
     }, [inputForm])
     const deleteItem = (sampleName: any) => {
-        setParseData((prev:any) =>
+        setParseData((prev: any) =>
             prev.filter((item: any) => item.sample_name !== sampleName)
         );
     };
@@ -226,7 +226,11 @@ const ImportFile: FC<{ component_type: any, component_id: any, component_name: a
             </pre> */}
 
             <Form form={form}>
-
+                {/* 同一个样本测序不同部位 */}
+                <Form.Item name={"sample_source"} label="样本来源">
+                    <Input>
+                    </Input>
+                </Form.Item>
 
                 {inputForm ?
                     <>

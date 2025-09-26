@@ -374,7 +374,13 @@ const ResultList = forwardRef<any, any>(({
                     <span style={{ cursor: "pointer" }}>{text}</span>
                 </Tooltip>
             }
-
+            
+        },{
+            title: '样本来源',
+            dataIndex: 'sample_source',
+            key: 'sample_source',
+            width: 100,
+            ellipsis: true,
         },
         ...getMetadataColumns(),
         //  {
@@ -683,7 +689,8 @@ const ResultList = forwardRef<any, any>(({
                 </Flex>
             </>}
             tabList={analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 1 ?
-                analysisMethod.map((it: any) => ({ key: it.component_id, label: it.component_name ? it.component_name : "no_name" })) : undefined}
+                analysisMethod.map((it: any) => ({ key: it.component_id, label: 
+                <Tooltip title={it.component_id}>{it.component_name ? it.component_name : "no_name" }</Tooltip>})) : undefined}
             activeTabKey={activeTabKey}
             onTabChange={onTabChange}
         >
@@ -691,6 +698,7 @@ const ResultList = forwardRef<any, any>(({
             {/* {JSON.stringify(rest)} */}
             {/* {JSON.stringify(projectObj)} */}
             {/* {JSON.stringify(currentAnalysisMethod.component_id)} */}
+           
             <Table
                 title={() => (
                     <Input.Search

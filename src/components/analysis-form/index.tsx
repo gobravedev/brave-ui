@@ -182,41 +182,41 @@ export const AnalysisForm: FC<any> = ({
 
     }
 
-    const saveUpstreamAnalysis = async (save: any, is_submit: any = false) => {
-        const values = await form.validateFields()
-        const requestParams = {
-            ...requestParsms,
-            ...values,
+    // const saveUpstreamAnalysis = async (save: any, is_submit: any = false) => {
+    //     const values = await form.validateFields()
+    //     const requestParams = {
+    //         ...requestParsms,
+    //         ...values,
 
-        }
-        const scriptType = rest.script_type || "script"
-        console.log(scriptType)
-        try {
-            const resp: any = await axios.post(`/fast-api/analysis-controller?save=${save}&type=${scriptType}&is_submit=${is_submit}`, requestParams)
-            // setFilePlot(resp.data)
-            // setAnalysisParams(resp.data)
-            console.log(resp)
+    //     }
+    //     const scriptType = rest.script_type || "script"
+    //     console.log(scriptType)
+    //     try {
+    //         const resp: any = await axios.post(`/fast-api/analysis-controller?save=${save}&type=${scriptType}&is_submit=${is_submit}`, requestParams)
+    //         // setFilePlot(resp.data)
+    //         // setAnalysisParams(resp.data)
+    //         console.log(resp)
 
-            if (save) {
-                messageApi.success("执行成功!")
-                if (callback) {
-                    callback()
-                }
-                // if (tableRef.current) {
-                //     tableRef.current.reload()
-                // }
-            } else {
-                operatePipeline.openModal("modalF", resp.data)
-            }
-        } catch (error: any) {
-            console.log(error)
-            if (error.response?.data) {
-                messageApi.error(error.response.data.detail)
-            }
-        }
-        // setLoading(false)
-        // /fast-api/save-analysis
-    }
+    //         if (save) {
+    //             messageApi.success("执行成功!")
+    //             if (callback) {
+    //                 callback()
+    //             }
+    //             // if (tableRef.current) {
+    //             //     tableRef.current.reload()
+    //             // }
+    //         } else {
+    //             operatePipeline.openModal("modalF", resp.data)
+    //         }
+    //     } catch (error: any) {
+    //         console.log(error)
+    //         if (error.response?.data) {
+    //             messageApi.error(error.response.data.detail)
+    //         }
+    //     }
+    //     // setLoading(false)
+    //     // /fast-api/save-analysis
+    // }
     return <>
         {contextHolder}
         {/* {JSON.stringify(projectObj)} */}

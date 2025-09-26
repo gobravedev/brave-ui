@@ -926,6 +926,8 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, component_id, compon
     useEffect(() => {
         if (script) {
             plot({ ...script, name: script.name })
+            // const componentIds = analysisMethod.map((item: any) => item.component_id)
+            // setComponentIds(componentIds)
             setComponentIds([script.component_id])
             // console.log(analysisMethod)
         }
@@ -951,7 +953,7 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, component_id, compon
 
     return <>
         {contextHolder}
-        {/* {JSON.stringify(rest)} */}
+        {/* {JSON.stringify(analysisMethod)} */}
 
         {analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 0 && <>
             <ResultList
@@ -1119,7 +1121,7 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, component_id, compon
                                     }} style={{ cursor: "pointer" }} />
                                 </Flex>
                                 <div style={{ marginBottom: "1rem" }}></div>
-                                {/* {JSON.stringify(downstreamData.databases)} */}
+                                {/* {JSON.stringify(componentIds)} */}
 
                                 <AnalysisForm
                                     {...downstreamData}
@@ -1135,7 +1137,7 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, component_id, compon
                                     params={params}
                                     name={btnName}
                                     setPlotLoading={setPlotLoading}
-                                    dataComponentIds={[currentAnalysisMethod?.component_id]}
+                                    dataComponentIds={analysisMethod.map((item: any) => item.component_id)}
                                     inputAnalysisMethod={currentAnalysisMethod}
                                     saveAnalysisMethod={saveAnalysisMethod}
                                     project={project}

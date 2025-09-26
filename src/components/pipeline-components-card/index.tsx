@@ -52,7 +52,8 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
     const { data: pipelineComponents, pageNumber, totalPage, loading, reload, pageSize, setPageNumber, search } = usePagination({
         pageApi: pagePipelineComponents,
         params: params || {},
-        map: mapFun
+        map: mapFun,
+        initialPageSize:12
     })
     // result = {
     //     "id":item.id,
