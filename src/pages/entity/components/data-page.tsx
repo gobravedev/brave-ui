@@ -14,13 +14,13 @@ interface DataPageParams {
     rowSelection?: any,
     params?: any,
     // columnType?: any,
-    hiddenSwitch?:boolean,
+    hiddenSwitch?: boolean,
     close?: any,
     api: any,
-    columns:any
+    columns: any
 }
 const DataPage = forwardRef<EntityRef, DataPageParams>(({
-   rowSelection, openModal, api, params, close,columns:columns_ ,hiddenSwitch=false}, ref) => {
+    rowSelection, openModal, api, params, close, columns: columns_, hiddenSwitch = false }, ref) => {
     const [isResearch, setIsResearch] = useState<boolean>(true)
     const { locale } = useI18n()
     const [initPageSize] = useState(30); // 每页显示条数
@@ -45,7 +45,7 @@ const DataPage = forwardRef<EntityRef, DataPageParams>(({
 
     const navigate = useNavigate();
     const { messageApi } = useOutletContext<any>()
-    
+
     // useEffect(() => {
     //     // console.log(columnType)
     //     // const columns = getColumns(columnType)
@@ -64,7 +64,7 @@ const DataPage = forwardRef<EntityRef, DataPageParams>(({
 
     //     //     ]
     //     // }
-       
+
     //     setColumns(columns)
     //     // console.log(columnType)
 
@@ -73,7 +73,7 @@ const DataPage = forwardRef<EntityRef, DataPageParams>(({
     const columns = useMemo(() => {
         // console.log("3333333333333")
         return columns_({ openModal, reload, messageApi });
-      }, [params?.category]);
+    }, [params?.category]);
     return <div >
         {/* {locale} */}
         {/* {entityType} */}
@@ -108,7 +108,9 @@ const DataPage = forwardRef<EntityRef, DataPageParams>(({
                         <Tooltip title="create">
                             <PlusCircleOutlined onClick={() => {
 
-                                if (params?.category) {
+                                if (params?.category && params?.registry_join) {
+                                    openModal("optModal", { entityType: "mesh", category: params?.category, registryJoin: params?.registry_join })
+                                } else if (params?.category) {
                                     openModal("optModal", { entityType: "mesh", category: params?.category })
                                 } else {
                                     openModal("optModal", { entityType: "mesh" })

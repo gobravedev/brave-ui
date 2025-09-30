@@ -61,6 +61,8 @@ const EntityPage = lazy(() => import('@/pages/entity'));
 const EntityRelation = lazy(() => import('@/pages/entity-relation'));
 const PsycMicroGraphHome = lazy(()=>import("@/pages/psycmicrograph"))
 const Test = lazy(()=>import("@/pages/test"))
+const Mining = lazy(()=>import("@/pages/mining"))
+const MiningData = lazy(()=>import("@/pages/mining/components/mining-data"))
 
 const ContainerPage = lazy(() => import('@/pages/container'));
 import axios from "axios";
@@ -348,9 +350,16 @@ if (appType == "index") {
         }, {
             path: "/entity-relation",
             element: <EntityRelation />
+        }, {
+            path: "/mining",
+            element: <Mining />
+        },{
+            path: "/mining-data/:entity_id",
+            element: <MiningData />
         },
-
-
+        
+        
+        
 
         {
             path: "/:project/meta_genome/reads-based-abundance-analysis",

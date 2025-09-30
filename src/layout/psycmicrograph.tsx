@@ -192,7 +192,23 @@ const App: React.FC = () => {
                 en_US: "Ontology"
             }
 
-        }, 
+        },  {
+            key: `/mining`,
+            label: {
+                zh_CN: "Mining",
+                en_US: "Mining"
+            },children: [
+                {
+                    key: `/mining-data`,
+                    label:{
+                        zh_CN: "Mining Data",
+                        en_US: "Mining Data"
+                    },
+                    hidden: true
+                }
+            ]
+
+        },
 
     ]
     type MenuItem = {

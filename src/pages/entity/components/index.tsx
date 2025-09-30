@@ -32,7 +32,9 @@ export const EntityModal: FC<any> = ({ ...rest }) => {
         }
     }, [params])
     return <>
+
         <FormModal {...rest}>
+            {/* {JSON.stringify(params)} */}
             {!params?.entityId && <Form.Item label="category" name={"category"} rules={[{ required: true, message: '该字段不能为空!' }]}>
 
                 <Select options={category}></Select>

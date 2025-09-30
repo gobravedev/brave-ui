@@ -5,6 +5,8 @@ const { Option } = Select;
 // import { EntityView, } from '@/pages/entity/index'
 import EntityViewPanel from '@/pages/entity/index'
 import { useModals } from "@/hooks/useModal";
+import StudyPage from '@/pages/mining/components/study/study-page'
+
 const Association: FC<any> = ({ }) => {
 
     const [fromLabel, setFromLabel] = useState<string>("study");
@@ -13,7 +15,7 @@ const Association: FC<any> = ({ }) => {
 
     const [fromOptions, setFromOptions] = useState<any[]>([]);
     const [toOptions, setToOptions] = useState<any[]>([]);
-    const { modals, openModals, closeModals } = useModals(["entityDrawer"]);
+    const { modals, openModals, closeModals } = useModals(["entityDrawer","studyDrawer"]);
     const [record, setRecord] = useState<any>()
 
     // 实时搜索实体
@@ -52,7 +54,7 @@ const Association: FC<any> = ({ }) => {
             <Input
                 placeholder="which study or reference provides evidence"
                 style={{ cursor: "pointer" }}
-                onClick={() => openModals("entityDrawer", { name: "study_id" })}
+                onClick={() => openModals("studyDrawer", { name: "study_id" })}
             />
         </Form.Item>
         <Form.Item label="Subject" name={"subject_id"} >
@@ -192,18 +194,45 @@ const Association: FC<any> = ({ }) => {
             params={modals.entityDrawer.params}
             onClose={() => closeModals("entityDrawer")}
         ></EntityDrawer>
+        <StudyDrawer
+            form={form}
+            setRecord={setRecord}
+            visible={modals.studyDrawer.visible}
+            params={modals.studyDrawer.params}
+            onClose={() => closeModals("studyDrawer")}
+        ></StudyDrawer>
     </>
 }
 
 export default Association
 
 
+const StudyDrawer: FC<any> = ({ visible, setRecord, form, params, onClose, callback }) => {
+
+    return <>
+        <Drawer open={visible} onClose={onClose} width={"80%"}>
+            {visible &&
+                <StudyPage rowSelection={{
+                    onChange: (selectedRowKeys: any, selectedRows: any) => {
+                        // console.log(form,selectedRows, params.name)
+                        form.setFieldValue(params.name, selectedRows[0].entity_id)
+                        // setRecord({...selectedRows[0],fieldName:})
+                        onClose()
+                    }, type: "radio"
+
+                }}></StudyPage>
+            }
+
+
+        </Drawer>
+    </>
+}
 const EntityDrawer: FC<any> = ({ visible, setRecord, form, params, onClose, callback }) => {
 
     return <>
         <Drawer open={visible} onClose={onClose} width={"80%"}>
             {visible &&
-                <EntityViewPanel disableWidth={true}  rowSelection={{
+                <EntityViewPanel disableWidth={true} rowSelection={{
                     onChange: (selectedRowKeys: any, selectedRows: any) => {
                         // console.log(form,selectedRows, params.name)
                         form.setFieldValue(params.name, selectedRows[0].entity_id)

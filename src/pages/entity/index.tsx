@@ -62,10 +62,11 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelect
         {
             key: "chemicals_and_drugs",
             label: "Chemicals and Drugs"
-        }, {
-            key: "evidence",
-            label: "Research Evidence"
-        },
+        }, 
+        // {
+        //     key: "evidence",
+        //     label: "Research Evidence"
+        // },
         // {
         //     key: "taxonomy",
         //     label: "Microbe"
@@ -134,7 +135,8 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelect
         } else if (key == "evidence") {
             // setEntityType("mesh")
             setParams({
-                category: ["evidence"]
+                category: ["evidence"],
+                registry_join: "study"
             })
             setColumnType("mesh")
         } else {
@@ -200,10 +202,10 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelect
         {showStyle == "table" && <>
 
             <DataPage
-                columns={({ openModal, reload, messageApi }:any) => {
+                columns={({ openModal, reload, messageApi }: any) => {
                     const columns = getColumns(columnType)
                     const action = getAction("mesh", openModal, reload, messageApi)
-                    return [...columns,...action]
+                    return [...columns, ...action]
                 }}
                 rowSelection={rowSelection} ref={entityRef} openModal={openModals} params={params}
                 api={`/entity/page/mesh`}></DataPage>
