@@ -41,6 +41,15 @@ const Panel: FC<any> = () => {
             setInnerHeight(window.innerHeight - height);
         }
     }
+    useEffect(() => {
+        updateHeight(); // 初始化
+        window.addEventListener("resize", updateHeight);
+        // window.addEventListener("scroll", updateHeight);
+        return () => {
+            window.removeEventListener("resize", updateHeight);
+            //   window.removeEventListener("scroll", updateHeight);
+        };
+    }, []);
     const loadGraph = () => {
         if (graphViewRef.current) {
             graphViewRef.current.reload()
@@ -70,15 +79,7 @@ const Panel: FC<any> = () => {
     // useEffect(() => {
 
     // }, []);
-    useEffect(() => {
-        updateHeight(); // 初始化
-        window.addEventListener("resize", updateHeight);
-        // window.addEventListener("scroll", updateHeight);
-        return () => {
-            window.removeEventListener("resize", updateHeight);
-            //   window.removeEventListener("scroll", updateHeight);
-        };
-    }, []);
+ 
     const [animatedSizes, setAnimatedSizes] = useState<(number | string)[]>(sizes);
 
     useEffect(() => {

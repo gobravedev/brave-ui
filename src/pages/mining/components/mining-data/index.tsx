@@ -264,140 +264,140 @@ const TextHighlighter: FC<{ text: string }> = ({ text }) => {
     );
 };
 
-const TextHighlighter2: FC<any> = ({ text: text_ }) => {
-    const [text] = useState<any>(text_);
-    const [html, setHtml] = useState("");
-    const [highlights, setHighlights] = useState<Highlight[]>([]);
-    const containerRef = useRef<HTMLDivElement>(null);
-    const idRef = useRef(1); // 高亮ID计数器
+// const TextHighlighter2: FC<any> = ({ text: text_ }) => {
+//     const [text] = useState<any>(text_);
+//     const [html, setHtml] = useState("");
+//     const [highlights, setHighlights] = useState<Highlight[]>([]);
+//     const containerRef = useRef<HTMLDivElement>(null);
+//     const idRef = useRef(1); // 高亮ID计数器
 
-    useEffect(() => {
-        setHtml(text.replace(/\n/g, "<br/>")); // 将 \n 渲染为换行
-    }, [text]);
+//     useEffect(() => {
+//         setHtml(text.replace(/\n/g, "<br/>")); // 将 \n 渲染为换行
+//     }, [text]);
 
-    /** 将选区的相对位置计算为在纯文本中的偏移量 */
-    const getSelectionOffsets = (selection: Selection): { start: number; end: number } => {
-        const range = selection.getRangeAt(0);
-        const preSelectionRange = range.cloneRange();
-        preSelectionRange.selectNodeContents(containerRef.current!);
-        preSelectionRange.setEnd(range.startContainer, range.startOffset);
-        const start = preSelectionRange.toString().length;
-        const end = start + range.toString().length;
-        return { start, end };
-    };
+//     /** 将选区的相对位置计算为在纯文本中的偏移量 */
+//     const getSelectionOffsets = (selection: Selection): { start: number; end: number } => {
+//         const range = selection.getRangeAt(0);
+//         const preSelectionRange = range.cloneRange();
+//         preSelectionRange.selectNodeContents(containerRef.current!);
+//         preSelectionRange.setEnd(range.startContainer, range.startOffset);
+//         const start = preSelectionRange.toString().length;
+//         const end = start + range.toString().length;
+//         return { start, end };
+//     };
 
-    /** 右键选中高亮 */
-    const handleContextMenu = (e: React.MouseEvent) => {
-        e.preventDefault();
-        const selection = window.getSelection();
-        if (!selection || selection.toString().trim() === "") return;
+//     /** 右键选中高亮 */
+//     const handleContextMenu = (e: React.MouseEvent) => {
+//         e.preventDefault();
+//         const selection = window.getSelection();
+//         if (!selection || selection.toString().trim() === "") return;
 
-        const selectedText = selection.toString();
-        const range = selection.getRangeAt(0);
-        if (!containerRef.current?.contains(range.commonAncestorContainer)) return;
+//         const selectedText = selection.toString();
+//         const range = selection.getRangeAt(0);
+//         if (!containerRef.current?.contains(range.commonAncestorContainer)) return;
 
-        // 计算位置
-        const { start, end } = getSelectionOffsets(selection);
+//         // 计算位置
+//         const { start, end } = getSelectionOffsets(selection);
 
-        // 生成唯一 ID
-        const id = idRef.current++;
+//         // 生成唯一 ID
+//         const id = idRef.current++;
 
-        // 创建高亮 span
-        const span = document.createElement("span");
-        span.style.backgroundColor = "yellow";
-        span.dataset.highlightId = id.toString();
-        range.surroundContents(span);
+//         // 创建高亮 span
+//         const span = document.createElement("span");
+//         span.style.backgroundColor = "yellow";
+//         span.dataset.highlightId = id.toString();
+//         range.surroundContents(span);
 
-        // 更新 HTML
-        const newHtml = containerRef.current?.innerHTML || "";
-        setHtml(newHtml);
+//         // 更新 HTML
+//         const newHtml = containerRef.current?.innerHTML || "";
+//         setHtml(newHtml);
 
-        // 清除选区
-        selection.removeAllRanges();
+//         // 清除选区
+//         selection.removeAllRanges();
 
-        // 保存高亮记录
-        setHighlights((prev) => [...prev, { id, text: selectedText, start, end }]);
-    };
+//         // 保存高亮记录
+//         setHighlights((prev) => [...prev, { id, text: selectedText, start, end }]);
+//     };
 
-    // 删除高亮
-    const handleDelete = (id: number) => {
-        if (!containerRef.current) return;
+//     // 删除高亮
+//     const handleDelete = (id: number) => {
+//         if (!containerRef.current) return;
 
-        const container = containerRef.current;
-        const span = container.querySelector(`span[data-highlight-id="${id}"]`);
-        if (span) {
-            // 还原高亮内容
-            const textNode = document.createTextNode(span.textContent || "");
-            span.replaceWith(textNode);
-        }
+//         const container = containerRef.current;
+//         const span = container.querySelector(`span[data-highlight-id="${id}"]`);
+//         if (span) {
+//             // 还原高亮内容
+//             const textNode = document.createTextNode(span.textContent || "");
+//             span.replaceWith(textNode);
+//         }
 
-        // 更新 HTML
-        const newHtml = container.innerHTML;
-        setHtml(newHtml);
+//         // 更新 HTML
+//         const newHtml = container.innerHTML;
+//         setHtml(newHtml);
 
-        // 从 state 删除
-        setHighlights((prev) => prev.filter((h) => h.id !== id));
-    };
+//         // 从 state 删除
+//         setHighlights((prev) => prev.filter((h) => h.id !== id));
+//     };
 
-    return (
-        <div style={{ display: "flex", gap: "20px" }}>
-            {/* 左侧文本区 */}
-            <div
-                ref={containerRef}
-                onContextMenu={handleContextMenu}
-                dangerouslySetInnerHTML={{ __html: html }}
-                style={{
-                    flex: 1,
-                    border: "1px solid #ddd",
-                    padding: "12px",
-                    borderRadius: "6px",
-                    lineHeight: "1.8",
-                    cursor: "text",
-                    whiteSpace: "pre-wrap",
-                }}
-            ></div>
+//     return (
+//         <div style={{ display: "flex", gap: "20px" }}>
+//             {/* 左侧文本区 */}
+//             <div
+//                 ref={containerRef}
+//                 onContextMenu={handleContextMenu}
+//                 dangerouslySetInnerHTML={{ __html: html }}
+//                 style={{
+//                     flex: 1,
+//                     border: "1px solid #ddd",
+//                     padding: "12px",
+//                     borderRadius: "6px",
+//                     lineHeight: "1.8",
+//                     cursor: "text",
+//                     whiteSpace: "pre-wrap",
+//                 }}
+//             ></div>
 
-            {/* 右侧高亮列表 */}
-            <div style={{ width: "320px" }}>
-                <h4>📑 已选高亮：</h4>
-                {highlights.length === 0 && <p style={{ color: "#888" }}>暂无高亮</p>}
-                <ul style={{ listStyle: "none", padding: 0 }}>
-                    {highlights.map((item) => (
-                        <li
-                            key={item.id}
-                            style={{
-                                background: "#fffbe6",
-                                border: "1px solid #ffe58f",
-                                padding: "6px 8px",
-                                borderRadius: "4px",
-                                marginBottom: "6px",
-                                fontSize: "14px",
-                            }}
-                        >
-                            <div style={{ marginBottom: "4px" }}>
-                                <b>内容：</b>{item.text}
-                            </div>
-                            <div style={{ fontSize: "12px", color: "#888" }}>
-                                <span>位置：{item.start} - {item.end}</span>
-                            </div>
-                            <div style={{ textAlign: "right", marginTop: "4px" }}>
-                                <button
-                                    onClick={() => handleDelete(item.id)}
-                                    style={{
-                                        border: "none",
-                                        background: "transparent",
-                                        color: "red",
-                                        cursor: "pointer",
-                                        fontSize: "12px",
-                                    }}
-                                >
-                                    删除
-                                </button>
-                            </div>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-        </div>
-    );
-}
+//             {/* 右侧高亮列表 */}
+//             <div style={{ width: "320px" }}>
+//                 <h4>📑 已选高亮：</h4>
+//                 {highlights.length === 0 && <p style={{ color: "#888" }}>暂无高亮</p>}
+//                 <ul style={{ listStyle: "none", padding: 0 }}>
+//                     {highlights.map((item) => (
+//                         <li
+//                             key={item.id}
+//                             style={{
+//                                 background: "#fffbe6",
+//                                 border: "1px solid #ffe58f",
+//                                 padding: "6px 8px",
+//                                 borderRadius: "4px",
+//                                 marginBottom: "6px",
+//                                 fontSize: "14px",
+//                             }}
+//                         >
+//                             <div style={{ marginBottom: "4px" }}>
+//                                 <b>内容：</b>{item.text}
+//                             </div>
+//                             <div style={{ fontSize: "12px", color: "#888" }}>
+//                                 <span>位置：{item.start} - {item.end}</span>
+//                             </div>
+//                             <div style={{ textAlign: "right", marginTop: "4px" }}>
+//                                 <button
+//                                     onClick={() => handleDelete(item.id)}
+//                                     style={{
+//                                         border: "none",
+//                                         background: "transparent",
+//                                         color: "red",
+//                                         cursor: "pointer",
+//                                         fontSize: "12px",
+//                                     }}
+//                                 >
+//                                     删除
+//                                 </button>
+//                             </div>
+//                         </li>
+//                     ))}
+//                 </ul>
+//             </div>
+//         </div>
+//     );
+// }

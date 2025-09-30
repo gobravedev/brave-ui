@@ -172,10 +172,14 @@ const App: React.FC = () => {
     //     token: { colorBgContainer, borderRadiusLG },
     // } = theme.useToken();
 
-    const menu0: MenuItem[] = [
+    const menu0:any = [
         {
             key: "/",
-            label: "项目介绍"
+            label: {
+                zh_CN: "项目介绍",
+                en_US: "Introduction"
+            }
+
         },
         // {
         //     key: `/sample`,
@@ -184,54 +188,81 @@ const App: React.FC = () => {
 
         {
             key: `/pipeline-card`,
-            label: "分析管道",
+            label: {
+                zh_CN: "分析管道",
+                en_US: "Pipeline"
+            },
             children: [
                 {
                     key: `/component/pipeline`,
-                    label: "分析报告",
+                    // label: {
+                    //     zh_CN: "",
+                    //     en_US: "report"
+                    // },
                     hidden: true
                 }
             ]
         },
         {
             key: `/software-card`,
-            label: "分析软件",
+            label: {
+                zh_CN: "分析软件",
+                en_US: "Software"
+            },
             children: [
                 {
                     key: `/component/software`,
-                    label: "分析报告",
+                    // label: "分析报告",
                     hidden: true
                 }
             ]
         },
         {
             key: `/file-card`,
-            label: "分析文件",
+            label: {
+                zh_CN: "分析文件",
+                en_US: "File"
+            },
             children: [
                 {
                     key: `/component/file`,
-                    label: "分析报告",
+                    // label: "分析报告",
                     hidden: true
                 }
             ]
         },
         {
             key: `/script-card`,
-            label: "分析脚本",
+            label: {
+                zh_CN: "分析脚本",
+                en_US: "Script"
+            },
             children: [
                 {
                     key: `/component/script`,
-                    label: "分析报告",
+                    // label: "分析报告",
                     hidden: true
                 }
             ]
         }, {
             key: `/analysis-report`,
-            label: "分析报告"
+            label: {
+                zh_CN: "分析报告",
+                en_US: "Report"
+            }
 
         }, {
+            key: `/tool-kit`,
+            label: {
+                zh_CN: "工具集",
+                en_US: "TookKit"
+            }
+        }, {
             key: `/psycmicrograph`,
-            label: "菌群知识库"
+            label:  {
+                zh_CN: "菌群知识库",
+                en_US: "PsycMicroGraph"
+            }
         },
         // {
         //     key: `/entity-page`,
@@ -244,21 +275,36 @@ const App: React.FC = () => {
         // },
         {
             key: `/more`,
-            label: "更多",
+            label: {
+                zh_CN: "更多",
+                en_US: "More"
+            },
             children: [
                 {
                     key: `/pipeline-monitor-panal`,
-                    label: "管道监控"
+                    label:  {
+                        zh_CN: "管道监控",
+                        en_US: "Monitor"
+                    },
                 },
                 {
                     key: `/analysis-result`,
-                    label: "分析结果"
+                    label: {
+                        zh_CN: "分析结果",
+                        en_US: "Analysis Result"
+                    }, 
                 }, {
                     key: `/container-page`,
-                    label: "容器管理"
+                    label:  {
+                        zh_CN: "容器管理",
+                        en_US: "Container"
+                    }, 
                 }, {
                     key: `/literature`,
-                    label: "文献资料"
+                    label:  {
+                        zh_CN: "文献资料",
+                        en_US: "Literature"
+                    }
                 },
             ]
         }
@@ -271,19 +317,40 @@ const App: React.FC = () => {
         children?: MenuItem[];
         hidden?: boolean; // 新增字段
     };
-
-    const filterMenu = (menus: MenuItem[]): MenuItem[] => {
+    type MenuItem0 = {
+        key: string;
+        label?: {
+            zh_CN: string;
+            en_US: string;
+        };
+        children?: MenuItem0[];
+        hidden?: boolean; // 新增字段
+    };
+    const filterMenu = (menus: MenuItem[]): MenuProps['items'] => {
         return menus
             .filter(item => !item.hidden)
             .map(item => {
-                const newItem: MenuItem = { ...item };
-                if (newItem.children) {
-                    newItem.children = filterMenu(newItem.children);
+                const newItem: MenuItem = { ...item } as MenuItem;
+                newItem.label = item.label[locale]; // 选择当前语言
+                if (item.children) {
+                    newItem.children = filterMenu(item.children) as MenuItem[];
                     if (newItem.children.length === 0) delete newItem.children;
                 }
                 return newItem;
             });
     };
+    // const filterMenu = (menus: MenuItem[]): MenuItem[] => {
+    //     return menus
+    //         .filter(item => !item.hidden)
+    //         .map(item => {
+    //             const newItem: MenuItem = { ...item };
+    //             if (newItem.children) {
+    //                 newItem.children = filterMenu(newItem.children);
+    //                 if (newItem.children.length === 0) delete newItem.children;
+    //             }
+    //             return newItem;
+    //         });
+    // };
     // 生成 path -> selectedKey 映射表，同时按 key 长度降序排序
     const generateSelectedKeyMap = (menus: MenuItem[]) => {
         const map: { key: string; selectedKey: string }[] = [];
@@ -320,7 +387,7 @@ const App: React.FC = () => {
         // setSelectedKeyMap(selectedKeyMap)
         const finalMenu = filterMenu(menu0);
         setMenus(finalMenu)
-    }, [])
+    }, [locale])
     // 使用示例
     useEffect(() => {
         // const pathname = findSelectedKey(menu0, location.pathname)
@@ -458,14 +525,14 @@ const App: React.FC = () => {
                         selectedKeys={[current]}
                         items={menus}
                         onSelect={k => {
-                            if(k.key=="/psycmicrograph"){
+                            if (k.key == "/psycmicrograph") {
                                 window.open(`${window.location.origin}${window.location.pathname}psycmicrograph.html`, "_blank")
-                                return 
+                                return
                             }
                             onMenuClick(k.key)
                             console.log(k)
                         }}
-                        style={{ flex: 1, minWidth: 0, background: 'transparent' }}
+                        style={{ flex: 1, minWidth: 0, background: 'transparent', borderInlineEnd: 0 }}
                     />
                 </div>
 
@@ -485,7 +552,7 @@ const App: React.FC = () => {
                     }}>
                         sse
                     </Button> */}
-             
+
                     {checkProject() && <>
                         <ProjectComp onProjectLoad={setProjectList} project_id={project_id} openModal={openModal} setProjectObj={setProjectObj}></ProjectComp>
 

@@ -63,6 +63,7 @@ const PsycMicroGraphHome = lazy(()=>import("@/pages/psycmicrograph"))
 const Test = lazy(()=>import("@/pages/test"))
 const Mining = lazy(()=>import("@/pages/mining"))
 const MiningData = lazy(()=>import("@/pages/mining/components/mining-data"))
+const ToolKit = lazy(()=>import("@/pages/tool-kit"))
 
 const ContainerPage = lazy(() => import('@/pages/container'));
 import axios from "axios";
@@ -106,7 +107,10 @@ if (appType == "index") {
             path: "/pipeline-card",
             element: <PipelineComponentsCard params={{ component_type: "pipeline" }} />
         },
-
+        {
+            path: "/tool-kit",
+            element: <ToolKit />
+        },
         {
             path: "/software-card",
             element: <PipelineComponentsCard
@@ -237,6 +241,9 @@ if (appType == "index") {
             children: [
                 ...children,
             ]
+        },{
+            path: "/test",
+            element: <Test />
         },
     ]
 } else if (appType == "micrograph") {
