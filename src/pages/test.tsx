@@ -13,7 +13,7 @@ interface Entry {
   label: string;
 }
 
-export const  KGMLMap = ({ pathwayId="hsa04144" }: { pathwayId: string }) =>{
+export const  KGMLMap = ({ pathwayId="hsa04144" }: { pathwayId?: string }) =>{
   const [image, setImage] = useState("");
   const [entries, setEntries] = useState<Entry[]>([]);
 
