@@ -21,7 +21,7 @@ interface DataPageParams {
 }
 const DataPage = forwardRef<EntityRef, DataPageParams>(({
     rowSelection, openModal, api, params, close, columns: columns_, hiddenSwitch = false }, ref) => {
-    const [isResearch, setIsResearch] = useState<boolean>(true)
+    const [isResearch, setIsResearch] = useState<boolean>(hiddenSwitch?false:true)
     const { locale } = useI18n()
     const [initPageSize] = useState(30); // 每页显示条数
     // const [columns, setColumns] = useState<any>([])

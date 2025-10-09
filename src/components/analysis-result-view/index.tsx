@@ -1,10 +1,10 @@
-import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Alert } from "antd";
+import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Alert, Modal } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { FC, forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import Markdown from '../markdown'
 import axios from "axios";
 import LogFile from "../log-file";
-import { QuestionCircleOutlined } from "@ant-design/icons"
+import { DownloadOutlined, QuestionCircleOutlined } from "@ant-design/icons"
 import { MonacoEditor } from "../react-monaco-editor";
 import { useNavigate, useOutletContext } from "react-router";
 import { useSSEContext } from "@/context/sse/useSSEContext";
@@ -16,8 +16,10 @@ import Project from "@/pages/project";
 import BioDatabaseForm from "../bio-database-form";
 import BioDatabases from "../bio-databases";
 import EditParams from '../edit-params'
+import { KGMLMapSVG } from "../databases/kegg";
+import { download } from "@antv/s2";
 
-export const TableView: FC<any> = ({ data, url, filename }) => {
+export const TableView: FC<any> = ({ data, url, filename, columns }) => {
     const { Search } = Input;
     const [tableData, setTableData] = useState<any>([])
     const getColumns = (data: any) => {
@@ -44,6 +46,7 @@ export const TableView: FC<any> = ({ data, url, filename }) => {
     return <>
         {Array.isArray(tableData) && <>
             <Table
+                style={{ border: "1px solid #f0f0f0" }}
                 size="small"
                 title={() => <Flex gap={"small"}>
                     <Search
@@ -60,18 +63,18 @@ export const TableView: FC<any> = ({ data, url, filename }) => {
                         style={{ width: 304 }}
                     />
 
-                    {url && <Popover title={`${window.location.origin}${url}`}><Button size="small" onClick={() => {
-                        window.open(`${url}?t=${Date.now()}`, "_blank")
-                    }} type="primary">下载</Button></Popover>}
+                    {url && <Popover title={`${window.location.origin}${url}`}>
+                        <Tag color="success" style={{ cursor: "pointer" }} onClick={() => {
+                            window.open(`${url}?t=${Date.now()}`, "_blank")
+                        }}>{filename} <DownloadOutlined /></Tag></Popover>}
 
-                    <span>{filename}</span>
                 </Flex>}
                 // showHeader={()=>{}}
                 scroll={{ x: 'max-content', y: 55 * 5 }}
                 dataSource={tableData}
                 pagination={false}
                 virtual
-                columns={getColumns(data[0])}
+                columns={columns ? columns : getColumns(data[0])}
                 footer={() => `一共${data.length}条记录`}
             ></Table>
 
@@ -87,12 +90,10 @@ const ImgView: FC<any> = ({ data, url, filename }) => {
             { }
             <Image src={filename?.endsWith("pdf") ? data : `${data}?t=${Date.now()}`} style={{ maxWidth: "20rem", marginRight: "0.5rem" }}></Image>
 
-            {url && <div>
-                <Popover title={`${window.location.origin}${url}`}>
-                    <Button size="small" onClick={() => { window.open(`${url}?t=${Date.now()}`, "_blank") }} type="primary">下载</Button>
-                </Popover>
-                {filename}
-            </div>}
+            {url && <Popover title={`${window.location.origin}${url}`}>
+                <Tag color="success" style={{ cursor: "pointer" }} onClick={() => {
+                    window.open(`${url}?t=${Date.now()}`, "_blank")
+                }}>{filename} <DownloadOutlined /></Tag></Popover>}
 
         </div>
 
@@ -110,7 +111,7 @@ const StringView: FC<any> = ({ data }) => {
 }
 const InfoView: FC<any> = ({ data }) => {
 
-    return <div style={{padding:"1rem"}}>
+    return <div >
         <Alert closable message={data} type="info" showIcon />
 
         {/* <Typography>
@@ -149,18 +150,132 @@ const HtmlView: FC<any> = ({ data }) => {
 
     </>
 }
+const Download: FC<any> = ({ url, filename }) => {
+    return <>
+        {url && <Popover title={`${window.location.origin}${url}`}>
+            <Tag color="success" style={{ cursor: "pointer" }} onClick={() => {
+                window.open(`${url}?t=${Date.now()}`, "_blank")
+            }}>{filename} <DownloadOutlined /></Tag></Popover>}
+
+    </>
+}
+const KeggMap: FC<any> = ({data,...rest}) => {
+    const { modal, openModal, closeModal } = useModal()
+    // const [record,setRecord] = useState<any>()
+    return <>
+        <TableView data={data?.list} {...rest} columns={[
+            {
+                title: "ID",
+                dataIndex: "ID",
+                key: "ID",
+                ellipsis: true,
+                width: 150,
+            }, {
+                title: "Description",
+                dataIndex: "Description",
+                key: "Description",
+                ellipsis: true,
+                width: 400,
+            }, {
+                title: "GeneRatio",
+                dataIndex: "GeneRatio",
+                key: "GeneRatio",
+                ellipsis: true,
+                width: 150,
+            }, {
+                title: "geneID",
+                dataIndex: "geneID",
+                key: "geneID",
+                ellipsis: true,
+                width: 150,
+            }, {
+                title: "Count",
+                dataIndex: "Count",
+                key: "Count",
+                ellipsis: true,
+                width: 150,
+            }, {
+                title: "pvalue",
+                dataIndex: "pvalue",
+                key: "pvalue",
+                ellipsis: true,
+                width: 150,
+            },  {
+                title: "p.adjust",
+                dataIndex: "p.adjust",
+                key: "p.adjust",
+                ellipsis: true,
+                width: 150,
+            },{
+                title: "qvalue",
+                dataIndex: "qvalue",
+                key: "qvalue",
+                ellipsis: true,
+                width: 150,
+            }, {
+                title: "organism",
+                dataIndex: "organism",
+                key: "organism",
+                ellipsis: true,
+                width: 150,
+            }, {
+                title: "pathwayId",
+                dataIndex: "pathwayId",
+                key: "pathwayId",
+                ellipsis: true,
+                width: 150,
+            }, {
+                title: '操作',
+                key: 'action',
+                fixed: "right",
+                ellipsis: true,
+                width: 200,
+                render: (_: any, record: any) => (
+                    <>
+                        <Button
+                            onClick={() => {
+                                openModal("KGMLMapSVG", record)
+                            }}
+                            size="small" color="cyan" variant="solid">pathview</Button>
+                    </>
+                )
+            }
+        ]}></TableView>
+
+        {modal.visible && <Modal
+            width={"80%"}
+            title={`${modal.params?.Description}(${modal.params?.ID})`}
+            footer={null}
+            onCancel={closeModal}
+            onClose={closeModal}
+            open={modal.visible && modal.key == "KGMLMapSVG"}>
+            <KGMLMapSVG
+                compound={data?.compound}
+                highlightKeys={modal.params?.geneID.split("/")}
+                pathwayId={modal.params?.pathwayId} organisms={modal.params?.organism}></KGMLMapSVG>
+
+        </Modal>}
+
+        {/*
+        {JSON.stringify(data)} */}
+    </>
+}
 const componentMap: any = {
     table: TableView,
     string: StringView,
     html: HtmlView,
     json: JSONView,
     text: TextView,
-    info:InfoView
+    info: InfoView,
+    kegg_map: KeggMap,
+    download: Download
 };
 
 export const ComponentsRender = ({ type, ...rest }: any) => {
     const Component = componentMap[type] || (() => <div>未知类型 {type}</div>)
-    return <Component {...rest} />;
+    return <div style={{ marginBottom: "1rem" }}>
+        <Component {...rest} />
+    </div>;
 }
 // const AnalysisResultView2: FC<any> = ({ plotLoading, filePlot, tableDesc,markdown }) => {
 
@@ -260,7 +375,7 @@ const AnalysisResultView: FC<any> = forwardRef<any, any>(({ params, visible, onC
     </>
 })
 
-export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose ,cancalReportCallback}) => {
+export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalReportCallback }) => {
     const [loading, setLoading] = useState<boolean>(false)
     const [analsyisResult, setAnalsyisResult] = useState<any>(null)
     const navigate = useNavigate()
@@ -314,6 +429,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose ,cancalRe
 
     return <>
         <Card size="small"
+            bodyStyle={{ padding: 0 }}
             title={<>
                 {analsyisResult ? <>
                     <Tag style={{ cursor: "pointer" }} onClick={() => {
@@ -357,7 +473,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose ,cancalRe
                                 <Popconfirm title={"是否运行!"} onConfirm={async () => {
                                     await runAnalysisApi(analsyisResult.analysis_id, "job")
                                     messageApi.success("运行成功")
-                                 
+
 
                                 }}>
                                     <Button size="small" color="cyan" variant="solid">
@@ -373,7 +489,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose ,cancalRe
                         await axios.post(`/analysis/update-report/${analsyisResult?.analysis_id}`)
                         messageApi.success("操作成功!")
                         setAnalsyisResult(null)
-                        if(cancalReportCallback){
+                        if (cancalReportCallback) {
                             cancalReportCallback()
                         }
                         // loadData()
@@ -420,7 +536,7 @@ const AnalysisResultDisplay: FC<any> = ({ analsyisResult, loading }) => {
     return <Spin spinning={loading}>
         {analsyisResult && <>
 
-            {analsyisResult.images && <div>
+            {analsyisResult.images && <div style={{ marginBottom: "1rem", padding: "1rem", borderBottom: "1px solid #f0f0f0" }}>
 
 
                 {
@@ -436,13 +552,16 @@ const AnalysisResultDisplay: FC<any> = ({ analsyisResult, loading }) => {
                         </>
                 }
             </div>}
-            {analsyisResult.tables && Array.isArray(analsyisResult.tables) && <>
-                {analsyisResult.tables.map((item: any, index: any) => (
-                    <ComponentsRender key={index} {...item}></ComponentsRender>
+
+            <div style={{ padding: "1rem" }}>
+                {analsyisResult.tables && Array.isArray(analsyisResult.tables) && <>
+                    {analsyisResult.tables.map((item: any, index: any) => (
+                        <ComponentsRender key={index} {...item}></ComponentsRender>
 
 
-                ))}
-            </>}
+                    ))}
+                </>}
+            </div>
 
         </>}
         <Markdown data={analsyisResult?.description}></Markdown>

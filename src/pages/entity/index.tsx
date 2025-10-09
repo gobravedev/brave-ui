@@ -21,15 +21,15 @@ import { getColumns, getAction } from './components/columns'
 
 // const [pipelineComponents, setPipelineComponents] = useState<any>([])
 
-export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelection, disableWidth = false }, ref) => {
+export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelection, disableWidth = false, tabKey: tabKey_, params: params_ ,hiddenSwitch=true}, ref) => {
 
     // const [entityType, setEntityType] = useState<any>("mesh")
     const [columnType, setColumnType] = useState<any>("mesh")
 
-    const [params, setParams] = useState<any>({
+    const [params, setParams] = useState<any>(params_ ? params_ : {
         category: ["F03", "C10", "F01"]
     })
-    const [tabKey, setTabKey] = useState<any>("mental_disorders")
+    const [tabKey, setTabKey] = useState<any>(tabKey_ ? tabKey_ : "mental_disorders")
 
     // const { modal, openModal, closeModal } = useModal();
 
@@ -62,7 +62,7 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelect
         {
             key: "chemicals_and_drugs",
             label: "Chemicals and Drugs"
-        }, 
+        },
         // {
         //     key: "evidence",
         //     label: "Research Evidence"
@@ -174,7 +174,7 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelect
 
         {/* {JSON.stringify(data)} */}
 
-        <Tabs size="small"
+        {!params_ && <Tabs size="small"
             activeKey={tabKey}
             onChange={(key: any) => {
                 onKeyChange(key)
@@ -195,7 +195,8 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelect
                     ]} />
 
             </>}
-            items={items}></Tabs>
+            items={items}></Tabs>}
+
         {/* {showStyle} */}
         {/* <TableTree></TableTree> */}
         {/* {entityType} */}
@@ -207,6 +208,7 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelect
                     const action = getAction("mesh", openModal, reload, messageApi)
                     return [...columns, ...action]
                 }}
+                hiddenSwitch={hiddenSwitch}
                 rowSelection={rowSelection} ref={entityRef} openModal={openModals} params={params}
                 api={`/entity/page/mesh`}></DataPage>
         </>}

@@ -1,8 +1,11 @@
-import React, { FC, useEffect, useMemo, useRef, useState } from "react";
+import React, { FC, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import axios from "axios";
-import { Card, Col, Empty, Form, Input, Row, Select, Tooltip } from "antd";
+import { Card, Col, Drawer, Empty, Flex, Form, Input, Row, Select, Spin, Tooltip } from "antd";
 import { useForm } from "antd/es/form/Form";
 import { RedoOutlined } from '@ant-design/icons'
+import { useModal } from "@/hooks/useModal";
+import EntityViewPanel from "@/pages/entity";
+import { useOutletContext } from "react-router";
 interface Entry {
   id: string;
   name: string;
@@ -187,34 +190,46 @@ interface Entry {
 }
 const { Search } = Input
 
-const KGMLMapSVG: FC<any> = ({ pathwayId, organisms }) => {
+export const KGMLMapSVG = forwardRef<any, any>(({ pathwayId, organisms, highlightKeys = [], compound }, ref) => {
   const [image, setImage] = useState("");
   const [entries, setEntries] = useState<Entry[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [highlightKeys, setHighlightKeys] = useState<string[]>([]);
   const imgRef = useRef<HTMLImageElement>(null);
   const [imgSize, setImgSize] = useState({ width: 0, height: 0 });
+  const [loading, setLoading] = useState(false);
+  const { messageApi } = useOutletContext<any>()
+
+  useImperativeHandle(ref, () => ({
+    reload: reload
+  }))
 
   const loadKgml = async (pathwayId: string) => {
     setLoading(true);
-    const res = await axios.get(`/kegg/kgml/${pathwayId}`);
-    setImage(res.data.image);
-    setEntries(res.data.entries);
+    try {
+      const res = await axios.get(`/kegg/kgml/${pathwayId}`);
+      setImage(res.data.image);
+      setEntries(res.data.entries);
+    } catch (error) {
+      messageApi.error("数据获取失败!")
+    }
+
     setLoading(false);
   };
 
-  useEffect(() => {
+  const reload = () => {
     if (pathwayId && organisms) {
       loadKgml(`${organisms}${pathwayId}`);
     }
+  }
+  useEffect(() => {
+    reload()
   }, [pathwayId, organisms]);
 
   // 缩放比例
   const scaleX = imgRef.current ? imgRef.current.width / imgSize.width : 1;
   const scaleY = imgRef.current ? imgRef.current.height / imgSize.height : 1;
-  const checkContains = (label: any,name:any) => {
+  const checkContains = (label: any, name: any) => {
 
-    const isMatch = highlightKeys.some(item =>
+    const isMatch = highlightKeys.some((item: any) =>
       label
         .split(",")
         .map((v: any) => v.trim().toLowerCase())
@@ -228,12 +243,45 @@ const KGMLMapSVG: FC<any> = ({ pathwayId, organisms }) => {
 
     return isMatch
   }
+
   const highlightEntries = useMemo(() => {
-    if (highlightKeys.length == 0) return entries;
+    if (!compound || (compound && compound.length == 0)) return entries;
+    const directionMap = new Map(Object.entries(compound));
+
+    // return entries.map((item: any) => {
+    //   if (checkContains(item.label, item.name)) {
+    //     return {
+    //       isHighlight: true,
+    //       ...item
+    //     }
+    //   } else {
+    //     return {
+    //       ...item
+    //     }
+    //   }
+    // });
     return entries.map((item: any) => {
-      if (checkContains(item.label, item.name)) {
+      // item.name.map((it:any)=> directionMap.get(item.name))
+      let direction: any=null;
+      
+      for(const it of item.name){
+        direction = directionMap.get(it)
+        if(direction){
+          break
+        }
+        // if(it=="C00146"){
+        //   console.log(it,"--",direction)
+        // }
+ 
+      }
+      // if(item.name.includes("C00146")){
+      //   console.log("--",direction)
+      // }
+      if (direction) {
         return {
           isHighlight: true,
+          color: direction > 0 ? "#ff4d4f" : "#1890ff",
+          direction: direction,
           ...item
         }
       } else {
@@ -242,86 +290,157 @@ const KGMLMapSVG: FC<any> = ({ pathwayId, organisms }) => {
         }
       }
     });
-  }, [entries, highlightKeys]);
-  console.log(highlightEntries.filter((item: any) => item.isHighlight))
+  }, [entries, compound]);
+  const expand = 3
+  // console.log(highlightEntries)
+  // console.log(highlightEntries.filter((item: any) => item.isHighlight))
   return (
-    <Card
-      size="small"
-      extra={
-        <>
-          <Tooltip title="刷新">
-            <RedoOutlined onClick={() => loadKgml(`${organisms}${pathwayId}`)} />
-          </Tooltip>
-          <Search
-            placeholder="输入要高亮的基因/化合物ID，用逗号分隔"
-            style={{ width: 250, marginLeft: 10 }}
-            allowClear
-            onSearch={(val) => setHighlightKeys(val.split(","))}
-          />
-        </>
-      }
-      title={`${organisms}${pathwayId}`}
-      loading={loading}
-    >
-      {/* {JSON.stringify(highlightKeys)} */}
-      <div style={{ position: "relative", display: "inline-block" }}>
-        {image && (
-          <>
-            <img
-              ref={imgRef}
-              src={image}
-              alt="KEGG pathway"
-              style={{ maxWidth: "100%", height: "auto" }}
-              onLoad={(e) => {
-                const target = e.currentTarget;
-                setImgSize({ width: target.naturalWidth, height: target.naturalHeight });
+
+
+    <Spin spinning={loading}>
+      <Flex justify="center" vertical>
+        {/* {JSON.stringify(direction)} */}
+        <div
+          style={{
+            marginTop: 12,
+            display: "flex",
+            gap: 24,
+            alignItems: "center",
+            flexWrap: "wrap",
+            justifyContent: "center",
+          }}
+        >
+          {/* 基因图例 */}
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span
+              style={{
+                display: "inline-block",
+                width: 14,
+                height: 14,
+                background: "#ff4d4f", // 红色代表上调
+                border: "1px solid #999",
+                borderRadius: 2,
               }}
             />
-            {/* SVG Overlay */}
-            <svg
-              width={imgSize.width}
-              height={imgSize.height}
-              style={{ position: "absolute", top: 0, left: 0, }}
-            >
-              {highlightEntries.map((e) => {
-                // const isHighlight = checkContains(e.label)// highlightKeys.includes(e.label) || highlightKeys.includes(e.name);
-                return (
-                  <a
-                    key={e.id}
-                    href={e.link}
-                    target="_blank"
-                  >
-                    <rect
-                      x={(e.x - e.width / 2) * scaleX}
-                      y={(e.y - e.height / 2) * scaleY}
-                      width={e.width * scaleX}
-                      height={e.height * scaleY}
-                      fill={e.isHighlight ? "red" : "transparent"}
-                      stroke={e.isHighlight ? "red" : "green"}
-                      strokeWidth={2}
-                      rx={4}
-                      ry={4}
-                    >
-                      {e.isHighlight && (
-                        <animate
-                          attributeName="opacity"
-                          values="1;0.3;1"
-                          dur="1s"
-                          repeatCount="indefinite"
-                        />
-                      )}
-                    </rect>
-                    <title>{e.label}</title>
-                  </a>
-                );
-              })}
-            </svg>
-          </>
-        )}
-      </div>
-    </Card>
+            <span>compound (Upregulated)</span>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span
+              style={{
+                display: "inline-block",
+                width: 14,
+                height: 14,
+                background: "#1890ff", // 蓝色代表下调
+                border: "1px solid #999",
+                borderRadius: 2,
+              }}
+            />
+            <span>compound (Downregulated)</span>
+          </div>
+
+          {/* 若你区分类型：基因 vs 代谢物 */}
+          {/* <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span
+              style={{
+                display: "inline-block",
+                width: 14,
+                height: 14,
+                background: "#52c41a", // 绿色
+                border: "1px solid #999",
+                borderRadius: 2,
+              }}
+            />
+            <span>代谢物 (Metabolite)</span>
+          </div> */}
+        </div>
+        <Flex justify="center" >
+          <div style={{ position: "relative", display: "inline-block" }}>
+            {image && (
+              <>
+                <img
+                  ref={imgRef}
+                  src={image}
+                  alt="KEGG pathway"
+                  style={{ maxWidth: "100%", height: "auto" }}
+                  onLoad={(e) => {
+                    const target = e.currentTarget;
+                    setImgSize({ width: target.naturalWidth, height: target.naturalHeight });
+                  }}
+                />
+                {/* SVG Overlay */}
+                <svg
+                  width={imgSize.width}
+                  height={imgSize.height}
+                  style={{ position: "absolute", top: 0, left: 0, }}
+                >
+                  {highlightEntries.map((e) => {
+                    // const isHighlight = checkContains(e.label)// highlightKeys.includes(e.label) || highlightKeys.includes(e.name);
+                    return (
+                      <a
+                        key={e.id}
+                        href={e.link}
+                        target="_blank"
+                      >
+                        <rect
+                          x={(e.x - e.width / 2 - expand) * scaleX}
+                          y={(e.y - e.height / 2 - expand) * scaleY}
+                          width={(e.width + expand * 2) * scaleX}
+                          height={(e.height + expand * 2) * scaleY}
+                          fill={e.isHighlight ? e.color : "transparent"}
+                          stroke={e.isHighlight ? e.color : "transparent"}
+                          strokeWidth={2}
+                          rx={4}
+                          ry={4}
+                        >
+                          {e.isHighlight && (
+                            <animate
+                              attributeName="opacity"
+                              values="1;0.3;1"
+                              dur="0.5s"
+                              repeatCount="indefinite"
+                            />
+                          )}
+                        </rect>
+
+                        <title>{e.label}{e.direction ? `(${e.direction})` : ""}</title>
+                      </a>
+                    );
+                  })}
+                </svg>
+              </>
+            )}
+          </div>
+        </Flex>
+      </Flex>
+    </Spin>
   );
-};
+})
+
+const KGMLMapSVGCard: FC<any> = (rest) => {
+  const [highlightKeys, setHighlightKeys] = useState<string[]>([]);
+  const { organisms, pathwayId } = rest
+  const kGMLMapSVGRef = useRef<any>(null)
+  return <Card
+    size="small"
+    extra={
+      <>
+        <Tooltip title="刷新">
+          <RedoOutlined onClick={() => kGMLMapSVGRef.current.reload()} />
+        </Tooltip>
+        <Search
+          placeholder="输入要高亮的基因/化合物ID，用逗号分隔"
+          style={{ width: 250, marginLeft: 10 }}
+          allowClear
+          onSearch={(val) => setHighlightKeys(val.split(","))}
+        />
+      </>
+    }
+    title={`${organisms}${pathwayId}`}
+  >
+    <KGMLMapSVG ref={kGMLMapSVGRef} {...rest} highlightKeys={highlightKeys} ></KGMLMapSVG>
+  </Card>
+}
 const Kegg: FC<any> = () => {
   const [pathwayId, setPathwayId] = useState<string>()
   const [form] = useForm()
@@ -363,22 +482,28 @@ const Kegg: FC<any> = () => {
             <Form.Item
               rules={[{ required: true, message: '该字段不能为空!' }]}
               name={"pathwayId"} label={"Pathway Id"}>
-              <Select allowClear options={[
+              <SelectEntity></SelectEntity>
+              {/* <Select allowClear options={[
                 {
+                  label: "00564",
+                  value: "00564"
+                }, {
                   label: "04144",
                   value: "04144"
                 }, {
                   label: "04927",
                   value: "04927"
                 }
-              ]}></Select>
+              ]}></Select> */}
             </Form.Item>
           </Form>
         </Card>
       </Col>
       <Col lg={18} sm={18} xs={24} >
 
-        {(values?.organisms && values?.pathwayId) ? <KGMLMapSVG  {...values}></KGMLMapSVG> :
+
+
+        {(values?.organisms && values?.pathwayId) ? <KGMLMapSVGCard  {...values}></KGMLMapSVGCard> :
           <Card>   <Empty></Empty></Card>
         }
 
@@ -389,4 +514,45 @@ const Kegg: FC<any> = () => {
   </>
 }
 
+
+const SelectEntity: FC<any> = ({ value, onChange }) => {
+  const { modal, openModal, closeModal } = useModal();
+  // const form = Form.useFormInstance();
+
+  return <>
+    <Input value={value} onClick={() => { openModal("entityDrawer", { name: "pathwayId" }) }}></Input>
+    <EntityDrawer
+      // callback={loadData}
+      visible={modal.key == "entityDrawer" && modal.visible}
+      params={modal.params}
+      onClose={closeModal}
+      onChange={onChange}
+    ></EntityDrawer>
+  </>
+}
+const EntityDrawer: FC<any> = ({ visible, setRecord, onChange, params, onClose, callback }) => {
+
+  return <>
+    <Drawer open={visible} onClose={onClose} width={"80%"}>
+      {visible &&
+        <EntityViewPanel tabKey={"mesh-KEGG"}
+          params={{
+            category: ["KEGG"]
+          }}
+          disableWidth={true} rowSelection={{
+            onChange: (selectedRowKeys: any, selectedRows: any) => {
+              // console.log(form,selectedRows, params.name)
+              onChange(selectedRows[0].entity_id.replaceAll("map", ""))
+              // setRecord({...selectedRows[0],fieldName:})
+              onClose()
+            }, type: "radio"
+
+          }}></EntityViewPanel>
+      }
+
+
+    </Drawer>
+  </>
+
+}
 export default Kegg
