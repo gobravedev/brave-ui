@@ -554,7 +554,7 @@ const App: React.FC = () => {
                         color={status === "open" ? "green" : status === "connecting" ? "blue" : "red"}
                         variant="solid"
                         onClick={reconnect} >
-                        {status === "open" ? "已连接" : status === "connecting" ? "连接中" : "连接失败"}
+                        {status === "open" ? "connected" : status === "connecting" ? "connecting" : "connection fail"}
                     </Button>
                     {/* <Button size="small" onClick={async () => {
                         await axios.get("/send-test")
@@ -597,7 +597,7 @@ const App: React.FC = () => {
                     <Suspense key={location.key} fallback={<Test></Test>}>
                         {checkProject() ? <>
                             <Outlet context={{ project: project_id, projectObj, projectList, messageApi }} />
-                        </> : <Empty description="请先创建/选择项目" image={Empty.PRESENTED_IMAGE_SIMPLE}>
+                        </> : <Empty description="Please create/select the project first" image={Empty.PRESENTED_IMAGE_SIMPLE}>
                             <ProjectComp onProjectLoad={setProjectList} project_id={project_id} openModal={openModal} setProjectObj={setProjectObj}></ProjectComp>
 
                             {/* <Button type='primary' onClick={() => {
@@ -708,10 +708,10 @@ const ProjectComp: FC<any> = ({ project_id, openModal, setProjectObj, onProjectL
                     <Flex gap={"small"} justify={"space-between"} >
                         <Button type='text' size="small" color="cyan" variant='solid' onClick={() => {
                             openModal("project")
-                        }}>创建</Button>
+                        }}>Create</Button>
                         <Button type='text' size="small" color="cyan" variant='solid' onClick={() => {
                             loadProject()
-                        }}>刷新</Button>
+                        }}>Refresh</Button>
                     </Flex>
 
                     {project_id && (
@@ -723,7 +723,7 @@ const ProjectComp: FC<any> = ({ project_id, openModal, setProjectObj, onProjectL
 
                                     <Button type='text' size="small" color="cyan" variant='solid' onClick={() => {
                                         openModal("project", { project_id: project_id })
-                                    }}>更新</Button>
+                                    }}>Update</Button>
                                     <Popconfirm title="确定删除吗？" onConfirm={async () => {
                                         await deleteProjectApi(project_id)
                                         messageApi.success("删除成功")
@@ -732,7 +732,7 @@ const ProjectComp: FC<any> = ({ project_id, openModal, setProjectObj, onProjectL
                                         }))
                                         loadProject()
                                     }}>
-                                        <Button type='text' size="small" color="danger" variant='solid' >删除</Button>
+                                        <Button type='text' size="small" color="danger" variant='solid' >Delete</Button>
                                     </Popconfirm>
 
                                 </Flex>
@@ -751,14 +751,15 @@ const ProjectComp: FC<any> = ({ project_id, openModal, setProjectObj, onProjectL
                     // loadProject()
                 }}
                 value={project_id}
-                style={{ width: 120 }}
-                placeholder="选择项目"
+                style={{ width: 130 }}
+                placeholder="Select Project"
                 options={projectList}
             >
             </Select>
         ) : <Button size="small" color="cyan" variant='solid' onClick={() => {
             openModal("project")
-        }}>创建项目</Button>}
+        }}>Create project
+        </Button>}
 
 
 
