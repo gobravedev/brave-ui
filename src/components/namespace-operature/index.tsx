@@ -44,10 +44,10 @@ export const CreateOrUpdateNamespace: FC<any> = ({ visible, onClose, params }) =
         loadNamespace()
     }, [])
 
-    return <Modal title="安装namespace" open={visible} onCancel={onClose} >
+    return <Modal title="Install namespace" open={visible} onCancel={onClose} >
         <Flex>
             <Form form={form} onFinish={saveNamespace}>
-                <Form.Item name="name" label="名称" rules={[{ required: true, message: "名称不能为空" }]}>
+                <Form.Item name="name" label="Name" rules={[{ required: true, message: "名称不能为空" }]}>
                     <Input />
                 </Form.Item>
                 <Form.Item>
@@ -102,14 +102,14 @@ export const InstallNamespace: FC<any> = ({ visible, onClose, params }) => {
             messageApi.error(error.response.data.message)
         }
     }
-    return <Modal footer={null} title="安装namespace" open={visible} onCancel={onClose} >
+    return <Modal footer={null} title="Install namespace" open={visible} onCancel={onClose} >
         {namespaceList && namespaceList.map((item: any) => {
             return <Flex style={{ display: "flex", marginBottom: "0.5rem", justifyContent: "space-between" }} key={item.namespace_id}>
                 <div >{item.name}({item.namespace_id})</div>
-                <Popconfirm title="确定安装吗？" onConfirm={() => {
+                <Popconfirm title="Are you sure to install it?" onConfirm={() => {
                     installNamespace(item.namespace_id)
                 }}>
-                    <Button  size="small">安装</Button>
+                    <Button  size="small" color="cyan" variant="solid">Install</Button>
                 </Popconfirm>
             </Flex>
         })}

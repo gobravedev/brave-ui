@@ -120,22 +120,22 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
                         component_type: component_type,
                     }
                 })
-            }}>创建组件</Button>
+            }}>Creating Components </Button>
 
 
 
             <Button size="small" color="cyan" variant="solid" onClick={() => {
                 openModal("modalB")
-            }}>创建/更新namespace</Button>
+            }}>Create/Update  namespace</Button>
             <Button size="small" color="cyan" variant="solid" onClick={() => {
                 openModal("modalC")
-            }}>安装namespace</Button>
-            <Button size="small" color="primary" variant="solid" onClick={reload}>刷新</Button>
+            }}>Install namespace</Button>
+            <Button size="small" color="primary" variant="solid" onClick={reload}>Refresh</Button>
         </Flex>
         <div style={{ marginBottom: "2rem" }}>
         </div>
         <Search
-            placeholder="搜索组件"
+            placeholder="Search Components"
             allowClear
             enterButton
             onSearch={(value) => { search(value) }}

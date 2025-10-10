@@ -20,7 +20,7 @@ export const SSEProvider = ({
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastReceived = useRef(Date.now());
   const timeoutMs = 15000;
-  const { baseURL } = useSelector((state: any) => state.user) //light dark
+  const { baseURL } = useSelector((state: any) => state.user) 
 
   const connect = () => {
     if (eventSourceRef.current) {
@@ -101,7 +101,7 @@ export const SSEProvider = ({
       close();
       intervalRef.current && clearInterval(intervalRef.current)
     };
-  }, []);
+  }, [baseURL]);
 
   return (
     <SSEContext.Provider value={{ eventSourceRef, status, close, reconnect }}>
