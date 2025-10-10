@@ -180,6 +180,13 @@ const App: React.FC = () => {
                 en_US: "Introduction"
             }
 
+        },{
+            key: "/doc",
+            label: {
+                zh_CN: "文档",
+                en_US: "Doc"
+            }
+
         },
         // {
         //     key: `/sample`,

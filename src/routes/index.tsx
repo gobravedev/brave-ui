@@ -33,6 +33,8 @@ import { setMenuItems, setSelectedKey } from '../store/menuSlice'
 // };
 const Sample = lazy(() => import('@/pages/sample'));
 const Project = lazy(() => import('@/pages/project'));
+
+const Doc = lazy(() => import('@/pages/doc'));
 const Mutation = lazy(() => import('@/pages/assembly-genome/mutation'));
 const MutationCompare = lazy(() => import('@/pages/mutation-compare'));
 const Abundance = lazy(() => import('@/pages/abundance'));
@@ -236,6 +238,9 @@ if (appType == "index") {
     ]
     routes = [
         {
+            path: "/doc",
+            element: <Doc />
+        }, {
             path: "/",
             element: <Layout />,
             children: [
