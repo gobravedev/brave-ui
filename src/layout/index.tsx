@@ -1,7 +1,7 @@
 import React, { FC, Suspense, useEffect, useState } from 'react';
-import { LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
+import { ApiOutlined, LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Breadcrumb, Button, Divider, Empty, Flex, Layout, Menu, message, notification, Popconfirm, Select, Skeleton, Space, Tag, theme, Tooltip } from 'antd';
+import { Breadcrumb, Button, Divider, Empty, Flex, Form, Input, Layout, Menu, message, Modal, notification, Popconfirm, Select, Skeleton, Space, Tag, theme, Tooltip } from 'antd';
 import { NavLink, Outlet, useLocation, useNavigate, useParams } from 'react-router';
 import { Header } from 'antd/es/layout/layout';
 import { useDispatch, useSelector } from 'react-redux';
@@ -172,7 +172,7 @@ const App: React.FC = () => {
     //     token: { colorBgContainer, borderRadiusLG },
     // } = theme.useToken();
 
-    const menu0:any = [
+    const menu0: any = [
         {
             key: "/",
             label: {
@@ -180,7 +180,7 @@ const App: React.FC = () => {
                 en_US: "Introduction"
             }
 
-        },{
+        }, {
             key: "/doc",
             label: {
                 zh_CN: "文档",
@@ -266,7 +266,7 @@ const App: React.FC = () => {
             }
         }, {
             key: `/psycmicrograph`,
-            label:  {
+            label: {
                 zh_CN: "菌群知识库",
                 en_US: "PsycMicroGraph"
             }
@@ -289,7 +289,7 @@ const App: React.FC = () => {
             children: [
                 {
                     key: `/pipeline-monitor-panal`,
-                    label:  {
+                    label: {
                         zh_CN: "管道监控",
                         en_US: "Monitor"
                     },
@@ -299,16 +299,16 @@ const App: React.FC = () => {
                     label: {
                         zh_CN: "分析结果",
                         en_US: "Analysis Result"
-                    }, 
+                    },
                 }, {
                     key: `/container-page`,
-                    label:  {
+                    label: {
                         zh_CN: "容器管理",
                         en_US: "Container"
-                    }, 
+                    },
                 }, {
                     key: `/literature`,
-                    label:  {
+                    label: {
                         zh_CN: "文献资料",
                         en_US: "Literature"
                     }
@@ -548,6 +548,8 @@ const App: React.FC = () => {
                     {/* <Tag color={status === "open" ? "green" : status === "connecting" ? "blue" : "red"} style={{marginRight:"1rem"}}>
                     {status}
                    </Tag> */}
+                    <ApiComp ></ApiComp>
+
                     <Button size="small"
                         color={status === "open" ? "green" : status === "connecting" ? "blue" : "red"}
                         variant="solid"
@@ -564,6 +566,7 @@ const App: React.FC = () => {
                         <ProjectComp onProjectLoad={setProjectList} project_id={project_id} openModal={openModal} setProjectObj={setProjectObj}></ProjectComp>
 
                     </>}
+
                     <LanguageSelector></LanguageSelector>
                     <ThemeSelector></ThemeSelector>
                     {/* <Button color="primary"   onClick={() => {
@@ -619,7 +622,42 @@ const App: React.FC = () => {
 };
 
 export default App;
+import { setUserItem } from '@/store/userSlice'
 
+const ApiComp: FC<any> = () => {
+    const { modal, openModal, closeModal } = useModal();
+    const { baseURL } = useSelector((state: any) => state.user) //light dark
+    const [value, setValue] = useState<any>(baseURL)
+    const dispatch = useDispatch()
+    const [messageApi, messageContextHolder] = message.useMessage();
+
+
+    return <>
+        {messageContextHolder}
+        <ApiOutlined style={{ cursor: "pointer" }}
+            onClick={() => { openModal("apiComp") }}
+        />
+        <Modal
+            title="edit api"
+            open={modal.key == "apiComp" && modal.visible}
+            onClose={closeModal}
+            onCancel={closeModal}
+            onOk={async () => {
+                dispatch(setUserItem({ baseURL: value }))
+                try {
+                    await axios.get(`${value}/brave-api/ping`)
+                    closeModal()
+                    messageApi.success("Connection successful!")
+                } catch (error) {
+                    messageApi.error("Connection failed!")
+                }
+
+            }}
+        >
+            <Input value={value} onChange={(e) => setValue(e.target.value)}></Input>
+        </Modal>
+    </>
+}
 const ProjectComp: FC<any> = ({ project_id, openModal, setProjectObj, onProjectLoad }) => {
     const [projectMap, setProjectMap] = useState<any>({})
     const [projectList, setProjectList] = useState<any>([])

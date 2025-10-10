@@ -10,7 +10,8 @@ import { ConfigProvider } from 'antd'
 import { SSEProvider } from './context/sse/SSEProvider.tsx'
 
 console.log(import.meta.env.MODE)
-axios.defaults.baseURL = '/brave-api';
+const baseURL = localStorage.getItem('baseURL') || ""
+axios.defaults.baseURL = `${baseURL}/brave-api`;
 
 
 createRoot(document.getElementById('root')!).render(

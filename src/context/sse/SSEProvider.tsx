@@ -1,6 +1,7 @@
 // src/context/sse/SSEProvider.tsx
 import React, { createContext, useRef, useState, useEffect, ReactNode } from "react";
 import { SSEContextType, SSEStatus } from "./types";
+import { useSelector } from "react-redux";
 
 export const SSEContext = createContext<SSEContextType | null>(null);
 
@@ -19,6 +20,7 @@ export const SSEProvider = ({
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastReceived = useRef(Date.now());
   const timeoutMs = 15000;
+  const { baseURL } = useSelector((state: any) => state.user) //light dark
 
   const connect = () => {
     if (eventSourceRef.current) {
@@ -26,7 +28,7 @@ export const SSEProvider = ({
     }
 
     setStatus("connecting");
-    const es = new EventSource(url);
+    const es = new EventSource(`${baseURL}${url}`);
     eventSourceRef.current = es;
 
     es.onopen = () => {
