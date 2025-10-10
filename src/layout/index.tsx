@@ -643,9 +643,10 @@ const ApiComp: FC<any> = () => {
             onClose={closeModal}
             onCancel={closeModal}
             onOk={async () => {
-                dispatch(setUserItem({ baseURL: value }))
+               
                 try {
                     await axios.get(`${value}/brave-api/ping`)
+                    dispatch(setUserItem({ baseURL: value }))
                     closeModal()
                     messageApi.success("Connection successful!")
                 } catch (error) {
