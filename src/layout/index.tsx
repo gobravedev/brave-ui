@@ -265,13 +265,7 @@ const App: React.FC = () => {
                 zh_CN: "工具集",
                 en_US: "TookKit"
             }
-        }, {
-            key: `/psycmicrograph`,
-            label: {
-                zh_CN: "菌群知识库",
-                en_US: "PsycMicroGraph"
-            }
-        },
+        }, 
         // {
         //     key: `/entity-page`,
         //     label: "研究实体"
@@ -294,6 +288,12 @@ const App: React.FC = () => {
                         zh_CN: "管道监控",
                         en_US: "Monitor"
                     },
+                },{
+                    key: `/psycmicrograph`,
+                    label: {
+                        zh_CN: "菌群知识库",
+                        en_US: "PsycMicroGraph"
+                    }
                 },
                 {
                     key: `/analysis-result`,
