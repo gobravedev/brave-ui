@@ -6,9 +6,11 @@ import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import 'katex/dist/katex.min.css'
+import { useSelector } from "react-redux";
 
 const Markdown: FC<any> = ({ data }) => {
 
+  const { baseURL } = useSelector((state: any) => state.user) 
   return <>
     <ReactMarkdown
       children={data}
@@ -18,7 +20,7 @@ const Markdown: FC<any> = ({ data }) => {
         img: ({ node, src, ...props }) => (
           <>
             <Image
-              src={src}
+              src={`${baseURL}${src}`}
               style={{ maxWidth: '50%', height: 'auto', margin: '1rem auto', display: 'block' }}
               alt={props.alt || ''}
             ></Image>

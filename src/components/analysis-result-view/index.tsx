@@ -18,8 +18,19 @@ import BioDatabases from "../bio-databases";
 import EditParams from '../edit-params'
 import { KGMLMapSVG } from "../databases/kegg";
 import { download } from "@antv/s2";
+import { useSelector } from "react-redux";
 
-export const TableView: FC<any> = ({ data, url, filename, columns }) => {
+const UrlComp: FC<any> = ({ url, filename, baseURL }) => {
+    return <>
+        {url && <Popover title={`${baseURL}${url}`}>
+            <Tag color="success" style={{ cursor: "pointer" }} onClick={() => {
+                window.open(`${baseURL}${url}?t=${Date.now()}`, "_blank")
+            }}>{filename} <DownloadOutlined /></Tag></Popover>}
+
+    </>
+}
+
+export const TableView: FC<any> = ({ data, url, filename, columns, baseURL }) => {
     const { Search } = Input;
     const [tableData, setTableData] = useState<any>([])
     const getColumns = (data: any) => {
@@ -34,6 +45,7 @@ export const TableView: FC<any> = ({ data, url, filename, columns }) => {
             }
         })
     }
+
     useEffect(() => {
         // console.log()
         if (data) {
@@ -45,6 +57,7 @@ export const TableView: FC<any> = ({ data, url, filename, columns }) => {
     }, [data])
     return <>
         {Array.isArray(tableData) && <>
+
             <Table
                 style={{ border: "1px solid #f0f0f0" }}
                 size="small"
@@ -62,11 +75,7 @@ export const TableView: FC<any> = ({ data, url, filename, columns }) => {
                         }}
                         style={{ width: 304 }}
                     />
-
-                    {url && <Popover title={`${window.location.origin}${url}`}>
-                        <Tag color="success" style={{ cursor: "pointer" }} onClick={() => {
-                            window.open(`${url}?t=${Date.now()}`, "_blank")
-                        }}>{filename} <DownloadOutlined /></Tag></Popover>}
+                    <UrlComp url={url} filename={filename} baseURL={baseURL}></UrlComp>
 
                 </Flex>}
                 // showHeader={()=>{}}
@@ -84,16 +93,17 @@ export const TableView: FC<any> = ({ data, url, filename, columns }) => {
     </>
 }
 
-const ImgView: FC<any> = ({ data, url, filename }) => {
+const ImgView: FC<any> = ({ data, url, filename, baseURL }) => {
     return <div >
         <div style={{ textAlign: "center" }}>
-            { }
+          
             <Image src={filename?.endsWith("pdf") ? data : `${data}?t=${Date.now()}`} style={{ maxWidth: "20rem", marginRight: "0.5rem" }}></Image>
+            <UrlComp url={url} filename={filename} baseURL={baseURL}></UrlComp>
 
-            {url && <Popover title={`${window.location.origin}${url}`}>
+            {/* {url && <Popover title={`${window.location.origin}${url}`}>
                 <Tag color="success" style={{ cursor: "pointer" }} onClick={() => {
                     window.open(`${url}?t=${Date.now()}`, "_blank")
-                }}>{filename} <DownloadOutlined /></Tag></Popover>}
+                }}>{filename} <DownloadOutlined /></Tag></Popover>} */}
 
         </div>
 
@@ -150,16 +160,18 @@ const HtmlView: FC<any> = ({ data }) => {
 
     </>
 }
-const Download: FC<any> = ({ url, filename }) => {
+const Download: FC<any> = ({ url, filename,baseURL }) => {
     return <>
-        {url && <Popover title={`${window.location.origin}${url}`}>
+        <UrlComp url={url} filename={filename} baseURL={baseURL}></UrlComp>
+
+        {/* {url && <Popover title={`${window.location.origin}${url}`}>
             <Tag color="success" style={{ cursor: "pointer" }} onClick={() => {
                 window.open(`${url}?t=${Date.now()}`, "_blank")
-            }}>{filename} <DownloadOutlined /></Tag></Popover>}
+            }}>{filename} <DownloadOutlined /></Tag></Popover>} */}
 
     </>
 }
-const KeggMap: FC<any> = ({data,...rest}) => {
+const KeggMap: FC<any> = ({ data, ...rest }) => {
     const { modal, openModal, closeModal } = useModal()
     // const [record,setRecord] = useState<any>()
     return <>
@@ -200,13 +212,13 @@ const KeggMap: FC<any> = ({data,...rest}) => {
                 key: "pvalue",
                 ellipsis: true,
                 width: 150,
-            },  {
+            }, {
                 title: "p.adjust",
                 dataIndex: "p.adjust",
                 key: "p.adjust",
                 ellipsis: true,
                 width: 150,
-            },{
+            }, {
                 title: "qvalue",
                 dataIndex: "qvalue",
                 key: "qvalue",
@@ -533,6 +545,8 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
 
 
 const AnalysisResultDisplay: FC<any> = ({ analsyisResult, loading }) => {
+    const { baseURL } = useSelector((state: any) => state.user)
+
     return <Spin spinning={loading}>
         {analsyisResult && <>
 
@@ -543,11 +557,11 @@ const AnalysisResultDisplay: FC<any> = ({ analsyisResult, loading }) => {
                     //  
                     Array.isArray(analsyisResult.images) ? <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
                         {analsyisResult.images.map((it: any, index: any) => (<Col key={index} span={4}>
-                            <ImgView {...it} ></ImgView>
+                            <ImgView {...it} baseURL={baseURL}></ImgView>
                         </Col>))}
                     </Row> :
                         <>
-                            <ImgView {...analsyisResult.images}></ImgView>
+                            <ImgView {...analsyisResult.images} baseURL={baseURL}></ImgView>
 
                         </>
                 }
@@ -556,7 +570,7 @@ const AnalysisResultDisplay: FC<any> = ({ analsyisResult, loading }) => {
             <div style={{ padding: "1rem" }}>
                 {analsyisResult.tables && Array.isArray(analsyisResult.tables) && <>
                     {analsyisResult.tables.map((item: any, index: any) => (
-                        <ComponentsRender key={index} {...item}></ComponentsRender>
+                        <ComponentsRender key={index} {...item} baseURL={baseURL}></ComponentsRender>
 
 
                     ))}

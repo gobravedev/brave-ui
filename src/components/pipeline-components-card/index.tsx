@@ -19,6 +19,7 @@ import "./index.css"
 const PipelineComponentsCard: FC<any> = ({ params, map }) => {
     const { Search } = Input;
     // const [searchText, setSearchText] = useState("");
+    const { baseURL } = useSelector((state: any) => state.user) 
 
     // const [pipelineComponents, setPipelineComponents] = useState<any>([])
     const { component_type } = params
@@ -162,7 +163,7 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
                                 padding: "12px 16px",          // 内边距更紧凑
                             }}
                             cover={<div style={{height:"15rem"}}>
-                                <img style={{height:"100%",width:"100%",objectFit:"cover"}} alt={item.label} src={item.img} />
+                                <img style={{height:"100%",width:"100%",objectFit:"cover"}} alt={item.label} src={`${baseURL}${item.img}`} />
                             </div>}
                             onClick={() => navigate(`${item.path}`)}>
 

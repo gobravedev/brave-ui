@@ -643,7 +643,7 @@ const ApiComp: FC<any> = () => {
             onClose={closeModal}
             onCancel={closeModal}
             onOk={async () => {
-               
+
                 try {
                     await axios.get(`${value}/brave-api/ping`)
                     dispatch(setUserItem({ baseURL: value }))
@@ -656,6 +656,13 @@ const ApiComp: FC<any> = () => {
             }}
         >
             <Input value={value} onChange={(e) => setValue(e.target.value)}></Input>
+            <a target='_blank' href={`${value}/brave-api/ping`}>Certificate Verification</a>
+            <p style={{ marginTop: 8, color: "#888", fontSize: 13 }}>
+                ⚠️ If your API uses a self-signed HTTPS certificate, the browser may show
+                a “Connection not private” or “Unsafe” warning.
+                Please click “Advanced” → “Proceed anyway” once to trust the certificate
+                before testing the connection.
+            </p>
         </Modal>
     </>
 }
