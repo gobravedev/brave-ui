@@ -184,26 +184,31 @@ export const ContainerOpt: FC<any> = ({ record, reload, traefikUI = false }) => 
         );
         return portMap[key]
     }
+    const { containerURL } = useSelector((state: any) => state.user); // 'light' | 'dark'
 
-
+    function originWithoutPort(inputUrl, port) {
+        if(!inputUrl) return "/"
+        const u = new URL(inputUrl);
+        return `${u.protocol}//${u.hostname}:${getPort(port, 8080)}`;
+    }
     return <>
         {record.status == "running" ? <>
 
             {traefikUI ? <>
                 <Tooltip title={<>
-                    {`http://10.110.1.11:${getPort(record.port, 8080)}`}
+                    {`${originWithoutPort(containerURL,record.port)}`}
                 </>}>
                     <a onClick={() => {
-                        window.open(`http://10.110.1.11:${getPort(record.port, 8080)}`, "_blank")
+                        window.open(`${originWithoutPort(containerURL,record.port)}`, "_blank")
                     }}>Traefik UI</a>
                 </Tooltip>
             </> :
                 <>
                     <Tooltip title={<>
-                        {`http://10.110.1.11:8089/container/${record.container_id}/`}
+                        {`${containerURL}/container/${record.container_id}/`}
                     </>}>
                         <a onClick={() => {
-                            window.open(`http://10.110.1.11:8089/container/${record.container_id}/`, "_blank")
+                            window.open(`${containerURL}/container/${record.container_id}/`, "_blank")
                         }}>Open URL</a>
                     </Tooltip>
                 </>

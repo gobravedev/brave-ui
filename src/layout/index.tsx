@@ -650,9 +650,11 @@ const Markdown = lazy(() => import('@/components/markdown'));
 
 const ApiComp: FC<any> = ({ open }) => {
     const { modal, openModal, closeModal } = useModal();
-    const { baseURL, authorization } = useSelector((state: any) => state.user)
+    const { baseURL, authorization,containerURL } = useSelector((state: any) => state.user)
     const [value, setValue] = useState<any>(baseURL)
     const [auth, setAuth] = useState<any>(authorization)
+    const [contURL, setContURL] = useState<any>(containerURL)
+
 
     const dispatch = useDispatch()
     const [messageApi, messageContextHolder] = message.useMessage();
@@ -687,6 +689,10 @@ const ApiComp: FC<any> = ({ open }) => {
                         dispatch(setUserItem({ authorization:`${auth}`}))
 
                     }
+                    if (contURL) {
+                        dispatch(setUserItem({ containerURL:`${contURL}`}))
+
+                    }
                     closeModal()
                     messageApi.success("Connection successful!")
                 } catch (error) {
@@ -709,6 +715,9 @@ const ApiComp: FC<any> = ({ open }) => {
                 </p>
                 <Form.Item label="Authorization">
                     <Input placeholder='Optional' value={auth} onChange={(e) => setAuth(e.target.value)}></Input>
+                </Form.Item>
+                 <Form.Item label="Container URL">
+                    <Input placeholder='Optional http://localhost:8089' value={contURL} onChange={(e) => setContURL(e.target.value)}></Input>
                 </Form.Item>
 
                 <Suspense fallback={<Test></Test>}>

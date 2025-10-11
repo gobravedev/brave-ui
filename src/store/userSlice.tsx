@@ -4,12 +4,14 @@ const locale = localStorage.getItem('locale')
 const theme = localStorage.getItem('theme')
 const baseURL = localStorage.getItem('baseURL')
 const authorization = localStorage.getItem('authorization')
+const containerURL = localStorage.getItem('containerURL')
 
 interface UserState {
     locale: string;
     theme:string;
     baseURL:string;
     authorization:string|null;
+    containerURL:string;
     
 }
 const contextSlice = createSlice({
@@ -20,6 +22,7 @@ const contextSlice = createSlice({
             : 'en_US',
         theme:theme?theme:"light",
         baseURL:baseURL?`${baseURL}`:"",
+        containerURL:containerURL?`${containerURL}`:"",
         authorization:authorization
     },
     reducers: {
@@ -36,6 +39,9 @@ const contextSlice = createSlice({
             }
             if(action.payload.authorization){
                 localStorage.setItem('authorization', action.payload.authorization)
+            }
+            if(action.payload.containerURL){
+                localStorage.setItem('containerURL', action.payload.containerURL)
             }
             // debugger
         },
