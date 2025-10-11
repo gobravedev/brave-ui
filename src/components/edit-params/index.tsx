@@ -59,7 +59,7 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
         // console.log([...resp.data.content?.formJson || [],...resp.data?.inputFormJson || []])
         // console.log(resp.data.content?.formJson)
         // console.log(resp.data?.inputFormJson)
-        
+
         setLoading(false)
 
 
@@ -102,7 +102,19 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
                     form={form}
                     requestParam={{ ...data.request_param, analysis_id: data?.analysis_id }}
                     dataMap={{ ...resultData, first_data_key: getFirstKey(resultData) }}
-                    formJson={[...data.content?.formJson || [], ...data.content?.upstreamFormJson || [], ...data?.inputFormJson || []]}
+                    formJson={[...data.content?.formJson || [], ...data.content?.upstreamFormJson || [], ...data?.inputFormJson || [],
+                    data?.component_type == "software" ? {
+                        "name": "group_field",
+                        "label": "分组列",
+                        "rules": [
+                            {
+                                "required": true,
+                                "message": "该字段不能为空!"
+                            }
+                        ],
+                        "type": "GroupFieldSelect"
+                    } : {}
+                    ]}
                     databases={data.content?.databases}
                     // inputFormJson={data?.inputFormJson}
                     // onChangeAddProject={(value:any)=>{
@@ -177,7 +189,7 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, for
         }
 
     }
-    
+
     return <>
         <Form form={form} onValuesChange={(changedValues, allValues) => {
             // onChange(allFields);
@@ -185,7 +197,7 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, for
             // if(changedValues?.addedProject){
             //     // console.log(onChangeAddProject)
 
-               
+
             // }
 
         }}>
@@ -199,7 +211,7 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, for
                         forceRender: true,
                         children: <>
 
-                            <FormJsonComp formJson={[ ...dbFormJson]} dataMap={dataMap} ></FormJsonComp>
+                            <FormJsonComp formJson={[...dbFormJson]} dataMap={dataMap} ></FormJsonComp>
                             {databases && <BioDatabaseForm openModal={() => {
                                 openModals("bioDatabases", databases)
                             }} formJson={databases}></BioDatabaseForm>}

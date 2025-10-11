@@ -19,9 +19,7 @@ export const containerData = [
         "name": "code-server",
         "image": "linuxserver/code-server:4.104.3",
         "description": null,
-        "envionment": {
-            "PUID": "$USERID"
-        },
+        "envionment": { "PUID": "$USERID", "PGID": "$DOCKER_GROUPID" },
         "command": null,
         "labels": {
             "traefik.enable": "true",
@@ -56,6 +54,22 @@ export const containerData = [
             "traefik.http.routers.$CONTAINER_NAME.middlewares": "$CONTAINER_NAME-strip,$CONTAINER_NAME-server-root-path-header"
         },
         "port": "8787",
+        "change_uid": false
+    } ,{
+        "name": "code-server-nextflow",
+        "image": "registry.cn-hangzhou.aliyuncs.com/wybioinfo/code-server-nextflow",
+        "description": null,
+        "envionment": { "PUID": "$USERID", "PGID": "$DOCKER_GROUPID" },
+        "command": null,
+        "labels": {
+            "traefik.enable": "true",
+            "traefik.http.routers.$CONTAINER_NAME.rule": "PathPrefix(`/$URL_PREFIX`)",
+            "traefik.http.routers.$CONTAINER_NAME.entrypoints": "web",
+            "traefik.http.services.$CONTAINER_NAME.loadbalancer.server.port": "8443",
+            "traefik.http.middlewares.$CONTAINER_NAME-strip.stripPrefix.prefixes": "/$URL_PREFIX",
+            "traefik.http.routers.$CONTAINER_NAME.middlewares": "$CONTAINER_NAME-strip"
+        },
+        "port": "8443",
         "change_uid": false
     }
 ]

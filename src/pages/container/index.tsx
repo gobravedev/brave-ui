@@ -185,7 +185,10 @@ import { containerData } from './container'
 import { useSSEContext } from "@/context/sse/useSSEContext"
 const InstallContainerModal: FC<any> = ({ visible, params, onClose, callback }) => {
     const [namespace,setNamespace] = useState<any>()
+        const [messageApi, contextHolder] = message.useMessage();
+    
     return <Modal title="Install Container" footer={null} width={"50%"} open={visible} onClose={onClose} onCancel={onClose}>
+        {contextHolder}
         <NamespaceSelect   value={namespace} onChange={setNamespace}></NamespaceSelect>
         <Table style={{marginTop:"1rem"}} size="small"
             bordered
@@ -206,10 +209,15 @@ const InstallContainerModal: FC<any> = ({ visible, params, onClose, callback }) 
                     render: (_: any, record: any) => (
                         <>
                             <Popconfirm title="Install?" onConfirm={async () => {
-                                record.envionment = JSON.stringify(record.envionment)
-                                record.labels = JSON.stringify(record.labels)
-                                record.namespace = namespace
-                                await axios.post(`/container/add-or-update-container`, record)
+                                if(!namespace){
+                                    messageApi.error("Please select namespace!")
+                                }
+                                const newParams = JSON.parse(JSON.stringify(record));
+
+                                newParams.envionment = JSON.stringify(record.envionment)
+                                newParams.labels = JSON.stringify(record.labels)
+                                newParams.namespace = namespace
+                                await axios.post(`/container/add-or-update-container`, newParams)
                                 onClose()
                                 callback()
 
