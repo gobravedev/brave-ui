@@ -29,7 +29,7 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
 
                 // }
                 if (data.run_type == "retry") {
-                    if ( data.event =="container_pulled" || data.event == "analysis_complete" || data.event == "analysis_failed" || data.event == "analysis_started") {
+                    if (data.event == "container_pulled" || data.event == "analysis_complete" || data.event == "analysis_failed" || data.event == "analysis_started") {
                         reload()
                     }
                 }
@@ -62,7 +62,10 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
         {
             title: "Namespace",
             dataIndex: "namespace_name",
-            key: "namespace_name"
+            key: "namespace_name",
+            render: (text: any, record: any) => (<>
+                {text ? text : record.namespace}
+            </>)
         }, {
             title: "Container Id",
             dataIndex: "container_id",
@@ -82,7 +85,7 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
             render: (text: any, record: any) => (<Tag color="green">
                 {text}
             </Tag>)
-        },{
+        }, {
             title: "Image Status",
             dataIndex: "image_status",
             key: "image_status",
@@ -93,49 +96,14 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
                     </Tag>
                 </Tooltip>
             )
-        },  {
+        }, {
             title: 'Action',
             key: 'action',
             fixed: "right",
             width: 300,
             render: (_: any, record: any) => (
                 <Space size="middle">
-                    {record.status == "running" ? <>
-                        <Tooltip title={<>
-                            {`http://10.110.1.11:5003/container/${record.container_id}/`}
-                        </>}>
-                            <a onClick={() => {
-                                window.open(`http://10.110.1.11:5003/container/${record.container_id}/`, "_blank")
-                            }}>打开URL</a>
-                        </Tooltip>
-                        <Popconfirm title="Stop?" onConfirm={async () => {
-                            await axios.post(`/container/stop-container/${record.container_id}`)
-                        }}>
-                            <Button size="small" color="cyan" variant="solid"  >Stop</Button>
-                        </Popconfirm>
-                    </> : <>
-
-                    {record.image_status =="exist" ?<>
-                        <Popconfirm title="Launch?" onConfirm={async () => {
-                            await axios.post(`/container/run-container/${record.container_id}`)
-                        }}>
-                            <Button size="small" color="cyan" variant="solid"  >Launch</Button>
-                        </Popconfirm>
-
-                        </> : <>
-                            <Popconfirm title="Pull?" onConfirm={async () => {
-                                await axios.post(`/container/pull-image/${record.container_id}`)
-                                reload()
-                            }}>
-                                <Button size="small" color="cyan" variant="solid"  >Pull</Button>
-                            </Popconfirm>
-
-                        
-                        </>}
-                        
-                 
-
-                    </>}
+                    <ContainerOpt record={record} reload={reload}></ContainerOpt>
 
                     <Button size="small" color="cyan" variant="solid" onClick={() => {
                         openModal("modalA", record.container_id)
@@ -206,16 +174,80 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
 
 export default ContainerPage
 
+export const ContainerOpt: FC<any> = ({ record, reload, traefikUI = false }) => {
+    const getPort = (port: any, key: any) => {
+        const portMap = Object.fromEntries(
+            port.split(",").map((item: any) => {
+                const [hostPort, containerPort] = item.split(":");
+                return [parseInt(containerPort), parseInt(hostPort)];
+            })
+        );
+        return portMap[key]
+    }
+
+
+    return <>
+        {record.status == "running" ? <>
+
+            {traefikUI ? <>
+                <Tooltip title={<>
+                    {`http://10.110.1.11:${getPort(record.port, 8080)}`}
+                </>}>
+                    <a onClick={() => {
+                        window.open(`http://10.110.1.11:${getPort(record.port, 8080)}`, "_blank")
+                    }}>Traefik UI</a>
+                </Tooltip>
+            </> :
+                <>
+                    <Tooltip title={<>
+                        {`http://10.110.1.11:8089/container/${record.container_id}/`}
+                    </>}>
+                        <a onClick={() => {
+                            window.open(`http://10.110.1.11:8089/container/${record.container_id}/`, "_blank")
+                        }}>Open URL</a>
+                    </Tooltip>
+                </>
+            }
+
+            <Popconfirm title="Stop?" onConfirm={async () => {
+                await axios.post(`/container/stop-container/${record.container_id}`)
+            }}>
+                <Button size="small" color="cyan" variant="solid"  >Stop</Button>
+            </Popconfirm>
+        </> : <>
+
+            {record.image_status == "exist" ? <>
+                <Popconfirm title="Launch?" onConfirm={async () => {
+                    await axios.post(`/container/run-container/${record.container_id}`)
+                }}>
+                    <Button size="small" color="cyan" variant="solid"  >Launch</Button>
+                </Popconfirm>
+
+            </> : <>
+                <Popconfirm title="Pull?" onConfirm={async () => {
+                    await axios.post(`/container/pull-image/${record.container_id}`)
+                    reload()
+                }}>
+                    <Button size="small" color="cyan" variant="solid"  >
+                        {record.image_status=="pulling"?"pulling":"Pull"}
+                        </Button>
+                </Popconfirm>
+
+            </>}
+        </>}
+    </>
+}
+
 import { containerData } from './container'
 import { useSSEContext } from "@/context/sse/useSSEContext"
 const InstallContainerModal: FC<any> = ({ visible, params, onClose, callback }) => {
-    const [namespace,setNamespace] = useState<any>()
-        const [messageApi, contextHolder] = message.useMessage();
-    
+    const [namespace, setNamespace] = useState<any>()
+    const [messageApi, contextHolder] = message.useMessage();
+
     return <Modal title="Install Container" footer={null} width={"50%"} open={visible} onClose={onClose} onCancel={onClose}>
         {contextHolder}
-        <NamespaceSelect   value={namespace} onChange={setNamespace}></NamespaceSelect>
-        <Table style={{marginTop:"1rem"}} size="small"
+        <NamespaceSelect value={namespace} onChange={setNamespace}></NamespaceSelect>
+        <Table style={{ marginTop: "1rem" }} size="small"
             bordered
             dataSource={containerData} columns={[
                 {
@@ -234,14 +266,17 @@ const InstallContainerModal: FC<any> = ({ visible, params, onClose, callback }) 
                     render: (_: any, record: any) => (
                         <>
                             <Popconfirm title="Install?" onConfirm={async () => {
-                                if(!namespace){
+
+                                const newParams = JSON.parse(JSON.stringify(record));
+                                if (newParams.namespace != "default" && !namespace) {
                                     messageApi.error("Please select namespace!")
                                 }
-                                const newParams = JSON.parse(JSON.stringify(record));
-
                                 newParams.envionment = JSON.stringify(record.envionment)
                                 newParams.labels = JSON.stringify(record.labels)
-                                newParams.namespace = namespace
+                                if (newParams.namespace != "default") {
+                                    newParams.namespace = namespace
+                                }
+
                                 await axios.post(`/container/add-or-update-container`, newParams)
                                 onClose()
                                 callback()

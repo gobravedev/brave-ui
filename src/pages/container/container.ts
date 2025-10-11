@@ -1,13 +1,30 @@
 export const containerData = [
-        {
-    "name": "traefik",
-    "image": "registry.cn-hangzhou.aliyuncs.com/wybioinfo/traefik:v3.5",
-    "container_key": "traefik",
+    {
+        "namespace": "default",
+        "name": "traefik",
+        "image": "registry.cn-hangzhou.aliyuncs.com/wybioinfo/traefik:v3.5",
+        "container_key": "traefik",
 
-    "command": "--api.insecure=true  --providers.docker=true  --log.level=DEBUG  --entrypoints.web.address=:80 ",
-    "port": "8089:80,8087:8080",
-    "change_uid": false
-    },{
+        "command": "--api.insecure=true  --providers.docker=true  --log.level=DEBUG  --entrypoints.web.address=:80 ",
+        "port": "8089:80,8087:8080",
+        "change_uid": false
+    }, {
+        "namespace": "default",
+        "name": "app-code-server",
+        "container_key": "code-server",
+        "image": "registry.cn-hangzhou.aliyuncs.com/wybioinfo/code-server:4.104.3",
+        "envionment": { "PUID": "$USERID", "PGID": "$DOCKER_GROUPID" },
+        "labels": {
+            "traefik.enable": "true",
+            "traefik.http.routers.$CONTAINER_NAME.rule": "PathPrefix(`/$URL_PREFIX`)",
+            "traefik.http.routers.$CONTAINER_NAME.entrypoints": "web",
+            "traefik.http.services.$CONTAINER_NAME.loadbalancer.server.port": "8443",
+            "traefik.http.middlewares.$CONTAINER_NAME-strip.stripPrefix.prefixes": "/$URL_PREFIX",
+            "traefik.http.routers.$CONTAINER_NAME.middlewares": "$CONTAINER_NAME-strip"
+        },
+        "port": "8443",
+        "change_uid": false
+    }, {
         "name": "datascience-notebook",
         "image": "registry.cn-hangzhou.aliyuncs.com/wybioinfo/datascience-notebook:x86_64-ubuntu-22.04",
         "description": "biobakery/maaslin2:1.3.0",
@@ -63,7 +80,7 @@ export const containerData = [
         },
         "port": "8787",
         "change_uid": false
-    } ,{
+    }, {
         "name": "code-server-nextflow",
         "image": "registry.cn-hangzhou.aliyuncs.com/wybioinfo/code-server-nextflow",
         "description": null,

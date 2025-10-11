@@ -19,9 +19,10 @@ const Markdown: FC<any> = ({ data }) => {
       components={{
         img: ({ node, src, ...props }) => (
           <>
+          {/* maxWidth: '50%', */}
             <Image
               src={`${baseURL}${src}`}
-              style={{ maxWidth: '50%', height: 'auto', margin: '1rem auto', display: 'block' }}
+              style={{  height: 'auto', margin: '1rem auto', display: 'block' }}
               alt={props.alt || ''}
             ></Image>
           </>
