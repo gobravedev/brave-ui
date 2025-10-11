@@ -15,7 +15,39 @@ import { NamespaceSelect } from '@/components/create-pipeline'
 import TextArea from "antd/es/input/TextArea"
 const ContainerPage: FC<any> = ({ params, rowSelection }) => {
     // const [pipelineComponents, setPipelineComponents] = useState<any>([])
+    const { eventSourceRef, status, reconnect } = useSSEContext();
 
+    useEffect(() => {
+        if (eventSourceRef) {
+            const handler = (event: MessageEvent) => {
+                // console.log('event', event)
+                const data = JSON.parse(event.data)
+                // console.log('analysisId', analysisIdRef.current)
+                // if (analysisIdRef.current.includes(data.analysis_id)) {
+
+
+
+                // }
+                if (data.run_type == "retry") {
+                    if (data.event == "analysis_complete" || data.event == "analysis_failed" || data.event == "analysis_started") {
+                        reload()
+                    }
+                }
+
+            };
+
+            eventSourceRef.current?.addEventListener('message', handler);
+
+            return () => {
+                console.log("removeEventListener")
+                eventSourceRef.current?.removeEventListener('message', handler);
+            };
+        }
+
+
+
+
+    }, [eventSourceRef.current]);
 
     const { data, pageNumber, totalPage, loading, reload, pageSize, setPageNumber } = usePagination({
         pageApi: pageContainerApi,
@@ -28,35 +60,67 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
     const { modal, openModal, closeModal } = useModal();
     const columns: any[] = [
         {
-            title: "namespace",
+            title: "Namespace",
             dataIndex: "namespace_name",
             key: "namespace_name"
         }, {
-            title: "container_id",
+            title: "Container Id",
             dataIndex: "container_id",
             key: "container_id"
         }, {
-            title: "名称",
+            title: "Name",
             dataIndex: "name",
             key: "name"
         }, {
-            title: "镜像",
+            title: "Image",
             dataIndex: "image",
             key: "image"
         }, {
-            title: '操作',
+            title: "Status",
+            dataIndex: "status",
+            key: "status",
+            render: (text: any, record: any) => (<Tag color="green">
+                {text}
+            </Tag>)
+        }, {
+            title: 'Action',
             key: 'action',
             fixed: "right",
-            width: 200,
+            width: 300,
             render: (_: any, record: any) => (
                 <Space size="middle">
+                    {record.status == "running" ? <>
+                        <Tooltip title={<>
+                            {`http://10.110.1.11:5003/container/${record.container_id}/`}
+                        </>}>
+                            <a onClick={() => {
+                                window.open(`http://10.110.1.11:5003/container/${record.container_id}/`, "_blank")
+                            }}>打开URL</a>
+                        </Tooltip>
+                        <Popconfirm title="Stop?" onConfirm={async () => {
+                            await axios.post(`/container/stop-container/${record.container_id}`)
+                        }}>
+                            <Button size="small" color="cyan" variant="solid"  >Stop</Button>
+                        </Popconfirm>
+                    </> : <>
+                        <Popconfirm title="Launch?" onConfirm={async () => {
+                            await axios.post(`/container/run-container/${record.container_id}`)
+                        }}>
+                            <Button size="small" color="cyan" variant="solid"  >Launch</Button>
+                        </Popconfirm>
+
+
+                    </>}
+
                     <Button size="small" color="cyan" variant="solid" onClick={() => {
                         openModal("modalA", record.container_id)
-                    }}>更新</Button>
-                    <Popconfirm title="确认删除?" onConfirm={() => {
+                    }}>Update</Button>
+                    <Popconfirm title="Delete?" onConfirm={async () => {
                         // deleteContainer(record)
+                        await axios.delete(`/container/delete-container-by-id/${record.container_id}`)
+                        reload()
                     }}>
-                        <Button size="small" danger variant="solid">删除</Button>
+                        <Button size="small" danger variant="solid">Delete</Button>
                     </Popconfirm>
 
 
@@ -70,9 +134,13 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
     return <div style={{ maxWidth: "1500px", margin: "1rem auto" }}>
         <Flex justify="flex-end" gap="small">
             <Button size="small" color="cyan" variant="solid" onClick={() => {
+                openModal("installContainerModal")
+            }}>Install</Button>
+
+            <Button size="small" color="cyan" variant="solid" onClick={() => {
                 openModal("modalA")
-            }}>新增</Button>
-            <Button size="small" color="cyan" variant="solid" onClick={reload}>刷新</Button>
+            }}>Create</Button>
+            <Button size="small" color="cyan" variant="solid" onClick={reload}>Refresh</Button>
         </Flex>
         <div style={{ marginBottom: "1rem" }}> </div>
 
@@ -96,6 +164,12 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
                 showSizeChanger={false}
             />
         </Flex>}
+        <InstallContainerModal
+            callback={reload}
+            visible={modal.key == "installContainerModal" && modal.visible}
+            params={modal.params}
+            onClose={closeModal}
+        ></InstallContainerModal>
         <ContainerModal
             callback={reload}
             visible={modal.key == "modalA" && modal.visible}
@@ -107,6 +181,48 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
 
 export default ContainerPage
 
+import { containerData } from './container'
+import { useSSEContext } from "@/context/sse/useSSEContext"
+const InstallContainerModal: FC<any> = ({ visible, params, onClose, callback }) => {
+    const [namespace,setNamespace] = useState<any>()
+    return <Modal title="Install Container" footer={null} width={"50%"} open={visible} onClose={onClose} onCancel={onClose}>
+        <NamespaceSelect   value={namespace} onChange={setNamespace}></NamespaceSelect>
+        <Table style={{marginTop:"1rem"}} size="small"
+            bordered
+            dataSource={containerData} columns={[
+                {
+                    title: "name",
+                    dataIndex: "name",
+                    key: "name"
+                }, {
+                    title: "Image",
+                    dataIndex: "image",
+                    key: "image"
+                }, {
+                    title: 'Action',
+                    key: 'action',
+                    fixed: "right",
+                    width: 300,
+                    render: (_: any, record: any) => (
+                        <>
+                            <Popconfirm title="Install?" onConfirm={async () => {
+                                record.envionment = JSON.stringify(record.envionment)
+                                record.labels = JSON.stringify(record.labels)
+                                record.namespace = namespace
+                                await axios.post(`/container/add-or-update-container`, record)
+                                onClose()
+                                callback()
+
+                            }}>
+                                <Button size="small" color="cyan" variant="solid">Install</Button>
+                            </Popconfirm>
+
+                        </>
+                    )
+                }
+            ]}></Table>
+    </Modal>
+}
 
 const ContainerModal: FC<any> = ({ visible, params, onClose, callback }) => {
     const [form] = Form.useForm()

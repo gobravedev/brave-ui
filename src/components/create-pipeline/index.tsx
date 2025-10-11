@@ -314,7 +314,7 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
             // onCancel={() => onClose()}
             // onOk={savePipeline}
             forceRender={true}
-            
+
             open={visible}
             width={"80%"}
             extra={<>
@@ -339,6 +339,13 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
                                 <NamespaceSelect disabled={data?.componemt_id} />
                             </Form.Item>
 
+
+                            <ComponentsRender {...structure} data={component} form={form}></ComponentsRender>
+                        </>
+                    }, {
+                        label: "Component Description",
+                        key: "2",
+                        children: <>
                             <Form.Item name={"tags"} label="Tags">
                                 <Select
                                     mode="tags"
@@ -356,12 +363,6 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
                                 <InputNumber ></InputNumber >
                             </Form.Item>
 
-                            <ComponentsRender {...structure} data={component} form={form}></ComponentsRender>
-                        </>
-                    }, {
-                        label: "Component Description",
-                        key: "2",
-                        children: <>
                             <Form.Item name={"description"} label="Description">
                                 <TextAreaComp templete={""}></TextAreaComp>
 
@@ -476,7 +477,7 @@ const ScriptContent: FC<any> = ({ data, form }) => {
     const [templete, setTemplete] = useState<any>()
 
     useEffect(() => {
-        
+
         if (!data?.componemt_id) {
             // console.log(scriptTemplete)
             setTemplete(JSON.stringify(scriptTemplete, null, 2))
@@ -571,7 +572,7 @@ const TextAreaComp: FC<any> = ({ value, onChange, templete }) => {
             onChange(e.target.value)
             // console.log(e.target.value)
         }}></TextArea> */}
-            {/* {templete} */}
+        {/* {templete} */}
 
         <MonacoEditor value={value} onChange={onChange} editorRef={editorRef} defaultLanguage="json" ></MonacoEditor>
         {/* <Button onClick={() => {
@@ -670,7 +671,9 @@ export const NamespaceSelect: FC<any> = ({ value, onChange, disabled }) => {
     return <>
         <Flex justify="space-between">
             {/* {JSON.stringify(namespace)} */}
-            <Select disabled={disabled} value={value} onChange={onChange} options={namespace.map((item: any) => ({ label: item.name, value: item.namespace_id }))}>
+            <Select 
+            placeholder="Please select namespace!"
+            style={{width:"100%"}} disabled={disabled} value={value} onChange={onChange} options={namespace.map((item: any) => ({ label: item.name, value: item.namespace_id }))}>
             </Select>
             {/* {modal.key == "namespaceOperation" && modal.visible ?
                 <Button onClick={() => {
