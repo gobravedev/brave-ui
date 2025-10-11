@@ -12,18 +12,22 @@ import { SSEProvider } from './context/sse/SSEProvider.tsx'
 console.log(import.meta.env.MODE)
 const baseURL = localStorage.getItem('baseURL') || ""
 axios.defaults.baseURL = `${baseURL}/brave-api`;
+const authorization = localStorage.getItem('authorization')
+if (authorization) {
+  axios.defaults.headers.common['Authorization'] = `Bearer ${authorization}`;
 
+}
 
 createRoot(document.getElementById('root')!).render(
   // <StrictMode>
 
   // </StrictMode>
   // <ConfigProvider>
-    <Provider store={store}>
-      <SSEProvider> 
+  <Provider store={store}>
+    <SSEProvider>
       <App />
-      </SSEProvider>
-    </Provider>
+    </SSEProvider>
+  </Provider>
   // </ConfigProvider>
 
 

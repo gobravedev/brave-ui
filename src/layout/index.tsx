@@ -1,4 +1,4 @@
-import React, { FC, Suspense, useEffect, useState,lazy } from 'react';
+import React, { FC, Suspense, useEffect, useState, lazy } from 'react';
 import { ApiOutlined, BookOutlined, LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Breadcrumb, Button, Divider, Empty, Flex, Form, Input, Layout, Menu, message, Modal, notification, Popconfirm, Select, Skeleton, Space, Tag, theme, Tooltip } from 'antd';
@@ -265,7 +265,7 @@ const App: React.FC = () => {
                 zh_CN: "工具集",
                 en_US: "TookKit"
             }
-        }, 
+        },
         // {
         //     key: `/entity-page`,
         //     label: "研究实体"
@@ -288,7 +288,7 @@ const App: React.FC = () => {
                         zh_CN: "管道监控",
                         en_US: "Monitor"
                     },
-                },{
+                }, {
                     key: `/psycmicrograph`,
                     label: {
                         zh_CN: "菌群知识库",
@@ -492,7 +492,7 @@ const App: React.FC = () => {
         },
     ]
 
-    const [isConnect, setIsConnect] = useState<"UNKNOW"|"CONNECT"|"NOT_CONNECT">("UNKNOW")
+    const [isConnect, setIsConnect] = useState<"UNKNOW" | "CONNECT" | "NOT_CONNECT">("UNKNOW")
 
     const ping = async () => {
         try {
@@ -566,11 +566,11 @@ const App: React.FC = () => {
                     {/* <Tag color={status === "open" ? "green" : status === "connecting" ? "blue" : "red"} style={{marginRight:"1rem"}}>
                     {status}
                    </Tag> */}
-                   {/* {isConnect=="NOT_CONNECT" && <>aaaaaaaaaaaa</>} */}
+                    {/* {isConnect=="NOT_CONNECT" && <>aaaaaaaaaaaa</>} */}
                     <BookOutlined style={{ cursor: "pointer" }} onClick={() => {
                         window.open(`https://pybrave.github.io/brave-doc`, "_blank")
                     }} />
-                    <ApiComp open={isConnect=="NOT_CONNECT" }></ApiComp>
+                    <ApiComp open={isConnect == "NOT_CONNECT"}></ApiComp>
 
                     <Button size="small"
                         color={status === "open" ? "green" : status === "connecting" ? "blue" : "red"}
@@ -647,19 +647,21 @@ export default App;
 import { setUserItem } from '@/store/userSlice'
 
 const Markdown = lazy(() => import('@/components/markdown'));
- 
-const ApiComp: FC<any> = ({open}) => {
+
+const ApiComp: FC<any> = ({ open }) => {
     const { modal, openModal, closeModal } = useModal();
-    const { baseURL } = useSelector((state: any) => state.user) //light dark
+    const { baseURL, authorization } = useSelector((state: any) => state.user)
     const [value, setValue] = useState<any>(baseURL)
+    const [auth, setAuth] = useState<any>(authorization)
+
     const dispatch = useDispatch()
     const [messageApi, messageContextHolder] = message.useMessage();
 
-    useEffect(()=>{
-        if(open){
+    useEffect(() => {
+        if (open) {
             openModal("apiComp")
         }
-    },[open])
+    }, [open])
 
     return <>
         {messageContextHolder}
@@ -667,7 +669,7 @@ const ApiComp: FC<any> = ({open}) => {
             onClick={() => { openModal("apiComp") }}
         />
         <Modal
-        width="40%"
+            width="40%"
             title="Edit api"
             open={modal.key == "apiComp" && modal.visible}
             onClose={closeModal}
@@ -675,8 +677,16 @@ const ApiComp: FC<any> = ({open}) => {
             onOk={async () => {
 
                 try {
-                    await axios.get(`${value}/brave-api/ping`)
+                    await axios.get(`${value}/brave-api/ping`, {
+                        headers: {
+                            Authorization: `Bearer ${auth}`
+                        }
+                    })
                     dispatch(setUserItem({ baseURL: value }))
+                    if (auth) {
+                        dispatch(setUserItem({ authorization:`${auth}`}))
+
+                    }
                     closeModal()
                     messageApi.success("Connection successful!")
                 } catch (error) {
@@ -686,7 +696,10 @@ const ApiComp: FC<any> = ({open}) => {
             }}
         >
             {(modal.key == "apiComp" && modal.visible) && <>
-             <Input value={value} onChange={(e) => setValue(e.target.value)}></Input>
+                <Form.Item label="API">
+                    <Input value={value} onChange={(e) => setValue(e.target.value)}></Input>
+
+                </Form.Item>
                 <a target='_blank' href={`${value}/brave-api/ping`}>Certificate Verification</a>
                 <p style={{ marginTop: 8, color: "#888", fontSize: 13 }}>
                     ⚠️ If your API uses a self-signed HTTPS certificate, the browser may show
@@ -694,6 +707,10 @@ const ApiComp: FC<any> = ({open}) => {
                     Please click “Advanced” → “Proceed anyway” once to trust the certificate
                     before testing the connection.
                 </p>
+                <Form.Item label="Authorization">
+                    <Input placeholder='Optional' value={auth} onChange={(e) => setAuth(e.target.value)}></Input>
+                </Form.Item>
+
                 <Suspense fallback={<Test></Test>}>
                     <Markdown data={`
 brave  \
@@ -702,7 +719,7 @@ brave  \
                 </Suspense>
 
             </>}
-           
+
         </Modal>
     </>
 }

@@ -20,7 +20,7 @@ export const SSEProvider = ({
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastReceived = useRef(Date.now());
   const timeoutMs = 15000;
-  const { baseURL } = useSelector((state: any) => state.user) 
+  const { baseURL,authorization } = useSelector((state: any) => state.user) 
 
   const connect = () => {
     if (eventSourceRef.current) {
@@ -28,7 +28,7 @@ export const SSEProvider = ({
     }
 
     setStatus("connecting");
-    const es = new EventSource(`${baseURL}${url}`);
+    const es = new EventSource(`${baseURL}${url}?authorization=${authorization}`);
     eventSourceRef.current = es;
 
     es.onopen = () => {

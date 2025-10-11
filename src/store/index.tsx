@@ -19,9 +19,13 @@ export default store
 
 store.subscribe(() => {
   const currentBaseURL = store.getState().user.baseURL;
+  const authorization = store.getState().user.authorization;
   if (axios.defaults.baseURL !== currentBaseURL) {
     console.log("currentBaseURL: ", currentBaseURL)
-
     axios.defaults.baseURL = `${currentBaseURL}/brave-api`;
+    if(authorization){
+      axios.defaults.headers.common['Authorization'] =`Bearer ${authorization}`;
+    }
+
   }
 });

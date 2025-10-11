@@ -3,11 +3,14 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 const locale = localStorage.getItem('locale')
 const theme = localStorage.getItem('theme')
 const baseURL = localStorage.getItem('baseURL')
+const authorization = localStorage.getItem('authorization')
 
 interface UserState {
     locale: string;
     theme:string;
     baseURL:string;
+    authorization:string|null;
+    
 }
 const contextSlice = createSlice({
     name: 'user',
@@ -16,7 +19,8 @@ const contextSlice = createSlice({
             ? locale  // 如果存在，从 localStorage 解析
             : 'en_US',
         theme:theme?theme:"light",
-        baseURL:baseURL?`${baseURL}`:""
+        baseURL:baseURL?`${baseURL}`:"",
+        authorization:authorization
     },
     reducers: {
         setUserItem(state, action: PayloadAction<Partial<UserState>>) {
@@ -29,6 +33,9 @@ const contextSlice = createSlice({
             }
             if(action.payload.baseURL){
                 localStorage.setItem('baseURL', action.payload.baseURL)
+            }
+            if(action.payload.authorization){
+                localStorage.setItem('authorization', action.payload.authorization)
             }
             // debugger
         },
