@@ -186,7 +186,7 @@ export const ContainerOpt: FC<any> = ({ record, reload, traefikUI = false }) => 
     }
     const { containerURL } = useSelector((state: any) => state.user); // 'light' | 'dark'
 
-    function originWithoutPort(inputUrl, port) {
+    function originWithoutPort(inputUrl:any, port:any) {
         if(!inputUrl) return "/"
         const u = new URL(inputUrl);
         return `${u.protocol}//${u.hostname}:${getPort(port, 8080)}`;
