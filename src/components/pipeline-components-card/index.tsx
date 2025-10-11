@@ -19,7 +19,7 @@ import "./index.css"
 const PipelineComponentsCard: FC<any> = ({ params, map }) => {
     const { Search } = Input;
     // const [searchText, setSearchText] = useState("");
-    const { baseURL } = useSelector((state: any) => state.user) 
+    const { baseURL } = useSelector((state: any) => state.user)
 
     // const [pipelineComponents, setPipelineComponents] = useState<any>([])
     const { component_type } = params
@@ -54,7 +54,7 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
         pageApi: pagePipelineComponents,
         params: params || {},
         map: mapFun,
-        initialPageSize:12
+        initialPageSize: 12
     })
     // result = {
     //     "id":item.id,
@@ -111,36 +111,40 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
     // indivi
     return <div style={{ maxWidth: "1500px", margin: "1rem auto" }}>
         {/* {JSON.stringify(sseData)} */}
-        <Flex justify="flex-end" gap="small">
-            <Button size="small" color="cyan" variant="solid" onClick={() => {
+        <Flex justify="space-between" gap="small">
+            <Search
+                size="small"
+                placeholder="Search Components"
+                allowClear
+                enterButton
+                onSearch={(value) => { search(value) }}
+                style={{ marginBottom: "1rem", width: 400 }}
+            />
+            <Flex  gap="small">
+                <Button size="small" color="cyan" variant="solid" onClick={() => {
 
-                openModal("modalA", {
-                    data: undefined,
-                    structure: {
-                        component_type: component_type,
-                    }
-                })
-            }}>Creating Components </Button>
+                    openModal("modalA", {
+                        data: undefined,
+                        structure: {
+                            component_type: component_type,
+                        }
+                    })
+                }}>Creating Components </Button>
 
 
 
-            <Button size="small" color="cyan" variant="solid" onClick={() => {
-                openModal("modalB")
-            }}>Create/Update  namespace</Button>
-            <Button size="small" color="cyan" variant="solid" onClick={() => {
-                openModal("modalC")
-            }}>Install namespace</Button>
-            <Button size="small" color="primary" variant="solid" onClick={reload}>Refresh</Button>
+                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                    openModal("modalB")
+                }}>Create/Update  namespace</Button>
+                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                    openModal("modalC")
+                }}>Install namespace</Button>
+                <Button size="small" color="primary" variant="solid" onClick={reload}>Refresh</Button>
+            </Flex>
         </Flex>
-        <div style={{ marginBottom: "2rem" }}>
-        </div>
-        <Search
-            placeholder="Search Components"
-            allowClear
-            enterButton
-            onSearch={(value) => { search(value) }}
-            style={{ marginBottom: "1rem", width: 400 }}
-        />
+        {/* <div style={{ marginBottom: "2rem" }}>
+        </div> */}
+
         {/* {JSON.stringify(params_)} */}
         <Spin spinning={loading}>
             {Array.isArray(pipelineComponents) && pipelineComponents.length != 0 ? <Row gutter={16} style={{ position: "relative" }}>
@@ -157,13 +161,13 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
                                 borderRadius: "12px",          // 圆角
                                 overflow: "hidden",
                                 transition: "all 0.3s ease",   // 平滑过渡
-                                
+
                             }}
                             bodyStyle={{
                                 padding: "12px 16px",          // 内边距更紧凑
                             }}
-                            cover={<div style={{height:"15rem"}}>
-                                <img style={{height:"100%",width:"100%",objectFit:"cover"}} alt={item.label} src={`${baseURL}${item.img}`} />
+                            cover={<div style={{ height: "15rem" }}>
+                                <img style={{ height: "100%", width: "100%", objectFit: "cover" }} alt={item.label} src={`${baseURL}${item.img}`} />
                             </div>}
                             onClick={() => navigate(`${item.path}`)}>
 

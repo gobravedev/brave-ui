@@ -8,6 +8,7 @@ const MonacoEditorComp = lazy(() => import('./editor'));
 export const MonacoEditor: FC<any> = ({ onChange, value, editorRef, defaultLanguage, format, height }) => {
     return <>
         <Suspense fallback={<Skeleton active></Skeleton>}>
+            
             <MonacoEditorComp onChange={onChange} value={value} editorRef={editorRef} defaultLanguage={defaultLanguage} format={format} height={height} > </MonacoEditorComp>
 
         </Suspense>

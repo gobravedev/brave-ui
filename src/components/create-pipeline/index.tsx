@@ -1,4 +1,4 @@
-import { Button, Card, Collapse, Divider, Flex, Form, Input, InputNumber, Modal, Popconfirm, Select, Space, Tabs, Typography, Upload, UploadFile, UploadProps } from "antd"
+import { Button, Card, Collapse, Divider, Drawer, Flex, Form, Input, InputNumber, Modal, Popconfirm, Select, Space, Tabs, Typography, Upload, UploadFile, UploadProps } from "antd"
 import TextArea from "antd/es/input/TextArea"
 import axios from "axios"
 import { FC, use, useEffect, useRef, useState } from "react"
@@ -307,30 +307,39 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
         }];
     };
     return <>
-        <Modal
+        <Drawer
             loading={loading}
-            title={`${data ? "更新" : "新增"}流程(${structure?.component_type})`}
-            okText={data ? "更新" : "新增"}
-            onOk={savePipeline}
+            title={`${data ? "Update" : "Create"} Component(${structure?.component_type})`}
+            // okText={data ? "Update" : "Create"}
+            // onCancel={() => onClose()}
+            // onOk={savePipeline}
+            forceRender={true}
+            
             open={visible}
-            width={"60%"}
+            width={"80%"}
+            extra={<>
+                <Button size="small" color="cyan" variant="solid" onClick={savePipeline}>
+                    {data ? "Update" : "Create"}
+                </Button>
+            </>}
             onClose={() => onClose()}
-            onCancel={() => onClose()}>
+        // onCancel={() => onClose()}
+        >
             <Form form={form}>
                 <Tabs items={[
                     {
-                        label: "组件信息",
+                        label: "Component Info",
                         key: "1",
                         children: <>
-                            <Form.Item name={"component_name"} label="组件名称">
+                            <Form.Item name={"component_name"} label="Component Name">
                                 <Input ></Input>
                             </Form.Item>
 
-                            <Form.Item name={"namespace"} label="namespace" >
+                            <Form.Item name={"namespace"} label="Namespace" >
                                 <NamespaceSelect disabled={data?.componemt_id} />
                             </Form.Item>
 
-                            <Form.Item name={"tags"} label="tags">
+                            <Form.Item name={"tags"} label="Tags">
                                 <Select
                                     mode="tags"
                                     style={{ width: '100%' }}
@@ -343,17 +352,17 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
                             {data?.component_id && <Form.Item label="Upload" name={"img"}  >
                                 <UploadComp component_id={data?.component_id}></UploadComp>
                             </Form.Item>}
-                            <Form.Item label="排序" name={"order_index"} initialValue={0}>
+                            <Form.Item label="Order" name={"order_index"} initialValue={0}>
                                 <InputNumber ></InputNumber >
                             </Form.Item>
 
                             <ComponentsRender {...structure} data={component} form={form}></ComponentsRender>
                         </>
                     }, {
-                        label: "组件描述",
+                        label: "Component Description",
                         key: "2",
                         children: <>
-                            <Form.Item name={"description"} label="组件名称">
+                            <Form.Item name={"description"} label="Description">
                                 <TextAreaComp templete={""}></TextAreaComp>
 
                             </Form.Item>
@@ -365,7 +374,7 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
                 <Collapse ghost items={[
                     {
                         key: "1",
-                        label: "更多",
+                        label: "More",
                         children: <>
                             <Form.Item noStyle shouldUpdate>
                                 {() => (
@@ -380,7 +389,7 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
 
             </Form>
 
-        </Modal>
+        </Drawer>
     </>
 }
 export default CreateORUpdatePipelineCompnentRelation
@@ -449,10 +458,10 @@ const SoftwareContent: FC<any> = ({ data, form }) => {
         }
     }, [])
     return <>
-        <Form.Item name={"container_id"} label="容器">
+        <Form.Item name={"container_id"} label="Container">
             <SelectContainer container={data?.container}></SelectContainer>
         </Form.Item>
-        <Form.Item name={"sub_container_id"} label="子容器">
+        <Form.Item name={"sub_container_id"} label="Sub Container">
             <SelectContainer container={data?.sub_container}></SelectContainer>
         </Form.Item>
         <Form.Item name={"content"} label="content">
@@ -467,12 +476,14 @@ const ScriptContent: FC<any> = ({ data, form }) => {
     const [templete, setTemplete] = useState<any>()
 
     useEffect(() => {
+        
         if (!data?.componemt_id) {
+            // console.log(scriptTemplete)
             setTemplete(JSON.stringify(scriptTemplete, null, 2))
         }
     }, [])
     return <>
-        <Form.Item name={"container_id"} label="容器">
+        <Form.Item name={"container_id"} label="Container">
             <SelectContainer container={data?.container}></SelectContainer>
         </Form.Item>
         <Form.Item name={"content"} label="content">
@@ -513,7 +524,7 @@ const SelectContainer: FC<any> = ({ value, onChange, container: container_ }) =>
         <Input value={container?.name} style={{ cursor: "pointer" }} onClick={() => openModal("modalA")}></Input>
         {/* {JSON.stringify(container)}
         {data?.container_image}{data?.container_name} */}
-        <Modal footer={false} width={"50%"} title="选择容器" open={modal.visible && modal.key == "modalA"} onClose={closeModal} onCancel={closeModal}>
+        <Modal footer={false} width={"50%"} title="Select container" open={modal.visible && modal.key == "modalA"} onClose={closeModal} onCancel={closeModal}>
             <ContainerPage rowSelection={{
                 type: "radio",
                 onChange: (selectedRowKeys: any, selectedRows: any) => {
@@ -560,6 +571,7 @@ const TextAreaComp: FC<any> = ({ value, onChange, templete }) => {
             onChange(e.target.value)
             // console.log(e.target.value)
         }}></TextArea> */}
+            {/* {templete} */}
 
         <MonacoEditor value={value} onChange={onChange} editorRef={editorRef} defaultLanguage="json" ></MonacoEditor>
         {/* <Button onClick={() => {
@@ -600,14 +612,14 @@ const WrapPipeline: FC<any> = ({ data, form }) => {
         <Form.Item name={["content", "name"]} label="name">
             <Input></Input>
         </Form.Item>
-        <Form.Item name={["content", "script_type"]} label="脚本类型">
+        <Form.Item name={["content", "script_type"]} label="Script Type">
             <Select options={
                 [{ label: "python", value: "python" },
                 { label: "nextflow", value: "nextflow" },
                 { label: "shell", value: "shell" },
                 { label: "R", value: "R" }]}></Select>
         </Form.Item>
-        <Form.Item name={["content", "image"]} label="镜像">
+        <Form.Item name={["content", "image"]} label="Image">
             <Input></Input>
         </Form.Item>
         {/* <Form.Item name={["content", "analysisPipline"]} label="analysisPipline">

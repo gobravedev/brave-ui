@@ -3,7 +3,7 @@ import axios from "axios";
 import { FC, useEffect } from "react";
 import { useState } from "react";
 import { useOutletContext } from "react-router";
-
+import { PlusCircleOutlined, PlusOutlined } from '@ant-design/icons'
 export const CreateOrUpdateNamespace: FC<any> = ({ visible, onClose, params }) => {
     if (!visible) return null;
     const [namespaceList, setNamespaceList] = useState<any>([])
@@ -15,6 +15,7 @@ export const CreateOrUpdateNamespace: FC<any> = ({ visible, onClose, params }) =
     const { messageApi } = useOutletContext<any>()
     const [record, setRecord] = useState<any>()
     const [form] = Form.useForm()
+    const [optPanel, setOptPanel] = useState<any>(false)
     const saveNamespace = async () => {
         const values = await form.validateFields()
         if (record) {
@@ -27,6 +28,7 @@ export const CreateOrUpdateNamespace: FC<any> = ({ visible, onClose, params }) =
                 ...values,
             })
         }
+        setOptPanel(false)
         loadNamespace()
         // onClose()
     }
@@ -39,43 +41,61 @@ export const CreateOrUpdateNamespace: FC<any> = ({ visible, onClose, params }) =
             messageApi.error(error.response.data.message)
         }
     }
- 
+
     useEffect(() => {
         loadNamespace()
     }, [])
 
-    return <Modal title="Install namespace" open={visible} onCancel={onClose} >
-        <Flex>
-            <Form form={form} onFinish={saveNamespace}>
-                <Form.Item name="name" label="Name" rules={[{ required: true, message: "名称不能为空" }]}>
-                    <Input />
-                </Form.Item>
-                <Form.Item>
-                    <Button type="primary" htmlType="submit" >
-                        Submit
-                    </Button>
-                </Form.Item>
-            </Form>
+    return <Modal title={<Flex gap={"small"}>
+        Install namespace
+        <PlusCircleOutlined style={{ cursor: "pointer", color: "cyan" }} onClick={() => {
+            setOptPanel(true)
+        }} />
+    </Flex>} open={visible}
+
+        onCancel={onClose} footer={null}>
+        {optPanel ? <>
+
+            <Flex>
+                <Form form={form} onFinish={saveNamespace}>
+                    <Form.Item name="name" label="Name" rules={[{ required: true, message: "名称不能为空" }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item>
+                        <Button size="small" color="cyan" variant="solid" htmlType="submit">
+                            Submit
+                        </Button>
+                        <Button style={{marginLeft:"1rem"}} size="small" color="cyan" variant="solid" onClick={()=>{setOptPanel(false)}} >
+                            Cancel
+                        </Button>
+                    </Form.Item>
+                </Form>
 
 
-        </Flex>
-        {namespaceList && namespaceList.map((item: any) => {
-            return <div style={{ display: "flex", marginBottom: "0.5rem", justifyContent: "space-between" }} key={item.namespace_id}>
-                <div>{item.name}({item.namespace_id})</div>
-                <Button type="primary" size="small" onClick={() => {
-                    setRecord(item)
-                    form.setFieldsValue({
-                        name: item.name
-                    })
-                }}>更新</Button>
-                
-                <Popconfirm title="确定删除吗？" onConfirm={() => {
-                    deleteNamespace(item.namespace_id)
-                }}>
-                    <Button danger size="small">删除</Button>
-                </Popconfirm>
-            </div>
-        })}
+            </Flex>
+        </> : <>
+            {namespaceList && namespaceList.map((item: any) => {
+                return <div style={{ display: "flex", marginBottom: "0.5rem", justifyContent: "space-between" }} key={item.namespace_id}>
+                    <div>{item.name}({item.namespace_id})</div>
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        setOptPanel(true)
+                        setRecord(item)
+                        form.setFieldsValue({
+                            name: item.name
+                        })
+                    }}>更新</Button>
+
+                    <Popconfirm title="确定删除吗？" onConfirm={() => {
+                        deleteNamespace(item.namespace_id)
+                    }}>
+                        <Button danger size="small" variant="solid">删除</Button>
+                    </Popconfirm>
+                </div>
+            })}
+
+        </>}
+
+
     </Modal>
 }
 
@@ -93,7 +113,7 @@ export const InstallNamespace: FC<any> = ({ visible, onClose, params }) => {
         loadNamespace()
     }, [])
 
-    const installNamespace = async (namespace   : any) => {
+    const installNamespace = async (namespace: any) => {
         try {
             await axios.post(`/import-namespace-component?namespace=${namespace}`)
             loadNamespace()
@@ -109,7 +129,7 @@ export const InstallNamespace: FC<any> = ({ visible, onClose, params }) => {
                 <Popconfirm title="Are you sure to install it?" onConfirm={() => {
                     installNamespace(item.namespace_id)
                 }}>
-                    <Button  size="small" color="cyan" variant="solid">Install</Button>
+                    <Button size="small" color="cyan" variant="solid">Install</Button>
                 </Popconfirm>
             </Flex>
         })}

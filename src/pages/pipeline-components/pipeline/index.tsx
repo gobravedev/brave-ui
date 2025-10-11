@@ -198,7 +198,7 @@ const Pipeline: FC<any> = ({ }) => {
     useEffect(() => {
         loadData()
     }, [])
-    return <div style={{ maxWidth: "1500px", margin: "0 auto" }}>
+    return <div style={{ maxWidth: "1500px", margin: "1rem auto" }}>
         {contextHolder}
         {/* {JSON.stringify(pipeline)} */}
         <Flex style={{ marginBottom: "1rem" }} justify={"space-between"} align={"center"} gap="small">
