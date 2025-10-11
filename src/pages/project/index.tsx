@@ -2,18 +2,18 @@ import { FC, useState } from "react"
 import Markdown from "../../components/markdown"
 import { Tabs } from "antd"
 
-import {chinese} from './chinese'
-import {english} from './english'
-import {introduction} from './introduction'
+import { chinese } from './chinese'
+import { english } from './english'
+import { introduction } from './introduction'
 
-import {EmbedLLM}  from '../../components/embed-llm'
+import { EmbedLLM } from '../../components/embed-llm'
 import Demo from "@/components/smart-table"
-const Project:FC<any> = ()=>{
-    const [data,setData] = useState<any>(introduction)
-    const onChange = (value:any)=>{
-        if(value =="chinese"){
+const Project: FC<any> = () => {
+    const [data, setData] = useState<any>(introduction)
+    const onChange = (value: any) => {
+        if (value == "chinese") {
             setData(chinese)
-        }else if(value =="english"){
+        } else if (value == "english") {
             setData(english)
         }
     }
@@ -28,9 +28,18 @@ const Project:FC<any> = ()=>{
             }
         ]}></Tabs> */}
         {/* <EmbedLLM content={"hi"}>LLM</EmbedLLM> */}
+        <Traefik></Traefik>
         <Markdown data={data}></Markdown>
         {/* <Demo></Demo> */}
     </div>
+}
+
+const Traefik: FC<any> = () => {
+
+    return <>
+
+
+    </>
 }
 
 export default Project

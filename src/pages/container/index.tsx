@@ -29,7 +29,7 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
 
                 // }
                 if (data.run_type == "retry") {
-                    if (data.event == "analysis_complete" || data.event == "analysis_failed" || data.event == "analysis_started") {
+                    if ( data.event =="container_pulled" || data.event == "analysis_complete" || data.event == "analysis_failed" || data.event == "analysis_started") {
                         reload()
                     }
                 }
@@ -82,7 +82,18 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
             render: (text: any, record: any) => (<Tag color="green">
                 {text}
             </Tag>)
-        }, {
+        },{
+            title: "Image Status",
+            dataIndex: "image_status",
+            key: "image_status",
+            render: (text: any, record: any) => (
+                <Tooltip title={record.image_id}>
+                    <Tag color="green">
+                        {text}
+                    </Tag>
+                </Tooltip>
+            )
+        },  {
             title: 'Action',
             key: 'action',
             fixed: "right",
@@ -103,12 +114,26 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
                             <Button size="small" color="cyan" variant="solid"  >Stop</Button>
                         </Popconfirm>
                     </> : <>
+
+                    {record.image_status =="exist" ?<>
                         <Popconfirm title="Launch?" onConfirm={async () => {
                             await axios.post(`/container/run-container/${record.container_id}`)
                         }}>
                             <Button size="small" color="cyan" variant="solid"  >Launch</Button>
                         </Popconfirm>
 
+                        </> : <>
+                            <Popconfirm title="Pull?" onConfirm={async () => {
+                                await axios.post(`/container/pull-image/${record.container_id}`)
+                                reload()
+                            }}>
+                                <Button size="small" color="cyan" variant="solid"  >Pull</Button>
+                            </Popconfirm>
+
+                        
+                        </>}
+                        
+                 
 
                     </>}
 
@@ -273,7 +298,9 @@ const ContainerModal: FC<any> = ({ visible, params, onClose, callback }) => {
             <Form.Item name={"image"} label="镜像" rules={[{ required: true, message: '该字段不能为空!' }]}>
                 <Input ></Input>
             </Form.Item>
-
+            <Form.Item name={"container_key"} label="container_key" >
+                <Input disabled ></Input>
+            </Form.Item>
             <Form.Item name={"description"} label="描述">
                 <TextArea ></TextArea>
             </Form.Item>
