@@ -755,8 +755,8 @@ const ApiComp: FC<any> = ({ open }) => {
             {(modal.key == "apiComp" && modal.visible) && <>
                 <Form.Item label="API">
                     <Input value={value} onChange={(e) => setValue(e.target.value)}></Input>
-
                 </Form.Item>
+                <Tag style={{cursor:"pointer"}} onClick={()=>{setValue("https://brave-eu0y.onrender.com")}}>Test: https://brave-eu0y.onrender.com</Tag>
                 <a target='_blank' href={`${value}/brave-api/ping`}>Certificate Verification</a>
                 <p style={{ marginTop: 8, color: "#888", fontSize: 13 }}>
                     ⚠️ If your API uses a self-signed HTTPS certificate, the browser may show

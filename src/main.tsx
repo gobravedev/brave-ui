@@ -17,6 +17,7 @@ if (authorization) {
   axios.defaults.headers.common['Authorization'] = `Bearer ${authorization}`;
 
 }
+axios.defaults.timeout = 5000;
 
 createRoot(document.getElementById('root')!).render(
   // <StrictMode>

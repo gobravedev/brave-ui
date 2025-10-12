@@ -60,6 +60,7 @@ const ContainerComp: FC<any> = ({ keys }) => {
     const [data, setData] = useState<any>()
     const [loading, setLoading] = useState<boolean>(false)
     const { namespace } = useSelector((state: any) => state.user);
+    const { baseURL } = useSelector((state: any) => state.user)
 
 
     // const { eventSourceRef, status, reconnect } = useSSEContext();
@@ -127,7 +128,7 @@ const ContainerComp: FC<any> = ({ keys }) => {
     }
     useEffect(() => {
         loadData()
-    }, [namespace])
+    }, [namespace,baseURL])
 
 
     return <Card size="small" loading={loading} extra={<>
