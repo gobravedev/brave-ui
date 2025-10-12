@@ -59,6 +59,7 @@ import { useSelector } from "react-redux"
 const ContainerComp: FC<any> = ({ keys }) => {
     const [data, setData] = useState<any>()
     const [loading, setLoading] = useState<boolean>(false)
+    const { baseURL } = useSelector((state: any) => state.user)
 
 
     // const { eventSourceRef, status, reconnect } = useSSEContext();
@@ -125,7 +126,7 @@ const ContainerComp: FC<any> = ({ keys }) => {
     }
     useEffect(() => {
         loadData()
-    }, [])
+    }, [baseURL])
 
 
     return <Card size="small" loading={loading} extra={<>

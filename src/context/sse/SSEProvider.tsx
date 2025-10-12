@@ -28,7 +28,8 @@ export const SSEProvider = ({
     }
 
     setStatus("connecting");
-    const es = new EventSource(`${baseURL}${url}?authorization=${authorization}`);
+    const sseUrl = authorization?`${baseURL}${url}?authorization=${authorization}`:`${baseURL}${url}`
+    const es = new EventSource(sseUrl);
     eventSourceRef.current = es;
 
     es.onopen = () => {
