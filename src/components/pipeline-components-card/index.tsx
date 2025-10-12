@@ -133,12 +133,12 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
 
 
 
-                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                     openModal("modalB")
-                }}>Create/Update  namespace</Button>
-                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                }}>Create/Update  namespace</Button> */}
+                {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                     openModal("modalC")
-                }}>Install namespace</Button>
+                }}>Install namespace</Button> */}
                 <Button size="small" color="primary" variant="solid" onClick={reload}>Refresh</Button>
             </Flex>
         </Flex>
@@ -295,14 +295,14 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
             onClose={closeModal}
             params={modal.params}></CreateOrUpdatePipelineComponent>
 
-        <CreateOrUpdateNamespace
+        {/* <CreateOrUpdateNamespace
             visible={modal.key == "modalB" && modal.visible}
             onClose={closeModal}
-            params={modal.params}></CreateOrUpdateNamespace>
-        <InstallNamespace
+            params={modal.params}></CreateOrUpdateNamespace> */}
+        {/* <InstallNamespace
             visible={modal.key == "modalC" && modal.visible}
             onClose={closeModal}
-            params={modal.params}></InstallNamespace>
+            params={modal.params}></InstallNamespace> */}
 
         <DependComponent
             visible={modal.key == "modalG" && modal.visible}

@@ -1,15 +1,17 @@
 import React, { FC, Suspense, useEffect, useState, lazy } from 'react';
-import { ApiOutlined, BookOutlined, LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
+import { ApiOutlined, BookOutlined, LaptopOutlined, NotificationOutlined, PlusOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Breadcrumb, Button, Divider, Empty, Flex, Form, Input, Layout, Menu, message, Modal, notification, Popconfirm, Select, Skeleton, Space, Tag, theme, Tooltip } from 'antd';
+import { Breadcrumb, Button, Divider, Drawer, Empty, Flex, Form, Input, Layout, Menu, message, Modal, notification, Popconfirm, Select, Skeleton, Space, Tag, theme, Tooltip } from 'antd';
 import { NavLink, Outlet, useLocation, useNavigate, useParams } from 'react-router';
 import { Header } from 'antd/es/layout/layout';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import { setProject } from '@/store/contextSlice'
+import { setUserItem } from '@/store/userSlice'
 import { setSetting, setSseData } from '@/store/globalSlice'
+
 import useMessage from 'antd/es/message/useMessage';
-import { useModal } from '@/hooks/useModal';
+import { useModal, useModals } from '@/hooks/useModal';
 import ContextModal from '@/components/context';
 import { useSSE } from '@/hooks/useSSE';
 import { useSSEContext } from '@/context/sse/useSSEContext';
@@ -19,6 +21,7 @@ import { Project } from '@/type/project';
 import { useI18n } from '@/hooks/useI18n';
 import LanguageSelector from '@/components/setting-switcher/language';
 import ThemeSelector from '@/components/setting-switcher/theme';
+import { CreateOrUpdateNamespace, InstallNamespace } from '@/components/namespace-operature';
 
 const { Content, Sider } = Layout;
 
@@ -59,7 +62,7 @@ const App: React.FC = () => {
     const dispatch = useDispatch()
     const [notificationApi, notificationContextHolder] = notification.useNotification();
     const [messageApi, messageContextHolder] = message.useMessage();
-    const { modal, openModal, closeModal } = useModal();
+    const { modals, openModals, closeModals } = useModals(["setting", "project"]);
     const [projectObj, setProjectObj] = useState<any>({})
     const [current, setCurrent] = useState('/');
     const [menus, setMenus] = useState<any>([])
@@ -567,30 +570,32 @@ const App: React.FC = () => {
                     {status}
                    </Tag> */}
                     {/* {isConnect=="NOT_CONNECT" && <>aaaaaaaaaaaa</>} */}
-                    <BookOutlined style={{ cursor: "pointer" }} onClick={() => {
-                        window.open(`https://pybrave.github.io/brave-doc`, "_blank")
-                    }} />
-                    <ApiComp open={isConnect == "NOT_CONNECT"}></ApiComp>
-
                     <Button size="small"
                         color={status === "open" ? "green" : status === "connecting" ? "blue" : "red"}
                         variant="solid"
                         onClick={reconnect} >
                         {status === "open" ? "connected" : status === "connecting" ? "connecting" : "connection fail"}
                     </Button>
+                    <BookOutlined style={{ cursor: "pointer" }} onClick={() => {
+                        window.open(`https://pybrave.github.io/brave-doc`, "_blank")
+                    }} />
+                    <ApiComp open={isConnect == "NOT_CONNECT"}></ApiComp>
+
+                    <SettingOutlined style={{ cursor: "pointer" }} onClick={() => {
+                        openModals("setting")
+                    }} />
+
                     {/* <Button size="small" onClick={async () => {
                         await axios.get("/send-test")
                     }}>
                         sse
                     </Button> */}
 
-                    {checkProject() && <>
+                    {/* {checkProject() && <>
                         <ProjectComp onProjectLoad={setProjectList} project_id={project_id} openModal={openModal} setProjectObj={setProjectObj}></ProjectComp>
 
-                    </>}
+                    </>} */}
 
-                    <LanguageSelector></LanguageSelector>
-                    <ThemeSelector></ThemeSelector>
                     {/* <Button color="primary"   onClick={() => {
                       openModal("context")
                     }}>
@@ -620,7 +625,7 @@ const App: React.FC = () => {
                         {checkProject() ? <>
                             <Outlet context={{ project: project_id, projectObj, projectList, messageApi }} />
                         </> : <Empty description="Please create/select the project first" image={Empty.PRESENTED_IMAGE_SIMPLE}>
-                            <ProjectComp onProjectLoad={setProjectList} project_id={project_id} openModal={openModal} setProjectObj={setProjectObj}></ProjectComp>
+                            <ProjectComp onProjectLoad={setProjectList} project_id={project_id} openModal={openModals} setProjectObj={setProjectObj}></ProjectComp>
 
                             {/* <Button type='primary' onClick={() => {
                                 openModal("project")
@@ -635,8 +640,20 @@ const App: React.FC = () => {
                     name: project_id,
                     project_id: project_id,
                 }))
-            }} messageApi={messageApi} params={modal.params} visible={modal.visible && modal.key === "project"} onClose={closeModal} />
+            }} messageApi={messageApi}
+                params={modals.project.params}
+                visible={modals.project.visible} onClose={() => closeModals("project")} />
 
+
+            <SettingDrawer
+                visible={modals.setting.visible}
+                onClose={() => closeModals("setting")}
+                params={modals.setting.params}
+                setProjectList={setProjectList}
+                project_id={project_id}
+                openModal={openModals}
+                setProjectObj={setProjectObj}
+            ></SettingDrawer>
             {/* <ContextModal visible={modal.visible} onClose={closeModal} /> */}
         </Layout>
 
@@ -644,13 +661,47 @@ const App: React.FC = () => {
 };
 
 export default App;
-import { setUserItem } from '@/store/userSlice'
+
+const SettingDrawer: FC<any> = ({ visible, onClose, setProjectList, project_id, openModal: openModal_, setProjectObj }) => {
+    const { modal, openModal, closeModal } = useModal();
+
+    return <Drawer title="Setting" open={visible} onClose={onClose} >
+        <Flex vertical gap={"small"}>
+
+            <div>
+                Language: <LanguageSelector></LanguageSelector>
+            </div>
+            <div>
+                Theme: <ThemeSelector></ThemeSelector>
+            </div>
+
+            <div>
+                Project: <ProjectComp onProjectLoad={setProjectList} project_id={project_id} openModal={openModal_} setProjectObj={setProjectObj}></ProjectComp>
+
+            </div>
+            <div>
+                Namespace: <NamespaceSelect></NamespaceSelect>
+            </div>
+            <div>
+                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                    openModal("installNamespace")
+                }}>Install namespace</Button>
+            </div>
+        </Flex>
+        <InstallNamespace
+            visible={modal.key == "installNamespace" && modal.visible}
+            onClose={closeModal}
+            params={modal.params}></InstallNamespace>
+
+
+    </Drawer>
+}
 
 const Markdown = lazy(() => import('@/components/markdown'));
 
 const ApiComp: FC<any> = ({ open }) => {
     const { modal, openModal, closeModal } = useModal();
-    const { baseURL, authorization,containerURL } = useSelector((state: any) => state.user)
+    const { baseURL, authorization, containerURL } = useSelector((state: any) => state.user)
     const [value, setValue] = useState<any>(baseURL)
     const [auth, setAuth] = useState<any>(authorization)
     const [contURL, setContURL] = useState<any>(containerURL)
@@ -686,11 +737,11 @@ const ApiComp: FC<any> = ({ open }) => {
                     })
                     dispatch(setUserItem({ baseURL: value }))
                     if (auth) {
-                        dispatch(setUserItem({ authorization:`${auth}`}))
+                        dispatch(setUserItem({ authorization: `${auth}` }))
 
                     }
                     if (contURL) {
-                        dispatch(setUserItem({ containerURL:`${contURL}`}))
+                        dispatch(setUserItem({ containerURL: `${contURL}` }))
 
                     }
                     closeModal()
@@ -716,7 +767,7 @@ const ApiComp: FC<any> = ({ open }) => {
                 <Form.Item label="Authorization">
                     <Input placeholder='Optional' value={auth} onChange={(e) => setAuth(e.target.value)}></Input>
                 </Form.Item>
-                 <Form.Item label="Container URL">
+                <Form.Item label="Container URL">
                     <Input placeholder='Optional http://localhost:8089' value={contURL} onChange={(e) => setContURL(e.target.value)}></Input>
                 </Form.Item>
 
@@ -732,6 +783,42 @@ brave  \
         </Modal>
     </>
 }
+
+const NamespaceSelect: FC<any> = () => {
+    const { namespace } = useSelector((state: any) => state.user); // 'light' | 'dark'
+    const dispatch = useDispatch()
+    const { modal, openModal, closeModal } = useModal();
+
+    const [options, setOptions] = useState<any>([])
+
+    // const [namespaceList, setNamespaceList] = useState<any>([])
+    const loadNamespace = async () => {
+        const resp = await axios.get(`/list-namespace-file`)
+        const data = resp.data
+        // setNamespaceList(data)
+        setOptions(data.map((item: any) => ({
+            label: `${item.name}`,
+            value: item.namespace_id
+        })))
+    }
+    useEffect(() => {
+        loadNamespace()
+    }, [])
+    return <>
+
+        <Select onChange={(value: any) => {
+            dispatch(setUserItem({ namespace: value }))
+        }} options={options} value={namespace}></Select>
+        <PlusOutlined style={{ cursor: "pointer" }} onClick={() => openModal("createOrUpdateNamespace")} />
+
+        <CreateOrUpdateNamespace
+            visible={modal.key == "createOrUpdateNamespace" && modal.visible}
+            onClose={closeModal}
+            params={modal.params}></CreateOrUpdateNamespace>
+
+    </>
+}
+
 const ProjectComp: FC<any> = ({ project_id, openModal, setProjectObj, onProjectLoad }) => {
     const [projectMap, setProjectMap] = useState<any>({})
     const [projectList, setProjectList] = useState<any>([])

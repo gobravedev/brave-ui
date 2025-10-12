@@ -5,6 +5,7 @@ const theme = localStorage.getItem('theme')
 const baseURL = localStorage.getItem('baseURL')
 const authorization = localStorage.getItem('authorization')
 const containerURL = localStorage.getItem('containerURL')
+const namespace = localStorage.getItem('namespace')
 
 interface UserState {
     locale: string;
@@ -12,6 +13,7 @@ interface UserState {
     baseURL:string;
     authorization:string|null;
     containerURL:string;
+    namespace:string;
     
 }
 const contextSlice = createSlice({
@@ -23,7 +25,8 @@ const contextSlice = createSlice({
         theme:theme?theme:"light",
         baseURL:baseURL?`${baseURL}`:"",
         containerURL:containerURL?`${containerURL}`:"",
-        authorization:authorization
+        authorization:authorization,
+        namespace:namespace?`${namespace}`:`default`
     },
     reducers: {
         setUserItem(state, action: PayloadAction<Partial<UserState>>) {
@@ -42,6 +45,9 @@ const contextSlice = createSlice({
             }
             if(action.payload.containerURL){
                 localStorage.setItem('containerURL', action.payload.containerURL)
+            }
+            if(action.payload.namespace){
+                localStorage.setItem('namespace', action.payload.namespace)
             }
             // debugger
         },

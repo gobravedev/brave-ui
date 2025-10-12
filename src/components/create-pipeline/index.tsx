@@ -203,6 +203,7 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
     const { data, structure } = params
     const [form] = Form.useForm()
     const [component, setComponent] = useState<any>()
+    const { namespace } = useSelector((state: any) => state.user); 
 
     const [loading, setLoaidng] = useState<any>(false)
     const componentMap: any = {
@@ -236,6 +237,8 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
         }
 
     }
+
+
 
     useEffect(() => {
 
@@ -294,6 +297,10 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
         }
         onClose()
     }
+
+    useEffect(() => {
+        form.setFieldValue("namespace", namespace)
+    }, [namespace])
     const normFile = (e: any) => {
         console.log(e)
         if (Array.isArray(e)) {
@@ -325,19 +332,22 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
             onClose={() => onClose()}
         // onCancel={() => onClose()}
         >
+            {/* {namespace} */}
             <Form form={form}>
                 <Tabs items={[
                     {
                         label: "Component Info",
                         key: "1",
                         children: <>
+                            <Form.Item name={"namespace"} label="Namespace"   >
+                                {/* <NamespaceSelect disabled={data?.componemt_id} /> */}
+                                <Input disabled></Input>
+                            </Form.Item>
+
                             <Form.Item name={"component_name"} label="Component Name">
                                 <Input ></Input>
                             </Form.Item>
 
-                            <Form.Item name={"namespace"} label="Namespace" >
-                                <NamespaceSelect disabled={data?.componemt_id} />
-                            </Form.Item>
 
 
                             <ComponentsRender {...structure} data={component} form={form}></ComponentsRender>
@@ -450,6 +460,7 @@ const DefaultComponentRelation: FC<any> = ({ data, form, components }) => {
 }
 import { softwareTemplete, scriptTemplete, fileTemplete } from './templete'
 import ContainerPage from "@/pages/container"
+import { useSelector } from "react-redux"
 const SoftwareContent: FC<any> = ({ data, form }) => {
     const [templete, setTemplete] = useState<any>()
 
@@ -671,9 +682,9 @@ export const NamespaceSelect: FC<any> = ({ value, onChange, disabled }) => {
     return <>
         <Flex justify="space-between">
             {/* {JSON.stringify(namespace)} */}
-            <Select 
-            placeholder="Please select namespace!"
-            style={{width:"100%"}} disabled={disabled} value={value} onChange={onChange} options={namespace.map((item: any) => ({ label: item.name, value: item.namespace_id }))}>
+            <Select
+                placeholder="Please select namespace!"
+                style={{ width: "100%" }} disabled={disabled} value={value} onChange={onChange} options={namespace.map((item: any) => ({ label: item.name, value: item.namespace_id }))}>
             </Select>
             {/* {modal.key == "namespaceOperation" && modal.visible ?
                 <Button onClick={() => {

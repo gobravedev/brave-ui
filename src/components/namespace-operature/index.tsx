@@ -1,4 +1,4 @@
-import { Button, Input, Flex, Modal, Popconfirm, Form } from "antd";
+import { Button, Input, Flex, Modal, Popconfirm, Form, message } from "antd";
 import axios from "axios";
 import { FC, useEffect } from "react";
 import { useState } from "react";
@@ -12,7 +12,9 @@ export const CreateOrUpdateNamespace: FC<any> = ({ visible, onClose, params }) =
         const data = resp.data
         setNamespaceList(data)
     }
-    const { messageApi } = useOutletContext<any>()
+    // const { messageApi } = useOutletContext<any>()
+    const [messageApi, contextHolder] = message.useMessage();
+
     const [record, setRecord] = useState<any>()
     const [form] = Form.useForm()
     const [optPanel, setOptPanel] = useState<any>(false)
@@ -47,13 +49,14 @@ export const CreateOrUpdateNamespace: FC<any> = ({ visible, onClose, params }) =
     }, [])
 
     return <Modal title={<Flex gap={"small"}>
-        Install namespace
+        Create/Update  namespace
         <PlusCircleOutlined style={{ cursor: "pointer", color: "cyan" }} onClick={() => {
             setOptPanel(true)
         }} />
     </Flex>} open={visible}
 
         onCancel={onClose} footer={null}>
+        {contextHolder}
         {optPanel ? <>
 
             <Flex>
@@ -65,7 +68,7 @@ export const CreateOrUpdateNamespace: FC<any> = ({ visible, onClose, params }) =
                         <Button size="small" color="cyan" variant="solid" htmlType="submit">
                             Submit
                         </Button>
-                        <Button style={{marginLeft:"1rem"}} size="small" color="cyan" variant="solid" onClick={()=>{setOptPanel(false)}} >
+                        <Button style={{ marginLeft: "1rem" }} size="small" color="cyan" variant="solid" onClick={() => { setOptPanel(false) }} >
                             Cancel
                         </Button>
                     </Form.Item>
@@ -101,7 +104,7 @@ export const CreateOrUpdateNamespace: FC<any> = ({ visible, onClose, params }) =
 
 export const InstallNamespace: FC<any> = ({ visible, onClose, params }) => {
     if (!visible) return null;
-    const { messageApi } = useOutletContext<any>()
+    const [messageApi, contextHolder] = message.useMessage();
 
     const [namespaceList, setNamespaceList] = useState<any>([])
     const loadNamespace = async () => {
@@ -123,6 +126,7 @@ export const InstallNamespace: FC<any> = ({ visible, onClose, params }) => {
         }
     }
     return <Modal footer={null} title="Install namespace" open={visible} onCancel={onClose} >
+        {contextHolder}
         {namespaceList && namespaceList.map((item: any) => {
             return <Flex style={{ display: "flex", marginBottom: "0.5rem", justifyContent: "space-between" }} key={item.namespace_id}>
                 <div >{item.name}({item.namespace_id})</div>

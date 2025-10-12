@@ -59,6 +59,7 @@ import { useSelector } from "react-redux"
 const ContainerComp: FC<any> = ({ keys }) => {
     const [data, setData] = useState<any>()
     const [loading, setLoading] = useState<boolean>(false)
+    const { namespace } = useSelector((state: any) => state.user);
 
 
     // const { eventSourceRef, status, reconnect } = useSSEContext();
@@ -113,7 +114,8 @@ const ContainerComp: FC<any> = ({ keys }) => {
     const loadData = async () => {
         setLoading(true)
         const resp = await axios.post(`/container/list-container-key`, {
-            container_key: keys
+            container_key: keys,
+            namespace: namespace
         })
         setContainerIds(resp.data.map((item: any) => item.container_id))
         const obj = Object.fromEntries(resp.data.map((item: any) => [item.container_key, item]));
@@ -125,7 +127,7 @@ const ContainerComp: FC<any> = ({ keys }) => {
     }
     useEffect(() => {
         loadData()
-    }, [])
+    }, [namespace])
 
 
     return <Card size="small" loading={loading} extra={<>
@@ -145,7 +147,7 @@ const ContainerComp: FC<any> = ({ keys }) => {
                     <Tag>{data[name].image}</Tag>
                 </div>
                 <Flex gap="small">
-                    <ContainerOpt record={data[name]} reload={loadData} traefikUI={name=="traefik"}></ContainerOpt>
+                    <ContainerOpt record={data[name]} reload={loadData} traefikUI={name == "traefik"}></ContainerOpt>
 
                 </Flex>
 

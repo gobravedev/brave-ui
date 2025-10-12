@@ -48,10 +48,11 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
 
 
     }, [eventSourceRef.current]);
-
+    const params_ = params || {}
+    const { namespace } = useSelector((state: any) => state.user);
     const { data, pageNumber, totalPage, loading, reload, pageSize, setPageNumber } = usePagination({
         pageApi: pageContainerApi,
-        params: params || {}
+        params: {...params_,namespace:namespace}
     })
 
 
@@ -186,8 +187,8 @@ export const ContainerOpt: FC<any> = ({ record, reload, traefikUI = false }) => 
     }
     const { containerURL } = useSelector((state: any) => state.user); // 'light' | 'dark'
 
-    function originWithoutPort(inputUrl:any, port:any) {
-        if(!inputUrl) return "/"
+    function originWithoutPort(inputUrl: any, port: any) {
+        if (!inputUrl) return "/"
         const u = new URL(inputUrl);
         return `${u.protocol}//${u.hostname}:${getPort(port, 8080)}`;
     }
@@ -196,10 +197,10 @@ export const ContainerOpt: FC<any> = ({ record, reload, traefikUI = false }) => 
 
             {traefikUI ? <>
                 <Tooltip title={<>
-                    {`${originWithoutPort(containerURL,record.port)}`}
+                    {`${originWithoutPort(containerURL, record.port)}`}
                 </>}>
                     <a onClick={() => {
-                        window.open(`${originWithoutPort(containerURL,record.port)}`, "_blank")
+                        window.open(`${originWithoutPort(containerURL, record.port)}`, "_blank")
                     }}>Traefik UI</a>
                 </Tooltip>
             </> :
@@ -234,8 +235,8 @@ export const ContainerOpt: FC<any> = ({ record, reload, traefikUI = false }) => 
                     reload()
                 }}>
                     <Button size="small" color="cyan" variant="solid"  >
-                        {record.image_status=="pulling"?"pulling":"Pull"}
-                        </Button>
+                        {record.image_status == "pulling" ? "pulling" : "Pull"}
+                    </Button>
                 </Popconfirm>
 
             </>}
@@ -246,12 +247,13 @@ export const ContainerOpt: FC<any> = ({ record, reload, traefikUI = false }) => 
 import { containerData } from './container'
 import { useSSEContext } from "@/context/sse/useSSEContext"
 const InstallContainerModal: FC<any> = ({ visible, params, onClose, callback }) => {
-    const [namespace, setNamespace] = useState<any>()
+    // const [namespace, setNamespace] = useState<any>()
     const [messageApi, contextHolder] = message.useMessage();
+    const { namespace } = useSelector((state: any) => state.user);
 
     return <Modal title="Install Container" footer={null} width={"50%"} open={visible} onClose={onClose} onCancel={onClose}>
         {contextHolder}
-        <NamespaceSelect value={namespace} onChange={setNamespace}></NamespaceSelect>
+        {/* <NamespaceSelect value={namespace} onChange={setNamespace}></NamespaceSelect> */}
         <Table style={{ marginTop: "1rem" }} size="small"
             bordered
             dataSource={containerData} columns={[
@@ -273,15 +275,15 @@ const InstallContainerModal: FC<any> = ({ visible, params, onClose, callback }) 
                             <Popconfirm title="Install?" onConfirm={async () => {
 
                                 const newParams = JSON.parse(JSON.stringify(record));
-                                if (newParams.namespace != "default" && !namespace) {
+                                if (!namespace) {
                                     messageApi.error("Please select namespace!")
                                 }
                                 newParams.envionment = JSON.stringify(record.envionment)
                                 newParams.labels = JSON.stringify(record.labels)
-                                if (newParams.namespace != "default") {
-                                    newParams.namespace = namespace
-                                }
-
+                                // if (newParams.namespace != "default") {
+                                //     newParams.namespace = namespace
+                                // }
+                                newParams.namespace = namespace
                                 await axios.post(`/container/add-or-update-container`, newParams)
                                 onClose()
                                 callback()
