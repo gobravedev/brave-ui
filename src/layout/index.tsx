@@ -67,7 +67,6 @@ const App: React.FC = () => {
     const [current, setCurrent] = useState('/');
     const [menus, setMenus] = useState<any>([])
     const [selectedKeyMap, setSelectedKeyMap] = useState<any>()
-    const [projectList, setProjectList] = useState<any>()
     const { t, locale } = useI18n();
     const { theme, baseURL } = useSelector((state: any) => state.user); // 'light' | 'dark'
 
@@ -82,7 +81,7 @@ const App: React.FC = () => {
             placement: "bottomRight"
         });
     };
-    const { project: { project_id }, namespace: { name: namespace, namespaceKey: namespaceKey } } = useSelector((state: any) => state.context)
+    const { project: { project_id } } = useSelector((state: any) => state.context)
     console.log(project_id)
     const onMenuClick = (key: string) => {
         console.log(key)
@@ -505,9 +504,15 @@ const App: React.FC = () => {
             setIsConnect("NOT_CONNECT")
         }
     }
+    const loadProject = async () => {
+        if (!project_id) return;
+        const resp = await axios.get(`/project/find-by-project-id/${project_id}`)
+        setProjectObj(resp.data)
+    }
 
     useEffect(() => {
         ping()
+        loadProject()
     }, [baseURL])
 
 
@@ -623,9 +628,11 @@ const App: React.FC = () => {
                 <Content style={{}}>
                     <Suspense key={location.key} fallback={<Test></Test>}>
                         {checkProject() ? <>
-                            <Outlet context={{ project: project_id, projectObj, projectList, messageApi }} />
+                            <Outlet context={{ project: project_id, projectObj, messageApi }} />
                         </> : <Empty description="Please create/select the project first" image={Empty.PRESENTED_IMAGE_SIMPLE}>
-                            <ProjectComp onProjectLoad={setProjectList} project_id={project_id} openModal={openModals} setProjectObj={setProjectObj}></ProjectComp>
+                            <ProjectComp
+                                project_id={project_id}
+                                openModal={openModals} ></ProjectComp>
 
                             {/* <Button type='primary' onClick={() => {
                                 openModal("project")
@@ -649,10 +656,8 @@ const App: React.FC = () => {
                 visible={modals.setting.visible}
                 onClose={() => closeModals("setting")}
                 params={modals.setting.params}
-                setProjectList={setProjectList}
                 project_id={project_id}
                 openModal={openModals}
-                setProjectObj={setProjectObj}
             ></SettingDrawer>
             {/* <ContextModal visible={modal.visible} onClose={closeModal} /> */}
         </Layout>
@@ -662,7 +667,7 @@ const App: React.FC = () => {
 
 export default App;
 
-const SettingDrawer: FC<any> = ({ visible, onClose, setProjectList, project_id, openModal: openModal_, setProjectObj }) => {
+const SettingDrawer: FC<any> = ({ visible, onClose, project_id, openModal: openModal_ }) => {
     const { modal, openModal, closeModal } = useModal();
 
     return <Drawer title="Setting" open={visible} onClose={onClose} >
@@ -676,7 +681,7 @@ const SettingDrawer: FC<any> = ({ visible, onClose, setProjectList, project_id, 
             </div>
 
             <div>
-                Project: <ProjectComp onProjectLoad={setProjectList} project_id={project_id} openModal={openModal_} setProjectObj={setProjectObj}></ProjectComp>
+                Project: <ProjectComp project_id={project_id} openModal={openModal_}></ProjectComp>
 
             </div>
             <div>
@@ -756,7 +761,7 @@ const ApiComp: FC<any> = ({ open }) => {
                 <Form.Item label="API">
                     <Input value={value} onChange={(e) => setValue(e.target.value)}></Input>
                 </Form.Item>
-                <Tag style={{cursor:"pointer"}} onClick={()=>{setValue("https://brave-eu0y.onrender.com")}}>Test: https://brave-eu0y.onrender.com</Tag>
+                <Tag style={{ cursor: "pointer" }} onClick={() => { setValue("https://brave-eu0y.onrender.com") }}>Test: https://brave-eu0y.onrender.com</Tag>
                 <a target='_blank' href={`${value}/brave-api/ping`}>Certificate Verification</a>
                 <p style={{ marginTop: 8, color: "#888", fontSize: 13 }}>
                     ⚠️ If your API uses a self-signed HTTPS certificate, the browser may show
@@ -785,7 +790,7 @@ brave  \
 }
 
 const NamespaceSelect: FC<any> = () => {
-    const { namespace } = useSelector((state: any) => state.user); // 'light' | 'dark'
+    const { namespace } = useSelector((state: any) => state.user);
     const dispatch = useDispatch()
     const { modal, openModal, closeModal } = useModal();
 
@@ -812,6 +817,7 @@ const NamespaceSelect: FC<any> = () => {
         <PlusOutlined style={{ cursor: "pointer" }} onClick={() => openModal("createOrUpdateNamespace")} />
 
         <CreateOrUpdateNamespace
+            callback={loadNamespace}
             visible={modal.key == "createOrUpdateNamespace" && modal.visible}
             onClose={closeModal}
             params={modal.params}></CreateOrUpdateNamespace>
@@ -819,7 +825,7 @@ const NamespaceSelect: FC<any> = () => {
     </>
 }
 
-const ProjectComp: FC<any> = ({ project_id, openModal, setProjectObj, onProjectLoad }) => {
+const ProjectComp: FC<any> = ({ project_id, openModal }) => {
     const [projectMap, setProjectMap] = useState<any>({})
     const [projectList, setProjectList] = useState<any>([])
     const dispatch = useDispatch()
@@ -835,84 +841,81 @@ const ProjectComp: FC<any> = ({ project_id, openModal, setProjectObj, onProjectL
             }
         })
         setProjectList(projectList)
-        if (onProjectLoad) {
-            onProjectLoad(projectList)
-        }
+
         const projectMap = resp.data.reduce((acc: any, item: any) => {
             acc[item.project_id] = item
             item.metadata_form = JSON.parse(item.metadata_form)
             return acc
         }, {})
         setProjectMap(projectMap)
-        setProjectObj(projectMap[project_id])
+        // setProjectObj(projectMap[project_id])
     }
     useEffect(() => {
         loadProject()
     }, [])
     return <>
         {messageContextHolder}
-        {Array.isArray(projectList) && projectList.length > 0 ? (
-            <Select
-                size='small'
-                // open={true}
-                dropdownRender={(menu) => <>
-                    {menu}
-                    <Divider style={{ margin: '8px 0' }} />
-                    <Flex gap={"small"} justify={"space-between"} >
-                        <Button type='text' size="small" color="cyan" variant='solid' onClick={() => {
-                            openModal("project")
-                        }}>Create</Button>
-                        <Button type='text' size="small" color="cyan" variant='solid' onClick={() => {
-                            loadProject()
-                        }}>Refresh</Button>
-                    </Flex>
 
-                    {project_id && (
-                        <>
-                            <Divider style={{ margin: '8px 0' }} />
-                            <Tooltip title={project_id} placement='bottom'>
+        <Select
+            size='small'
+            // open={true}
+            dropdownRender={(menu) => <>
+                {menu}
+                <Divider style={{ margin: '8px 0' }} />
+                <Flex gap={"small"} justify={"space-between"} >
+                    <Button type='text' size="small" color="cyan" variant='solid' onClick={() => {
+                        openModal("project")
+                    }}>Create</Button>
+                    <Button type='text' size="small" color="cyan" variant='solid' onClick={() => {
+                        loadProject()
+                    }}>Refresh</Button>
+                </Flex>
 
-                                <Flex gap={"small"} justify={"space-between"} >
+                {project_id && (
+                    <>
+                        <Divider style={{ margin: '8px 0' }} />
+                        <Tooltip title={project_id} placement='bottom'>
 
-                                    <Button type='text' size="small" color="cyan" variant='solid' onClick={() => {
-                                        openModal("project", { project_id: project_id })
-                                    }}>Update</Button>
-                                    <Popconfirm title="确定删除吗？" onConfirm={async () => {
-                                        await deleteProjectApi(project_id)
-                                        messageApi.success("删除成功")
-                                        dispatch(setProject({
+                            <Flex gap={"small"} justify={"space-between"} >
 
-                                        }))
-                                        loadProject()
-                                    }}>
-                                        <Button type='text' size="small" color="danger" variant='solid' >Delete</Button>
-                                    </Popconfirm>
+                                <Button type='text' size="small" color="cyan" variant='solid' onClick={() => {
+                                    openModal("project", { project_id: project_id })
+                                }}>Update</Button>
+                                <Popconfirm title="确定删除吗？" onConfirm={async () => {
+                                    await deleteProjectApi(project_id)
+                                    messageApi.success("删除成功")
+                                    dispatch(setProject({
 
-                                </Flex>
-                            </Tooltip>
+                                    }))
+                                    loadProject()
+                                }}>
+                                    <Button type='text' size="small" color="danger" variant='solid' >Delete</Button>
+                                </Popconfirm>
 
-                        </>)}
-                </>}
-                onChange={(value: any) => {
-                    console.log("onChange", value)
+                            </Flex>
+                        </Tooltip>
 
-                    dispatch(setProject({
-                        name: value,
-                        project_id: value,
-                    }))
-                    setProjectObj(projectMap[value])
-                    // loadProject()
-                }}
-                value={project_id}
-                style={{ width: 130 }}
-                placeholder="Select Project"
-                options={projectList}
-            >
-            </Select>
-        ) : <Button size="small" color="cyan" variant='solid' onClick={() => {
+                    </>)}
+            </>}
+            onChange={(value: any) => {
+                console.log("onChange", value)
+
+                dispatch(setProject({
+                    name: value,
+                    project_id: value,
+                }))
+                // setProjectObj(projectMap[value])
+                // loadProject()
+            }}
+            value={project_id}
+            style={{ width: 130 }}
+            placeholder="Select Project"
+            options={projectList}
+        >
+        </Select><PlusOutlined style={{ cursor: "pointer" }} onClick={() => {
             openModal("project")
-        }}>Create project
-        </Button>}
+        }} />
+
 
 
 

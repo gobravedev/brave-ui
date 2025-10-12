@@ -138,7 +138,7 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, for
     const { modals, openModals, closeModals } = useModals(["paramsView", "bioDatabases"]);
     const [dbFormJson, setDbFormJson] = useState<any>([])
     const [formJson, setFormJson] = useState<any>([])
-    const { messageApi, projectList: projectList_, project } = useOutletContext<any>()
+    const { messageApi } = useOutletContext<any>()
     // useEffect(()=>{
 
     // },[project])

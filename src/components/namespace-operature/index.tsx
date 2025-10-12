@@ -4,7 +4,7 @@ import { FC, useEffect } from "react";
 import { useState } from "react";
 import { useOutletContext } from "react-router";
 import { PlusCircleOutlined, PlusOutlined } from '@ant-design/icons'
-export const CreateOrUpdateNamespace: FC<any> = ({ visible, onClose, params }) => {
+export const CreateOrUpdateNamespace: FC<any> = ({ visible, onClose, params ,callback}) => {
     if (!visible) return null;
     const [namespaceList, setNamespaceList] = useState<any>([])
     const loadNamespace = async () => {
@@ -32,6 +32,9 @@ export const CreateOrUpdateNamespace: FC<any> = ({ visible, onClose, params }) =
         }
         setOptPanel(false)
         loadNamespace()
+        if(callback){
+            callback()
+        }
         // onClose()
     }
     const deleteNamespace = async (namespaceId: any) => {

@@ -541,14 +541,26 @@ export default ResultList
 
 const AddProject: FC<any> = ({ visible, params, onClose, callback }) => {
     const [projectList, setProjectList] = useState<any>([])
-    const { messageApi, projectList: projectList_, project } = useOutletContext<any>()
+    const { messageApi, project } = useOutletContext<any>()
     const [form] = Form.useForm()
 
-    useEffect(() => {
-        if (projectList_) {
-            setProjectList(projectList_.filter((item: any) => item.value != project))
 
-        }
+    const loadData = async () => {
+        const resp: any = await axios.get("/project/list-project")
+        // console.log(resp.data)
+        const projectList_ = resp.data.map((item: any) => {
+            return {
+                label: `${item.project_name}`,
+                value: item.project_id
+            }
+        })
+        setProjectList(projectList_.filter((item: any) => item.value != project))
+    }
+
+
+
+    useEffect(() => {
+        loadData()
         form.resetFields()
         if (params?.extra_project_ids) {
             form.setFieldValue("project", JSON.parse(params?.extra_project_ids))

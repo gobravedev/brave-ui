@@ -393,7 +393,6 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
     const [currentAnalysisMethod, setCurrentAnalysisMethod] = useState<any>()
     // const [analysisParams, setAnalysisParams] = useState<any>()
     const [modal, modalContextHolder] = Modal.useModal();
-    const { projectObj } = useOutletContext<any>()
 
     // const {    setPipelineStructure,setOperateOpen,setPipelineRecord,datelePipeline} = operatePipeline
     const tableRef = useRef<any>(null)
@@ -449,13 +448,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
             value: "/data/databases/mouse/bowtie2/Mus_musculus.GRCm39.dna_sm.toplevel.fa"
         }
     ]
-    const getGroupField = () => {
-        if (!projectObj?.metadata_form) return []
-        return projectObj?.metadata_form.map((item: any) => ({
-            label: item.label,
-            value: item.name
-        }))
-    }
+
     const dataMap: any = {
         "host_genome_index": host_genome_index
     }

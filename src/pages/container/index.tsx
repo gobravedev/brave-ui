@@ -52,7 +52,7 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
     const { namespace } = useSelector((state: any) => state.user);
     const { data, pageNumber, totalPage, loading, reload, pageSize, setPageNumber } = usePagination({
         pageApi: pageContainerApi,
-        params: {...params_,namespace:namespace}
+        params: { ...params_, namespace: namespace }
     })
 
 
@@ -224,7 +224,12 @@ export const ContainerOpt: FC<any> = ({ record, reload, traefikUI = false }) => 
 
             {record.image_status == "exist" ? <>
                 <Popconfirm title="Launch?" onConfirm={async () => {
-                    await axios.post(`/container/run-container/${record.container_id}`)
+                    try {
+                        await axios.post(`/container/run-container/${record.container_id}`)
+
+                    } catch (error) {
+                        console.log(error)
+                    }
                 }}>
                     <Button size="small" color="cyan" variant="solid"  >Launch</Button>
                 </Popconfirm>

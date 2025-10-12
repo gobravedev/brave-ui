@@ -61,7 +61,7 @@ const AnalysisReport: FC<any> = () => {
     return <div style={{ maxWidth: "1500px", margin: "0 auto" }}>
 
         {/* <div style={{ marginBottom: "1rem" }}></div> */}
-
+        {/* {JSON.stringify(projectObj)} */}
         <Row style={{ marginTop: "1rem" }}>
             <Col lg={6} sm={6} xs={24} ref={containerRef} style={{
 

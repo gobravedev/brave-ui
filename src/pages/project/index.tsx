@@ -128,8 +128,7 @@ const ContainerComp: FC<any> = ({ keys }) => {
     }
     useEffect(() => {
         loadData()
-    }, [namespace,baseURL])
-
+    }, [namespace, baseURL])
 
     return <Card size="small" loading={loading} extra={<>
         <RedoOutlined style={{ cursor: "pointer" }} onClick={() => loadData()}></RedoOutlined>
@@ -166,6 +165,7 @@ const ContainerComp: FC<any> = ({ keys }) => {
 
                     newParams.envionment = JSON.stringify(templete.envionment)
                     newParams.labels = JSON.stringify(templete.labels)
+                    newParams.namespace = namespace
                     console.log(newParams)
 
                     await axios.post(`/container/add-or-update-container`, newParams)

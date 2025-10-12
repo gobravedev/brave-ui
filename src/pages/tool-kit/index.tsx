@@ -85,7 +85,6 @@ const ToolKit: FC<any> = () => {
         <Row>
             <Col lg={4} sm={4} xs={24} >
                 <Card
-                    // title={projectObj?.project_name}
                     size="small"
                 >
                     <LeftPanel onSelect={(val: any) => {
