@@ -692,6 +692,7 @@ const SettingDrawer: FC<any> = ({ visible, onClose, project_id, openModal: openM
             </div>
         </Flex>
         <InstallNamespace
+            callback={onClose}
             visible={modal.key == "installNamespace" && modal.visible}
             onClose={closeModal}
             params={modal.params}></InstallNamespace>

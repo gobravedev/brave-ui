@@ -106,10 +106,10 @@ export const CreateOrUpdateNamespace: FC<any> = ({ visible, onClose, params, cal
 
 
 
-export const InstallNamespace: FC<any> = ({ visible, onClose, params }) => {
+export const InstallNamespace: FC<any> = ({ visible, onClose, params,callback}) => {
     if (!visible) return null;
-    const [messageApi, contextHolder] = message.useMessage();
-
+    // const [messageApi, contextHolder] = message.useMessage();
+    const mesage = useGlobalMessage()
     const [namespaceList, setNamespaceList] = useState<any>([])
     const loadNamespace = async () => {
         const resp = await axios.get(`/list-namespace-file`)
@@ -124,13 +124,16 @@ export const InstallNamespace: FC<any> = ({ visible, onClose, params }) => {
         try {
             await axios.post(`/import-namespace-component?namespace=${namespace}`)
             loadNamespace()
-            messageApi.success("安装成功")
+            mesage.success("install successfully!")
+            onClose()
+            if(callback){
+                callback()
+            }
         } catch (error: any) {
-            messageApi.error(error.response.data.message)
+            // messageApi.error(error.response.data.message)
         }
     }
     return <Modal footer={null} title="Install namespace" open={visible} onCancel={onClose} >
-        {contextHolder}
         {namespaceList && namespaceList.map((item: any) => {
             return <Flex style={{ display: "flex", marginBottom: "0.5rem", justifyContent: "space-between" }} key={item.namespace_id}>
                 <div >{item.name}({item.namespace_id})</div>
