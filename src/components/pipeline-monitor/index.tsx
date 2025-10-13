@@ -612,7 +612,7 @@ export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
                     <li>{analysis?.output_dir}</li>
                 </ul>
             </>}>
-                输出文件
+                Output File
             </Tooltip>
         }, {
             key: "analysis_progress",

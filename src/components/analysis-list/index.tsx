@@ -501,8 +501,8 @@ const ResultList = forwardRef<any, any>(({
                     {software.outputFormat.map((item: any, index: any) => <li key={index}>
                             输出文件: {item.outputFile} 输出路径: {item.dir}
                     </li>
+                    </>}
                     )}
-                </>}
             </ul>} */}
 
             <Table

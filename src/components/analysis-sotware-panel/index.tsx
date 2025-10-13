@@ -709,7 +709,8 @@ export const SelectComp: FC<any> = ({ it, resultTableList, value, onChange }) =>
 
 
 
-export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, component_id, component_type, operatePipeline, children, project, onClickItem, analysisType, analysisMethod, appendSampleColumns, script, ...rest }) => {
+export const UpstreamAnalysisOutput: FC<any> = (rest) => {
+    const {pipeline, component_id, component_type, operatePipeline, children, project, onClickItem, analysisType, analysisMethod, appendSampleColumns, script} = rest
     const [form] = Form.useForm();
 
     // const [loading, setLoading] = useState(false)
@@ -957,7 +958,7 @@ export const UpstreamAnalysisOutput: FC<any> = ({ pipeline, component_id, compon
                 setCurrentAnalysisMethod={setCurrentAnalysisMethod}
                 operatePipeline={operatePipeline}
                 relationType="software_output_file"
-                title={`输出文件 ${analysisMethod.length > 0 ? "" : analysisMethod.map((it: any) => it.name)}`}
+                title={`Output File ${analysisMethod.length > 0 ? "" : analysisMethod.map((it: any) => it.name)}`}
                 appendSampleColumns={appendSampleColumns}
                 activeTabKey={activeTabKey}
                 setActiveTabKey={setActiveTabKey}

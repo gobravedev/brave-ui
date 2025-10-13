@@ -4,12 +4,15 @@ import axios from "axios";
 import { FC, useEffect, useState } from "react"
 import { MonacoEditor } from "../react-monaco-editor";
 import Markdown from "../markdown";
-import  {ComponentsRender} from '../analysis-result-view'
+import { ComponentsRender } from '../analysis-result-view'
+import { useSelector } from "react-redux";
 const OpenFile: FC<any> = ({ visible, onClose, params }) => {
     const [fileContent, setFileContent] = useState<any>()
     const [fileList, setFileList] = useState<any[]>([])
     const [tabKey, setTabKey] = useState<any>()
     const [loading, setLoading] = useState<any>()
+    const { baseURL } = useSelector((state: any) => state.user)
+
     useEffect(() => {
         if (visible) {
             const paramsList = Object.entries(params.content).map(([key, value]) => ({
@@ -31,7 +34,7 @@ const OpenFile: FC<any> = ({ visible, onClose, params }) => {
         setLoading(false)
     }
     const handleDownload = (file_path: string) => {
-        const url = `/brave-api/file-operation/download?path=${file_path}`;
+        const url = `${baseURL}/brave-api/file-operation/download?path=${file_path}`;
         window.open(url, "_blank");
     };
     if (!visible) return null;
@@ -47,10 +50,10 @@ const OpenFile: FC<any> = ({ visible, onClose, params }) => {
             <Flex gap={"small"} align={"center"}>
                 <Button size="small" color="cyan" variant="solid" onClick={() => {
                     handleDownload(tabKey)
-                }}>下载</Button>
+                }}>Download</Button>
                 <Button size="small" color="cyan" variant="solid" onClick={() => {
                     readFile(tabKey)
-                }}>刷新</Button>
+                }}>Refresh</Button>
             </Flex>
         } items={fileList} onChange={(key) => {
             readFile(key)
@@ -62,7 +65,7 @@ const OpenFile: FC<any> = ({ visible, onClose, params }) => {
             <ComponentsRender {...fileContent}></ComponentsRender>
         </Spin>
         {params?.description && <Markdown data={params.description}></Markdown>}
-        
+
         {/* <div>{JSON.stringify(params)}</div> */}
     </Modal>
 }

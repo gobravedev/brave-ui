@@ -570,7 +570,7 @@ const ResultList = forwardRef<any, any>(({
             </Tooltip>}</>}
             extra={<>{cardExtra}
                 <Flex gap={"small"}>
-
+                    
                     {operatePipeline?.openModal && <>
                         <Button size="small" color="cyan" variant="solid" onClick={() => {
                             // operatePipeline.openModals("modalD", { ...currentAnalysisMethod, operatePipeline: operatePipeline })
@@ -582,7 +582,7 @@ const ResultList = forwardRef<any, any>(({
                             <Button size="small" color="cyan" variant="solid" >计算MD5</Button>
                         </Popconfirm> */}
                         <Button size="small" color="primary" variant="solid" onClick={reload}>Refresh</Button>
-
+                            
                         {(rest.component_type == "software" || rest.component_type == "file") && <>
                             <Dropdown menu={{
                                 items: [
@@ -702,6 +702,7 @@ const ResultList = forwardRef<any, any>(({
             activeTabKey={activeTabKey}
             onTabChange={onTabChange}
         >
+            {/* {JSON.stringify(rest)} */}
 
             {/* {JSON.stringify(rest)} */}
             {/* {JSON.stringify(projectObj)} */}

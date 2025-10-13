@@ -96,7 +96,7 @@ export const TableView: FC<any> = ({ data, url, filename, columns, baseURL }) =>
 const ImgView: FC<any> = ({ data, url, filename, baseURL }) => {
     return <div >
         <div style={{ textAlign: "center" }}>
-          
+
             <Image src={filename?.endsWith("pdf") ? data : `${data}?t=${Date.now()}`} style={{ maxWidth: "20rem", marginRight: "0.5rem" }}></Image>
             <UrlComp url={url} filename={filename} baseURL={baseURL}></UrlComp>
 
@@ -150,17 +150,56 @@ const JSONView: FC<any> = ({ data }) => {
         {/* <Paragraph style={{ background: "#13c2c2", padding: "1rem", border: "1px solid #1677ff" }}>{data}</Paragraph> */}
     </>
 }
-const HtmlView: FC<any> = ({ data }) => {
+// const HtmlView: FC<any> = ({ data }) => {
+
+//     return <>
+//         {data && data.startsWith("/brave") ? <>
+//             <iframe src={data} width={"100%"} style={{ height: "80vh", border: "none" }}>
+//             </iframe>
+//         </> : <>{data}</>}
+
+//     </>
+// }
+const HtmlView: FC<any> = ({ data, url }) => {
+    const { baseURL } = useSelector((state: any) => state.user)
+    const [loading, setLoading] = useState(true);
 
     return <>
-        {data && data.startsWith("/brave") ? <>
-            <iframe src={data} width={"100%"} style={{ height: "80vh", border: "none" }}>
-            </iframe>
-        </> : <>{data}</>}
+
+        <div style={{ position: "relative", width: "100%", height: "80vh" }}>
+            {/* loading 层 */}
+            {loading && (
+                <div
+                    style={{
+                        position: "absolute",
+                        inset: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        background: "rgba(255,255,255,0.8)",
+                        zIndex: 1,
+                    }}
+                >
+                    <Spin size="large" tip="Loading..." />
+                </div>
+            )}
+
+            {/* iframe 本体 */}
+            <iframe
+                src={`${baseURL}${url}`}
+                width="100%"
+                style={{ height: "100%", border: "none" }}
+                onLoad={() => setLoading(false)} // 加载完成时隐藏 loading
+                title="content-frame"
+            />
+        </div>
+
+        {/* {data && data.startsWith("/brave") ? <>
+        </> : <>{data}</>} */}
 
     </>
 }
-const Download: FC<any> = ({ url, filename,baseURL }) => {
+const Download: FC<any> = ({ url, filename, baseURL }) => {
     return <>
         <UrlComp url={url} filename={filename} baseURL={baseURL}></UrlComp>
 
@@ -276,6 +315,7 @@ const componentMap: any = {
     table: TableView,
     string: StringView,
     html: HtmlView,
+    // htmlDoc: HtmlDoc,
     json: JSONView,
     text: TextView,
     info: InfoView,
@@ -462,7 +502,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
             </>}
             extra={
                 <Flex gap={"small"}>
-                    {onClose && <Button size="small" color="cyan" variant="solid" onClick={() => onClose()}>关闭</Button>}
+                    {onClose && <Button size="small" color="cyan" variant="solid" onClick={() => onClose()}>Close</Button>}
                     {analsyisResult && <>
                         <Button size="small" color="cyan" variant="solid" onClick={() => {
                             openModals("editParams", analsyisResult.analysis_id)
