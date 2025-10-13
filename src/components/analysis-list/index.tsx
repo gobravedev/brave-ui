@@ -76,7 +76,7 @@ const ResultList = forwardRef<any, any>(({
                 console.log('analysisId', analysisIdRef.current)
                 if (analysisIdRef.current.includes(data.analysis_id)) {
 
-                    if (data.event == "analysis_complete" || data.event == "analysis_failed" || data.event == "analysis_started") {
+                    if ( data.event == "analysis_complete" || data.event == "analysis_failed" || data.event == "analysis_started") {
                         loadData()
                         // if (analysisResultRef.current) {
                         //     analysisResultRef.current?.relaod()
@@ -86,6 +86,10 @@ const ResultList = forwardRef<any, any>(({
                         }
                     }
 
+                } else if (data.run_type == "retry") {
+                    if (data.event == "container_pulled") {
+                        loadData()
+                    }
                 }
             };
 
@@ -250,6 +254,18 @@ const ResultList = forwardRef<any, any>(({
                 </Tooltip>
             }
 
+        }, {
+            title: "Image Status",
+            dataIndex: "image_status",
+            key: "image_status",
+            ellipsis: true,
+            render: (text: any, record: any) => (
+                <Tooltip title={record.image_id}>
+                    <Tag color="green">
+                        {text}
+                    </Tag>
+                </Tooltip>
+            )
         },
         // {
         //     title: "ports",
@@ -270,30 +286,46 @@ const ResultList = forwardRef<any, any>(({
                 <Space size="middle">
 
                     {/* /analysis/stop-analysis/{analysis_id} */}
-                    {record.analysis_status == "running" ?
-                        <>
-                            <Popconfirm title={"Whether or not to stop?"} onConfirm={() => {
-                                stopAnalysis(record)
 
-                            }}>
-                                <Button size="small" color="cyan" variant="solid">
-                                    Stop
-                                </Button>
-                            </Popconfirm>
+                    {record.image_status == "exist" ? <>
+                        {record.analysis_status == "running" ?
+                            <>
+                                <Popconfirm title={"Whether or not to stop?"} onConfirm={() => {
+                                    stopAnalysis(record)
 
-                        </> : <>
-                            <Popconfirm title={"Whether or not to run?"} onConfirm={() => {
-                                runAnalysis(record, "job")
-                                openModal("modalA", record)
-                                setRecord(record)
-                            }}>
-                                <Button size="small" color="cyan" variant="solid">
-                                    {record.analysis_status == "created" ? "Run" : "Rerun"}
-                                </Button>
-                            </Popconfirm>
+                                }}>
+                                    <Button size="small" color="cyan" variant="solid">
+                                        Stop
+                                    </Button>
+                                </Popconfirm>
 
-                        </>
-                    }
+                            </> : <>
+                                <Popconfirm title={"Whether or not to run?"} onConfirm={() => {
+                                    runAnalysis(record, "job")
+                                    openModal("modalA", record)
+                                    setRecord(record)
+                                }}>
+                                    <Button size="small" color="cyan" variant="solid">
+                                        {record.analysis_status == "created" ? "Run" : "Rerun"}
+                                    </Button>
+                                </Popconfirm>
+
+                            </>
+                        }
+
+                    </> : <>
+                        <Popconfirm title="Pull?" onConfirm={async () => {
+                            await axios.post(`/container/pull-image/${record.container_id}`)
+                            loadData()
+
+                        }}>
+                            <Button size="small" color="cyan" variant="solid"  >
+                                {record.image_status == "pulling" ? "pulling" : "Pull"}
+                            </Button>
+                        </Popconfirm>
+
+                    </>}
+
 
 
 
