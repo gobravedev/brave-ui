@@ -245,13 +245,13 @@ const ResultList = forwardRef<any, any>(({
             //     ellipsis: true,
             // },
             {
-                title: '样本名称',
+                title: 'Sample Name',
                 dataIndex: 'sample_name',
                 key: 'sample_name',
                 ellipsis: true,
 
             }, {
-                title: '样本Key',
+                title: 'Sampel Key',
                 dataIndex: 'sample_key',
                 key: 'sample_key',
                 ellipsis: true,
@@ -454,7 +454,7 @@ const ResultList = forwardRef<any, any>(({
                                         component_type: "file"
                                     }
                                 })
-                            }}>新增文件</Button>
+                            }}>New File</Button>
                         </Tooltip>
                         <Tooltip title={currentAnalysisMethod?.label}>
                             <Button color="cyan" variant="solid" onClick={() => {
@@ -463,7 +463,7 @@ const ResultList = forwardRef<any, any>(({
                                         component_type: "file",
                                     }
                                 })
-                            }}>更新文件</Button>
+                            }}>Update File</Button>
                         </Tooltip>
                         <Tooltip title={currentAnalysisMethod?.label}>
                             <Button color="cyan" variant="solid" onClick={() => {
@@ -475,7 +475,7 @@ const ResultList = forwardRef<any, any>(({
                                         pipeline_id: pipeline.component_id
                                     }
                                 })
-                            }}>添加文件</Button>
+                            }}>Add File</Button>
                         </Tooltip>
 
                         <Tooltip title={currentAnalysisMethod?.label}>
@@ -530,7 +530,7 @@ const ResultList = forwardRef<any, any>(({
                 loading={loading}
                 scroll={{ x: 'max-content', y: 55 * 5 }}
                 columns={columnsParamsALL ? columnsParamsALL : columns}
-                footer={() => `一共${data && Array.isArray(data) && data.length}条记录`}
+                footer={() => `A total of ${data && Array.isArray(data) && data.length} records`}
                 dataSource={data} />
 
         </Card>

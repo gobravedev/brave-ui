@@ -13,6 +13,8 @@ import { DownOutlined, LineChartOutlined } from '@ant-design/icons'
 export const readHdfsAPi = (contentPath: any) => axios.get(`/api/read-hdfs?path=${contentPath}`)
 export const readJsonAPi = (contentPath: any) => axios.get(`/fast-api/read-json?path=${contentPath}`)
 import EditParams from '../edit-params'
+import { useSelector } from "react-redux"
+import { InspectPanel } from "@/pages/container"
 
 const ResultList = forwardRef<any, any>(({
     title,
@@ -51,6 +53,7 @@ const ResultList = forwardRef<any, any>(({
     // const [content,setContent] = useState<any>()
     const [loading, setLoading] = useState(false)
     const [currentAnalysis, setCurrentAnalysis] = useState<any>()
+    const { containerURL } = useSelector((state: any) => state.user); // 'light' | 'dark'
 
     useEffect(() => {
         if (data && Array.isArray(data) && data.length > 0) {
@@ -136,7 +139,7 @@ const ResultList = forwardRef<any, any>(({
     }
     const deleteById = async (id: any) => {
         const resp: any = await axios.delete(`/fast-api/analysis/${id}`)
-        message.success("删除成功!")
+        message.success("successfully delete!")
         loadData()
     }
 
@@ -157,17 +160,17 @@ const ResultList = forwardRef<any, any>(({
     }
     const runAnalysis = async (record: any, run_type: string) => {
         await runAnalysisApi(record.analysis_id, run_type)
-        message.success("运行成功")
+        message.success("run successfully")
         loadData()
     }
     const stopAnalysis = async (record: any) => {
         await stopAnalysisApi(record.analysis_id)
-        message.success("停止成功")
+        message.success("Stop Success")
         loadData()
     }
     let columns: any = [
         {
-            title: 'project_name',
+            title: 'Project Name',
             dataIndex: 'project_name',
             key: 'project_name',
             ellipsis: true,
@@ -177,7 +180,7 @@ const ResultList = forwardRef<any, any>(({
                 </Tooltip>
             }
         }, {
-            title: 'analysis_status',
+            title: 'Analysis Status',
             dataIndex: 'analysis_status',
             key: 'analysis_status',
             ellipsis: true,
@@ -185,7 +188,7 @@ const ResultList = forwardRef<any, any>(({
                 return <Tag color={text === "success" ? "green" : text === "failed" ? "red" : "blue"}>{text}</Tag>
             }
         }, {
-            title: "组件名称",
+            title: "Component Name",
             dataIndex: 'component_name',
             key: 'component_name',
             ellipsis: true,
@@ -195,21 +198,21 @@ const ResultList = forwardRef<any, any>(({
                 </Tooltip>
             }
         }, {
-            title: "分析名称",
+            title: "Analysis Name",
             dataIndex: 'analysis_name',
             key: 'analysis_name',
             ellipsis: true,
         }, {
-            title: "报告",
+            title: "Report",
             dataIndex: 'is_report',
             key: 'is_report',
             ellipsis: true,
             render: (text: any, record: any) => {
-                return <Tag color={text ? "green" : "blue"}>{text ? "报告" : "不报告"}</Tag>
+                return <Tag color={text ? "green" : "blue"}>{text ? "Report" : "NonReport"}</Tag>
             }
         },
         {
-            title: 'analysis_id',
+            title: 'Analysis Id',
             dataIndex: 'analysis_id',
             key: 'analysis_id',
             ellipsis: true,
@@ -231,7 +234,7 @@ const ResultList = forwardRef<any, any>(({
             }
 
         }, {
-            title: "容器",
+            title: "Container Name",
             dataIndex: "container_name",
             key: "container_name",
             ellipsis: true,
@@ -258,7 +261,7 @@ const ResultList = forwardRef<any, any>(({
         //     </>)
         // }, 
         {
-            title: '操作',
+            title: 'Action',
             key: 'action',
             fixed: "right",
             ellipsis: true,
@@ -269,23 +272,23 @@ const ResultList = forwardRef<any, any>(({
                     {/* /analysis/stop-analysis/{analysis_id} */}
                     {record.analysis_status == "running" ?
                         <>
-                            <Popconfirm title={"是否停止!"} onConfirm={() => {
+                            <Popconfirm title={"Whether or not to stop?"} onConfirm={() => {
                                 stopAnalysis(record)
 
                             }}>
                                 <Button size="small" color="cyan" variant="solid">
-                                    停止
+                                    Stop
                                 </Button>
                             </Popconfirm>
 
                         </> : <>
-                            <Popconfirm title={"是否运行!"} onConfirm={() => {
+                            <Popconfirm title={"Whether or not to run?"} onConfirm={() => {
                                 runAnalysis(record, "job")
                                 openModal("modalA", record)
                                 setRecord(record)
                             }}>
                                 <Button size="small" color="cyan" variant="solid">
-                                    {record.analysis_status == "created" ? "运行" : "重新运行"}
+                                    {record.analysis_status == "created" ? "Run" : "Rerun"}
                                 </Button>
                             </Popconfirm>
 
@@ -295,16 +298,16 @@ const ResultList = forwardRef<any, any>(({
 
 
                     {/* {editParams && <Button size="small" color="cyan" variant="solid" onClick={() => editParams(record)}>编辑参数</Button>} */}
-                    <Button size="small" color="cyan" variant="solid" onClick={() => openModal("editParams", record.analysis_id)}>编辑参数</Button>
+                    <Button size="small" color="cyan" variant="solid" onClick={() => openModal("editParams", record.analysis_id)}>Edit Parameters</Button>
                     {
                         isSelected(record, "modalA") ?
                             <Button size="small" color={"cyan"} variant="solid" onClick={() => {
                                 closeModal()
-                            }}>关闭</Button> :
+                            }}>Close</Button> :
                             <Button size="small" color={"cyan"} variant="solid" onClick={() => {
                                 openModal("modalA", record)
                                 // setRecord(record)
-                            }}>查看结果</Button>
+                            }}>View Results</Button>
                     }
 
 
@@ -350,11 +353,11 @@ const ResultList = forwardRef<any, any>(({
                                         isSelected(record, "modalB") ?
                                             <a onClick={() => {
                                                 closeModal()
-                                            }}>关闭</a> :
+                                            }}>Close</a> :
                                             <a onClick={() => {
                                                 openModal("modalB", record)
                                                 // setRecord(record)
-                                            }}>详情</a>
+                                            }}>Details</a>
                                     }
                                 </>)
                             },
@@ -363,24 +366,48 @@ const ResultList = forwardRef<any, any>(({
                                 label: (<>
                                     {record.analysis_status == "running" ? <>
                                         {record.run_type == "server" && <>
-                                            <Tooltip title={<>
+                                            {/* <Tooltip title={<>
                                                 {record.url}
                                             </>}>
                                                 <a onClick={() => {
                                                     window.open(`${record.url}`, "_blank")
-                                                }}>打开URL</a>
+                                                }}>Open URL</a>
+                                            </Tooltip> */}
+
+                                            <Tooltip title={<>
+                                                {`${containerURL}/container/${record.analysis_id}/`}
+                                            </>}>
+                                                <a onClick={() => {
+                                                    //  console.log("record", record)
+
+                                                    window.open(`${containerURL}/container/${record.analysis_id}/`, "_blank")
+                                                }}>Open URL</a>
                                             </Tooltip>
+
+
                                         </>}
 
                                     </> : <>
-                                        <Popconfirm title="是否启动服务?" onConfirm={() => {
+                                        <Popconfirm title="Whether to start the server?" onConfirm={() => {
 
                                             runAnalysis(record, "server")
                                         }}>
-                                            <a >启动服务</a>
+                                            <a >Run Server</a>
                                         </Popconfirm>
                                     </>
                                     }
+                                </>)
+                            }, {
+                                key: 'inspect',
+                                disabled: record.analysis_status != "running",
+                                label: (<>
+                                    <a onClick={async () => {
+                                        // await axios.get(`/container/inspect/${record.analysis_id}`)
+                                        openModal("inspectPanel", {
+                                            inspect: "inspect",
+                                            id: record.analysis_id
+                                        })
+                                    }}>Inspect</a>
                                 </>)
                             },
                             {
@@ -392,23 +419,23 @@ const ResultList = forwardRef<any, any>(({
                                                 location: location.pathname,
                                             }
                                         })
-                                    }}>编辑</a>
+                                    }}>Edit</a>
                                 </>)
                             }, {
                                 key: '4',
-                                label: (<> <Popconfirm title={"是否删除!"} onConfirm={async () => {
+                                label: (<> <Popconfirm title={"Delete or not?"} onConfirm={async () => {
                                     await deleteById(record.analysis_id)
                                     loadData()
                                 }}>
-                                    <a >删除</a>
+                                    <a >Delete</a>
                                 </Popconfirm></>)
                             }, {
                                 key: '5',
-                                label: (<> <Popconfirm title={record.is_report ? "是否取消报告" : "是否报告"} onConfirm={async () => {
+                                label: (<> <Popconfirm title={record.is_report ? "Whether to cancel the report?" : "Whether to the report?"} onConfirm={async () => {
                                     await axios.post(`/analysis/update-report/${record.analysis_id}`)
                                     loadData()
                                 }}>
-                                    {record.is_report ? "取消报告" : "报告"}
+                                    {record.is_report ? "Cancel Report" : "Report"}
                                 </Popconfirm></>)
                             },
                             {
@@ -416,14 +443,14 @@ const ResultList = forwardRef<any, any>(({
                                 label: (<>
                                     <a onClick={() => {
                                         openModal("addProject", record)
-                                    }}>添加项目</a>
+                                    }}>Add Project</a>
                                 </>)
                             }
                         ]
                     }}>
                         <a onClick={(e) => e.preventDefault()}>
                             <Space>
-                                更多
+                                More
                                 <DownOutlined />
                             </Space>
                         </a>
@@ -452,7 +479,7 @@ const ResultList = forwardRef<any, any>(({
     return <>
         {contextHolder}
         {/* {JSON.stringify(location.pathname)} */}
-        <Card size="small" title={<><LineChartOutlined /> 分析记录</>} extra={
+        <Card size="small" title={<><LineChartOutlined />  Analysis Record</>} extra={
             <Flex gap={"small"}>
                 {/* {software && <>
                     {software.outputFormat && <>
@@ -466,7 +493,7 @@ const ResultList = forwardRef<any, any>(({
                             }}>输出解析模块({item.module})</Button>)}
                     </>}
                 </>} */}
-                <Button size="small" type="primary" onClick={loadData}>刷新</Button>
+                <Button size="small" type="primary" onClick={loadData}>Refresh</Button>
             </Flex>
         } >
             {/* {software && <ul style={{ marginBottom: "0.5rem" }}>
@@ -497,7 +524,7 @@ const ResultList = forwardRef<any, any>(({
                 loading={loading}
                 scroll={{ x: 'max-content', y: 55 * 5 }}
                 columns={columns}
-                footer={() => `一共${filteredData.length}条记录`}
+                footer={() => `A total of ${filteredData.length} records`}
                 dataSource={filteredData} />
 
         </Card>
@@ -526,6 +553,13 @@ const ResultList = forwardRef<any, any>(({
             params={modal.params}
             onClose={closeModal}
         ></AddProject>
+
+        <InspectPanel
+            callback={loadData}
+            visible={modal.key == "inspectPanel" && modal.visible}
+            params={modal.params}
+            onClose={closeModal}
+        ></InspectPanel>
         {/* <ResultParse
             visible={modal.key == "modalA" && modal.visible}
             onClose={closeModal}

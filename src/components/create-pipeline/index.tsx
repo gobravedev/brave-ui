@@ -137,8 +137,8 @@ export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClo
     return <>
         <Modal
             loading={loading}
-            title={`${data ? "更新" : "新增"}流程(${pipelineStructure?.relation_type})`}
-            okText={data ? "更新" : "新增"}
+            title={`${data ? "Update" : "Add"} (${pipelineStructure?.relation_type})`}
+            okText={data ? "Update" : "Add"}
             onOk={savePipeline}
             open={visible}
             footer={(_, { OkBtn, CancelBtn }) => (
@@ -166,7 +166,7 @@ export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClo
                 <Collapse ghost items={[
                     {
                         key: "1",
-                        label: "更多",
+                        label: "More",
                         children: <>
                             <Form.Item noStyle shouldUpdate>
                                 {() => (
@@ -203,7 +203,7 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
     const { data, structure } = params
     const [form] = Form.useForm()
     const [component, setComponent] = useState<any>()
-    const { namespace } = useSelector((state: any) => state.user); 
+    const { namespace } = useSelector((state: any) => state.user);
 
     const [loading, setLoaidng] = useState<any>(false)
     const componentMap: any = {
@@ -288,14 +288,19 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
         }
 
         console.log(params)
-        const resp = await axios.post("/save-pipeline", params)
-        console.log(resp)
-        setLoaidng(false)
-        if (callback) {
-            callback()
-            // await axios.get("/get-pipeline-v2/d9830ebd-240e-4758-adab-dd3a9d17e414")
+        try {
+            const resp = await axios.post("/save-pipeline", params)
+            console.log(resp)
+            setLoaidng(false)
+            if (callback) {
+                callback()
+                // await axios.get("/get-pipeline-v2/d9830ebd-240e-4758-adab-dd3a9d17e414")
+            }
+            onClose()
+        } catch (error) {
+            setLoaidng(false)
         }
-        onClose()
+
     }
 
     useEffect(() => {
@@ -452,7 +457,7 @@ const UploadComp: FC<any> = ({ value, onChange, component_id }) => {
 const DefaultComponentRelation: FC<any> = ({ data, form, components }) => {
     return <>
 
-        <Form.Item name={"component_id"} label="组件">
+        <Form.Item name={"component_id"} label="Component">
             <Select showSearch options={components}></Select>
         </Form.Item>
 
@@ -473,9 +478,9 @@ const SoftwareContent: FC<any> = ({ data, form }) => {
         <Form.Item name={"container_id"} label="Container">
             <SelectContainer container={data?.container}></SelectContainer>
         </Form.Item>
-        <Form.Item name={"sub_container_id"} label="Sub Container">
+        {/* <Form.Item name={"sub_container_id"} label="Sub Container">
             <SelectContainer container={data?.sub_container}></SelectContainer>
-        </Form.Item>
+        </Form.Item> */}
         <Form.Item name={"content"} label="content">
             <TextAreaComp templete={templete}></TextAreaComp>
         </Form.Item>

@@ -6,6 +6,8 @@ import axios from "axios"
 import { FC, forwardRef, useEffect, useImperativeHandle, useMemo, useState } from "react"
 import { useOutletContext, useParams } from "react-router"
 import { DownOutlined, FileOutlined, QuestionCircleOutlined, RedoOutlined } from "@ant-design/icons"
+import ImportData from "../import-data"
+import { useModal } from "@/hooks/useModal"
 export const readHdfsAPi = (contentPath: any) => axios.get(`/api/read-hdfs?path=${contentPath}`)
 export const readJsonAPi = (contentPath: any) => axios.get(`/fast-api/read-json?path=${contentPath}`)
 
@@ -40,12 +42,15 @@ const ResultList = forwardRef<any, any>(({
     }))
 
     const { project, projectObj } = useOutletContext<any>()
+    
     const [data, setData] = useState<any>([])
     const [groupedData, setGroupedData] = useState<any>()
     // const [content,setContent] = useState<any>()
     const [loading, setLoading] = useState(false)
     // const { eventSource } = useOutletContext<SSEContextType>();
     const { eventSourceRef, status, reconnect } = useSSEContext();
+    const { modal, openModal, closeModal } = useModal();
+
 
     useEffect(() => {
         if (!eventSourceRef) return;
@@ -154,7 +159,7 @@ const ResultList = forwardRef<any, any>(({
         reload()
 
         // initData(currentAnalysisMethod)
-    }, [JSON.stringify(params), JSON.stringify(analysisMethod), project])
+    }, [JSON.stringify(params), JSON.stringify(analysisMethod), project,projectObj?.metadata_form])
 
     const onTabChange = (key: any) => {
         setData(groupedData[key])
@@ -297,7 +302,7 @@ const ResultList = forwardRef<any, any>(({
 
     let columns: any = [
         {
-            title: '项目名称',
+            title: 'Project Name',
             dataIndex: 'project_name',
             key: 'project_name',
             width: 100,
@@ -310,7 +315,7 @@ const ResultList = forwardRef<any, any>(({
         },
 
         {
-            title: '分析结果ID',
+            title: 'Analysis Result ID',
             dataIndex: 'analysis_result_id',
             key: 'analysis_result_id',
             width: 50,
@@ -322,7 +327,7 @@ const ResultList = forwardRef<any, any>(({
             }
 
         }, {
-            title: '分析ID',
+            title: 'Analysis Id',
             dataIndex: 'analysis_id',
             key: 'analysis_id',
             width: 50,
@@ -335,7 +340,7 @@ const ResultList = forwardRef<any, any>(({
 
         },
         {
-            title: '组件名称',
+            title: 'Component Name',
             dataIndex: 'component_name',
             key: 'component_name',
             width: 100,
@@ -356,7 +361,7 @@ const ResultList = forwardRef<any, any>(({
             }
         },
         {
-            title: '样本名称',
+            title: 'Sample Name',
             dataIndex: 'sample_name',
             key: 'sample_name',
             width: 100,
@@ -374,9 +379,9 @@ const ResultList = forwardRef<any, any>(({
                     <span style={{ cursor: "pointer" }}>{text}</span>
                 </Tooltip>
             }
-            
-        },{
-            title: '样本来源',
+
+        }, {
+            title: 'Sample Source',
             dataIndex: 'sample_source',
             key: 'sample_source',
             width: 100,
@@ -458,7 +463,7 @@ const ResultList = forwardRef<any, any>(({
         // },
 
         ...appendSampleColumns, {
-            title: '操作',
+            title: 'Action',
             key: 'action',
             fixed: "right",
             ellipsis: true,
@@ -491,7 +496,7 @@ const ResultList = forwardRef<any, any>(({
                             //     form.setFieldValue("id", record?.id)
                             // }
                             // readHdfs(record.content)
-                        }}>查看</Button>
+                        }}>Open</Button>
                     </Popover>
                     {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                         operatePipeline.openModal("analysisResultEdit", {
@@ -518,7 +523,7 @@ const ResultList = forwardRef<any, any>(({
                                         analysis_result_id: record.analysis_result_id,
                                         callback: reload
                                     })
-                                }}>添加metadata</Button>
+                                }}>Add Metadata</Button>
                             </>
                     }
                     <Button size="small" color="cyan" variant="solid" onClick={() => {
@@ -527,11 +532,11 @@ const ResultList = forwardRef<any, any>(({
                             analysis_result_id: record.analysis_result_id,
                             callback: reload
                         })
-                    }}>绑定样本</Button>
-                    <Popconfirm title="确定删除吗?" onConfirm={async () => {
+                    }}>Bind Sample </Button>
+                    <Popconfirm title="Are you sure you want to delete it?" onConfirm={async () => {
                         await deleteById(record.analysis_result_id)
                     }}>
-                        <Button size="small" color="danger" variant="solid">删除</Button>
+                        <Button size="small" color="danger" variant="solid">Delete</Button>
                     </Popconfirm>
                 </Space>
             ),
@@ -568,14 +573,15 @@ const ResultList = forwardRef<any, any>(({
 
                     {operatePipeline?.openModal && <>
                         <Button size="small" color="cyan" variant="solid" onClick={() => {
-                            operatePipeline.openModals("modalD", { ...currentAnalysisMethod, operatePipeline: operatePipeline })
-                        }}>导入数据</Button>
+                            // operatePipeline.openModals("modalD", { ...currentAnalysisMethod, operatePipeline: operatePipeline })
+                            openModal("importFile",{ ...currentAnalysisMethod, operatePipeline: operatePipeline })
+                        }}>Import data </Button>
                         {/* <Popconfirm title="是否计算MD5?" onConfirm={() => {
                                 console.log(currentAnalysisMethod.component_id)
                             }}>
                             <Button size="small" color="cyan" variant="solid" >计算MD5</Button>
                         </Popconfirm> */}
-                        <Button size="small" color="primary" variant="solid" onClick={reload}>刷新</Button>
+                        <Button size="small" color="primary" variant="solid" onClick={reload}>Refresh</Button>
 
                         {(rest.component_type == "software" || rest.component_type == "file") && <>
                             <Dropdown menu={{
@@ -603,7 +609,7 @@ const ResultList = forwardRef<any, any>(({
                                                         component_type: "file"
                                                     }
                                                 })
-                                            }}>新增文件</a>
+                                            }}>Add File</a>
                                         </Tooltip>
                                         )
                                     }, {
@@ -616,7 +622,7 @@ const ResultList = forwardRef<any, any>(({
                                                             component_type: "file",
                                                         }
                                                     })
-                                                }}>更新文件</a>
+                                                }}>Edit File</a>
                                             </Tooltip>
                                         )
                                     }, {
@@ -632,7 +638,7 @@ const ResultList = forwardRef<any, any>(({
                                                             // pipeline_id: pipeline.component_id
                                                         }
                                                     })
-                                                }}>添加文件</a>
+                                                }}>New File</a>
                                             </Tooltip>
 
                                         )
@@ -653,18 +659,18 @@ const ResultList = forwardRef<any, any>(({
                                                             // pipeline_id: currentAnalysisMethod.pipeline_id
                                                         }
                                                     })
-                                                }}>替换文件</a>
+                                                }}>Replace File</a>
                                             </Tooltip>
                                         )
                                     },
                                     {
                                         label: (
                                             <Tooltip title={currentAnalysisMethod?.component_name}>
-                                                <Popconfirm title="是否移除文件!" onConfirm={() => {
+                                                <Popconfirm title="Whether to remove file?" onConfirm={() => {
                                                     operatePipeline.deletePipelineRelation(currentAnalysisMethod.relation_id)
                                                 }}>
                                                     {/* <Button size="small" color="cyan" variant="solid" ></Button> */}
-                                                    <a>移除文件</a>
+                                                    <a>Remove File</a>
                                                 </Popconfirm>
                                             </Tooltip>
                                         ),
@@ -674,7 +680,7 @@ const ResultList = forwardRef<any, any>(({
                             }}>
                                 <a onClick={(e) => e.preventDefault()}>
                                     <Space>
-                                        更多
+                                        More
                                         <DownOutlined />
                                     </Space>
                                 </a>
@@ -689,8 +695,10 @@ const ResultList = forwardRef<any, any>(({
                 </Flex>
             </>}
             tabList={analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 1 ?
-                analysisMethod.map((it: any) => ({ key: it.component_id, label: 
-                <Tooltip title={it.component_id}>{it.component_name ? it.component_name : "no_name" }</Tooltip>})) : undefined}
+                analysisMethod.map((it: any) => ({
+                    key: it.component_id, label:
+                        <Tooltip title={it.component_id}>{it.component_name ? it.component_name : "no_name"}</Tooltip>
+                })) : undefined}
             activeTabKey={activeTabKey}
             onTabChange={onTabChange}
         >
@@ -698,7 +706,7 @@ const ResultList = forwardRef<any, any>(({
             {/* {JSON.stringify(rest)} */}
             {/* {JSON.stringify(projectObj)} */}
             {/* {JSON.stringify(currentAnalysisMethod.component_id)} */}
-           
+
             <Table
                 title={() => (
                     <Input.Search
@@ -719,7 +727,7 @@ const ResultList = forwardRef<any, any>(({
                 loading={loading}
                 scroll={{ x: 'max-content', y: 55 * 5 }}
                 columns={columnsParamsALL ? columnsParamsALL : columns}
-                footer={() => `一共${filteredData && Array.isArray(filteredData) && filteredData.length}条记录`}
+                footer={() => `A total of ${filteredData && Array.isArray(filteredData) && filteredData.length} records`}
                 dataSource={filteredData} />
             {currentAnalysisMethod?.parseFormat && currentAnalysisMethod?.relation_type == "software_output_file" && <Typography>
                 <pre>
@@ -731,6 +739,12 @@ const ResultList = forwardRef<any, any>(({
         {/* <Card style={{ marginBottom: "1rem" }}>
             <Button onClick={loadData}>刷新</Button>
         </Card> */}
+
+        <ImportData
+            visible={modal.visible && modal.key=="importFile"}
+            params={modal.params}
+            callback={reload}
+            onClose={closeModal}></ImportData>
 
     </>
 

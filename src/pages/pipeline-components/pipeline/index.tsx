@@ -24,6 +24,8 @@ import OpenFile from "@/components/open-file"
 import PipelineFlow from "@/components/pipeline-flow"
 import SortSoftwareModal from "@/components/sort-software"
 import DescriptionModal from "@/components/description-modal"
+import FormProject from "@/components/form-project"
+import { useSelector } from "react-redux"
 const Pipeline: FC<any> = ({ }) => {
     console.log("Pipeline")
     const { component_type, component_id: name } = useParams()
@@ -48,6 +50,7 @@ const Pipeline: FC<any> = ({ }) => {
     // };
     const { modal, openModal, closeModal } = useModal();
     const { modals, openModals, closeModals } = useModals(["modalD", "metadataModal", "bindSample"])
+    const { project: { project_id } } = useSelector((state: any) => state.context)
 
     // const [createOpen, setCreateOpen] = useState<any>(false)
     // const [record, setRecord] = useState<any>()
@@ -225,14 +228,19 @@ const Pipeline: FC<any> = ({ }) => {
                 {component_type == "pipeline" && <>
                     <Button size="small" color="cyan" variant="solid" onClick={() => {
                         openModal("sortSoftware", { software: pipeline.software })
-                    }}>更新排序</Button>
+                    }}>Update Sorting</Button>
                 </>}
+                
+                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                    operatePipeline.openModal("projectForm",{project_id:project_id})
+                }}>Edit Project</Button>
+
                 <Button size="small" color="cyan" variant="solid" onClick={() => {
                     operatePipeline.openModal("modalG", pipeline)
-                }}>查看依赖</Button>
+                }}>View Dependencies</Button>
                 <Button size="small" color="cyan" variant="solid" onClick={() => {
                     openModals("metadataModal", { ...pipeline, operatePipeline: operatePipeline })
-                }}>metadata</Button>
+                }}>Metadata</Button>
 
                 <Button size="small" color="cyan" variant="solid" onClick={() => {
                     openModal("modalC", {
@@ -240,10 +248,10 @@ const Pipeline: FC<any> = ({ }) => {
                             component_type: component_type,
                         }
                     })
-                }}>更新{component_type}</Button>
+                }}>Update {component_type}</Button>
 
-                <Button size="small" color="primary" variant="solid" onClick={loadData}>刷新</Button>
-                <Button size="small" color="primary" variant="solid" onClick={() => navigate(`/${component_type}-card`)}>返回</Button>
+                <Button size="small" color="primary" variant="solid" onClick={loadData}>Refresh</Button>
+                <Button size="small" color="primary" variant="solid" onClick={() => navigate(`/${component_type}-card`)}>Back</Button>
             </Flex>
 
         </Flex>
@@ -289,11 +297,11 @@ const Pipeline: FC<any> = ({ }) => {
             visible={modal.key == "modalC" && modal.visible}
             onClose={closeModal}
             params={modal.params}></CreateOrUpdatePipelineComponent>
-
+        {/* 
         <ImportData
             visible={modals.modalD.visible}
             params={modals.modalD.params}
-            onClose={() => closeModals("modalD")}></ImportData>
+            onClose={() => closeModals("modalD")}></ImportData> */}
         <BioDatabases
             visible={modal.key == "modalE" && modal.visible}
             onClose={closeModal}
@@ -329,6 +337,10 @@ const Pipeline: FC<any> = ({ }) => {
             operatePipeline={operatePipeline}
             params={modals.bindSample.params}></BindSample>
 
+        <FormProject
+            params={modal.params}
+            visible={modal.key == "projectForm" && modal.visible}
+            onClose={closeModal} />
 
         <OpenFile
             visible={modal.key == "openFile" && modal.visible}

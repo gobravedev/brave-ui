@@ -101,10 +101,10 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
             title: 'Action',
             key: 'action',
             fixed: "right",
-            width: 300,
+            width: 500,
             render: (_: any, record: any) => (
-                <Space size="middle">
-                    <ContainerOpt record={record} reload={reload}></ContainerOpt>
+                <Space size="small">
+                    <ContainerOpt openModal={openModal} record={record} reload={reload}></ContainerOpt>
 
                     <Button size="small" color="cyan" variant="solid" onClick={() => {
                         openModal("modalA", record.container_id)
@@ -170,6 +170,7 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
             params={modal.params}
             onClose={closeModal}
         ></ContainerModal>
+
     </div>
 }
 
@@ -185,6 +186,8 @@ export const ContainerOpt: FC<any> = ({ record, reload, traefikUI = false }) => 
         );
         return portMap[key]
     }
+    const { modal, openModal, closeModal } = useModal();
+
     const { containerURL } = useSelector((state: any) => state.user); // 'light' | 'dark'
 
     function originWithoutPort(inputUrl: any, port: any) {
@@ -192,8 +195,9 @@ export const ContainerOpt: FC<any> = ({ record, reload, traefikUI = false }) => 
         const u = new URL(inputUrl);
         return `${u.protocol}//${u.hostname}:${getPort(port, 8080)}`;
     }
-    return <>
+    return <Flex gap="small">
         {record.status == "running" ? <>
+
 
             {traefikUI ? <>
                 <Tooltip title={<>
@@ -220,6 +224,14 @@ export const ContainerOpt: FC<any> = ({ record, reload, traefikUI = false }) => 
             }}>
                 <Button size="small" color="cyan" variant="solid"  >Stop</Button>
             </Popconfirm>
+
+            <Button size="small" color="cyan" variant="solid"
+                onClick={() => {
+                    openModal("inspectPanel", {
+                        inspect: "inspect",
+                        id: record.container_id
+                    })
+                }}  >Inspect</Button>
         </> : <>
 
             {record.image_status == "exist" ? <>
@@ -245,12 +257,56 @@ export const ContainerOpt: FC<any> = ({ record, reload, traefikUI = false }) => 
                 </Popconfirm>
 
             </>}
+
+
         </>}
-    </>
+        {record.image_status == "exist" && <>
+            <Button size="small" color="cyan" variant="solid"
+                onClick={() => {
+                    openModal("inspectPanel", {
+                        inspect: "image-inspect",
+                        id: record.image_id
+                    })
+                }}  >Image Inspect</Button>
+        </>}
+
+        <InspectPanel
+            callback={reload}
+            visible={modal.key == "inspectPanel" && modal.visible}
+            params={modal.params}
+            onClose={closeModal}
+        ></InspectPanel>
+    </Flex>
+}
+
+
+export const InspectPanel: FC<any> = ({ visible, params, onClose, callback }) => {
+    const [data, setData] = useState<any>()
+    const [loading, setLoading] = useState<any>(false)
+    const loadData = async () => {
+        setLoading(true)
+        const resp = await axios.get(`/container/${params.inspect}/${params?.id}`)
+        setData(resp.data)
+        setLoading(false)
+    }
+    useEffect(() => {
+        if (params?.id) {
+            loadData()
+        }
+
+    }, [params?.id])
+    return <Modal width={"60%"} title={`Inspect ${params?.id}`} open={visible} footer={null} onCancel={onClose} onClose={onClose} loading={loading} >
+        <Typography>
+            <pre>
+                {JSON.stringify(data, null, 2)}
+            </pre>
+        </Typography>
+    </Modal>
 }
 
 import { containerData } from './container'
 import { useSSEContext } from "@/context/sse/useSSEContext"
+import { fa, tr } from "@faker-js/faker"
 const InstallContainerModal: FC<any> = ({ visible, params, onClose, callback }) => {
     // const [namespace, setNamespace] = useState<any>()
     const [messageApi, contextHolder] = message.useMessage();

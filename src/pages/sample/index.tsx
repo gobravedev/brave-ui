@@ -4,7 +4,6 @@ import { Button, Card, Drawer, Flex, Form, Input, Modal, Popconfirm, Space, Tabl
 import { useOutletContext, useParams } from "react-router"
 
 import { useModal } from "@/hooks/useModal"
-import ImportFile from '@/components/import-data/inport-metadata'
 import { deleteSampleBySampleIdApi } from "@/api/sample"
 import { bindSampleToAnalysisResultApi } from "@/api/analysis-result"
 import { updateSampleMetadataListApi } from "@/api/sample-metadata"
@@ -51,14 +50,14 @@ const Sample: FC<any> = ({ operatePipeline, rowSelection }) => {
             ellipsis: true,
             width: 100,
         }, {
-            title: '项目',
+            title: 'Project',
             dataIndex: 'project',
             key: 'project',
             ellipsis: true,
             width: 100,
         },
         {
-            title: '样本名称',
+            title: 'Sample Name',
             dataIndex: 'sample_name',
             key: 'sample_name',
             ellipsis: true,
@@ -196,7 +195,7 @@ const Sample: FC<any> = ({ operatePipeline, rowSelection }) => {
         //     ellipsis: true,
         // }, 
         {
-            title: '操作',
+            title: 'Action',
             key: 'action',
             fixed: "right",
             width: 200,
@@ -208,15 +207,15 @@ const Sample: FC<any> = ({ operatePipeline, rowSelection }) => {
                             sample_id: record.sample_id,
                             callback: loadSample
                         })
-                    }}>编辑</Button>
+                    }}>Edit</Button>
                     {/* <a href={`http://10.110.1.11:8000/heixiaoyan/heixiaoyan_workspace/output/fastp/${record.sample_name}.fastp.html`} target="__black">fastp</a>
                     <a href={`http://10.110.1.11:8000/heixiaoyan/heixiaoyan_workspace/output/fastqc/clean_reads/${record.sample_name}_1.fastp_fastqc.html`} target="__black">cf1</a>
                     <a href={`http://10.110.1.11:8000/heixiaoyan/heixiaoyan_workspace/output/fastqc/clean_reads/${record.sample_name}_2.fastp_fastqc.html`} target="__black">cf2</a> */}
-                    <Popconfirm title="确定删除吗？" onConfirm={async () => {
+                    <Popconfirm title="Are you sure about the deletion?" onConfirm={async () => {
                         await deleteSampleBySampleIdApi(record.sample_id)
                         loadSample()
                     }}>
-                        <Button size="small" color="danger" variant="solid">删除</Button>
+                        <Button size="small" color="danger" variant="solid">Delete</Button>
                     </Popconfirm>
                 </Space>
             ),
@@ -234,7 +233,7 @@ const Sample: FC<any> = ({ operatePipeline, rowSelection }) => {
             // console.log(columnRef.current)
             const column = [
                 {
-                    title: "样本名称",
+                    title: "Sample Name",
                     dataIndex: "sample_name",
                     key: "sample_name",
                     render: (text: any) => <span>{text}</span>
@@ -270,7 +269,7 @@ const Sample: FC<any> = ({ operatePipeline, rowSelection }) => {
             // console.log("meg",merged)
             setSampleData(merged)
             // setParseData(converted);
-            messageApi.success('粘贴成功！');
+            messageApi.success('Paste was successful!');
         };
 
         document.addEventListener('paste', handlePaste);
@@ -294,12 +293,12 @@ const Sample: FC<any> = ({ operatePipeline, rowSelection }) => {
             return {sample_id:row.sample_id, metadata:metadata}
         }).filter((item:any)=>item.metadata!=null)
         if (saveData.length ==0){
-            messageApi.error("没有数据!")
+            messageApi.error("No Data!")
             return 
         }
         console.log(saveData)
         await updateSampleMetadataListApi(saveData)
-        messageApi.success("更新成功!")
+        messageApi.success("update successfully!")
     }
 
     useEffect(() => {
@@ -313,13 +312,13 @@ const Sample: FC<any> = ({ operatePipeline, rowSelection }) => {
         /> */}
 
         <Flex justify={"end"} align={"center"} gap="small" style={{ marginBottom: "1rem" }}>
-            <Button size="small" color="cyan" variant="solid" onClick={updateMetadata}>批量保存</Button>
+            <Button size="small" color="cyan" variant="solid" onClick={updateMetadata}>Batch Save</Button>
             <Button size="small" color="cyan" variant="solid" onClick={() => {
                 operatePipeline.openModal("metadataForm", {
                     callback: loadSample
                 })
-            }}>添加样本</Button>
-            <Button size="small" color="primary" variant="solid" onClick={loadSample} >刷新</Button>
+            }}>Add Sample</Button>
+            <Button size="small" color="primary" variant="solid" onClick={loadSample} >Refresh</Button>
 
         </Flex>
         {/* <Button onClick={() => { openModal("modalA", { operatureUrl: "import_sample_form_str" }) }} style={{ marginLeft: "1rem" }}>导入样本</Button>
@@ -335,7 +334,7 @@ const Sample: FC<any> = ({ operatePipeline, rowSelection }) => {
             loading={loading}
             scroll={{ x: 'max-content', y: 55 * 5 }}
             columns={columns}
-            footer={() => `一共${sampleData.length}条记录`}
+            footer={() => `A total of ${sampleData.length} records`}
             dataSource={sampleData} />
 
         {/* <ImportFile
@@ -351,7 +350,7 @@ export const BindSample: FC<any> = ({ visible, onClose, operatePipeline, params 
     const { messageApi } = useOutletContext<any>()
     const submit = async () => {
         if (!selectedRowKey) {
-            messageApi.error("请选择样本")
+            messageApi.error("Please select a sample")
             return
         }
         const req = {
@@ -361,18 +360,18 @@ export const BindSample: FC<any> = ({ visible, onClose, operatePipeline, params 
         // analysis_result_id:string,sample_id:string
         console.log(req)
         const resp = await bindSampleToAnalysisResultApi(req)
-        messageApi.success("绑定成功")
+        messageApi.success("Bind successfully")
         params.callback?.()
         onClose()
     }
-    return <Modal title="绑定样本"
+    return <Modal title="Binding Sample"
         open={visible}
         onClose={onClose}
         onCancel={onClose}
         width={"80%"}
         onOk={submit}
     >
-        {JSON.stringify(params)}
+        {/* {JSON.stringify(params)} */}
         <Sample
             rowSelection={{
                 type: "radio",

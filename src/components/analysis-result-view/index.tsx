@@ -84,7 +84,7 @@ export const TableView: FC<any> = ({ data, url, filename, columns, baseURL }) =>
                 pagination={false}
                 virtual
                 columns={columns ? columns : getColumns(data[0])}
-                footer={() => `一共${data.length}条记录`}
+                footer={() => `A total of ${data.length} records`}
             ></Table>
 
 
@@ -467,29 +467,29 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
                         <Button size="small" color="cyan" variant="solid" onClick={() => {
                             openModals("editParams", analsyisResult.analysis_id)
                         }}>
-                            编辑参数
+                            Edit Parameters
                         </Button>
                         {analsyisResult?.analysis_status == "running" ?
                             <>
-                                <Popconfirm title={"是否停止!"} onConfirm={async () => {
+                                <Popconfirm title={"Whether or not to stop?"} onConfirm={async () => {
                                     await stopAnalysisApi(analsyisResult.analysis_id)
-                                    messageApi.success("停止成功")
+                                    messageApi.success("Stop Success")
 
                                 }}>
                                     <Button size="small" color="cyan" variant="solid">
-                                        停止
+                                        Stop
                                     </Button>
                                 </Popconfirm>
 
                             </> : <>
-                                <Popconfirm title={"是否运行!"} onConfirm={async () => {
+                                <Popconfirm title={"Whether or not to run?"} onConfirm={async () => {
                                     await runAnalysisApi(analsyisResult.analysis_id, "job")
-                                    messageApi.success("运行成功")
+                                    messageApi.success("run successfully")
 
 
                                 }}>
                                     <Button size="small" color="cyan" variant="solid">
-                                        {analsyisResult.analysis_status == "created" ? "运行" : "重新运行"}
+                                        {analsyisResult.analysis_status == "created" ? "Run" : "Rerun"}
                                     </Button>
                                 </Popconfirm>
 
@@ -497,18 +497,18 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
                         }
                     </>}
 
-                    <Popconfirm title={analsyisResult?.is_report ? "是否取消报告" : "是否报告"} onConfirm={async () => {
+                    <Popconfirm title={analsyisResult?.is_report ? "Whether to cancel the report?" : "Reported or not?"} onConfirm={async () => {
                         await axios.post(`/analysis/update-report/${analsyisResult?.analysis_id}`)
-                        messageApi.success("操作成功!")
+                        messageApi.success("operate successfully!")
                         setAnalsyisResult(null)
                         if (cancalReportCallback) {
                             cancalReportCallback()
                         }
                         // loadData()
                     }}>
-                        <Button size="small" color={"cyan"} variant="solid">{analsyisResult?.is_report ? "取消报告" : "报告"}</Button>
+                        <Button size="small" color={"cyan"} variant="solid">{analsyisResult?.is_report ? "Cancel Report" : "Report"}</Button>
                     </Popconfirm>
-                    <Button size="small" color="cyan" variant="solid" onClick={() => loadData(analysis_id)}>刷新</Button>
+                    <Button size="small" color="cyan" variant="solid" onClick={() => loadData(analysis_id)}>Refresh</Button>
 
                 </Flex>
             }>

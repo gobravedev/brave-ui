@@ -4,81 +4,82 @@ import { FC, useEffect } from "react";
 import { useState } from "react";
 import { useOutletContext } from "react-router";
 import { PlusCircleOutlined, PlusOutlined } from '@ant-design/icons'
-export const CreateOrUpdateNamespace: FC<any> = ({ visible, onClose, params ,callback}) => {
-    if (!visible) return null;
-    const [namespaceList, setNamespaceList] = useState<any>([])
-    const loadNamespace = async () => {
-        const resp = await axios.get(`/list-namespace`)
-        const data = resp.data
-        setNamespaceList(data)
-    }
-    // const { messageApi } = useOutletContext<any>()
-    const [messageApi, contextHolder] = message.useMessage();
+import TextArea from "antd/es/input/TextArea";
+import { useGlobalMessage } from "@/hooks/useGlobalMessage";
 
-    const [record, setRecord] = useState<any>()
+
+
+
+export const CreateOrUpdateNamespace: FC<any> = ({ visible, onClose, params, callback }) => {
+    const message = useGlobalMessage()
+    // const [record, setRecord] = useState<any>()
     const [form] = Form.useForm()
-    const [optPanel, setOptPanel] = useState<any>(false)
+    useEffect(() => {
+        if (params?.namespace_id) {
+            loadData()
+        } else {
+            form.resetFields()
+        }
+    }, [params?.namespace_id])
+
+    if (!visible) return
+
     const saveNamespace = async () => {
         const values = await form.validateFields()
-        if (record) {
+        if (params?.namespace_id) {
             await axios.post("/save-or-update-namespace", {
                 ...values,
-                namespace_id: record.namespace_id
+                namespace_id: params?.namespace_id
             })
+            message.success("successfully update!")
         } else {
             await axios.post("/save-or-update-namespace", {
                 ...values,
             })
+            message.success("successfully added!")
         }
-        setOptPanel(false)
-        loadNamespace()
-        if(callback){
+        if (callback) {
             callback()
         }
-        // onClose()
-    }
-    const deleteNamespace = async (namespaceId: any) => {
-        try {
-            await axios.delete(`/delete-namespace-by-id/${namespaceId}`)
-            loadNamespace()
-            messageApi.success("删除成功")
-        } catch (error: any) {
-            messageApi.error(error.response.data.message)
-        }
+        onClose()
     }
 
-    useEffect(() => {
-        loadNamespace()
-    }, [])
+    const loadData = async () => {
+        const resp = await axios.get(`/find-namespace-by-id/${params?.namespace_id}`)
+        form.setFieldsValue(resp.data)
+    }
 
     return <Modal title={<Flex gap={"small"}>
-        Create/Update  namespace
-        <PlusCircleOutlined style={{ cursor: "pointer", color: "cyan" }} onClick={() => {
+        {params?.namespace_id ? "Update" : "Create"} Namespace
+        {/* <PlusCircleOutlined style={{ cursor: "pointer", color: "cyan" }} onClick={() => {
             setOptPanel(true)
-        }} />
+            form.resetFields()
+        }} /> */}
     </Flex>} open={visible}
-
         onCancel={onClose} footer={null}>
-        {contextHolder}
-        {optPanel ? <>
+        <Form form={form} onFinish={saveNamespace}>
+            <Form.Item name="name" label="Name" rules={[{ required: true, message: "This field cannot be empty!" }]}>
+                <Input />
+            </Form.Item>
+            <Form.Item name="volumes" label="Volumes" rules={[{ required: true, message: "This field cannot be empty!" }]}>
+                <TextArea />
+            </Form.Item>
+            <Form.Item>
+                <Button size="small" color="cyan" variant="solid" htmlType="submit">
+                    Submit
+                </Button>
+                {/* <Button style={{ marginLeft: "1rem" }} size="small" color="cyan" variant="solid" onClick={() => { setOptPanel(false) }} >
+                    Cancel
+                </Button> */}
+            </Form.Item>
+        </Form>
 
-            <Flex>
-                <Form form={form} onFinish={saveNamespace}>
-                    <Form.Item name="name" label="Name" rules={[{ required: true, message: "名称不能为空" }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item>
-                        <Button size="small" color="cyan" variant="solid" htmlType="submit">
-                            Submit
-                        </Button>
-                        <Button style={{ marginLeft: "1rem" }} size="small" color="cyan" variant="solid" onClick={() => { setOptPanel(false) }} >
-                            Cancel
-                        </Button>
-                    </Form.Item>
-                </Form>
+        {/* {optPanel ? <>
 
 
-            </Flex>
+           
+
+
         </> : <>
             {namespaceList && namespaceList.map((item: any) => {
                 return <div style={{ display: "flex", marginBottom: "0.5rem", justifyContent: "space-between" }} key={item.namespace_id}>
@@ -86,9 +87,7 @@ export const CreateOrUpdateNamespace: FC<any> = ({ visible, onClose, params ,cal
                     <Button size="small" color="cyan" variant="solid" onClick={() => {
                         setOptPanel(true)
                         setRecord(item)
-                        form.setFieldsValue({
-                            name: item.name
-                        })
+                        form.setFieldsValue(item)
                     }}>更新</Button>
 
                     <Popconfirm title="确定删除吗？" onConfirm={() => {
@@ -99,11 +98,13 @@ export const CreateOrUpdateNamespace: FC<any> = ({ visible, onClose, params ,cal
                 </div>
             })}
 
-        </>}
+        </>} */}
 
 
     </Modal>
 }
+
+
 
 export const InstallNamespace: FC<any> = ({ visible, onClose, params }) => {
     if (!visible) return null;

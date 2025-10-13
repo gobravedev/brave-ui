@@ -67,7 +67,7 @@ const AbundanceOpterature: FC<any> = () => {
                         {/* <Area {...config2} /> */}
                         {/* <Bar {...config} /> */}
                         <Image width={"100%"} src={data?.img}></Image>
-                        一共{data.table.length}条记录
+                        A total of {data.table.length} records
                         <Table
                     pagination={{ pageSize: 30 }}
                     loading={loading}

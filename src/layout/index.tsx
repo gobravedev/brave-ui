@@ -6,7 +6,6 @@ import { NavLink, Outlet, useLocation, useNavigate, useParams } from 'react-rout
 import { Header } from 'antd/es/layout/layout';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
-import { setProject } from '@/store/contextSlice'
 import { setUserItem } from '@/store/userSlice'
 import { setSetting, setSseData } from '@/store/globalSlice'
 
@@ -22,6 +21,7 @@ import { useI18n } from '@/hooks/useI18n';
 import LanguageSelector from '@/components/setting-switcher/language';
 import ThemeSelector from '@/components/setting-switcher/theme';
 import { CreateOrUpdateNamespace, InstallNamespace } from '@/components/namespace-operature';
+import { useGlobalMessage } from '@/hooks/useGlobalMessage';
 
 const { Content, Sider } = Layout;
 
@@ -63,12 +63,12 @@ const App: React.FC = () => {
     const [notificationApi, notificationContextHolder] = notification.useNotification();
     const [messageApi, messageContextHolder] = message.useMessage();
     const { modals, openModals, closeModals } = useModals(["setting", "project"]);
-    const [projectObj, setProjectObj] = useState<any>({})
+    // const [projectObj, setProjectObj] = useState<any>({})
     const [current, setCurrent] = useState('/');
     const [menus, setMenus] = useState<any>([])
     const [selectedKeyMap, setSelectedKeyMap] = useState<any>()
     const { t, locale } = useI18n();
-    const { theme, baseURL } = useSelector((state: any) => state.user); // 'light' | 'dark'
+    const { theme, baseURL, projectObj,project:project_id } = useSelector((state: any) => state.user); // 'light' | 'dark'
 
     const isDark = theme === 'dark';
     const bgColor = isDark ? '#001529' : '#fff'; // 深色/白色
@@ -81,7 +81,6 @@ const App: React.FC = () => {
             placement: "bottomRight"
         });
     };
-    const { project: { project_id } } = useSelector((state: any) => state.context)
     console.log(project_id)
     const onMenuClick = (key: string) => {
         console.log(key)
@@ -507,13 +506,17 @@ const App: React.FC = () => {
     const loadProject = async () => {
         if (!project_id) return;
         const resp = await axios.get(`/project/find-by-project-id/${project_id}`)
-        setProjectObj(resp.data)
+        // setProjectObj(resp.data)
+        dispatch(setUserItem({ projectObj: resp.data }))
     }
 
     useEffect(() => {
         ping()
-        loadProject()
     }, [baseURL])
+    useEffect(() => {
+
+        loadProject()
+    }, [baseURL, project_id])
 
 
     return (
@@ -641,15 +644,10 @@ const App: React.FC = () => {
                     </Suspense>
                 </Content>
             </Layout>
-            <FormProject callback={(project_id: any) => {
-                // loadProject()
-                dispatch(setProject({
-                    name: project_id,
-                    project_id: project_id,
-                }))
-            }} messageApi={messageApi}
+            <FormProject
                 params={modals.project.params}
-                visible={modals.project.visible} onClose={() => closeModals("project")} />
+                visible={modals.project.visible}
+                onClose={() => closeModals("project")} />
 
 
             <SettingDrawer
@@ -789,47 +787,129 @@ brave  \
     </>
 }
 
+// const NamespaceSelect: FC<any> = () => {
+//     const { namespace } = useSelector((state: any) => state.user);
+//     const dispatch = useDispatch()
+//     const { modal, openModal, closeModal } = useModal();
+
+//     const [options, setOptions] = useState<any>([])
+
+//     // const [namespaceList, setNamespaceList] = useState<any>([])
+//     const loadNamespace = async () => {
+//         const resp = await axios.get(`/list-namespace-file`)
+//         const data = resp.data
+//         // setNamespaceList(data)
+//         setOptions(data.map((item: any) => ({
+//             label: `${item.name}`,
+//             value: item.namespace_id
+//         })))
+//     }
+//     useEffect(() => {
+//         loadNamespace()
+//     }, [])
+//     return <>
+
+//         <Select onChange={(value: any) => {
+//             dispatch(setUserItem({ namespace: value }))
+//         }} options={options} value={namespace}></Select>
+//         <PlusOutlined style={{ cursor: "pointer" }} onClick={() => openModal("createOrUpdateNamespace")} />
+
+//         <CreateOrUpdateNamespace
+// callback={loadNamespace}
+// visible={modal.key == "createOrUpdateNamespace" && modal.visible}
+// onClose={closeModal}
+// params={modal.params}></CreateOrUpdateNamespace>
+
+//     </>
+// }
 const NamespaceSelect: FC<any> = () => {
     const { namespace } = useSelector((state: any) => state.user);
-    const dispatch = useDispatch()
+    const [dataList, setdDataList] = useState<any>([])
     const { modal, openModal, closeModal } = useModal();
+    const message = useGlobalMessage()
+    const dispatch = useDispatch()
+    const loadData = async () => {
+        const resp: any = await axios.get("/list-namespace")
+        // console.log(resp.data)
+        const dataList = resp.data.map((item: any) => {
+            return {
+                label: `${item.name}`,
+                value: item.namespace_id
+            }
+        })
+        setdDataList(dataList)
 
-    const [options, setOptions] = useState<any>([])
 
-    // const [namespaceList, setNamespaceList] = useState<any>([])
-    const loadNamespace = async () => {
-        const resp = await axios.get(`/list-namespace-file`)
-        const data = resp.data
-        // setNamespaceList(data)
-        setOptions(data.map((item: any) => ({
-            label: `${item.name}`,
-            value: item.namespace_id
-        })))
     }
     useEffect(() => {
-        loadNamespace()
+        loadData()
     }, [])
     return <>
 
-        <Select onChange={(value: any) => {
-            dispatch(setUserItem({ namespace: value }))
-        }} options={options} value={namespace}></Select>
-        <PlusOutlined style={{ cursor: "pointer" }} onClick={() => openModal("createOrUpdateNamespace")} />
+        <Select
+            size='small'
+            // open={true}
+            dropdownRender={(menu) => <>
+                {menu}
+                <Divider style={{ margin: '8px 0' }} />
+                <Flex gap={"small"} justify={"space-between"} >
+                    <Button type='text' size="small" color="cyan" variant='solid' onClick={() => {
+                        openModal("namespace")
+                    }}>Create</Button>
+                    <Button type='text' size="small" color="cyan" variant='solid' onClick={() => {
+                        loadData()
+                    }}>Refresh</Button>
+                </Flex>
+
+                {namespace && (
+                    <>
+                        <Divider style={{ margin: '8px 0' }} />
+                        <Tooltip title={namespace} placement='bottom'>
+
+                            <Flex gap={"small"} justify={"space-between"} >
+
+                                <Button type='text' size="small" color="cyan" variant='solid' onClick={() => {
+                                    openModal("namespace", { namespace_id: namespace })
+                                }}>Update</Button>
+                                <Popconfirm title="Are you sure about the deletion?" onConfirm={async () => {
+                                    await axios.delete(`/delete-namespace-by-id/${namespace}`)
+                                    message.success("successfully delete")
+                                    loadData()
+                                }}>
+                                    <Button type='text' size="small" color="danger" variant='solid' >Delete</Button>
+                                </Popconfirm>
+
+                            </Flex>
+                        </Tooltip>
+
+                    </>)}
+            </>}
+            onChange={(value: any) => {
+                console.log("onChange", value)
+                dispatch(setUserItem({ namespace: value }))
+                message.success(`Switching Namespaces: ${value}`)
+            }}
+            value={namespace}
+            style={{ width: 130 }}
+            placeholder="Select Namespace"
+            options={dataList}
+        >
+        </Select>
 
         <CreateOrUpdateNamespace
-            callback={loadNamespace}
-            visible={modal.key == "createOrUpdateNamespace" && modal.visible}
+            callback={loadData}
+            visible={modal.key == "namespace" && modal.visible}
             onClose={closeModal}
-            params={modal.params}></CreateOrUpdateNamespace>
-
+            params={modal.params}
+        ></CreateOrUpdateNamespace>
     </>
 }
-
-const ProjectComp: FC<any> = ({ project_id, openModal }) => {
-    const [projectMap, setProjectMap] = useState<any>({})
+const ProjectComp: FC<any> = ({ }) => {
     const [projectList, setProjectList] = useState<any>([])
     const dispatch = useDispatch()
-    const [messageApi, messageContextHolder] = message.useMessage();
+    const message = useGlobalMessage()
+    const { modal, openModal, closeModal } = useModal();
+    const { project:project_id } = useSelector((state: any) => state.user);
 
     const loadProject = async () => {
         const resp: any = await axios.get("/project/list-project")
@@ -842,19 +922,18 @@ const ProjectComp: FC<any> = ({ project_id, openModal }) => {
         })
         setProjectList(projectList)
 
-        const projectMap = resp.data.reduce((acc: any, item: any) => {
-            acc[item.project_id] = item
-            item.metadata_form = JSON.parse(item.metadata_form)
-            return acc
-        }, {})
-        setProjectMap(projectMap)
+        // const projectMap = resp.data.reduce((acc: any, item: any) => {
+        //     acc[item.project_id] = item
+        //     // item.metadata_form = JSON.parse(item.metadata_form)
+        //     return acc
+        // }, {})
+        // setProjectMap(projectMap)
         // setProjectObj(projectMap[project_id])
     }
     useEffect(() => {
         loadProject()
     }, [])
     return <>
-        {messageContextHolder}
 
         <Select
             size='small'
@@ -881,12 +960,12 @@ const ProjectComp: FC<any> = ({ project_id, openModal }) => {
                                 <Button type='text' size="small" color="cyan" variant='solid' onClick={() => {
                                     openModal("project", { project_id: project_id })
                                 }}>Update</Button>
-                                <Popconfirm title="确定删除吗？" onConfirm={async () => {
+                                <Popconfirm title="Are you sure about the deletion?" onConfirm={async () => {
                                     await deleteProjectApi(project_id)
-                                    messageApi.success("删除成功")
-                                    dispatch(setProject({
+                                    message.success("successfully delete")
+                                    // dispatch(setProject({
 
-                                    }))
+                                    // }))
                                     loadProject()
                                 }}>
                                     <Button type='text' size="small" color="danger" variant='solid' >Delete</Button>
@@ -900,10 +979,8 @@ const ProjectComp: FC<any> = ({ project_id, openModal }) => {
             onChange={(value: any) => {
                 console.log("onChange", value)
 
-                dispatch(setProject({
-                    name: value,
-                    project_id: value,
-                }))
+                dispatch(setUserItem({project: value}))
+                message.success(`Switching Project: ${value}`)
                 // setProjectObj(projectMap[value])
                 // loadProject()
             }}
@@ -912,12 +989,15 @@ const ProjectComp: FC<any> = ({ project_id, openModal }) => {
             placeholder="Select Project"
             options={projectList}
         >
-        </Select><PlusOutlined style={{ cursor: "pointer" }} onClick={() => {
+        </Select>
+
+        <FormProject
+            callback={loadProject}
+            visible={modal.key == "project" && modal.visible}
+            onClose={closeModal}
+            params={modal.params} />
+        {/* <PlusOutlined style={{ cursor: "pointer" }} onClick={() => {
             openModal("project")
-        }} />
-
-
-
-
+        }} /> */}
     </>
 }

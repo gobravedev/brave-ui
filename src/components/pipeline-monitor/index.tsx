@@ -376,7 +376,7 @@ const TaskTable: FC<any> = ({ data }) => {
             scroll={{ x: 'max-content', y: 55 * 5 }}
             size="small"
             bordered
-            footer={() => `一共${filteredData.length}条记录`}
+            footer={() => `A total of ${filteredData.length} records`}
             // pagination={false}
             columns={columns} dataSource={filteredData} rowKey={(record: any) => record.task_id}></Table>
         {/* {JSON.stringify(data)} */}

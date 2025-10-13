@@ -78,8 +78,6 @@ const App: React.FC = () => {
             placement: "bottomRight"
         });
     };
-    const { project: { project_id }, namespace: { name: namespace, namespaceKey: namespaceKey } } = useSelector((state: any) => state.context)
-    console.log(project_id)
     const onMenuClick = (key: string) => {
         console.log(key)
         navigate(key);
@@ -297,71 +295,21 @@ const App: React.FC = () => {
 
         }
     }, [location.pathname])
-    const menu1: MenuProps['items'] = [
-        {
-            key: `${project_id}/sample-qc`,
-            label: "样本质控"
-        }, {
-            key: `${project_id}/meta_genome/remove-host`,
-            label: "去宿主"
-        }, {
-            key: `${project_id}/meta_genome/reads-based-abundance-analysis`,
-            label: "基于Reads的丰度分析"
-        }, {
-            key: `${project_id}/meta_genome/recovering-mag`,
-            label: "重构MAG"
-        }, {
-            key: `${project_id}/meta_genome/abundance-meta`,
-            label: "丰度分析"
-        }, {
-            key: `${project_id}/meta_genome/function-analysis`,
-            label: "功能分析"
-        }, {
-            key: `${project_id}/meta_genome/abundance`,
-            label: "old丰度分析"
-        }
-    ]
-    // individual meta
-    const menu2: any = [
-        // {
-        //     key: `${project}/single_genome`,
-        //     label: "项目介绍"
-        // }, {
-        //     key: `${project}/single_genome/sample`,
-        //     label: "检测样本"
-        // }, 
-        {
-            key: `${project_id}/single_genome/assembly`,
-            label: "单菌组装"
-        }, {
-            key: `${project_id}/single_genome/gene-prediction`,
-            label: "基因预测"
-        }, {
-            key: `${project_id}/single_genome/gene-annotation`,
-            label: "基因注释"
-        }, , {
-            key: `${project_id}/single_genome/gene-expression`,
-            label: "基因表达"
-        },
-        {
-            key: `${project_id}/single_genome/mutation`,
-            label: "突变检测"
-        }, {
-            key: `${project_id}/single_genome/mutation-compare`,
-            label: "突变比较"
-        }
-    ]
-    const checkProject = () => {
-        if (!project_id) {
-            // console.log("checkProject",location.pathname)
-            if (location.pathname.startsWith("/component") || location.pathname.startsWith("/analysis-report")) {
-                return false
-            }
 
-            return true
-        }
-        return true
-    }
+    
+    // individual meta
+
+    // const checkProject = () => {
+    //     if (!project_id) {
+    //         // console.log("checkProject",location.pathname)
+    //         if (location.pathname.startsWith("/component") || location.pathname.startsWith("/analysis-report")) {
+    //             return false
+    //         }
+
+    //         return true
+    //     }
+    //     return true
+    // }
 
     const items = [
         {
@@ -517,7 +465,7 @@ const ProjectComp: FC<any> = ({ project_id, openModal, setProjectObj, onProjectL
         }
         const projectMap = resp.data.reduce((acc: any, item: any) => {
             acc[item.project_id] = item
-            item.metadata_form = JSON.parse(item.metadata_form)
+            // item.metadata_form = JSON.parse(item.metadata_form)
             return acc
         }, {})
         setProjectMap(projectMap)

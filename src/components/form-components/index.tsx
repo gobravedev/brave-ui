@@ -522,7 +522,7 @@ const GroupSelectSample: FC<any> = ({ value, onChange, sampleGroup, watch, sampl
         {/* {watch}{group} */}
         <Select showSearch filterOption={(input: any, option: any) =>
             (option?.label ?? '').toLowerCase().includes(input.toLowerCase())} mode={"multiple"} value={value} onChange={onChange} options={sampleGroup}></Select>
-        {value && <>一共选择{value.length}个样本</>}
+        {value && <>A total of {value.length} samples were selected</>}
 
     </>
 }

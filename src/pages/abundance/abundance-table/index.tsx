@@ -39,11 +39,11 @@ const Abundance: FC<any> = () => {
         //     key: 'id',
         // },
         {
-            title: '样本名称',
+            title: 'Sample Name',
             dataIndex: 'sample_name',
             key: 'sample_name',
         },  {
-            title: '数据版本',
+            title: 'Data Verison',
             dataIndex: 'data_version',
             key: 'data_version',
         },{
@@ -64,11 +64,11 @@ const Abundance: FC<any> = () => {
             key: 'sample_group',
         },
         {
-            title: '项目',
+            title: 'Project',
             dataIndex: 'project',
             key: 'project',
         }, {
-            title: '操作',
+            title: 'Action',
             key: 'action',
             fixed: "left",
             width: 100,
@@ -79,7 +79,7 @@ const Abundance: FC<any> = () => {
                         getAbundance(record.content)
                         setOpen(true)
 
-                    }}>查看</a>
+                    }}>View</a>
                 </Space>
             ),
         },

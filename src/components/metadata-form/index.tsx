@@ -36,10 +36,10 @@ const MetadataForm: FC<any> = ({ visible, onClose, params }: any) => {
         // console.log(params)
         if (params.sample_id) {
             const resp = await updateSampleMetadataApi(params)
-            messageApi.success("更新成功")
+            messageApi.success("update successfully")
         } else {
             const resp = await addSampleMetadataApi(params)
-            messageApi.success("添加成功")
+            messageApi.success("add successfully")
         }
         callback?.()
         onClose()
@@ -49,11 +49,11 @@ const MetadataForm: FC<any> = ({ visible, onClose, params }: any) => {
         open={visible}
         onClose={onClose}
         onCancel={onClose}
-        title={`${params.sample_id ? "编辑" : "添加"}metadata`}>
+        title={`${params.sample_id ? "Edit" : "Add "} Metadata`}>
         {/* {JSON.stringify(params)} */}
-        {JSON.stringify(projectObj)}
+        {/* {JSON.stringify(projectObj)} */}
         <Form form={form}>
-            <Form.Item label="样本名称" name="sample_name" >
+            <Form.Item label="Sample Name" name="sample_name" >
                 <Input />
             </Form.Item>
             {/* <Form.Item label="样本分组" name="sample_group" >
@@ -75,7 +75,7 @@ const MetadataForm: FC<any> = ({ visible, onClose, params }: any) => {
             <Collapse ghost items={[
                 {
                     key: "1",
-                    label: "更多",
+                    label: "More",
                     children: <>
                         <Form.Item noStyle shouldUpdate>
                             {() => (

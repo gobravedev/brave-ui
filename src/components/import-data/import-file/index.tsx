@@ -38,7 +38,7 @@ const RenderTable: FC<any> = ({ parseData, columns, importData }) => {
         pagination={false}
         footer={() => (
             <div style={{ textAlign: 'right' }}>
-                一共{parseData.length}条记录 &nbsp;&nbsp;
+                A total of{parseData.length} records &nbsp;&nbsp;
                 <Button size="small" color="cyan" variant="solid" onClick={importData}>确认</Button>
             </div>
         )} columns={columns} dataSource={parseData} />;
@@ -81,12 +81,12 @@ const ImportFile: FC<{ component_type: any, component_id: any, component_name: a
                 render: (text: any) => <span>{text}</span>
             }))
             columnsObj = [{
-                title: "样本名称",
+                title: "Sample Name",
                 dataIndex: "sample_name",
                 key: "sample_name",
                 render: (text: any) => <span>{text}</span>
             }, ...columnsObj, {
-                title: "操作",
+                title: "Action",
                 dataIndex: "action",
                 key: "action",
                 ellipsis: true,
@@ -135,17 +135,17 @@ const ImportFile: FC<{ component_type: any, component_id: any, component_name: a
     const importData = async () => {
         const values = await form.validateFields()
         if (values.length == 0) {
-            messageApi.error("没有数据添加!")
+            messageApi.error("No data added!")
             return
         }
         if (inputForm && inputForm.length == 0) {
-            messageApi.error("该组件没有配置inputForm!")
+            messageApi.error("This component does not have inputForm configured!")
             return
         }
         const requestParams = getRequestParams(values)
         try {
             const resp = await axios.post(`/import-data`, requestParams)
-            messageApi.success("导入成功")
+            messageApi.success("Imported successfully!")
             callback && callback()
         } catch (error: any) {
             messageApi.error(error.response.data.detail)
@@ -158,7 +158,7 @@ const ImportFile: FC<{ component_type: any, component_id: any, component_name: a
     const parseImportData = async () => {
         const values = await form.validateFields()
         if (inputForm && inputForm.length == 0) {
-            messageApi.error("该组件没有配置inputForm!")
+            messageApi.error("This component does not have inputForm configured!")
             return
         }
         // const requestParams = getRequestParams(values)
@@ -194,7 +194,7 @@ const ImportFile: FC<{ component_type: any, component_id: any, component_name: a
             });
 
             setParseData(converted);
-            messageApi.success('粘贴成功！');
+            messageApi.success('Paste successful!');
         };
 
         document.addEventListener('paste', handlePaste);
@@ -214,10 +214,10 @@ const ImportFile: FC<{ component_type: any, component_id: any, component_name: a
                             component_type: component_type,
                         }
                     })
-                }}>编辑inputForm</Button>
-                <Button size="small" color="cyan" variant="solid" disabled={!parseData} onClick={() => setParseData([])}>清空</Button>
+                }}>Edit InputForm</Button>
+                <Button size="small" color="cyan" variant="solid" disabled={!parseData} onClick={() => setParseData([])}>Clear</Button>
 
-                <Button size="small" color="cyan" variant="solid" disabled={!inputForm} onClick={parseImportData}>解析</Button>
+                <Button size="small" color="cyan" variant="solid" disabled={!inputForm} onClick={parseImportData}>Parse</Button>
             </Flex>}
 
         >
@@ -227,8 +227,8 @@ const ImportFile: FC<{ component_type: any, component_id: any, component_name: a
 
             <Form form={form}>
                 {/* 同一个样本测序不同部位 */}
-                <Form.Item name={"sample_source"} label="样本来源">
-                    <Input>
+                <Form.Item  name={"sample_source"} label="Sample Source" rules={[{ required: true, message: 'This field cannot be empty!' }]}>
+                    <Input placeholder="gut,brain...">
                     </Input>
                 </Form.Item>
 
@@ -241,7 +241,7 @@ const ImportFile: FC<{ component_type: any, component_id: any, component_name: a
                     <>
                         <Empty
 
-                            description="该组件没有配置inputForm!"
+                            description="This component does not have inputForm configured!"
                         >
 
                             <Button color="cyan" variant="solid" onClick={() => {
@@ -254,11 +254,11 @@ const ImportFile: FC<{ component_type: any, component_id: any, component_name: a
                         </Empty>
                     </>
                 }
-                <RenderTable parseData={parseData} columns={columns} importData={importData}></RenderTable>
+                <RenderTable parseData={parseData} columns={columns} importData={importData} ></RenderTable>
                 <Collapse ghost items={[
                     {
                         key: "1",
-                        label: "更多",
+                        label: "More",
                         children: <>
                             <Form.Item noStyle shouldUpdate>
                                 {() => (

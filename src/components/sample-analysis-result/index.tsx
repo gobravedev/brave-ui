@@ -62,24 +62,24 @@ const SampleAnalysisResult: FC<any> = ({ form, setTableLoading, setSampleResult,
             ellipsis: true,
 
         }, {
-            title: '分析名称',
+            title: 'Analyis Name',
             dataIndex: 'analysis_name',
             key: 'analysis_name',
             ellipsis: true,
 
         }, {
-            title: '分析版本',
+            title: 'Analysis Verison',
             dataIndex: 'analysis_verison',
             key: 'analysis_verison',
             ellipsis: true,
         }, {
-            title: '样本名称',
+            title: 'Sample Name',
             dataIndex: 'sample_name',
             key: 'sample_name',
             ellipsis: true,
 
         }, {
-            title: "软件",
+            title: "Software",
             dataIndex: 'software',
             key: 'software',
             ellipsis: true,
@@ -89,7 +89,7 @@ const SampleAnalysisResult: FC<any> = ({ form, setTableLoading, setSampleResult,
             key: 'project',
             ellipsis: true,
         }, {
-            title: '操作',
+            title: 'Action',
             key: 'action',
             fixed: "right",
             ellipsis: true,

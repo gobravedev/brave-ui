@@ -105,7 +105,7 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
                     formJson={[...data.content?.formJson || [], ...data.content?.upstreamFormJson || [], ...data?.inputFormJson || [],
                     data?.component_type == "software" ? {
                         "name": "group_field",
-                        "label": "分组列",
+                        "label": "Group Field",
                         "rules": [
                             {
                                 "required": true,
@@ -207,7 +207,7 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, for
                 items={[
                     {
                         key: "1",
-                        label: "必填参数",
+                        label: "Required Parameters",
                         forceRender: true,
                         children: <>
 
@@ -218,7 +218,7 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, for
                         </>
                     }, {
                         key: "2",
-                        label: "可选参数",
+                        label: "Optional parameters",
                         forceRender: true,
                         children: <>
                             {/* {data.request_param.data_component_ids} */}
@@ -238,17 +238,17 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, for
                         </>
                     }
                 ]}></Tabs>
-            <Form.Item label="分析名称" name={"analysis_name"} style={{ maxWidth: 600 }} rules={[{ required: true, message: '该字段不能为空!' }]}>
+            <Form.Item label="Analysyis Name" name={"analysis_name"} style={{ maxWidth: 600 }} rules={[{ required: true, message: 'This field cannot be empty!' }]}>
                 <Input></Input>
             </Form.Item>
             <Flex gap={"small"}>
                 <Button size="small" color="cyan" variant="solid" onClick={() => {
                     saveUpstreamAnalysis(false)
-                }}>查看参数</Button>
+                }}>View Parameters</Button>
 
                 <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>
-                    {requestParam?.analysis_id ? <>更新分析({requestParam.analysis_name})({String(requestParam.analysis_id).slice(0, 8)})</> : <>保存分析</>}</Button>
-                {(requestParam?.analysis_id && showCancal) && <Button size="small" color="cyan" onClick={() => form.setFieldValue("analysis_id", undefined)}>取消更新</Button>}
+                    {requestParam?.analysis_id ? <>Update Analysis({requestParam.analysis_name})({String(requestParam.analysis_id).slice(0, 8)})</> : <>Save Analysis</>}</Button>
+                {(requestParam?.analysis_id && showCancal) && <Button size="small" color="cyan" onClick={() => form.setFieldValue("analysis_id", undefined)}>Cancel Analysis</Button>}
                 {/* <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>更新分析</Button> */}
             </Flex>
 

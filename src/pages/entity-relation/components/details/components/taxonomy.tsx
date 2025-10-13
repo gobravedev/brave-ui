@@ -78,7 +78,7 @@ const TableView: FC<any> = ({ data }) => {
                 pagination={false}
                 // virtual
                 columns={getColumns(data[0])}
-                footer={() => `一共${filteredData?.length}条记录`}
+                footer={() => `A total of ${filteredData?.length} records`}
             ></Table>
 
 

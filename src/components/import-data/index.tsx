@@ -6,15 +6,21 @@ import ImportFile from "./import-file"
 const ImportData: FC<any> = ({ visible, onClose, params, callback }) => {
     if (!visible) return null;
     return <>
-        <Modal open={visible} onClose={onClose} width={"80%"} onCancel={onClose} title="导入数据" footer={null}>
+        <Modal open={visible} onClose={onClose} width={"80%"} onCancel={onClose} title="Import Data" footer={null}>
             {/* {JSON.stringify(params)} */}
-            <MemoizedImportFileComponnetRender params={params} type="inputFile" callback={onClose} />
+            <MemoizedImportFileComponnetRender params={params} type="inputFile" callback={() => {
+                onClose()
+                if (callback) {
+                    callback()
+                }
+
+            }} />
 
             {/* {JSON.stringify(params)} */}
             {/* <Tabs items={[
                 {
                     key: "1",
-                    label: "输入文件",
+                    label: "Input File",
                     children: <>
                         {params && <>
                             <MemoizedImportFileComponnetRender params={params} type="inputFile" callback={onClose} />
@@ -58,7 +64,7 @@ const ImportFileComponnetRender: FC<any> = ({ params, type, callback }) => {
     } else if (params.component_type == "pipeline") {
         return <ImportFile {...params} ></ImportFile>
     } else if (params.component_type == "file") {
-        return <ImportFile {...params} ></ImportFile>
+        return <ImportFile {...params} callback={callback}></ImportFile>
     }
 }
 const MemoizedImportFileComponnetRender = memo(ImportFileComponnetRender)
