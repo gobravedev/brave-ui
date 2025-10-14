@@ -413,13 +413,14 @@ export default CreateORUpdatePipelineCompnentRelation
 
 const UploadComp: FC<any> = ({ value, onChange, component_id }) => {
     const [fileList, setFileList] = useState<any>([])
+    const { baseURL } = useSelector((state: any) => state.user)
 
     const handleChange: UploadProps['onChange'] = ({ file, fileList }) => {
         // console.log()
         setFileList([file]);
         if (file.status === 'done') {
             console.log(file)
-            onChange(file.response.url)
+            onChange(`${file.response.url}`)
 
         }
 
@@ -432,7 +433,7 @@ const UploadComp: FC<any> = ({ value, onChange, component_id }) => {
                 uid: '-1',
                 name: 'image.png',
                 status: 'done',
-                url: `${window.location.origin}${value}`
+                url: `${baseURL}${value}`
             }])
         }
 
@@ -442,7 +443,7 @@ const UploadComp: FC<any> = ({ value, onChange, component_id }) => {
         <Upload
             onChange={handleChange}
             fileList={fileList}
-            action={`/brave-api/component/upload/${component_id}`} listType="picture-card"  >
+            action={`${baseURL}/brave-api/component/upload/${component_id}`} listType="picture-card"  >
             <button
                 style={{ color: 'inherit', cursor: 'inherit', border: 0, background: 'none' }}
                 type="button"
