@@ -52,7 +52,7 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
     const { namespace } = useSelector((state: any) => state.user);
     const { data, pageNumber, totalPage, loading, reload, pageSize, setPageNumber } = usePagination({
         pageApi: pageContainerApi,
-        params: { ...params_}
+        params: { ...params_ }
     })
 
 
@@ -68,7 +68,7 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
         //         {text ? text : record.namespace}
         //     </>)
         // },
-         {
+        {
             title: "Container Id",
             dataIndex: "container_id",
             key: "container_id"
@@ -110,13 +110,15 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
                     <Button size="small" color="cyan" variant="solid" onClick={() => {
                         openModal("modalA", record.container_id)
                     }}>Update</Button>
-                    <Popconfirm title="Delete?" onConfirm={async () => {
-                        // deleteContainer(record)
-                        await axios.delete(`/container/delete-container-by-id/${record.container_id}`)
-                        reload()
-                    }}>
-                        <Button size="small" danger variant="solid">Delete</Button>
-                    </Popconfirm>
+                    {record.status != "running" &&
+                        <Popconfirm title="Delete?" onConfirm={async () => {
+                            // deleteContainer(record)
+                            await axios.delete(`/container/delete-container-by-id/${record.container_id}`)
+                            reload()
+                        }}>
+                            <Button size="small" danger variant="solid">Delete</Button>
+                        </Popconfirm>}
+
 
 
 
@@ -204,18 +206,18 @@ export const ContainerOpt: FC<any> = ({ record, reload, traefikUI = false }) => 
                 <Tooltip title={<>
                     {`${originWithoutPort(containerURL, record.port)}`}
                 </>}>
-                    <a onClick={() => {
+                    <Button size="small" color="blue" variant="solid" onClick={() => {
                         window.open(`${originWithoutPort(containerURL, record.port)}`, "_blank")
-                    }}>Traefik UI</a>
+                    }}>Traefik UI</Button>
                 </Tooltip>
             </> :
                 <>
                     <Tooltip title={<>
                         {`${containerURL}/container/${record.container_id}/`}
                     </>}>
-                        <a onClick={() => {
+                        <Button size="small" color="blue" variant="solid" onClick={() => {
                             window.open(`${containerURL}/container/${record.container_id}/`, "_blank")
-                        }}>Open URL</a>
+                        }}>Open URL</Button>
                     </Tooltip>
                 </>
             }
@@ -230,7 +232,8 @@ export const ContainerOpt: FC<any> = ({ record, reload, traefikUI = false }) => 
                 onClick={() => {
                     openModal("inspectPanel", {
                         inspect: "inspect",
-                        id: record.container_id
+                        id: record.container_id,
+                        run_type: "retry"
                     })
                 }}  >Inspect</Button>
         </> : <>
@@ -286,7 +289,7 @@ export const InspectPanel: FC<any> = ({ visible, params, onClose, callback }) =>
     const [loading, setLoading] = useState<any>(false)
     const loadData = async () => {
         setLoading(true)
-        const resp = await axios.get(`/container/${params.inspect}/${params?.id}?run_type=${params?.run_type}`)
+        const resp = await axios.get(`/container/${params.inspect}/${params?.id}${params?.run_type ? `?run_type=${params?.run_type}` : ""}`)
         setData(resp.data)
         setLoading(false)
     }
@@ -311,7 +314,6 @@ import { fa, tr } from "@faker-js/faker"
 const InstallContainerModal: FC<any> = ({ visible, params, onClose, callback }) => {
     // const [namespace, setNamespace] = useState<any>()
     const [messageApi, contextHolder] = message.useMessage();
-    const { namespace } = useSelector((state: any) => state.user);
 
     return <Modal title="Install Container" footer={null} width={"50%"} open={visible} onClose={onClose} onCancel={onClose}>
         {contextHolder}
@@ -337,15 +339,12 @@ const InstallContainerModal: FC<any> = ({ visible, params, onClose, callback }) 
                             <Popconfirm title="Install?" onConfirm={async () => {
 
                                 const newParams = JSON.parse(JSON.stringify(record));
-                                if (!namespace) {
-                                    messageApi.error("Please select namespace!")
-                                }
+
                                 newParams.envionment = JSON.stringify(record.envionment)
                                 newParams.labels = JSON.stringify(record.labels)
                                 // if (newParams.namespace != "default") {
                                 //     newParams.namespace = namespace
                                 // }
-                                newParams.namespace = namespace
                                 await axios.post(`/container/add-or-update-container`, newParams)
                                 onClose()
                                 callback()
@@ -384,50 +383,53 @@ const ContainerModal: FC<any> = ({ visible, params, onClose, callback }) => {
         if (callback) {
             callback()
         }
-        messageApi.success("操作成功!")
+        messageApi.success("Operation successful!")
     }
-    return <Modal title={params ? `编辑容器` : "创建容器"}
+    return <Modal title={params ? `Edit Container` : "Create Container"}
         onOk={save}
         width={"50%"} open={visible} onClose={onClose} onCancel={onClose}>
         {/* {params} */}
         <Form form={form}>
-            <Form.Item name={"namespace"} label="namespace" rules={[{ required: true, message: '该字段不能为空!' }]}>
+            {/* <Form.Item name={"namespace"} label="Namespace" rules={[{ required: true, message: 'This field is required!' }]}>
                 <NamespaceSelect ></NamespaceSelect>
-            </Form.Item>
+            </Form.Item> */}
 
-            <Form.Item name={"name"} label="名称" rules={[{ required: true, message: '该字段不能为空!' }]}>
+            <Form.Item name={"name"} label="Name" rules={[{ required: true, message: 'This field is required!' }]}>
                 <Input ></Input>
             </Form.Item>
 
-            <Form.Item name={"image"} label="镜像" rules={[{ required: true, message: '该字段不能为空!' }]}>
+            <Form.Item name={"image"} label="Image" rules={[{ required: true, message: 'This field is required!' }]}>
                 <Input ></Input>
             </Form.Item>
-            <Form.Item name={"container_key"} label="container_key" >
+            <Form.Item name={"container_key"} label="Container Key" >
                 <Input disabled ></Input>
             </Form.Item>
-            <Form.Item name={"description"} label="描述">
+            <Form.Item name={"description"} label="Description">
                 <TextArea ></TextArea>
             </Form.Item>
 
-            <Form.Item name={"envionment"} label="环境变量">
+            <Form.Item name={"envionment"} label="Environment Variables">
                 <TextArea ></TextArea>
             </Form.Item>
-            <Form.Item name={"command"} label="命令">
+            <Form.Item name={"command"} label="Command">
                 <TextArea ></TextArea>
             </Form.Item>
-            <Form.Item name={"labels"} label="标签">
+            <Form.Item name={"labels"} label="Labels">
                 <TextArea ></TextArea>
             </Form.Item>
-            <Form.Item name={"port"} label="端口">
+            <Form.Item name={"port"} label="Port">
                 <Input ></Input>
             </Form.Item>
-            <Form.Item name={"change_uid"} label="修改用户">
+            <Form.Item name={"img"} label="Img" >
+                <TextArea ></TextArea>
+            </Form.Item>
+            <Form.Item name={"change_uid"} label="Change User">
                 <Select options={[
                     {
-                        label: "是",
+                        label: "Yes",
                         value: true
                     }, {
-                        label: "否",
+                        label: "No",
                         value: false
                     }
                 ]} ></Select>
@@ -436,7 +438,7 @@ const ContainerModal: FC<any> = ({ visible, params, onClose, callback }) => {
             <Collapse ghost items={[
                 {
                     key: "1",
-                    label: "更多",
+                    label: "More",
                     children: <>
                         <Form.Item noStyle shouldUpdate>
                             {() => (
