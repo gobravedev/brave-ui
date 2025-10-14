@@ -50,16 +50,16 @@ const LogFile: FC<any> = ({ file_path }) => {
         <Card
             size="small"
             extra={
-                <Button size="small" color="cyan" variant="solid" onClick={() => {
-                    readFile(file_path)
-                }}>刷新日志</Button>
+            <Button size="small" type="primary" onClick={() => {
+                readFile(file_path)
+            }}>Refresh Log</Button>
             }
             title={
-                <Flex gap="small" wrap="wrap">
-                    <Tag color="blue">文件: {file_path}</Tag>
-                    <Tag color="purple">偏移量: {offsetRef.current}</Tag>
-                    {/* <Tag color="green">分析ID: {analysis_id}</Tag> */}
-                </Flex>
+            <Flex gap="small" wrap="wrap">
+                <Tag color="blue">File: {file_path}</Tag>
+                <Tag color="purple">Offset: {offsetRef.current}</Tag>
+                {/* <Tag color="green">Analysis ID: {analysis_id}</Tag> */}
+            </Flex>
             }
             bodyStyle={{ padding: 0 }}
         >

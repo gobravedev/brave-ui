@@ -1,7 +1,7 @@
 import { Button, Card, Col, Empty, Flex, Row, Tag, Tree, TreeDataNode, TreeProps } from "antd"
 import axios from "axios"
 import { FC, useEffect, useRef, useState } from "react"
-import { useNavigate, useOutletContext } from "react-router"
+import { useLocation, useNavigate, useOutletContext, useParams } from "react-router"
 import { DownOutlined } from '@ant-design/icons'
 import { AnalysisResultViewComp } from '@/components/analysis-result-view'
 const AnalysisReport: FC<any> = () => {
@@ -9,8 +9,40 @@ const AnalysisReport: FC<any> = () => {
     const { project, projectObj } = useOutletContext<any>()
     const [data, setData] = useState<any>()
     const [analysis, setAnalysis] = useState<any>()
+    const location = useLocation()
+    const queryParams = new URLSearchParams(location.search);
+    const key = queryParams.get("key");
+
+    const [analysisKey, setAnalysisKey] = useState<any>(key)
+
     const resultRef = useRef<any>(null)
     const navigate = useNavigate()
+    // const updateKey = (newKey:any) => {
+    //     const searchParams = new URLSearchParams(location.search);
+    //     searchParams.set("key", newKey);
+
+    //     navigate({
+    //         pathname: location.pathname,
+    //         search: `?${searchParams.toString()}`
+    //     });
+    // };
+    const updateKey = (newKey: string) => {
+        // 获取当前 hash，例如 "#/analysis-report?key=1111"
+        const hash = window.location.hash;
+
+        // 分离路径和参数部分
+        const [path, search = ""] = hash.replace(/^#/, "").split("?");
+        const searchParams = new URLSearchParams(search);
+
+        // 修改 key 参数
+        searchParams.set("key", newKey);
+
+        // 组装新的 hash
+        const newHash = `#${path}?${searchParams.toString()}`;
+
+        // 更新地址栏但不刷新页面
+        window.history.pushState({}, "", newHash);
+    };
     // const [components,setComponents] = useState<any>()
     // const loadComponents = async (componentId:any) => {
     //     const resp = await axios.post("/find-pipeline", { component_id: componentId })
@@ -44,14 +76,17 @@ const AnalysisReport: FC<any> = () => {
 
 
         setData(resp.data)
-        if (resp.data.length > 0) {
+        if (!key && resp.data.length > 0) {
             if (resp.data[0]?.children && resp.data[0]?.children.length > 0) {
                 setAnalysis(resp.data[0]?.children[0])
+                setAnalysisKey(resp.data[0]?.children[0]?.key)
             }
         }
 
         setLoading(false)
     }
+
+
     const reloadResult = () => {
         resultRef.current.reload()
     }
@@ -62,6 +97,8 @@ const AnalysisReport: FC<any> = () => {
 
         {/* <div style={{ marginBottom: "1rem" }}></div> */}
         {/* {JSON.stringify(projectObj)} */}
+        {/* {JSON.stringify(analysis)} */}
+        {/* {key} */}
         <Row style={{ marginTop: "1rem" }}>
             <Col lg={6} sm={6} xs={24} ref={containerRef} style={{
 
@@ -94,13 +131,15 @@ const AnalysisReport: FC<any> = () => {
                         <LeftPanel onSelect={(val: any) => {
                             if (val.node?.type == "analysis") {
                                 setAnalysis(val.node)
+                                setAnalysisKey(val.node.key)
+                                updateKey(val.node.key)
                             } else if (val.node?.type == "components") {
                                 console.log(val.node)
                                 // loadComponents(val.node.key)
                             }
 
                             // console.log(val)
-                        }} defaultSelectKey={analysis?.key} treeData={data}></LeftPanel>
+                        }} defaultSelectKey={analysisKey} treeData={data}></LeftPanel>
 
                     </> : <>
                         <Empty></Empty>
@@ -112,10 +151,10 @@ const AnalysisReport: FC<any> = () => {
             </Col>
             <Col lg={18} sm={18} xs={24} style={{ paddingLeft: "1rem" }}>
 
-                {analysis ? <>
+                {analysisKey ? <>
                     <AnalysisResultViewComp cancalReportCallback={() => {
                         loadData()
-                    }} analysis_id={analysis?.key}></AnalysisResultViewComp>
+                    }} analysis_id={analysisKey}></AnalysisResultViewComp>
                 </> : <>
                     <Card size="small">
                         <Empty></Empty>
@@ -137,49 +176,49 @@ export default AnalysisReport
 // }
 const LeftPanel: FC<any> = ({ treeData, defaultSelectKey, onSelect: onSelect_ }) => {
 
-    const treeData2: TreeDataNode[] = [
-        {
-            title: 'parent 1',
-            key: '0-0',
-            children: [
-                {
-                    title: 'parent 1-0',
-                    key: '0-0-0',
+    // const treeData2: TreeDataNode[] = [
+    //     {
+    //         title: 'parent 1',
+    //         key: '0-0',
+    //         children: [
+    //             {
+    //                 title: 'parent 1-0',
+    //                 key: '0-0-0',
 
-                },
-                {
-                    title: 'parent 1-1',
-                    key: '0-0-1',
+    //             },
+    //             {
+    //                 title: 'parent 1-1',
+    //                 key: '0-0-1',
 
-                },
-                {
-                    title: 'parent 1-2',
-                    key: '0-0-2',
+    //             },
+    //             {
+    //                 title: 'parent 1-2',
+    //                 key: '0-0-2',
 
-                },
-            ],
-        }, {
-            title: 'parent 1',
-            key: '0-1',
-            children: [
-                {
-                    title: 'parent 1-0',
-                    key: '0-0-0',
+    //             },
+    //         ],
+    //     }, {
+    //         title: 'parent 1',
+    //         key: '0-1',
+    //         children: [
+    //             {
+    //                 title: 'parent 1-0',
+    //                 key: '0-0-0',
 
-                },
-                {
-                    title: 'parent 1-1',
-                    key: '0-0-1',
+    //             },
+    //             {
+    //                 title: 'parent 1-1',
+    //                 key: '0-0-1',
 
-                },
-                {
-                    title: 'parent 1-2',
-                    key: '0-0-2',
+    //             },
+    //             {
+    //                 title: 'parent 1-2',
+    //                 key: '0-0-2',
 
-                },
-            ],
-        },
-    ];
+    //             },
+    //         ],
+    //     },
+    // ];
     const [selectedKey, setSelectedKey] = useState<any>(defaultSelectKey)
     const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
 
@@ -221,6 +260,7 @@ const LeftPanel: FC<any> = ({ treeData, defaultSelectKey, onSelect: onSelect_ })
 
     return (
         <>
+
             {/* {defaultSelectKey} */}
             <Tree
                 selectedKeys={[selectedKey]}

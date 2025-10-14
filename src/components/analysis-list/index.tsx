@@ -4,7 +4,7 @@ import axios from "axios"
 import { FC, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { useLocation, useNavigate, useOutletContext, useParams } from "react-router"
 import ResultParse from "../result-parse"
-import { useModal } from "@/hooks/useModal"
+import { useModal, useModals } from "@/hooks/useModal"
 import PipelineInfo from "../pipeline-monitor"
 import { runAnalysisApi, stopAnalysisApi } from "@/api/analysis"
 import AnalysisResultView from "../analysis-result-view"
@@ -42,6 +42,8 @@ const ResultList = forwardRef<any, any>(({
     const [record, setRecord0] = useState<any>()
     const [messageApi, contextHolder] = message.useMessage();
     const { modal, openModal, closeModal } = useModal();
+    const { modals, openModals, closeModals } = useModals(["inspectPanel"]);
+
     const [openMonitor, setOpenMonitor] = useState<any>(false)
     const navigate = useNavigate()
     const location = useLocation()
@@ -302,7 +304,7 @@ const ResultList = forwardRef<any, any>(({
                                     stopAnalysis(record,"job")
 
                                 }}>
-                                    <Button size="small" color="cyan" variant="solid">
+                                    <Button size="small" color="red" variant="solid">
                                         Stop Job
                                     </Button>
                                 </Popconfirm>
@@ -314,7 +316,7 @@ const ResultList = forwardRef<any, any>(({
                                     setRecord(record)
                                 }}>
                                     <Button size="small" color="cyan" variant="solid">
-                                        {record.analysis_status == "created" ? "Run" : "Rerun"}
+                                        {record.analysis_status == "created" ? "Run" : "Re-Run"}
                                     </Button>
                                 </Popconfirm>
 
@@ -327,7 +329,7 @@ const ResultList = forwardRef<any, any>(({
                                 <Tooltip title={<>
                                     {`${containerURL}/container/${record.analysis_id}/`}
                                 </>}>
-                                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                    <Button size="small" color="blue" variant="solid" onClick={() => {
                                         //  console.log("record", record)
 
                                         window.open(`${containerURL}/container/${record.analysis_id}/`, "_blank")
@@ -337,7 +339,7 @@ const ResultList = forwardRef<any, any>(({
                                     stopAnalysis(record,"server")
 
                                 }}>
-                                    <Button size="small" color="cyan" variant="solid">
+                                    <Button size="small" color="red" variant="solid">
                                         Stop Server
                                     </Button>
                                 </Popconfirm>
@@ -407,7 +409,7 @@ const ResultList = forwardRef<any, any>(({
                                 label: (<>
                                     <a onClick={async () => {
                                         // await axios.get(`/container/inspect/${record.analysis_id}`)
-                                        openModal("inspectPanel", {
+                                        openModals("inspectPanel", {
                                             inspect: "inspect",
                                             id: record.analysis_id,
                                             run_type:"job"
@@ -420,7 +422,7 @@ const ResultList = forwardRef<any, any>(({
                                 label: (<>
                                     <a onClick={async () => {
                                         // await axios.get(`/container/inspect/${record.analysis_id}`)
-                                        openModal("inspectPanel", {
+                                        openModals("inspectPanel", {
                                             inspect: "inspect",
                                             id: record.analysis_id,
                                             run_type:"server"
@@ -574,9 +576,9 @@ const ResultList = forwardRef<any, any>(({
 
         <InspectPanel
             callback={loadData}
-            visible={modal.key == "inspectPanel" && modal.visible}
-            params={modal.params}
-            onClose={closeModal}
+            visible={modals.inspectPanel.visible}
+            params={modals.inspectPanel.params}
+            onClose={() => closeModals("inspectPanel")}
         ></InspectPanel>
         {/* <ResultParse
             visible={modal.key == "modalA" && modal.visible}

@@ -531,7 +531,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
 
                                 }}>
                                     <Button size="small" color="cyan" variant="solid">
-                                        {analsyisResult.analysis_status == "created" ? "Run" : "Rerun"}
+                                        {analsyisResult.job_status == "created" ? "Run" : "Rerun"}
                                     </Button>
                                 </Popconfirm>
 
@@ -556,12 +556,12 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
             }>
 
 
-
-            {analsyisResult?.analysis_status == "failed" ? <div style={{ textAlign: "center" }}>
+            {/* {analysis_id} */}
+            {analsyisResult?.job_status == "failed" ? <div style={{ textAlign: "center" }}>
 
                 <LogFile file_path={analsyisResult?.command_log_path}  ></LogFile>
             </div> : <>
-                {((analsyisResult?.analysis_status == "running" && analsyisResult?.run_type != "server")) ? <Skeleton active></Skeleton> : <>
+                {((analsyisResult?.job_status == "running" && analsyisResult?.run_type != "server")) ? <Skeleton active></Skeleton> : <>
 
 
                     {analysis_id && <AnalysisResultDisplay analsyisResult={analsyisResult} loading={loading}></AnalysisResultDisplay>}

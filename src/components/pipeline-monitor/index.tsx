@@ -545,92 +545,91 @@ export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
             callback()
         }
     }
-
     const items = [
         {
             key: "command_log_path",
-            label: <Tooltip title={<>
+            label: <Tooltip title={
                 <ul>
                     <li>{analysis?.command_log_path}</li>
                 </ul>
-            </>}>
-                运行日志
+            }>
+                Run Log
             </Tooltip>
         }, {
             key: "trace_file",
-            label: <Tooltip title={<>
+            label: <Tooltip title={
                 <ul>
                     <li>{analysis?.trace_file}</li>
                 </ul>
-            </>}>
-                运行进度
+            }>
+                Progress
             </Tooltip>
         }, {
             key: "workflow_log_file",
-            label: <Tooltip title={<>
+            label: <Tooltip title={
                 <ul>
                     <li>{analysis?.workflow_log_file}</li>
                 </ul>
-            </>}>
-                工作流日志
+            }>
+                Workflow Log
             </Tooltip>
         },
         {
             key: "executor_log_file",
-            label: <Tooltip title={<>
+            label: <Tooltip title={
                 <ul>
                     <li>{analysis?.executor_log_file}</li>
                 </ul>
-            </>}>
-                执行器日志
+            }>
+                Executor Log
             </Tooltip>
         },
         {
             key: "params_path",
-            label: <Tooltip title={<>
+            label: <Tooltip title={
                 <ul>
                     <li>{analysis?.params_path}</li>
                 </ul>
-            </>}>
-                参数
+            }>
+                Parameters
             </Tooltip>
         },
         {
             key: "command_path",
-            label: <Tooltip title={<>
+            label: <Tooltip title={
                 <ul>
                     <li>{analysis?.command_path}</li>
                 </ul>
-            </>}>
-                命令
+            }>
+                Command
             </Tooltip>
         },
         {
             key: "output_dir",
-            label: <Tooltip title={<>
+            label: <Tooltip title={
                 <ul>
                     <li>{analysis?.output_dir}</li>
                 </ul>
-            </>}>
+            }>
                 Output File
             </Tooltip>
         }, {
             key: "analysis_progress",
-            label: <Tooltip title={<>
+            label: <Tooltip title={
                 <ul>
                     <li>{analysis?.output_dir}</li>
                 </ul>
-            </>}>
-                分析可视化
+            }>
+                Analysis Visualization
             </Tooltip>
         }, {
             key: "result_parse",
-            label: <Tooltip title={<>
+            label: <Tooltip title={
                 <ul>
                     <li>{analysis?.output_dir}</li>
                 </ul>
-            </>}>
-                结果解析
+            }>
+                Result Parsing
             </Tooltip>
         }
     ]
@@ -650,32 +649,28 @@ export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
                 </Tooltip>
                 {analysis.job_status == "running" ?
                     <>
-                        <Popconfirm title={"是否停止!"} onConfirm={async () => {
-                            await stopAnalysisApi(analysis.analysis_id,"job")
-                            messageApi.success("停止成功")
-
+                        <Popconfirm title={"Stop the job?"} onConfirm={async () => {
+                            await stopAnalysisApi(analysis.analysis_id, "job")
+                            messageApi.success("Stopped successfully")
                         }}>
                             <Button size="small" color="cyan" variant="solid">
-                                停止
+                                Stop
                             </Button>
                         </Popconfirm>
-
                     </> : <>
-                        <Popconfirm title={"是否运行!"} onConfirm={runAnalysis}>
+                        <Popconfirm title={"Run the job?"} onConfirm={runAnalysis}>
                             <Button size="small" color="cyan" variant="solid">
-                                {analysis.analysis_status == "created" ? "运行" : "重新运行"}
+                                {analysis.analysis_status == "created" ? "Run" : "Re-Run"}
                             </Button>
                         </Popconfirm>
-
                     </>
                 }
-
 
                 {/* <Tooltip title={<>
                     {analysis?.analysis_id}
                 </>}>
                     <Button disabled={analysis.analysis_status == "running"} size="small" color="cyan" variant="solid" onClick={runAnalysis}>
-                        {analysis.analysis_status == "created" ? "运行" : "重新运行"}
+                        {analysis.analysis_status == "created" ? "Run" : "Re-Run"}
                     </Button>
                 </Tooltip> */}
             </Flex>
@@ -737,7 +732,7 @@ const PipelineInfo: FC<any> = forwardRef<any, any>(({ visible, params, onClose, 
     return <>
         <Card
             size="small"
-            title={`流程监控 ${analysisId}`}
+            title={`Process Monitoring ${analysisId}`}
 
             // activeTabKey={activeTabKey}
             extra={<>
