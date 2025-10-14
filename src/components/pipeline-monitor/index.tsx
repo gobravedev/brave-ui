@@ -640,7 +640,7 @@ export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
         {/* {JSON.stringify(currentAnalysis)} */}
         <Tabs tabBarExtraContent={
             <Flex gap={"small"} align={"center"}>
-                <Tag color="cyan" >{analysis?.analysis_status}</Tag>
+                <Tag color="cyan" >{analysis?.job_status}</Tag>
                 <Tooltip title={<>
                     {fileMap[fileTabKey]}
                 </>}>
@@ -648,10 +648,10 @@ export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
                         readFile(fileTabKey)
                     }}>刷新日志</Button> */}
                 </Tooltip>
-                {analysis.analysis_status == "running" ?
+                {analysis.job_status == "running" ?
                     <>
                         <Popconfirm title={"是否停止!"} onConfirm={async () => {
-                            await stopAnalysisApi(analysis.analysis_id)
+                            await stopAnalysisApi(analysis.analysis_id,"job")
                             messageApi.success("停止成功")
 
                         }}>

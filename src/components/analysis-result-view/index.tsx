@@ -489,7 +489,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
                     }}>{analsyisResult?.component_name}</Tag>
                     <Tag>{analsyisResult?.analysis_name}</Tag>
                     <Tag>{String(analsyisResult?.analysis_id).slice(0, 8)}</Tag>
-                    <Tag>{analsyisResult?.analysis_status}</Tag>
+                    <Tag>{analsyisResult?.job_status}</Tag>
                     {analysisIdRef.current == sseAnalysisIdRef.current?.analysis_id && <Tag> <>{sseAnalysisIdRef.current?.event}</>
                     </Tag>}
 
@@ -509,10 +509,12 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
                         }}>
                             Edit Parameters
                         </Button>
-                        {analsyisResult?.analysis_status == "running" ?
+                        
+
+                        {analsyisResult?.job_status == "running" ?
                             <>
                                 <Popconfirm title={"Whether or not to stop?"} onConfirm={async () => {
-                                    await stopAnalysisApi(analsyisResult.analysis_id)
+                                    await stopAnalysisApi(analsyisResult.analysis_id,"job")
                                     messageApi.success("Stop Success")
 
                                 }}>
