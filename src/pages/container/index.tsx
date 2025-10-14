@@ -52,7 +52,7 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
     const { namespace } = useSelector((state: any) => state.user);
     const { data, pageNumber, totalPage, loading, reload, pageSize, setPageNumber } = usePagination({
         pageApi: pageContainerApi,
-        params: { ...params_, namespace: namespace }
+        params: { ...params_}
     })
 
 
@@ -60,14 +60,15 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
     const { messageApi } = useOutletContext<any>()
     const { modal, openModal, closeModal } = useModal();
     const columns: any[] = [
-        {
-            title: "Namespace",
-            dataIndex: "namespace_name",
-            key: "namespace_name",
-            render: (text: any, record: any) => (<>
-                {text ? text : record.namespace}
-            </>)
-        }, {
+        // {
+        //     title: "Namespace",
+        //     dataIndex: "namespace_name",
+        //     key: "namespace_name",
+        //     render: (text: any, record: any) => (<>
+        //         {text ? text : record.namespace}
+        //     </>)
+        // },
+         {
             title: "Container Id",
             dataIndex: "container_id",
             key: "container_id"

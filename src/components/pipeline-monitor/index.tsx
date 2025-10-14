@@ -704,6 +704,9 @@ const PipelineInfo: FC<any> = forwardRef<any, any>(({ visible, params, onClose, 
             callback()
         }
     }
+    
+    const { analysis_id: analysisId, ...rest } = params || {}
+
     const loadAnalysis = async () => {
         // console.log('11111111111111111params',params)
         if (analysisId) {
@@ -724,10 +727,9 @@ const PipelineInfo: FC<any> = forwardRef<any, any>(({ visible, params, onClose, 
         }
     }, [visible && params?.analysis_id])
     if (!visible) return <>
-        {/* 无数据....... */}
+        
     </>
 
-    const { analysis_id: analysisId, ...rest } = params
 
 
 

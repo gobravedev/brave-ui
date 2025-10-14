@@ -68,7 +68,7 @@ const App: React.FC = () => {
     const [menus, setMenus] = useState<any>([])
     const [selectedKeyMap, setSelectedKeyMap] = useState<any>()
     const { t, locale } = useI18n();
-    const { theme, baseURL, projectObj,project:project_id } = useSelector((state: any) => state.user); // 'light' | 'dark'
+    const { theme, baseURL, projectObj, project: project_id } = useSelector((state: any) => state.user); // 'light' | 'dark'
 
     const isDark = theme === 'dark';
     const bgColor = isDark ? '#001529' : '#fff'; // 深色/白色
@@ -685,11 +685,11 @@ const SettingDrawer: FC<any> = ({ visible, onClose, project_id, openModal: openM
             <div>
                 Namespace: <NamespaceSelect></NamespaceSelect>
             </div>
-            <div>
+            {/* <div>
                 <Button size="small" color="cyan" variant="solid" onClick={() => {
                     openModal("installNamespace")
                 }}>Install namespace</Button>
-            </div>
+            </div> */}
         </Flex>
         <InstallNamespace
             callback={onClose}
@@ -823,12 +823,13 @@ brave  \
 
 //     </>
 // }
+
 const NamespaceSelect: FC<any> = () => {
-    const { namespace } = useSelector((state: any) => state.user);
+    const [namespace, setNamespace] = useState<any>()
     const [dataList, setdDataList] = useState<any>([])
+    const [loading, setLoading] = useState(false)
     const { modal, openModal, closeModal } = useModal();
     const message = useGlobalMessage()
-    const dispatch = useDispatch()
     const loadData = async () => {
         const resp: any = await axios.get("/list-namespace")
         // console.log(resp.data)
@@ -839,16 +840,26 @@ const NamespaceSelect: FC<any> = () => {
             }
         })
         setdDataList(dataList)
-
-
+    }
+    const loadUsedNamespace = async () => {
+        setLoading(true)
+        const resp: any = await axios.get("/get-used-namespace")
+        // console.log(resp.data)
+        setNamespace(resp.data)
+        setLoading(false)
     }
     useEffect(() => {
+        loadUsedNamespace()
         loadData()
     }, [])
     return <>
+        {/* {JSON.stringify(namespace)} */}
+
 
         <Select
+            loading={loading}
             size='small'
+
             // open={true}
             dropdownRender={(menu) => <>
                 {menu}
@@ -862,18 +873,18 @@ const NamespaceSelect: FC<any> = () => {
                     }}>Refresh</Button>
                 </Flex>
 
-                {namespace && (
+                {namespace?.namespace_id && (
                     <>
                         <Divider style={{ margin: '8px 0' }} />
-                        <Tooltip title={namespace} placement='bottom'>
+                        <Tooltip title={namespace.namespace_id} placement='bottom'>
 
                             <Flex gap={"small"} justify={"space-between"} >
 
                                 <Button type='text' size="small" color="cyan" variant='solid' onClick={() => {
-                                    openModal("namespace", { namespace_id: namespace })
+                                    openModal("namespace", { namespace_id: namespace.namespace_id })
                                 }}>Update</Button>
                                 <Popconfirm title="Are you sure about the deletion?" onConfirm={async () => {
-                                    await axios.delete(`/delete-namespace-by-id/${namespace}`)
+                                    await axios.delete(`/delete-namespace-by-id/${namespace.namespace_id}`)
                                     message.success("successfully delete")
                                     loadData()
                                 }}>
@@ -885,12 +896,16 @@ const NamespaceSelect: FC<any> = () => {
 
                     </>)}
             </>}
-            onChange={(value: any) => {
+            onChange={async (value: any) => {
                 console.log("onChange", value)
-                dispatch(setUserItem({ namespace: value }))
+                // dispatch(setUserItem({ namespace: value }))
+                setLoading(true)
+                await axios.post(`/set-used-namespace/${value}`)
+                await loadUsedNamespace()
+                setLoading(false)
                 message.success(`Switching Namespaces: ${value}`)
             }}
-            value={namespace}
+            value={namespace?.namespace_id}
             style={{ width: 130 }}
             placeholder="Select Namespace"
             options={dataList}
@@ -910,7 +925,7 @@ const ProjectComp: FC<any> = ({ }) => {
     const dispatch = useDispatch()
     const message = useGlobalMessage()
     const { modal, openModal, closeModal } = useModal();
-    const { project:project_id } = useSelector((state: any) => state.user);
+    const { project: project_id } = useSelector((state: any) => state.user);
 
     const loadProject = async () => {
         const resp: any = await axios.get("/project/list-project")
@@ -980,7 +995,7 @@ const ProjectComp: FC<any> = ({ }) => {
             onChange={(value: any) => {
                 console.log("onChange", value)
 
-                dispatch(setUserItem({project: value}))
+                dispatch(setUserItem({ project: value }))
                 message.success(`Switching Project: ${value}`)
                 // setProjectObj(projectMap[value])
                 // loadProject()

@@ -115,8 +115,7 @@ const ContainerComp: FC<any> = ({ keys }) => {
     const loadData = async () => {
         setLoading(true)
         const resp = await axios.post(`/container/list-container-key`, {
-            container_key: keys,
-            namespace: namespace
+            container_key: keys
         })
         setContainerIds(resp.data.map((item: any) => item.container_id))
         const obj = Object.fromEntries(resp.data.map((item: any) => [item.container_key, item]));
