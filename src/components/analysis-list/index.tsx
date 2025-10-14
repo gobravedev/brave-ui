@@ -76,7 +76,7 @@ const ResultList = forwardRef<any, any>(({
                 console.log('analysisId', analysisIdRef.current)
                 if (analysisIdRef.current.includes(data.analysis_id)) {
 
-                    if ( data.event == "analysis_complete" || data.event == "analysis_failed" || data.event == "analysis_started") {
+                    if (data.event == "analysis_complete" || data.event == "analysis_failed" || data.event == "analysis_started") {
                         loadData()
                         // if (analysisResultRef.current) {
                         //     analysisResultRef.current?.relaod()
@@ -167,8 +167,8 @@ const ResultList = forwardRef<any, any>(({
         message.success("run successfully")
         loadData()
     }
-    const stopAnalysis = async (record: any) => {
-        await stopAnalysisApi(record.analysis_id)
+    const stopAnalysis = async (record: any,run_type:any) => {
+        await stopAnalysisApi(record.analysis_id,run_type)
         message.success("Stop Success")
         loadData()
     }
@@ -184,9 +184,17 @@ const ResultList = forwardRef<any, any>(({
                 </Tooltip>
             }
         }, {
-            title: 'Analysis Status',
-            dataIndex: 'analysis_status',
-            key: 'analysis_status',
+            title: 'Job Status',
+            dataIndex: 'job_status',
+            key: 'job_status',
+            ellipsis: true,
+            render: (text: any) => {
+                return <Tag color={text === "success" ? "green" : text === "failed" ? "red" : "blue"}>{text}</Tag>
+            }
+        }, {
+            title: 'Server Status',
+            dataIndex: 'server_status',
+            key: 'server_status',
             ellipsis: true,
             render: (text: any) => {
                 return <Tag color={text === "success" ? "green" : text === "failed" ? "red" : "blue"}>{text}</Tag>
@@ -288,14 +296,14 @@ const ResultList = forwardRef<any, any>(({
                     {/* /analysis/stop-analysis/{analysis_id} */}
 
                     {record.image_status == "exist" ? <>
-                        {record.analysis_status == "running" ?
+                        {record.job_status == "running" ?
                             <>
                                 <Popconfirm title={"Whether or not to stop?"} onConfirm={() => {
-                                    stopAnalysis(record)
+                                    stopAnalysis(record,"job")
 
                                 }}>
                                     <Button size="small" color="cyan" variant="solid">
-                                        Stop
+                                        Stop Job
                                     </Button>
                                 </Popconfirm>
 
@@ -308,6 +316,39 @@ const ResultList = forwardRef<any, any>(({
                                     <Button size="small" color="cyan" variant="solid">
                                         {record.analysis_status == "created" ? "Run" : "Rerun"}
                                     </Button>
+                                </Popconfirm>
+
+                            </>
+                        }
+
+                        {record.server_status == "running" ?
+                            <>
+
+                                <Tooltip title={<>
+                                    {`${containerURL}/container/${record.analysis_id}/`}
+                                </>}>
+                                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                        //  console.log("record", record)
+
+                                        window.open(`${containerURL}/container/${record.analysis_id}/`, "_blank")
+                                    }}>Open URL</Button>
+                                </Tooltip>
+                                <Popconfirm title={"Whether or not to stop?"} onConfirm={() => {
+                                    stopAnalysis(record,"server")
+
+                                }}>
+                                    <Button size="small" color="cyan" variant="solid">
+                                        Stop Server
+                                    </Button>
+                                </Popconfirm>
+
+
+                            </> : <>
+                                <Popconfirm title="Whether to start the server?" onConfirm={() => {
+
+                                    runAnalysis(record, "server")
+                                }}>
+                                    <Button size="small" color="cyan" variant="solid">Run Server</Button>
                                 </Popconfirm>
 
                             </>
@@ -343,39 +384,6 @@ const ResultList = forwardRef<any, any>(({
                     }
 
 
-                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        openModal("modalB", record)
-                    }}>查看/运行</Button> */}
-
-                    {/* <Popconfirm title={"是否运行!"} onConfirm={async () => {
-                        await runAnalysisApi(record.analysis_id)
-                        setRecord(record)
-                        loadData()
-                    }}>
-                        <Button size="small" color="cyan" variant="solid">运行</Button>
-                    </Popconfirm> */}
-                    {/* {isSelected(record, "modalA") ?
-                        <Button size="small" color={"cyan"} variant="solid" onClick={() => {
-                            closeModal()
-                        }}>关闭</Button> :
-                        <Button size="small" color={"cyan"} variant="solid" onClick={() => {
-                            openModal("modalA", record)
-                        }}>输出结果</Button>} */}
-
-
-
-                    {/* <Popconfirm title={"是否解析!"} onConfirm={async () => {
-                        try {
-                            await parseAnalysisResultAPi(record.id, true)
-                            messageApi.success("提交成功")
-                        } catch (error: any) {
-                            console.log(error)
-                            messageApi.error(error?.response?.data?.detail)
-                        }
-
-                    }}>
-                        
-                    </Popconfirm> */}
                     <Dropdown menu={{
                         items: [
                             {
@@ -394,52 +402,30 @@ const ResultList = forwardRef<any, any>(({
                                 </>)
                             },
                             {
-                                key: "2",
-                                label: (<>
-                                    {record.analysis_status == "running" ? <>
-                                        {record.run_type == "server" && <>
-                                            {/* <Tooltip title={<>
-                                                {record.url}
-                                            </>}>
-                                                <a onClick={() => {
-                                                    window.open(`${record.url}`, "_blank")
-                                                }}>Open URL</a>
-                                            </Tooltip> */}
-
-                                            <Tooltip title={<>
-                                                {`${containerURL}/container/${record.analysis_id}/`}
-                                            </>}>
-                                                <a onClick={() => {
-                                                    //  console.log("record", record)
-
-                                                    window.open(`${containerURL}/container/${record.analysis_id}/`, "_blank")
-                                                }}>Open URL</a>
-                                            </Tooltip>
-
-
-                                        </>}
-
-                                    </> : <>
-                                        <Popconfirm title="Whether to start the server?" onConfirm={() => {
-
-                                            runAnalysis(record, "server")
-                                        }}>
-                                            <a >Run Server</a>
-                                        </Popconfirm>
-                                    </>
-                                    }
-                                </>)
-                            }, {
-                                key: 'inspect',
-                                disabled: record.analysis_status != "running",
+                                key: 'inspect_job',
+                                disabled: record.job_status != "running",
                                 label: (<>
                                     <a onClick={async () => {
                                         // await axios.get(`/container/inspect/${record.analysis_id}`)
                                         openModal("inspectPanel", {
                                             inspect: "inspect",
-                                            id: record.analysis_id
+                                            id: record.analysis_id,
+                                            run_type:"job"
                                         })
-                                    }}>Inspect</a>
+                                    }}>Inspect Job</a>
+                                </>)
+                            },  {
+                                key: 'inspect_server',
+                                disabled: record.server_status != "running",
+                                label: (<>
+                                    <a onClick={async () => {
+                                        // await axios.get(`/container/inspect/${record.analysis_id}`)
+                                        openModal("inspectPanel", {
+                                            inspect: "inspect",
+                                            id: record.analysis_id,
+                                            run_type:"server"
+                                        })
+                                    }}>Inspect Server</a>
                                 </>)
                             },
                             {

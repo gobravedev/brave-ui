@@ -286,7 +286,7 @@ export const InspectPanel: FC<any> = ({ visible, params, onClose, callback }) =>
     const [loading, setLoading] = useState<any>(false)
     const loadData = async () => {
         setLoading(true)
-        const resp = await axios.get(`/container/${params.inspect}/${params?.id}`)
+        const resp = await axios.get(`/container/${params.inspect}/${params?.id}?run_type=${params?.run_type}`)
         setData(resp.data)
         setLoading(false)
     }
