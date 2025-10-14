@@ -1,9 +1,9 @@
-import { Button, Card, Col, Empty, Flex, Input, message, notification, Pagination, Popconfirm, Row, Spin, Tag, Tooltip } from "antd"
+import { Button, Card, Col, Empty, Flex, Input, message, Modal, notification, Pagination, Popconfirm, Row, Spin, Tag, Tooltip } from "antd"
 import Item from "antd/es/list/Item"
 import { FC, useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate, useOutletContext, useParams } from "react-router"
-import { ApartmentOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { ApartmentOutlined, DeleteOutlined, DownloadOutlined, EditOutlined, RedoOutlined } from '@ant-design/icons';
 
 import Meta from "antd/es/card/Meta"
 import { colors } from '@/utils/utils'
@@ -16,6 +16,8 @@ import path from "path"
 import { CreateOrUpdateNamespace, InstallNamespace } from "../namespace-operature"
 import DependComponent from "../depend-component"
 import "./index.css"
+import { base } from "@faker-js/faker"
+import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 const PipelineComponentsCard: FC<any> = ({ params, map }) => {
     const { Search } = Input;
     // const [searchText, setSearchText] = useState("");
@@ -30,6 +32,7 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
         if (item["tags"]) {
             item["tags"] = JSON.parse(item["tags"])
         }
+        // console.log(item)
         return {
             id: item.id,
             component_id: item.component_id,
@@ -37,6 +40,7 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
             category: item.category,
             img: item.img,
             tags: item.tags,
+            component_type: item.component_type,
             // description: item.description,
             order: item.order_index,
             path: `/component/${component_type}/${item.component_id}`,
@@ -100,7 +104,6 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
     //         loadPipeine()
     //     } catch (error: any) {
     //         console.log(error)
-    //         messageApi.error(`删除失败!${error.response.data.detail}`)
     //     }
     // }
     // useEffect(() => {
@@ -120,7 +123,11 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
                 onSearch={(value) => { search(value) }}
                 style={{ marginBottom: "1rem", width: 400 }}
             />
-            <Flex  gap="small">
+            <Flex gap="small">
+                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                    openModal("installComponents", { component_type: component_type })
+                }}>Intsall Components </Button>
+
                 <Button size="small" color="cyan" variant="solid" onClick={() => {
 
                     openModal("modalA", {
@@ -129,7 +136,7 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
                             component_type: component_type,
                         }
                     })
-                }}>Creating Components </Button>
+                }}>Create Components </Button>
 
 
 
@@ -145,7 +152,7 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
         {/* <div style={{ marginBottom: "2rem" }}>
         </div> */}
 
-        {/* {JSON.stringify(params_)} */}
+        {/* {JSON.stringify(pipelineComponents)} */}
         <Spin spinning={loading}>
             {Array.isArray(pipelineComponents) && pipelineComponents.length != 0 ? <Row gutter={16} style={{ position: "relative" }}>
 
@@ -174,9 +181,9 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
 
                             <Meta title={<>
                                 {item.name}
-                                <Tooltip title={item?.namespace}>
+                                {/* <Tooltip title={item?.namespace}>
                                     <span style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)", fontSize: "0.5rem" }}> {item?.namespace_name}</span>
-                                </Tooltip>
+                                </Tooltip> */}
                             </>} description={item?.description} style={{ marginBottom: "1rem" }} />
                             {item.tags && Array.isArray(item.tags) && item.tags.map((tag: any, index: any) => (
                                 <Tooltip key={index} title={tag}>
@@ -309,7 +316,116 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
             onClose={closeModal}
             callback={reload}
             params={modal.params}></DependComponent>
+
+        <InstallComponents
+            visible={modal.key == "installComponents" && modal.visible}
+            onClose={closeModal}
+            callback={reload}
+            params={modal.params}
+        ></InstallComponents>
     </div>
 }
 
 export default PipelineComponentsCard
+
+
+
+const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
+    const [components, setComponents] = useState<any>([])
+    const [loading, setLoading] = useState(false)
+
+    const { baseURL } = useSelector((state: any) => state.user)
+    const message = useGlobalMessage()
+    useEffect(() => {
+        if (visible && params?.component_type) {
+            loadData()
+        }
+    }, [visible, params?.component_type])
+
+    const loadData = async () => {
+        setLoading(true)
+        const resp = await axios.get(`/component-store/list-by-type/${params?.component_type}`)
+        setComponents(resp.data)
+        setLoading(false)
+
+    }
+    return <Modal footer={null} title={<Flex gap={"small"}>
+        
+        <span>{`Install Components`} </span>
+        <RedoOutlined style={{ cursor: "pointer" }} onClick={loadData} />
+    </Flex>} width={"60%"} open={visible} onClose={onClose} onCancel={onClose}>
+        {/* {JSON.stringify(components)} */}
+
+        <Spin spinning={loading}>
+            {Array.isArray(components) && components.length != 0 ? <Row gutter={16} style={{ position: "relative" }}>
+
+                {components.map((item: any, index: any) => (
+                    <Col key={index} lg={6} sm={4} xs={24} style={{ marginBottom: "1rem", cursor: "pointer" }}>
+                        <Card hoverable
+                            className="custom-card"
+                            // title={item.label}
+                            // variant="borderless" 
+                            style={{
+                                height: "100%",
+                                border: "1px solid #f0f0f0",   // 默认灰色边框
+                                borderRadius: "12px",          // 圆角
+                                overflow: "hidden",
+                                transition: "all 0.3s ease",   // 平滑过渡
+
+                            }}
+                            bodyStyle={{
+                                padding: "12px 16px",          // 内边距更紧凑
+                            }}
+                            cover={<div style={{ height: "15rem" }}>
+                                <img style={{ height: "100%", width: "100%", objectFit: "cover" }} alt={item.label} src={`${baseURL}${item.img}`} />
+                            </div>}
+                        >
+
+
+                            <Meta title={<Flex justify="space-between" align="center">
+
+                                <Tooltip title={item?.component_id}>
+                                    {item.component_name} 
+                                    <Tag color={item.installed ? "#108ee9":"#f5222d"} style={{marginLeft:"1rem"}}>
+                                        {item.installed ?"Installed":"Not I nstalled"}
+                                    </Tag>
+                                </Tooltip>
+                                <Popconfirm title="Are you sure to install this component?"
+                                    onConfirm={async () => {
+                                        await axios.post(`/install-components`, {
+                                            path: item.file_path,
+                                        })
+                                        message.success("Install success!")
+                                        callback && callback()
+                                        onClose && onClose()
+
+                                    }}>
+                                    <DownloadOutlined style={{ cursor: "pointer" }} />
+                                </Popconfirm>
+
+                            </Flex>} description={item?.description} style={{ marginBottom: "1rem" }} />
+
+                            {item.tags && Array.isArray(item.tags) && item.tags.map((tag: any, index: any) => (
+                                <Tooltip key={index} title={tag}>
+                                    <Tag style={{
+                                        wordBreak: "break-word",
+                                        whiteSpace: "nowrap",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        maxWidth: 100,
+                                        display: "inline-block",
+                                        cursor: "default"
+                                    }} color={colors[index]}>{tag}</Tag>
+                                </Tooltip>
+
+                            ))}
+
+
+                        </Card>
+                    </Col>
+                ))}
+
+            </Row> : <Empty></Empty>}
+        </Spin>
+    </Modal>
+}

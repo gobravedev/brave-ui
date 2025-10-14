@@ -117,51 +117,28 @@ if (appType == "index") {
             path: "/software-card",
             element: <PipelineComponentsCard
                 map={(item: any) => ({
-                    id: item.id,
-                    component_id: item.component_id,
+                    ...item,
                     name: item.component_name,
-                    category: item.category,
-                    img: item.img,
-                    tags: item.tags,
-                    description: item.description,
-                    order: item.order_index,
                     path: `/software/${item.component_id}`,
-                    namespace: item.namespace,
-                    namespace_name: item.namespace_name
+                 
                 })}
                 params={{ component_type: "software" }} />
         }, {
             path: "/file-card",
             element: <PipelineComponentsCard
                 map={(item: any) => ({
-                    id: item.id,
-                    component_id: item.component_id,
+                     ...item,
                     name: item.component_name,
-                    category: item.category,
-                    img: item.img,
-                    tags: item.tags,
-                    description: item.description,
-                    order: item.order_index,
-                    path: `/file/${item.component_id}`,
-                    namespace: item.namespace,
-                    namespace_name: item.namespace_name
+                    path: `/software/${item.component_id}`,
                 })}
                 params={{ component_type: "file" }} />
         }, {
             path: "/script-card",
             element: <PipelineComponentsCard
                 map={(item: any) => ({
-                    id: item.id,
-                    component_id: item.component_id,
+                    ...item,
                     name: item.component_name,
-                    category: item.category,
-                    img: item.img,
-                    tags: item.tags,
-                    description: item.description,
-                    order: item.order_index,
-                    path: `/script/${item.component_id}`,
-                    namespace: item.namespace,
-                    namespace_name: item.namespace_name
+                    path: `/software/${item.component_id}`,
                 })}
                 params={{ component_type: "script" }} />
         },

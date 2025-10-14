@@ -179,7 +179,7 @@ const Pipeline: FC<any> = ({ }) => {
             loadData()
         } catch (error: any) {
             console.log(error)
-            messageApi.error(`删除失败!${error.response.data.detail}`)
+            messageApi.error(`${error.response.data.detail}`)
         }
     }
     const datelePipeline = async (pipelineId: any) => {
@@ -189,7 +189,7 @@ const Pipeline: FC<any> = ({ }) => {
             loadData()
         } catch (error: any) {
             console.log(error)
-            messageApi.error(`删除失败!${error.response.data.detail}`)
+            messageApi.error(`${error.response.data.detail}`)
         }
     }
     const operatePipeline = {

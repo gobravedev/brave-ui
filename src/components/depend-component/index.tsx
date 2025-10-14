@@ -25,7 +25,7 @@ const DependComponent = ({ visible, onClose, params, callback }: any) => {
             getDependComponent()
         } catch (error: any) {
             console.log(error)
-            messageApi.error(`删除失败!${error.response.data.detail}`)
+            messageApi.error(`${error.response.data.detail}`)
         }
     }
     const deleteComponent = async (componentId: any) => {
@@ -38,7 +38,7 @@ const DependComponent = ({ visible, onClose, params, callback }: any) => {
             }
         } catch (error: any) {
             console.log(error)
-            messageApi.error(`删除失败!${error.response.data.detail}`)
+            messageApi.error(`${error.response.data.detail}`)
         }
     }
     useEffect(() => {
@@ -47,17 +47,17 @@ const DependComponent = ({ visible, onClose, params, callback }: any) => {
     return <div>
         <Modal
             width={"70%"}
-            title={`组件(${component_type},${name})`}
+            title={`Component(${component_type},${name})`}
             open={visible} onCancel={onClose}
             footer={(_, { OkBtn, CancelBtn }) => (
                 <>
-                    <Popconfirm title="确定要删除组件吗？" onConfirm={() => {
+                    <Popconfirm title="Are you sure to delete this component?" onConfirm={() => {
                         deleteComponent(component_id)
                     }}>
-                        <Button size="small" color="danger" variant="solid">删除组件</Button>
+                        <Button size="small" color="danger" variant="solid">Delete Component</Button>
                     </Popconfirm>
-                    <Button size="small" color="cyan" variant="solid" onClick={getDependComponent}>刷新</Button>
-                    <Button size="small" color="cyan" variant="solid" onClick={onClose}>关闭</Button>
+                    <Button size="small" color="cyan" variant="solid" onClick={getDependComponent}>Refresh</Button>
+                    <Button size="small" color="cyan" variant="solid" onClick={onClose}>Close</Button>
 
                     {/* <OkBtn /> */}
                 </>
@@ -71,37 +71,37 @@ const DependComponent = ({ visible, onClose, params, callback }: any) => {
                 bordered
                 pagination={false}
                 columns={[{
-                    title: "组件名称",
+                    title: "Component Name",
                     dataIndex: "component_name",
                     key: "component_name"
                 }, {
-                    title: "组件类型",
+                    title: "Component Type",
                     dataIndex: "component_type",
                     key: "component_type"
                 }, {
-                    title: "关系类型",
+                    title: "Relation Type",
                     dataIndex: "relation_type",
                     key: "relation_type"
                 }, {
-                    title: "组件ID",
+                    title: "Component ID",
                     dataIndex: "component_id",
                     key: "component_id"
                 }, {
-                    title: "关系ID",
+                    title: "Relation ID",
                     dataIndex: "relation_id",
                     key: "relation_id"
                 }, {
-                    title: "操作",
+                    title: "Action",
                     key: "action",
                     render: (_, record) => (
                         <Flex gap={"small"}>
                             <Popconfirm
-                                title="确定要移除关系吗？"
+                                title="Are you sure to delete this relation?"
                                 onConfirm={() => {
                                     deletePipelineRelation(record.relation_id)
                                 }}
                             >
-                                <Button size="small" color="danger" variant="solid">移除关系</Button>
+                                <Button size="small" color="danger" variant="solid">Delete Relation</Button>
                             </Popconfirm>
                             <Button size="small" color="cyan" variant="solid" onClick={() => {
                                 openModal("modalA", {
@@ -109,7 +109,7 @@ const DependComponent = ({ visible, onClose, params, callback }: any) => {
                                         component_type: record.component_type,
                                     }
                                 })
-                            }}>更新组件</Button>
+                            }}>Update</Button>
                             {/* <Button size="small" color="cyan" variant="solid">修改组件</Button> */}
                         </Flex>
                     )
@@ -120,7 +120,7 @@ const DependComponent = ({ visible, onClose, params, callback }: any) => {
             <Collapse ghost items={[
                 {
                     key: "1",
-                    label: "更多",
+                    label: "More",
                     children: <pre>{JSON.stringify(params, null, 2)}</pre>
                 }
             ]} />
