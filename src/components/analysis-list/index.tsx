@@ -55,7 +55,7 @@ const ResultList = forwardRef<any, any>(({
     // const [content,setContent] = useState<any>()
     const [loading, setLoading] = useState(false)
     const [currentAnalysis, setCurrentAnalysis] = useState<any>()
-    const { containerURL } = useSelector((state: any) => state.user); // 'light' | 'dark'
+    const { containerURL } = useSelector((state: any) => state.user);
 
     useEffect(() => {
         if (data && Array.isArray(data) && data.length > 0) {
@@ -316,7 +316,7 @@ const ResultList = forwardRef<any, any>(({
                                     setRecord(record)
                                 }}>
                                     <Button size="small" color="cyan" variant="solid">
-                                        {record.analysis_status == "created" ? "Run" : "Re-Run"}
+                                        {record.job_status == "created" ? "Run" : "Re-Run"}
                                     </Button>
                                 </Popconfirm>
 

@@ -1085,14 +1085,14 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
                                             component_id: downstreamData.component_id,
                                             // module_dir: downstreamData.moduleDir
                                         })
-                                    }}>组件代码</Button>
+                                    }}>Component Code</Button>
                                     <Button size="small" color="cyan" variant="solid" onClick={() => {
                                         operatePipeline.openModal("modalC", {
                                             data: downstreamData, structure: {
                                                 component_type: "script",
                                             }
                                         })
-                                    }}>更新分析</Button>
+                                    }}>Update Analysis</Button>
 
                                     <Button size="small" color="cyan" variant="solid" onClick={() => {
                                         operatePipeline.openModal("modalA", {
@@ -1103,12 +1103,12 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
                                             }
                                         })
 
-                                    }}>替换分析</Button>
-                                    <Popconfirm title="确认删除!" onConfirm={() => {
+                                    }}>Replace Analysis</Button>
+                                    <Popconfirm title="Are you sure to delete?" onConfirm={() => {
                                         operatePipeline.deletePipelineRelation(downstreamData.relation_id)
                                         setBtnName(undefined)
                                     }}>
-                                        <Button size="small" color="danger" variant="solid" >删除分析</Button>
+                                        <Button size="small" color="danger" variant="solid" >Delete Analysis</Button>
                                     </Popconfirm>
                                     <QuestionCircleOutlined onClick={() => {
                                         operatePipeline.openModal("descriptionModal", downstreamData.description)

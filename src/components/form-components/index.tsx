@@ -179,7 +179,7 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap }) => {
         // console.log(prevProps)
         // console.log(nextProps)
         // return false
-        console.log("prevProps==nextProps: ",JSON.stringify(prevProps) === JSON.stringify(nextProps)) //  === JSON.stringify(nextProps)
+        console.log("prevProps==nextProps: ", JSON.stringify(prevProps) === JSON.stringify(nextProps)) //  === JSON.stringify(nextProps)
         // console.log("nextProps",JSON.stringify(nextProps)) 
         return JSON.stringify(prevProps) === JSON.stringify(nextProps) // JSON.stringify(prevProps.formJson) === JSON.stringify(nextProps.formJson) 
     }
@@ -415,9 +415,15 @@ export const GroupSelectSampleButton: FC<any> = ({ label, name, rules, data, fil
         <Form.Item label={label} name={[name, "sample"]} rules={rules}>
             <GroupSelectSample sampleGrouped={sampleGrouped} sampleGroup={options} watch={[name, "group"]}></GroupSelectSample>
         </Form.Item>
-        <Form.Item label={label} name={[name, "group"]} >
-            <GroupSelectButton sampleGrouped={sampleGrouped}></GroupSelectButton>
-        </Form.Item>
+        <Flex gap="small">
+            <Form.Item label={label} name={[name, "group"]} noStyle >
+                <GroupSelectButton sampleGrouped={sampleGrouped}></GroupSelectButton>
+            </Form.Item>
+            <Form.Item name={[name, "group_name"]} >
+                <Input size="small" placeholder="Optional group name"></Input>
+            </Form.Item>
+        </Flex>
+
     </>
 }
 export const SelectAll: FC<any> = ({ label, name, data, initialValue, rules, ...rest }) => {
@@ -564,7 +570,7 @@ const GroupSelectButton: FC<any> = ({ value, onChange, sampleGrouped }) => {
     }
     return <>
         {/* <Select mode={"multiple"} value={value} onChange={onSelectChange} options={options}></Select> */}
-        <Flex gap="small" wrap>
+        <Flex gap="small" >
             {Object.entries(sampleGrouped ? sampleGrouped : {}).map(([key, value2]: any) => (<span key={key}>
                 <Button size="small" type={(value ? value : []).includes(key) ? "primary" : "dashed"} onClick={() => onSelectGroup(key)}>{key}({value2.length})</Button>
             </span>))}

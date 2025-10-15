@@ -1,4 +1,4 @@
-import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Alert, Modal } from "antd";
+import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Alert, Modal, Tooltip } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { FC, forwardRef, use, useEffect, useImperativeHandle, useRef, useState } from "react";
 import Markdown from '../markdown'
@@ -17,6 +17,7 @@ import EditParams from '../edit-params'
 import { KGMLMapSVG } from "../databases/kegg";
 import { download } from "@antv/s2";
 import { useSelector } from "react-redux";
+import ModuleEdit from "../module-edit";
 
 const UrlComp: FC<any> = ({ url, filename, baseURL }) => {
     return <>
@@ -39,7 +40,7 @@ export const TableView: FC<any> = ({ data, url, filename, columns, baseURL, proj
     const { Search } = Input;
     const [tableData, setTableData] = useState<any>([])
     const [research, setResearch] = useState<any>()
-    const [search,setSearch] = useState<string>()
+    const [search, setSearch] = useState<string>()
     useEffect(() => {
         if (projectObj?.research) {
             try {
@@ -77,19 +78,19 @@ export const TableView: FC<any> = ({ data, url, filename, columns, baseURL, proj
     return <>
         {research?.table && <>
             {/* {JSON.stringify(research?.table)} */}
-            
+
             <div style={{ marginBottom: "1rem" }}>
                 {research?.table.map((item: any) => (<Tag
-                color="blue"
-                style={{ cursor: "pointer" }}
-                onClick={() => {
-                    const filterData = data.filter((it: any) => Object.values(it).some(val =>
-                        typeof val === "string" && val.includes(item)
-                    ))
-                    setTableData(filterData)
-                    setSearch(item)
-                }}
-                key={item}>{item}</Tag>))}
+                    color="blue"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => {
+                        const filterData = data.filter((it: any) => Object.values(it).some(val =>
+                            typeof val === "string" && val.includes(item)
+                        ))
+                        setTableData(filterData)
+                        setSearch(item)
+                    }}
+                    key={item}>{item}</Tag>))}
             </div>
 
 
@@ -107,7 +108,7 @@ export const TableView: FC<any> = ({ data, url, filename, columns, baseURL, proj
                         // onChange={setSearch}
                         value={search}
                         size="small"
-                        onChange={e=>{setSearch(e.target.value)}}
+                        onChange={e => { setSearch(e.target.value) }}
                         // onClear={()=>{setSearch("")}}
                         placeholder="input search text"
                         allowClear
@@ -480,7 +481,8 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
     const analysisIdRef = useRef<any>(null)
     const sseAnalysisIdRef = useRef<any>(null)
     const { messageApi } = useOutletContext<any>()
-    const { modals, openModals, closeModals } = useModals(["editParams"]);
+    const { modals, openModals, closeModals } = useModals(["editParams","moduleEdit"]);
+    const { containerURL } = useSelector((state: any) => state.user);
 
 
     const loadData = async (analysis_id: any) => {
@@ -554,8 +556,42 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
                         }}>
                             Edit Parameters
                         </Button>
+                        <Button size="small" color="cyan" variant="solid" onClick={() => {
+                            openModals("moduleEdit", {
+                                component_id: analsyisResult?.component_id,
+                            })
+                        }}>Component Code</Button>
+                        {analsyisResult.server_status == "running" ?
+                            <>
+
+                                <Tooltip title={<>
+                                    {`${containerURL}/container/${analsyisResult.analysis_id}/`}
+                                </>}>
+                                    <Button size="small" color="blue" variant="solid" onClick={() => {
+                                        //  console.log("record", record)
+
+                                        window.open(`${containerURL}/container/${analsyisResult.analysis_id}/`, "_blank")
+                                    }}>Open URL</Button>
+                                </Tooltip>
+                                <Popconfirm title={"Whether or not to stop?"} onConfirm={async () => {
+                                    // stopAnalysis(record, "server")
+                                    await stopAnalysisApi(analsyisResult.analysis_id, "server")
+                                }}>
+                                    <Button size="small" color="red" variant="solid">
+                                        Stop Server
+                                    </Button>
+                                </Popconfirm>
 
 
+                            </> : <>
+                                <Popconfirm title="Whether to start the server?" onConfirm={async () => {
+                                    await runAnalysisApi(analsyisResult.analysis_id, "server")
+                                }}>
+                                    <Button size="small" color="cyan" variant="solid">Run Server</Button>
+                                </Popconfirm>
+
+                            </>
+                        }
                         {analsyisResult?.job_status == "running" ?
                             <>
                                 <Popconfirm title={"Whether or not to stop?"} onConfirm={async () => {
@@ -622,6 +658,14 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
                 params={modals.editParams.params}
                 onClose={() => closeModals("editParams")}
             ></EditParams>
+
+            <ModuleEdit
+                visible={modals.moduleEdit.visible}
+                onClose={() => closeModals("moduleEdit")}
+                callback={() => loadData(analysis_id)}
+                params={modals.moduleEdit.params}
+            >
+            </ModuleEdit>
 
         </Card>
 

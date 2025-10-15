@@ -666,13 +666,7 @@ export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
                     </>
                 }
 
-                {/* <Tooltip title={<>
-                    {analysis?.analysis_id}
-                </>}>
-                    <Button disabled={analysis.analysis_status == "running"} size="small" color="cyan" variant="solid" onClick={runAnalysis}>
-                        {analysis.analysis_status == "created" ? "Run" : "Re-Run"}
-                    </Button>
-                </Tooltip> */}
+           
             </Flex>
 
         } activeKey={fileTabKey} onChange={(key) => {
