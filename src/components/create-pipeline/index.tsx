@@ -344,10 +344,9 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
                         label: "Component Info",
                         key: "1",
                         children: <>
-                            <Form.Item name={"namespace"} label="Namespace"   >
-                                {/* <NamespaceSelect disabled={data?.componemt_id} /> */}
+                            {/* <Form.Item name={"namespace"} label="Namespace"   >
                                 <Input disabled></Input>
-                            </Form.Item>
+                            </Form.Item> */}
 
                             <Form.Item name={"component_name"} label="Component Name">
                                 <Input ></Input>

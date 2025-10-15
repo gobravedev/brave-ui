@@ -1,9 +1,9 @@
-import { Button, Card, Col, Empty, Flex, Input, message, Modal, notification, Pagination, Popconfirm, Row, Spin, Tag, Tooltip } from "antd"
+import { Button, Card, Col, Empty, Flex, Input, message, Modal, notification, Pagination, Popconfirm, Row, Spin, Tabs, Tag, Tooltip } from "antd"
 import Item from "antd/es/list/Item"
 import { FC, useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate, useOutletContext, useParams } from "react-router"
-import { ApartmentOutlined, DeleteOutlined, DownloadOutlined, EditOutlined, RedoOutlined } from '@ant-design/icons';
+import { ApartmentOutlined, CopyOutlined, DeleteOutlined, DownloadOutlined, EditOutlined, RedoOutlined } from '@ant-design/icons';
 
 import Meta from "antd/es/card/Meta"
 import { colors } from '@/utils/utils'
@@ -179,12 +179,25 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
                             onClick={() => navigate(`${item.path}`)}>
 
 
-                            <Meta title={<>
-                                {item.name}
+                            <Meta title={<Flex gap={"small"}>
+                                <span>{item.name}</span>
+                                <Popconfirm title="Copy component ?" onConfirm={async (e:any) => {
+                                    e.stopPropagation()
+                                    await axios.post(`/copy-component/${item.component_id}`)
+                                    message.success("Component copied!")
+                                    reload()
+                                }}>
+
+                                    <CopyOutlined onClick={(e)=>{
+                                         e.stopPropagation()
+
+                                    }} />
+
+                                </Popconfirm>
                                 {/* <Tooltip title={item?.namespace}>
                                     <span style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)", fontSize: "0.5rem" }}> {item?.namespace_name}</span>
                                 </Tooltip> */}
-                            </>} description={item?.description} style={{ marginBottom: "1rem" }} />
+                            </Flex>} description={item?.description} style={{ marginBottom: "1rem" }} />
                             {item.tags && Array.isArray(item.tags) && item.tags.map((tag: any, index: any) => (
                                 <Tooltip key={index} title={tag}>
                                     <Tag style={{
@@ -200,6 +213,7 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
 
                             ))}
                             {/* {JSON.stringify(item)} */}
+
                             <div onClick={(e) => {
                                 e.stopPropagation()
                                 openModal("modalG", item)
@@ -331,36 +345,66 @@ export default PipelineComponentsCard
 
 
 const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
+    const [storeList, setStoreList] = useState<any>([])
     const [components, setComponents] = useState<any>([])
     const [loading, setLoading] = useState(false)
-
+    const [tabKey, setTabkey] = useState<any>()
     const { baseURL } = useSelector((state: any) => state.user)
     const message = useGlobalMessage()
     useEffect(() => {
         if (visible && params?.component_type) {
-            loadData()
+            loadStoreList()
+
         }
     }, [visible, params?.component_type])
 
-    const loadData = async () => {
+    const loadStoreList = async () => {
+        try {
+            setLoading(true)
+            const resp = await axios.get(`/component-store/list-stores`)
+            setStoreList(resp.data)
+            if (resp.data.length > 0) {
+                setTabkey(resp.data[0].store_name)
+                loadData(resp.data[0].store_name)
+            }
+            setLoading(false)
+
+        } catch (error: any) {
+            // message.error(error.message)
+        }
+
+    }
+    const loadData = async (store_name: any) => {
         setLoading(true)
-        const resp = await axios.get(`/component-store/list-by-type/${params?.component_type}`)
+        const resp = await axios.get(`/component-store/list-by-type/${store_name}?component_type=${params?.component_type}`)
         setComponents(resp.data)
         setLoading(false)
 
     }
     return <Modal footer={null} title={<Flex gap={"small"}>
-        
+
         <span>{`Install Components`} </span>
         <RedoOutlined style={{ cursor: "pointer" }} onClick={loadData} />
-    </Flex>} width={"60%"} open={visible} onClose={onClose} onCancel={onClose}>
+    </Flex>} width={"90%"} open={visible} onClose={onClose} onCancel={onClose}>
         {/* {JSON.stringify(components)} */}
 
         <Spin spinning={loading}>
+            {/* {JSON.stringify(storeList)} */}
+            <Tabs
+                activeKey={tabKey}
+                onChange={(key) => {
+                    setTabkey(key)
+                    loadData(key)
+                }}
+                items={storeList.map((item: any) => ({
+                    key: item.store_name,
+                    label: item.name,
+                }))}></Tabs>
             {Array.isArray(components) && components.length != 0 ? <Row gutter={16} style={{ position: "relative" }}>
 
                 {components.map((item: any, index: any) => (
-                    <Col key={index} lg={6} sm={4} xs={24} style={{ marginBottom: "1rem", cursor: "pointer" }}>
+                    <Col key={index} lg={4} sm={4} xs={24} style={{ marginBottom: "1rem", cursor: "pointer" }}>
+
                         <Card hoverable
                             className="custom-card"
                             // title={item.label}
@@ -381,29 +425,42 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
                             </div>}
                         >
 
+                            <Meta title={
 
-                            <Meta title={<Flex justify="space-between" align="center">
+                                <Flex justify="space-between" align="center">
 
-                                <Tooltip title={item?.component_id}>
-                                    {item.component_name} 
-                                    <Tag color={item.installed ? "#108ee9":"#f5222d"} style={{marginLeft:"1rem"}}>
-                                        {item.installed ?"Installed":"Not I nstalled"}
-                                    </Tag>
-                                </Tooltip>
-                                <Popconfirm title="Are you sure to install this component?"
-                                    onConfirm={async () => {
-                                        await axios.post(`/install-components`, {
-                                            path: item.file_path,
-                                        })
-                                        message.success("Install success!")
-                                        callback && callback()
-                                        onClose && onClose()
+                                    <Tooltip title={item?.component_id}>
+                                        {item.component_name}
+                                        <Tag color={item.installed ? "#108ee9" : "#f5222d"} style={{ marginLeft: "1rem" }}>
+                                            {item.installed ? "Installed" : "Not I nstalled"}
+                                        </Tag>
+                                    </Tooltip>
 
-                                    }}>
-                                    <DownloadOutlined style={{ cursor: "pointer" }} />
-                                </Popconfirm>
+                                    <Popconfirm
+                                        okButtonProps={{ color: `${item.installed ? "red" : "blue"}`, variant: "solid" }}
+                                        okText={item.installed ? "Reinstall" : "Install"}
+                                        title={
+                                            item.installed ? `Reinstall ${item.component_name} ?` : `Install ${item.component_name} ?`
+                                        }
+                                        onConfirm={async () => {
+                                            await axios.post(`/install-components`, {
+                                                path: item.file_path,
+                                                force: true,
+                                            })
+                                            message.success(item.installed ? `Install success!` : `Reinstall success!`)
+                                            callback && callback()
+                                            onClose && onClose()
 
-                            </Flex>} description={item?.description} style={{ marginBottom: "1rem" }} />
+                                        }}>
+
+                                        <DownloadOutlined style={{ cursor: "pointer" }} />
+
+                                    </Popconfirm>
+
+                                </Flex>
+
+                            } description={item?.description} style={{ marginBottom: "1rem" }} />
+
 
                             {item.tags && Array.isArray(item.tags) && item.tags.map((tag: any, index: any) => (
                                 <Tooltip key={index} title={tag}>
@@ -427,5 +484,5 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
 
             </Row> : <Empty></Empty>}
         </Spin>
-    </Modal>
+    </Modal >
 }
