@@ -1,14 +1,19 @@
-import { Button, Card, Col, Empty, Flex, Row, Tag, Tree, TreeDataNode, TreeProps } from "antd"
+import { Button, Card, Col, Empty, Flex, Row, Tabs, Tag, Tree, TreeDataNode, TreeProps } from "antd"
 import axios from "axios"
 import { FC, use, useEffect, useRef, useState } from "react"
 import { useLocation, useNavigate, useOutletContext, useParams } from "react-router"
 import { DownOutlined } from '@ant-design/icons'
 import { AnalysisResultViewComp } from '@/components/analysis-result-view'
-import { useDispatch } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { setUserItem } from "@/store/userSlice"
+import { useModal } from "@/hooks/useModal"
+import FormProject from "@/components/form-project"
+import Markdown from "@/components/markdown"
 const AnalysisReport: FC<any> = () => {
     const [loading, setLoading] = useState<boolean>(false)
-    const { project, projectObj } = useOutletContext<any>()
+    // const { project, projectObj } = useOutletContext<any>()
+    const { project, projectObj } = useSelector((state: any) => state.user);
+
     const [data, setData] = useState<any>()
     const [analysis, setAnalysis] = useState<any>()
     const location = useLocation()
@@ -16,6 +21,8 @@ const AnalysisReport: FC<any> = () => {
     const key = queryParams.get("key");
     const projectParam = queryParams.get("project");
     const dispatch = useDispatch()
+    const { modal, openModal, closeModal } = useModal();
+
     const [analysisKey, setAnalysisKey] = useState<any>(key)
 
     useEffect(() => {
@@ -119,7 +126,7 @@ const AnalysisReport: FC<any> = () => {
     useEffect(() => {
         loadData()
     }, [project])
-    return <div style={{ maxWidth: "1500px", margin: "0 auto" }}>
+    return <div style={{ maxWidth: "1800px", margin: "0 auto" }}>
 
         {/* <div style={{ marginBottom: "1rem" }}></div> */}
         {/* {JSON.stringify(projectObj)} */}
@@ -133,6 +140,7 @@ const AnalysisReport: FC<any> = () => {
                 alignSelf: "flex-start", // 避免被stretch
                 height: `calc(100vh - ${top}px - 1rem )`, // 可选：固定高度，让内部滚动
             }}>
+
                 <Card
                     loading={loading}
                     title={projectObj?.project_name}
@@ -146,8 +154,9 @@ const AnalysisReport: FC<any> = () => {
                     }}
                     extra={
                         <Flex gap={"small"}>
-                            <Button size="small" color="cyan" variant="solid" onClick={loadData}>刷新</Button>
 
+
+                            <Button size="small" color="cyan" variant="solid" onClick={loadData}>Refresh</Button>
                         </Flex>
                     }>
                     {/* {JSON.stringify(analysis)} */}
@@ -177,20 +186,54 @@ const AnalysisReport: FC<any> = () => {
 
             </Col>
             <Col lg={18} sm={18} xs={24} style={{ paddingLeft: "1rem" }}>
+                <Tabs
+                
+                    type="card"
+                    size="small"
+                    tabPosition="right"
+                    items={[
+                        {
+                            key: '1',
+                            label: `Analysis Result`,
+                            children: <>
+                                {analysisKey ? <>
+                                    <AnalysisResultViewComp cancalReportCallback={() => {
+                                        loadData()
+                                    }} analysis_id={analysisKey}></AnalysisResultViewComp>
+                                </> : <>
+                                    <Card size="small">
+                                        <Empty></Empty>
 
-                {analysisKey ? <>
-                    <AnalysisResultViewComp cancalReportCallback={() => {
-                        loadData()
-                    }} analysis_id={analysisKey}></AnalysisResultViewComp>
-                </> : <>
-                    <Card size="small">
-                        <Empty></Empty>
+                                    </Card>
 
-                    </Card>
+                                </>}
+                            </>
+                        }, {
+                            key: '2',
+                            label: `Records`,
+                            children: <>
+                                <Card size="small" style={{ marginBottom: "1rem" }} extra={
+                                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                        openModal("projectForm", { project_id: project })
+                                    }}>Edit</Button>
+                                }>
+                                    {projectObj?.description ? <Markdown data={projectObj?.description}></Markdown> : <Empty />}
+                                </Card>
+                            </>
+                        }
+                    ]}
+                    defaultActiveKey="1">
+                </Tabs>
 
-                </>}
+
+
             </Col>
         </Row>
+        <FormProject
+            research={true}
+            params={modal.params}
+            visible={modal.key == "projectForm" && modal.visible}
+            onClose={closeModal} />
     </div>
 }
 

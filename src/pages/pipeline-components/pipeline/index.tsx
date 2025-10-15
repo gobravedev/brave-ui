@@ -50,7 +50,8 @@ const Pipeline: FC<any> = ({ }) => {
     // };
     const { modal, openModal, closeModal } = useModal();
     const { modals, openModals, closeModals } = useModals(["modalD", "metadataModal", "bindSample"])
-    const { project: { project_id } } = useSelector((state: any) => state.context)
+    // const { project: { project_id } } = useSelector((state: any) => state.context)
+    const { project: project_id } = useSelector((state: any) => state.user);
 
     // const [createOpen, setCreateOpen] = useState<any>(false)
     // const [record, setRecord] = useState<any>()
@@ -230,9 +231,9 @@ const Pipeline: FC<any> = ({ }) => {
                         openModal("sortSoftware", { software: pipeline.software })
                     }}>Update Sorting</Button>
                 </>}
-                
+
                 <Button size="small" color="cyan" variant="solid" onClick={() => {
-                    operatePipeline.openModal("projectForm",{project_id:project_id})
+                    operatePipeline.openModal("projectForm", { project_id: project_id })
                 }}>Edit Project</Button>
 
                 <Button size="small" color="cyan" variant="solid" onClick={() => {
@@ -355,6 +356,8 @@ const Pipeline: FC<any> = ({ }) => {
             visible={modal.key == "descriptionModal" && modal.visible}
             onClose={closeModal}
             params={modal.params} callback={loadData}></DescriptionModal>
+
+
     </div>
 }
 

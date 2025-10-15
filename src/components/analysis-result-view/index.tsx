@@ -1,6 +1,6 @@
 import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Alert, Modal } from "antd";
 import TextArea from "antd/es/input/TextArea";
-import { FC, forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { FC, forwardRef, use, useEffect, useImperativeHandle, useRef, useState } from "react";
 import Markdown from '../markdown'
 import axios from "axios";
 import LogFile from "../log-file";
@@ -13,8 +13,6 @@ import { useModal, useModals } from "@/hooks/useModal";
 import FormJsonComp from "../form-components";
 import ParamsView from "../params-view";
 import Project from "@/pages/project";
-import BioDatabaseForm from "../bio-database-form";
-import BioDatabases from "../bio-databases";
 import EditParams from '../edit-params'
 import { KGMLMapSVG } from "../databases/kegg";
 import { download } from "@antv/s2";
@@ -23,16 +21,37 @@ import { useSelector } from "react-redux";
 const UrlComp: FC<any> = ({ url, filename, baseURL }) => {
     return <>
         {url && <Popover title={`${baseURL}${url}`}>
-            <Tag color="success" style={{ cursor: "pointer" }} onClick={() => {
-                window.open(`${baseURL}${url}?t=${Date.now()}`, "_blank")
-            }}>{filename} <DownloadOutlined /></Tag></Popover>}
+            <Tag color="success"
+                style={{
+                    cursor: "pointer",
+                    whiteSpace: "normal",   // Allow multi-line wrapping
+                    wordBreak: "break-all", // Break long words/URLs
+                    display: "inline-block", // Allow wrapping inside the tag
+                    //   maxWidth: "300px"       // Optional: limit width to trigger wrapping
+                }} onClick={() => {
+                    window.open(`${baseURL}${url}?t=${Date.now()}`, "_blank")
+                }}><span>{filename} </span><DownloadOutlined /></Tag></Popover>}
 
     </>
 }
 
-export const TableView: FC<any> = ({ data, url, filename, columns, baseURL }) => {
+export const TableView: FC<any> = ({ data, url, filename, columns, baseURL, projectObj }) => {
     const { Search } = Input;
     const [tableData, setTableData] = useState<any>([])
+    const [research, setResearch] = useState<any>()
+    const [search,setSearch] = useState<string>()
+    useEffect(() => {
+        if (projectObj?.research) {
+            try {
+                const data = JSON.parse(projectObj?.research || "{}")
+                setResearch(data)
+            } catch (error) {
+
+            }
+        }
+
+
+    }, [projectObj?.research])
     const getColumns = (data: any) => {
         if (!data) return []
         return Object.keys(data).map(it => {
@@ -56,6 +75,28 @@ export const TableView: FC<any> = ({ data, url, filename, columns, baseURL }) =>
 
     }, [data])
     return <>
+        {research?.table && <>
+            {/* {JSON.stringify(research?.table)} */}
+            
+            <div style={{ marginBottom: "1rem" }}>
+                {research?.table.map((item: any) => (<Tag
+                color="blue"
+                style={{ cursor: "pointer" }}
+                onClick={() => {
+                    const filterData = data.filter((it: any) => Object.values(it).some(val =>
+                        typeof val === "string" && val.includes(item)
+                    ))
+                    setTableData(filterData)
+                    setSearch(item)
+                }}
+                key={item}>{item}</Tag>))}
+            </div>
+
+
+
+        </>}
+
+
         {Array.isArray(tableData) && <>
 
             <Table
@@ -63,7 +104,11 @@ export const TableView: FC<any> = ({ data, url, filename, columns, baseURL }) =>
                 size="small"
                 title={() => <Flex gap={"small"}>
                     <Search
+                        // onChange={setSearch}
+                        value={search}
                         size="small"
+                        onChange={e=>{setSearch(e.target.value)}}
+                        // onClear={()=>{setSearch("")}}
                         placeholder="input search text"
                         allowClear
                         onSearch={(value: any) => {
@@ -509,12 +554,12 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
                         }}>
                             Edit Parameters
                         </Button>
-                        
+
 
                         {analsyisResult?.job_status == "running" ?
                             <>
                                 <Popconfirm title={"Whether or not to stop?"} onConfirm={async () => {
-                                    await stopAnalysisApi(analsyisResult.analysis_id,"job")
+                                    await stopAnalysisApi(analsyisResult.analysis_id, "job")
                                     messageApi.success("Stop Success")
 
                                 }}>
@@ -588,6 +633,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
 
 const AnalysisResultDisplay: FC<any> = ({ analsyisResult, loading }) => {
     const { baseURL } = useSelector((state: any) => state.user)
+    const { projectObj } = useSelector((state: any) => state.user);
 
     return <Spin spinning={loading}>
         {analsyisResult && <>
@@ -612,7 +658,7 @@ const AnalysisResultDisplay: FC<any> = ({ analsyisResult, loading }) => {
             <div style={{ padding: "1rem" }}>
                 {analsyisResult.tables && Array.isArray(analsyisResult.tables) && <>
                     {analsyisResult.tables.map((item: any, index: any) => (
-                        <ComponentsRender key={index} {...item} baseURL={baseURL}></ComponentsRender>
+                        <ComponentsRender projectObj={projectObj} key={index} {...item} baseURL={baseURL}></ComponentsRender>
 
 
                     ))}

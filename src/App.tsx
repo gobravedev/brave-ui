@@ -29,6 +29,13 @@ const App: FC<any> = () => {
           theme === 'dark'
             ? antdTheme.darkAlgorithm
             : antdTheme.defaultAlgorithm,
+        components: {
+          Tabs: {
+            /* 这里是你的组件 token */
+            verticalItemPadding: "0 0",
+            // cardBg:"red"
+          }
+        }
       }}
       locale={antdLocale}>
       <HashRouter>

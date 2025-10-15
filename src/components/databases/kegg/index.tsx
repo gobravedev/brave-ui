@@ -6,6 +6,7 @@ import { RedoOutlined } from '@ant-design/icons'
 import { useModal } from "@/hooks/useModal";
 import EntityViewPanel from "@/pages/entity";
 import { useOutletContext } from "react-router";
+import { useSelector } from "react-redux";
 interface Entry {
   id: string;
   name: string;
@@ -197,6 +198,7 @@ export const KGMLMapSVG = forwardRef<any, any>(({ pathwayId, organisms, highligh
   const [imgSize, setImgSize] = useState({ width: 0, height: 0 });
   const [loading, setLoading] = useState(false);
   const { messageApi } = useOutletContext<any>()
+  const { baseURL } = useSelector((state: any) => state.user)
 
   useImperativeHandle(ref, () => ({
     reload: reload
@@ -209,7 +211,7 @@ export const KGMLMapSVG = forwardRef<any, any>(({ pathwayId, organisms, highligh
       setImage(res.data.image);
       setEntries(res.data.entries);
     } catch (error) {
-      messageApi.error("数据获取失败!")
+      // messageApi.error("数据获取失败!")
     }
 
     setLoading(false);
@@ -360,7 +362,7 @@ export const KGMLMapSVG = forwardRef<any, any>(({ pathwayId, organisms, highligh
               <>
                 <img
                   ref={imgRef}
-                  src={image}
+                  src={`${baseURL}${image}`}
                   alt="KEGG pathway"
                   style={{ maxWidth: "100%", height: "auto" }}
                   onLoad={(e) => {

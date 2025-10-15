@@ -7,8 +7,9 @@ import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 import axios from "axios"
 import { setUserItem } from "@/store/userSlice"
 import { useDispatch } from "react-redux"
+import { MonacoEditor } from "../react-monaco-editor"
 const Textarea = Input.TextArea
-const FormProject: FC<any> = ({ visible, onClose, params, callback }: any) => {
+const FormProject: FC<any> = ({ visible, onClose, params, callback, research = false }: any) => {
     const [form] = Form.useForm()
     const message = useGlobalMessage();
     const dispatch = useDispatch()
@@ -61,7 +62,7 @@ const FormProject: FC<any> = ({ visible, onClose, params, callback }: any) => {
         // setProjectObj(resp.data)
         dispatch(setUserItem({ projectObj: resp.data }))
         onClose()
-        if(callback){
+        if (callback) {
             callback()
         }
 
@@ -71,15 +72,35 @@ const FormProject: FC<any> = ({ visible, onClose, params, callback }: any) => {
         open={visible}
         onClose={onClose}
         onCancel={onClose}
-        title={`${params?.project_id ? "编辑" : "添加"}项目`}>
+        width={`${research ? "60%" : "40%"}`}
+        title={`${params?.project_id ? "Edit" : "New"} Project`}>
         {/* {JSON.stringify(params)} */}
         <Form form={form}>
-            <Form.Item label="Project Name" name="project_name"  rules={[{ required: true, message: 'This field cannot be empty!' }]}>
-                <Input />
-            </Form.Item>
-            <Form.Item initialValue={"[]"} label="Research Variable" name="metadata_form"  rules={[{ required: true, message: 'This field cannot be empty!' }]}>
-                <TextArea rows={6} />
-            </Form.Item>
+            {!research ? <>
+
+                <Form.Item label="Project Name" name="project_name" rules={[{ required: true, message: 'This field cannot be empty!' }]}>
+                    <Input />
+                </Form.Item>
+                <Form.Item initialValue={"[]"} label="Metadata" name="metadata_form" rules={[{ required: true, message: 'This field cannot be empty!' }]}>
+                    <TextArea rows={6} />
+                </Form.Item>
+                <Form.Item label="Research" name="research">
+                    <TextArea rows={6} />
+                </Form.Item>
+                <Form.Item label="Description" name="description">
+                    <TextArea rows={6} />
+                </Form.Item>
+            </> : <>
+
+                <Form.Item name="description">
+                    {/* <TextArea rows={6} /> */}
+                    <MonacoEditor></MonacoEditor>
+                </Form.Item>
+                <Form.Item name="research">
+                    <TextArea rows={6} />
+                </Form.Item>
+            </>}
+
             {/* <Form.Item label="样本分组名称" name="sample_group_name" >
                 <Input />
             </Form.Item> */}
@@ -87,7 +108,7 @@ const FormProject: FC<any> = ({ visible, onClose, params, callback }: any) => {
             <Collapse ghost items={[
                 {
                     key: "1",
-                    label: "更多",
+                    label: "More",
                     children: <>
                         <Form.Item noStyle shouldUpdate>
                             {() => (
