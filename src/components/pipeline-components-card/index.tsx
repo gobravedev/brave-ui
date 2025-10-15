@@ -1,4 +1,4 @@
-import { Button, Card, Col, Empty, Flex, Input, message, Modal, notification, Pagination, Popconfirm, Row, Spin, Tabs, Tag, Tooltip } from "antd"
+import { Button, Card, Col, Empty, Flex, Input, message, Modal, notification, Pagination, Popconfirm, Row, Segmented, Spin, Tabs, Tag, Tooltip } from "antd"
 import Item from "antd/es/list/Item"
 import { FC, useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
@@ -181,15 +181,15 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
 
                             <Meta title={<Flex gap={"small"}>
                                 <span>{item.name}</span>
-                                <Popconfirm title="Copy component ?" onConfirm={async (e:any) => {
+                                <Popconfirm title="Copy component ?" onConfirm={async (e: any) => {
                                     e.stopPropagation()
                                     await axios.post(`/copy-component/${item.component_id}`)
                                     message.success("Component copied!")
                                     reload()
                                 }}>
 
-                                    <CopyOutlined onClick={(e)=>{
-                                         e.stopPropagation()
+                                    <CopyOutlined onClick={(e) => {
+                                        e.stopPropagation()
 
                                     }} />
 
@@ -351,17 +351,20 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
     const [tabKey, setTabkey] = useState<any>()
     const { baseURL } = useSelector((state: any) => state.user)
     const message = useGlobalMessage()
+    const [storePosition, setStorePosition] = useState("Remote")
+
+    const isRemote = storePosition == "Remote"
     useEffect(() => {
         if (visible && params?.component_type) {
             loadStoreList()
 
         }
-    }, [visible, params?.component_type])
+    }, [visible, params?.component_type, storePosition])
 
     const loadStoreList = async () => {
         try {
             setLoading(true)
-            const resp = await axios.get(`/component-store/list-stores`)
+            const resp = await axios.get(`/component-store/list-stores?is_remote=${ isRemote? 'true' : 'false'}`)
             setStoreList(resp.data)
             if (resp.data.length > 0) {
                 setTabkey(resp.data[0].store_name)
@@ -376,7 +379,7 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
     }
     const loadData = async (store_name: any) => {
         setLoading(true)
-        const resp = await axios.get(`/component-store/list-by-type/${store_name}?component_type=${params?.component_type}`)
+        const resp = await axios.get(`/component-store/list-by-type/${store_name}?component_type=${params?.component_type}&is_remote=${isRemote ? 'true' : 'false'}`)
         setComponents(resp.data)
         setLoading(false)
 
@@ -384,13 +387,24 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
     return <Modal footer={null} title={<Flex gap={"small"}>
 
         <span>{`Install Components`} </span>
-        <RedoOutlined style={{ cursor: "pointer" }} onClick={loadData} />
+        <RedoOutlined style={{ cursor: "pointer" }} onClick={() => loadData(tabKey)} />
     </Flex>} width={"90%"} open={visible} onClose={onClose} onCancel={onClose}>
         {/* {JSON.stringify(components)} */}
 
         <Spin spinning={loading}>
             {/* {JSON.stringify(storeList)} */}
             <Tabs
+                tabBarExtraContent={<>
+                    <Segmented<string>
+                        value={storePosition}
+                        options={['Remote', 'Local']}
+                        onChange={(value) => {
+                            // console.log(value); // string
+                            setStorePosition(value)
+                        }}
+                    />
+                    <RedoOutlined style={{ cursor: "pointer" }} onClick={() => loadStoreList()} />
+                </>}
                 activeKey={tabKey}
                 onChange={(key) => {
                     setTabkey(key)
