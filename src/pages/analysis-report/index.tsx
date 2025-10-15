@@ -1,9 +1,11 @@
 import { Button, Card, Col, Empty, Flex, Row, Tag, Tree, TreeDataNode, TreeProps } from "antd"
 import axios from "axios"
-import { FC, useEffect, useRef, useState } from "react"
+import { FC, use, useEffect, useRef, useState } from "react"
 import { useLocation, useNavigate, useOutletContext, useParams } from "react-router"
 import { DownOutlined } from '@ant-design/icons'
 import { AnalysisResultViewComp } from '@/components/analysis-result-view'
+import { useDispatch } from "react-redux"
+import { setUserItem } from "@/store/userSlice"
 const AnalysisReport: FC<any> = () => {
     const [loading, setLoading] = useState<boolean>(false)
     const { project, projectObj } = useOutletContext<any>()
@@ -12,8 +14,16 @@ const AnalysisReport: FC<any> = () => {
     const location = useLocation()
     const queryParams = new URLSearchParams(location.search);
     const key = queryParams.get("key");
-
+    const projectParam = queryParams.get("project");
+    const dispatch = useDispatch()
     const [analysisKey, setAnalysisKey] = useState<any>(key)
+
+    useEffect(() => {
+        if (projectParam && projectParam != project) {
+            dispatch(setUserItem({ project: projectParam }))
+
+        }
+    }, [projectParam])
 
     const resultRef = useRef<any>(null)
     const navigate = useNavigate()
@@ -26,22 +36,36 @@ const AnalysisReport: FC<any> = () => {
     //         search: `?${searchParams.toString()}`
     //     });
     // };
-    const updateKey = (newKey: string) => {
-        // 获取当前 hash，例如 "#/analysis-report?key=1111"
-        const hash = window.location.hash;
+    const updateQueryParam = (paramName: string, newValue: string) => {
+        const { pathname, search, hash } = window.location;
 
-        // 分离路径和参数部分
-        const [path, search = ""] = hash.replace(/^#/, "").split("?");
-        const searchParams = new URLSearchParams(search);
+        // Parse current query string
+        const searchParams = new URLSearchParams(search || "");
 
-        // 修改 key 参数
-        searchParams.set("key", newKey);
+        // Update or add the parameter
+        searchParams.set(paramName, newValue);
 
-        // 组装新的 hash
-        const newHash = `#${path}?${searchParams.toString()}`;
+        // Determine if the app uses HashRouter
+        const isHashRouter = hash.startsWith("#/");
 
-        // 更新地址栏但不刷新页面
-        window.history.pushState({}, "", newHash);
+        let newUrl = "";
+
+        if (isHashRouter) {
+            // Extract path and query part from the hash
+            const [hashPath, hashSearch = ""] = hash.replace(/^#/, "").split("?");
+
+            const hashParams = new URLSearchParams(hashSearch);
+            hashParams.set(paramName, newValue);
+
+            // Build new hash-based URL
+            newUrl = `#${hashPath}?${hashParams.toString()}`;
+        } else {
+            // Build new browser-based URL
+            newUrl = `${pathname}?${searchParams.toString()}`;
+        }
+
+        // Update browser URL without reloading the page
+        window.history.pushState({}, "", newUrl);
     };
     // const [components,setComponents] = useState<any>()
     // const loadComponents = async (componentId:any) => {
@@ -80,6 +104,8 @@ const AnalysisReport: FC<any> = () => {
             if (resp.data[0]?.children && resp.data[0]?.children.length > 0) {
                 setAnalysis(resp.data[0]?.children[0])
                 setAnalysisKey(resp.data[0]?.children[0]?.key)
+                updateQueryParam("project", project);
+                updateQueryParam("key", resp.data[0]?.children[0]?.key);
             }
         }
 
@@ -132,7 +158,8 @@ const AnalysisReport: FC<any> = () => {
                             if (val.node?.type == "analysis") {
                                 setAnalysis(val.node)
                                 setAnalysisKey(val.node.key)
-                                updateKey(val.node.key)
+                                updateQueryParam("project", project);
+                                updateQueryParam("key", val.node.key);
                             } else if (val.node?.type == "components") {
                                 console.log(val.node)
                                 // loadComponents(val.node.key)

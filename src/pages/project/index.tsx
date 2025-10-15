@@ -18,21 +18,21 @@ const Project: FC<any> = () => {
             setData(english)
         }
     }
-    return <div style={{ maxWidth: "1800px", margin: "1rem auto" }}>
+    return <div style={{ maxWidth: "1800px", margin: "0 auto" }}>
         <Row>
-            <Col xs={24} sm={12} md={12} lg={12} xl={12} style={{ padding: "0 0.5rem" }}>
+            <Col xs={24} sm={12} md={12} lg={12} xl={12} style={{ padding: "0 0.5rem",marginTop:"1rem" }}>
 
                 <Card >
                     <Markdown data={data}></Markdown>
                 </Card>
             </Col>
-            <Col xs={24} sm={6} md={6} lg={6} xl={6}  style={{ padding: "0 0.5rem" }}>
+            <Col xs={24} sm={6} md={6} lg={6} xl={6}  style={{ padding: "0 0.5rem",marginTop:"1rem"  }}>
 
                 <ContainerComp keys={["traefik", "code-server", "notebook", "rstudio"]}></ContainerComp>
 
             </Col>
 
-            <Col xs={24} sm={6} md={6} lg={6} xl={6}  style={{ padding: "0 0.5rem" }}>
+            <Col xs={24} sm={6} md={6} lg={6} xl={6}  style={{ padding: "0 0.5rem",marginTop:"1rem"  }}>
                 <RunningContainer></RunningContainer>
             </Col>
         </Row>
@@ -329,7 +329,7 @@ const RunningContainer: FC<any> = () => {
                     <Skeleton avatar title={false} loading={item.loading} active>
                         <List.Item.Meta
 
-                            title={item.image}
+                            title={<p style={{ wordWrap: "break-word" }}>{item.image}</p>}
                             description={item.name}
                         />
                         {/* <div>content</div> */}
