@@ -1,4 +1,4 @@
-import { Breadcrumb, Button, Card, Empty, Flex, message, Modal, Skeleton, Tabs, Tag, Tooltip } from "antd"
+import { Breadcrumb, Button, Card, Empty, Flex, message, Modal, Popconfirm, Skeleton, Switch, Tabs, Tag, Tooltip } from "antd"
 import { FC, useEffect, useRef, useState } from "react"
 import AnalysisPanel, { UpstreamAnalysisInput, UpstreamAnalysisOutput } from '../../../components/analysis-sotware-panel'
 import Meta from "antd/es/card/Meta"
@@ -204,62 +204,71 @@ const Pipeline: FC<any> = ({ }) => {
     }, [])
     return <div style={{ maxWidth: "1500px", margin: "1rem auto" }}>
         {/* {JSON.stringify(pipeline)} */}
-        <Flex style={{ marginBottom: "1rem" }} justify={"space-between"} align={"center"} gap="small">
-            <div  style={{height: "3.5rem"}}>
-                {pipeline ? <>
-                    <h2 style={{ margin: 0 }}>
-                        {pipeline?.component_name}
-                        <Tooltip title={pipeline?.namespace}>
-                            <span style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)", fontSize: "1rem" }}> {pipeline?.namespace_name}</span>
-                        </Tooltip>
-                    </h2>
-                    {/* <p style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)" }}>{pipeline?.description}</p> */}
+        <Card size="small" style={{ marginBottom: "1rem" }} >
+
+            <Flex justify={"space-between"} align={"center"} gap="small">
+                <div style={{ height: "5rem" }}>
+                    {pipeline ? <>
+                        <h2 style={{ margin: 0 }}>
+                            {pipeline?.component_name}
+                            <Tooltip title={pipeline?.namespace}>
+                                <span style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)", fontSize: "1rem" }}> {pipeline?.namespace_name}
+                                    <Tag style={{ marginLeft: "0.5rem" }} color="blue">{pipeline?.category}</Tag>
+                                </span>
+                            </Tooltip>
+                        </h2>
+                        {/* <p style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)" }}>{pipeline?.description}</p> */}
 
 
-                    {import.meta.env.MODE == "development" && <>
-                        <p style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)" }}>{pipeline?.component_id}</p></>}
+                        {import.meta.env.MODE == "development" && <>
+                            <p style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)" }}>{pipeline?.component_id}</p></>}
 
-                    {pipeline.tags && Array.isArray(pipeline.tags) && pipeline.tags.map((tag: any, index: any) => (
-                        <Tag style={{ marginTop: "0.5rem" }} key={index} color={colors[index]}>{tag}</Tag>
-                    ))}
-                </> : <Skeleton active></Skeleton>}
-            </div>
-            <Flex gap="small" wrap>
-                {component_type == "pipeline" && <>
+                        {pipeline.tags && Array.isArray(pipeline.tags) && pipeline.tags.map((tag: any, index: any) => (
+                            <Tag style={{ marginTop: "0.5rem" }} key={index} color={colors[index]}>{tag}</Tag>
+                        ))}
+                    </> : <Skeleton active></Skeleton>}
+                </div>
+                <Flex gap="small" wrap>
+                    {component_type == "pipeline" && <>
+                        <Button size="small" color="cyan" variant="solid" onClick={() => {
+                            openModal("sortSoftware", { software: pipeline.software })
+                        }}>Update Sorting</Button>
+                    </>}
                     <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        openModal("sortSoftware", { software: pipeline.software })
-                    }}>Update Sorting</Button>
-                </>}
+                        openModal("publishModal", { ...pipeline, component_type: component_type })
+                    }}>Publish</Button>
 
-                <Button size="small" color="cyan" variant="solid" onClick={() => {
-                    operatePipeline.openModal("projectForm", { project_id: project_id })
-                }}>Edit Project</Button>
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        operatePipeline.openModal("projectForm", { project_id: project_id })
+                    }}>Edit Project</Button>
 
-                <Button size="small" color="cyan" variant="solid" onClick={() => {
-                    operatePipeline.openModal("modalG", pipeline)
-                }}>View Dependencies</Button>
-                <Button size="small" color="cyan" variant="solid" onClick={() => {
-                    openModals("metadataModal", { ...pipeline, operatePipeline: operatePipeline })
-                }}>Metadata</Button>
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        operatePipeline.openModal("modalG", pipeline)
+                    }}>View Dependencies</Button>
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        openModals("metadataModal", { ...pipeline, operatePipeline: operatePipeline })
+                    }}>Metadata</Button>
 
-                <Button size="small" color="cyan" variant="solid" onClick={() => {
-                    openModal("modalC", {
-                        data: pipeline, structure: {
-                            component_type: component_type,
-                        }
-                    })
-                }}>Update {component_type}</Button>
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        openModal("modalC", {
+                            data: pipeline, structure: {
+                                component_type: component_type,
+                            }
+                        })
+                    }}>Update {component_type}</Button>
 
-                <Button size="small" color="primary" variant="solid" onClick={loadData}>Refresh</Button>
-                <Button size="small" color="primary" variant="solid" onClick={() => navigate(`/${component_type}-card`)}>Back</Button>
+                    <Button size="small" color="primary" variant="solid" onClick={loadData}>Refresh</Button>
+                    <Button size="small" color="primary" variant="solid" onClick={() => navigate(`/${component_type}-card`)}>Back</Button>
+                </Flex>
+
             </Flex>
-
-        </Flex>
+        </Card>
         {/* 111111 */}
         {/* <ComponentsRender component_type={component_type || ""} operatePipeline={{
             deletePipelineRelation: deletePipelineRelation,
             openModal: openModal
         }} component={pipeline} /> */}
+
         <MemoizedComponentsRender
             component_type={component_type || ""}
             component={pipeline}
@@ -356,7 +365,10 @@ const Pipeline: FC<any> = ({ }) => {
             visible={modal.key == "descriptionModal" && modal.visible}
             onClose={closeModal}
             params={modal.params} callback={loadData}></DescriptionModal>
-
+        <PublishModal
+            visible={modal.key == "publishModal" && modal.visible}
+            onClose={closeModal}
+            params={modal.params}></PublishModal>
 
     </div>
 }
@@ -364,6 +376,86 @@ const Pipeline: FC<any> = ({ }) => {
 
 export default Pipeline
 
+
+const PublishModal: FC<any> = ({ visible, onClose, params }) => {
+    const [storeList, setStoreList] = useState<any>([])
+    const [loading, setLoading] = useState(false)
+    const [force, setForce] = useState(false)
+    const loadStoreList = async () => {
+        try {
+            setLoading(true)
+            const resp = await axios.get(`/component-store/list-stores?address=local`)
+            setStoreList(resp.data)
+
+            setLoading(false)
+
+        } catch (error: any) {
+            // message.error(error.message)
+        }
+
+    }
+
+    // component_id: str
+    // store_path:Optional[str]=None
+    // force: Optional[bool]=False
+    const publishToStore = async (component_id: any, store_path: any = undefined) => {
+        try {
+            setLoading(true)
+            const resp = await axios.post(`/publish-component`, {
+                component_id: component_id,
+                store_path: store_path,
+                force: force
+            })
+            message.success("Published successfully")
+            setLoading(false)
+            onClose()
+        } catch (error: any) {
+            // message.error(error.response?.data?.detail || error.message)
+            setLoading(false)
+        }
+    }
+    useEffect(() => {
+        if (visible) {
+            loadStoreList()
+        }
+    }, [visible])
+
+    // const { component_type, component_id} = params
+    return <Modal
+        loading={loading}
+        title={<>
+            {`Publish ${params?.component_name} (${params?.component_type})`}
+            <Switch style={{ marginLeft: "1rem" }} checked={force} onChange={(checked) => { setForce(checked) }} /> Force
+        </>}
+        open={visible}
+        onCancel={onClose}
+        footer={null}
+
+    >
+        <Flex gap={"small"} style={{ marginBottom: "1rem" }}>
+            {/* <Popconfirm title={"pubpish?"} onConfirm={() => publishToStore(params?.component_id, undefined)}>
+                <Button size="small" color="cyan" variant="solid"
+
+                >default</Button>
+            </Popconfirm> */}
+
+
+            {storeList.map((item: any, index: any) => (
+                <Tooltip title={item.store_path} key={index}>
+                    <Popconfirm title={"pubpish?"} onConfirm={() => publishToStore(params?.component_id, item.store_path)}>
+
+                        <Button size="small" color="cyan" variant="solid"
+
+                        >{item.name}</Button>
+
+                    </Popconfirm>
+                </Tooltip>
+            ))}
+        </Flex>
+        {/* {JSON.stringify(storeList)} */}
+
+    </Modal>
+}
 interface PipelineComponentProps {
     operatePipeline: any,
     component: any,

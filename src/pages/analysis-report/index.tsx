@@ -1,4 +1,4 @@
-import { Button, Card, Col, Empty, Flex, Row, Tabs, Tag, Tree, TreeDataNode, TreeProps } from "antd"
+import { Button, Card, Col, Empty, Flex, Row, Skeleton, Tabs, Tag, Tree, TreeDataNode, TreeProps } from "antd"
 import axios from "axios"
 import { FC, use, useEffect, useRef, useState } from "react"
 import { useLocation, useNavigate, useOutletContext, useParams } from "react-router"
@@ -22,9 +22,13 @@ const AnalysisReport: FC<any> = () => {
     const projectParam = queryParams.get("project");
     const dispatch = useDispatch()
     const { modal, openModal, closeModal } = useModal();
-
+    const [queryProject,setQueryProject] = useState<any>()
     const [analysisKey, setAnalysisKey] = useState<any>(key)
 
+    const loadProject = async () => {
+        const resp = await axios.get(`/project/find-by-project-id/${project}`)
+        setQueryProject(resp.data)
+    }
     useEffect(() => {
         if (projectParam && projectParam != project) {
             dispatch(setUserItem({ project: projectParam }))
@@ -87,6 +91,7 @@ const AnalysisReport: FC<any> = () => {
             setTop(height);
         }
     }
+    
     useEffect(() => {
         updateHeight(); // 初始化
         window.addEventListener("resize", updateHeight);
@@ -187,13 +192,18 @@ const AnalysisReport: FC<any> = () => {
             </Col>
             <Col lg={18} sm={18} xs={24} style={{ paddingLeft: "1rem" }}>
                 <Tabs
-                
+
                     type="card"
                     size="small"
                     tabPosition="right"
+                    onChange={(val) => {
+                        if(val=="records"){
+                            loadProject()
+                        }
+                    }}
                     items={[
                         {
-                            key: '1',
+                            key: 'analysis_result',
                             label: `Analysis Result`,
                             children: <>
                                 {analysisKey ? <>
@@ -209,20 +219,31 @@ const AnalysisReport: FC<any> = () => {
                                 </>}
                             </>
                         }, {
-                            key: '2',
+                            key: 'records',
                             label: `Records`,
                             children: <>
                                 <Card size="small" style={{ marginBottom: "1rem" }} extra={
-                                    <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                        openModal("projectForm", { project_id: project })
-                                    }}>Edit</Button>
+                                    <Flex gap={"small"}>
+
+                                        <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                            openModal("projectForm", { project_id: project })
+                                        }}>Edit</Button>
+
+                                        <Button size="small" color="cyan" variant="solid" onClick={ () => {
+                                            loadProject()
+                                            // setProjectObj(resp.data)
+                                            // dispatch(setUserItem({ projectObj: resp.data }))
+                                        }}>Refresh</Button>
+                                    </Flex>
+
                                 }>
-                                    {projectObj?.description ? <Markdown data={projectObj?.description}></Markdown> : <Empty />}
+                                    
+                                    {queryProject?.description ? <Markdown data={queryProject?.description}></Markdown> : <Skeleton active />}
                                 </Card>
                             </>
                         }
                     ]}
-                    defaultActiveKey="1">
+                    defaultActiveKey="analysis_result">
                 </Tabs>
 
 

@@ -1,6 +1,6 @@
-import { Button, Card, Col, Empty, Flex, Input, message, Modal, notification, Pagination, Popconfirm, Row, Segmented, Spin, Tabs, Tag, Tooltip } from "antd"
+import { Button, Card, Col, Empty, Flex, Input, List, message, Modal, notification, Pagination, Popconfirm, Row, Segmented, Skeleton, Spin, Tabs, Tag, Tooltip } from "antd"
 import Item from "antd/es/list/Item"
-import { FC, useEffect, useState } from "react"
+import { FC, use, useEffect, useMemo, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate, useOutletContext, useParams } from "react-router"
 import { ApartmentOutlined, CopyOutlined, DeleteOutlined, DownloadOutlined, EditOutlined, RedoOutlined } from '@ant-design/icons';
@@ -22,6 +22,10 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
     const { Search } = Input;
     // const [searchText, setSearchText] = useState("");
     const { baseURL } = useSelector((state: any) => state.user)
+    const navigate = useNavigate();
+    const { messageApi } = useOutletContext<any>()
+    const { modal, openModal, closeModal } = useModal();
+    const [activeCategory, setActiveCategory] = useState<string | null>("all");
 
     // const [pipelineComponents, setPipelineComponents] = useState<any>([])
     const { component_type } = params
@@ -56,10 +60,24 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
     // }
     const { data: pipelineComponents, pageNumber, totalPage, loading, reload, pageSize, setPageNumber, search } = usePagination({
         pageApi: pagePipelineComponents,
-        params: params || {},
+        params: { category: activeCategory, ...params },
         map: mapFun,
         initialPageSize: 12
     })
+    const [category, setCategory] = useState<any[]>([])
+    const [categoryLoading, setCategoryLoading] = useState(false)
+    const loadCateory = async () => {
+        setCategoryLoading(true)
+        const resp = await axios.get(`/component/get-all-category`)
+        setCategory(["all", ...resp.data])
+        setCategoryLoading(false)
+    }
+    useEffect(() => {
+        loadCateory()
+    }, [])
+    // useEffect(() => {
+    //     const loadData = async () => {
+
     // result = {
     //     "id":item.id,
     //     "component_id":item.component_id,
@@ -72,9 +90,6 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
     //     "order":item.order_index
     // }
 
-    const navigate = useNavigate();
-    const { messageApi } = useOutletContext<any>()
-    const { modal, openModal, closeModal } = useModal();
 
     // const menuItems = useSelector((state: any) => state.menu.items)
     // const sseData = useSelector((state: any) => state.global.sseData)
@@ -112,125 +127,132 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
     // }, [])
 
     // indivi
-    return <div style={{ maxWidth: "1500px", margin: "1rem auto" }}>
+    return <div style={{ maxWidth: "1800px", margin: "1rem auto" }}>
         {/* {JSON.stringify(sseData)} */}
-        <Flex justify="space-between" gap="small">
-            <Search
-                size="small"
-                placeholder="Search Components"
-                allowClear
-                enterButton
-                onSearch={(value) => { search(value) }}
-                style={{ marginBottom: "1rem", width: 400 }}
-            />
-            <Flex gap="small">
-                <Button size="small" color="cyan" variant="solid" onClick={() => {
-                    openModal("installComponents", { component_type: component_type })
-                }}>Intsall Components </Button>
+        <Card size="small">
+            <Flex justify="space-between" gap="small">
+                <Search
+                    size="small"
+                    placeholder="Search Components"
+                    allowClear
+                    enterButton
+                    onSearch={(value) => { search(value) }}
+                    style={{ width: 400 }}
+                />
+                <Flex gap="small">
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        openModal("installComponents", { component_type: component_type })
+                    }}>Intsall Components </Button>
 
-                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
 
-                    openModal("modalA", {
-                        data: undefined,
-                        structure: {
-                            component_type: component_type,
-                        }
-                    })
-                }}>Create Components </Button>
+                        openModal("modalA", {
+                            data: undefined,
+                            structure: {
+                                component_type: component_type,
+                            }
+                        })
+                    }}>Create Components </Button>
 
 
 
-                {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
+                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                     openModal("modalB")
                 }}>Create/Update  namespace</Button> */}
-                {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
+                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                     openModal("modalC")
                 }}>Install namespace</Button> */}
-                <Button size="small" color="primary" variant="solid" onClick={reload}>Refresh</Button>
+                    <Button size="small" color="primary" variant="solid" onClick={reload}>Refresh</Button>
+                </Flex>
             </Flex>
-        </Flex>
+        </Card>
         {/* <div style={{ marginBottom: "2rem" }}>
         </div> */}
 
         {/* {JSON.stringify(pipelineComponents)} */}
-        <Spin spinning={loading}>
-            {Array.isArray(pipelineComponents) && pipelineComponents.length != 0 ? <Row gutter={16} style={{ position: "relative" }}>
 
-                {pipelineComponents.map((item: any, index: any) => (
-                    <Col key={index} lg={6} sm={4} xs={24} style={{ marginBottom: "1rem", cursor: "pointer" }}>
-                        <Card hoverable
-                            className="custom-card"
-                            // title={item.label}
-                            // variant="borderless" 
-                            style={{
-                                height: "100%",
-                                border: "1px solid #f0f0f0",   // 默认灰色边框
-                                borderRadius: "12px",          // 圆角
-                                overflow: "hidden",
-                                transition: "all 0.3s ease",   // 平滑过渡
+        <Row style={{ marginTop: "1rem" }} gutter={16}>
+            <Col lg={21} sm={21} xs={24} >
+                <Card size="small">
+                    <Spin spinning={loading}>
+                        {Array.isArray(pipelineComponents) && pipelineComponents.length != 0 ? <Row gutter={16} style={{ position: "relative" }}>
 
-                            }}
-                            bodyStyle={{
-                                padding: "12px 16px",          // 内边距更紧凑
-                            }}
-                            cover={<div style={{ height: "15rem" }}>
-                                <img style={{ height: "100%", width: "100%", objectFit: "cover" }} alt={item.label} src={`${baseURL}${item.img}`} />
-                            </div>}
-                            onClick={() => navigate(`${item.path}`)}>
+                            {pipelineComponents.map((item: any, index: any) => (
+                                <Col key={index} lg={6} sm={4} xs={24} style={{ marginBottom: "1rem", cursor: "pointer" }}>
+                                    <Card hoverable
+                                    size="small"
+                                        className="custom-card"
+                                        // title={item.label}
+                                        // variant="borderless" 
+                                        style={{
+                                            height: "100%",
+                                            border: "1px solid #f0f0f0",   // 默认灰色边框
+                                            borderRadius: "12px",          // 圆角
+                                            overflow: "hidden",
+                                            transition: "all 0.3s ease",   // 平滑过渡
+
+                                        }}
+                                        bodyStyle={{
+                                            padding: "12px 16px",          // 内边距更紧凑
+                                        }}
+                                        cover={<div style={{ height: "15rem" }}>
+                                            <img style={{ height: "100%", width: "100%", objectFit: "cover" }} alt={item.label} src={`${baseURL}${item.img}`} />
+                                        </div>}
+                                        onClick={() => navigate(`${item.path}`)}>
 
 
-                            <Meta title={<Flex gap={"small"}>
-                                <span>{item.name}</span>
-                                <Popconfirm title="Copy component ?" onConfirm={async (e: any) => {
-                                    e.stopPropagation()
-                                    await axios.post(`/copy-component/${item.component_id}`)
-                                    message.success("Component copied!")
-                                    reload()
-                                }}>
+                                        <Meta title={<Flex gap={"small"}>
+                                            <span>{item.name}</span>
+                                            <Popconfirm title="Copy component ?" onConfirm={async (e: any) => {
+                                                e.stopPropagation()
+                                                await axios.post(`/copy-component/${item.component_id}`)
+                                                message.success("Component copied!")
+                                                reload()
+                                            }}>
 
-                                    <CopyOutlined onClick={(e) => {
-                                        e.stopPropagation()
+                                                <CopyOutlined onClick={(e) => {
+                                                    e.stopPropagation()
 
-                                    }} />
+                                                }} />
 
-                                </Popconfirm>
-                                {/* <Tooltip title={item?.namespace}>
+                                            </Popconfirm>
+                                            {/* <Tooltip title={item?.namespace}>
                                     <span style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)", fontSize: "0.5rem" }}> {item?.namespace_name}</span>
                                 </Tooltip> */}
-                            </Flex>} description={item?.description} style={{ marginBottom: "1rem" }} />
-                            {item.tags && Array.isArray(item.tags) && item.tags.map((tag: any, index: any) => (
-                                <Tooltip key={index} title={tag}>
-                                    <Tag style={{
-                                        wordBreak: "break-word",
-                                        whiteSpace: "nowrap",
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                        maxWidth: 100,
-                                        display: "inline-block",
-                                        cursor: "default"
-                                    }} color={colors[index]}>{tag}</Tag>
-                                </Tooltip>
+                                        </Flex>} description={item?.description} style={{ marginBottom: "1rem" }} />
+                                        {item.tags && Array.isArray(item.tags) && item.tags.map((tag: any, index: any) => (
+                                            <Tooltip key={index} title={tag}>
+                                                <Tag style={{
+                                                    wordBreak: "break-word",
+                                                    whiteSpace: "nowrap",
+                                                    overflow: "hidden",
+                                                    textOverflow: "ellipsis",
+                                                    maxWidth: 100,
+                                                    display: "inline-block",
+                                                    cursor: "default"
+                                                }} color={colors[index]}>{tag}</Tag>
+                                            </Tooltip>
 
-                            ))}
-                            {/* {JSON.stringify(item)} */}
+                                        ))}
+                                        {/* {JSON.stringify(item)} */}
 
-                            <div onClick={(e) => {
-                                e.stopPropagation()
-                                openModal("modalG", item)
-                                // setCreateOpen(true)
-                                // console.log(item)
-                                // setRecord(item)
-                            }} style={{
-                                position: "absolute",
-                                right: 10,
-                                bottom: 10,
-                                fontSize: 15,
-                                color: "rgba(0,0,0,0.45)",
-                                cursor: "pointer",
-                            }}>
-                                <ApartmentOutlined />
-                            </div>
-                            {/* <div style={{
+                                        <div onClick={(e) => {
+                                            e.stopPropagation()
+                                            openModal("modalG", item)
+                                            // setCreateOpen(true)
+                                            // console.log(item)
+                                            // setRecord(item)
+                                        }} style={{
+                                            position: "absolute",
+                                            right: 10,
+                                            bottom: 10,
+                                            fontSize: 15,
+                                            color: "rgba(0,0,0,0.45)",
+                                            cursor: "pointer",
+                                        }}>
+                                            <ApartmentOutlined />
+                                        </div>
+                                        {/* <div style={{
                                 position: "absolute",
                                 right: 40,
                                 bottom: 10,
@@ -242,7 +264,7 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
                                     {item.namespace_name}
                                 </Tooltip>
                             </div> */}
-                            {/* <EditOutlined
+                                        {/* <EditOutlined
                                 onClick={(e) => {
                                     e.stopPropagation()
                                     openModal("modalA", {
@@ -280,23 +302,86 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
                                     }}
                                 />
                             </Popconfirm> */}
-                        </Card>
-                    </Col>
-                ))}
+                                    </Card>
+                                </Col>
+                            ))}
 
-            </Row> : <Empty></Empty>}
-        </Spin>
+                        </Row> : <Empty></Empty>}
+                    </Spin>
+                    {totalPage != 0 && <Flex style={{ marginTop: "1rem" }} align="center">
+                        一共{totalPage}条数据 &nbsp;
+                        <Pagination
+                            current={pageNumber}
+                            pageSize={pageSize}
+                            total={totalPage}
+                            onChange={(p) => setPageNumber(p)}
+                            showSizeChanger={false}
+                        />
+                    </Flex>}
+                </Card>
+            </Col>
+            <Col lg={3} sm={3} xs={24}>
+                <Card
+                    extra={<RedoOutlined style={{ cursor: "pointer" }} onClick={() => loadCateory()} />}
+                    size="small"
+                    loading={categoryLoading}
+                    title={<span style={{ fontWeight: 600 }}>Category</span>}
+                    bordered={false}
+                    style={{
+                        borderRadius: "12px",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                        height: "100%",
+                    }}
+                    bodyStyle={{ padding: "0.75rem" }}
+                >
+                    {categoryLoading ? (
+                        <Skeleton active paragraph={{ rows: 5 }} />
+                    ) : (
+                        <List
+                            dataSource={category}
+                            split={false}
+                            renderItem={(item) => (
+                                <List.Item
+                                    style={{
+                                        padding: "6px 0",
+                                        border: "none",
+                                    }}
+                                >
+                                    <Button
+                                        block
+                                        type={activeCategory === item ? "primary" : "default"}
+                                        onClick={() => setActiveCategory(item)}
+                                        style={{
+                                            textAlign: "left",
+                                            borderRadius: "8px",
+                                            transition: "all 0.2s",
+                                        }}
+                                        className="hover:shadow-md"
+                                    >
+                                        {item}
+                                        {/* {activeCategory === item && (
+                                            <Tag
+                                                color="blue"
+                                                style={{
+                                                    float: "right",
+                                                    marginTop: "2px",
+                                                }}
+                                            >
+                                                ✓
+                                            </Tag>
+                                        )} */}
+                                    </Button>
+                                </List.Item>
+                            )}
+                        />
+                    )}
+                </Card>
+            </Col>
+        </Row>
 
-        {totalPage != 0 && <Flex style={{ marginTop: "1rem" }} align="center">
-            一共{totalPage}条数据 &nbsp;
-            <Pagination
-                current={pageNumber}
-                pageSize={pageSize}
-                total={totalPage}
-                onChange={(p) => setPageNumber(p)}
-                showSizeChanger={false}
-            />
-        </Flex>}
+
+
+
         {/* <CreatePipeline
             callback={loadPipeine}
             pipelineStructure={{
@@ -353,7 +438,10 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
     const message = useGlobalMessage()
     const [address, setAddress] = useState("github")
     // const [token, setToken] = useState()
-    const {githubToken} = useSelector((state: any) => state.user)
+    const { githubToken } = useSelector((state: any) => state.user)
+    const [category, setCategory] = useState<any[]>([])
+    const [activeCategory, setActiveCategory] = useState("all")
+
     // const isRemote = storePosition == "Remote"
     useEffect(() => {
         if (visible && params?.component_type) {
@@ -390,10 +478,28 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
             remote_force: remote_force,
             token: githubToken
         })
+        const category = resp.data.map((item: any) => item.category)
+        setCategory(["all", ...Array.from(new Set(category))])
+
         setComponents(resp.data)
         setLoading(false)
 
     }
+
+    const filteredComponents = useMemo(() => {
+        if (activeCategory == "all") return components;
+        return components.filter((item: any) => item.category == activeCategory);
+    }, [components, activeCategory]);
+
+    // useEffect(() => {
+    //     resp.data.filter((item: any) => {
+    //         if (activeCategory == "all") {
+    //             return true
+    //         } else {
+    //             return false//item.category == activeCategory
+    //         }
+    //     })
+    // }, [])
     const getImgPath = (img: any) => {
         if (img.startsWith("http")) {
             return img
@@ -417,7 +523,8 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
         <Spin spinning={loading}>
             {/* {JSON.stringify(storeList)} */}
             <Tabs
-                tabBarExtraContent={<>
+                size="small"
+                tabBarExtraContent={<Flex gap={"small"}>
                     <Segmented<string>
                         value={address}
                         options={[
@@ -435,7 +542,7 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
                         }}
                     />
                     <RedoOutlined style={{ cursor: "pointer" }} onClick={() => loadStoreList()} />
-                </>}
+                </Flex>}
                 activeKey={tabKey}
                 onChange={(key) => {
                     setTabkey(key)
@@ -445,96 +552,121 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
                     key: item.store_name,
                     label: item.name,
                 }))}></Tabs>
-            {Array.isArray(components) && components.length != 0 ? <Row gutter={16} style={{ position: "relative" }}>
 
-                {components.map((item: any, index: any) => (
-                    <Col key={index} lg={4} sm={4} xs={24} style={{ marginBottom: "1rem", cursor: "pointer" }}>
+            <Row>
+                <Col lg={21} sm={21} xs={24}>
+                    {Array.isArray(filteredComponents) && filteredComponents.length != 0 ? <Row gutter={16} style={{ position: "relative" }}>
 
-                        <Card hoverable
-                            className="custom-card"
-                            // title={item.label}
-                            // variant="borderless" 
-                            style={{
-                                height: "100%",
-                                border: "1px solid #f0f0f0",   // 默认灰色边框
-                                borderRadius: "12px",          // 圆角
-                                overflow: "hidden",
-                                transition: "all 0.3s ease",   // 平滑过渡
+                        {filteredComponents.map((item: any, index: any) => (
+                            <Col key={index} lg={4} sm={4} xs={24} style={{ marginBottom: "1rem", cursor: "pointer" }}>
 
-                            }}
-                            bodyStyle={{
-                                padding: "12px 16px",          // 内边距更紧凑
-                            }}
-                            cover={<div style={{ height: "15rem" }}>
-                                <img style={{ height: "100%", width: "100%", objectFit: "cover" }} alt={item.label}
-                                    src={getImgPath(item.img)} />
-                            </div>}
-                        >
-
-                            <Meta title={
-
-                                <Flex justify="space-between" align="center">
-
-                                    <Tooltip title={item?.component_id}>
-                                        {item.component_name}
-                                        <Tag color={item.installed ? "#108ee9" : "#f5222d"} style={{ marginLeft: "1rem" }}>
-                                            {item.installed ? "Installed" : "Not I nstalled"}
-                                        </Tag>
-                                    </Tooltip>
-
-                                    <Popconfirm
-                                        okButtonProps={{ color: `${item.installed ? "red" : "blue"}`, variant: "solid" }}
-                                        okText={item.installed ? "Reinstall" : "Install"}
-                                        title={
-                                            item.installed ? `Reinstall ${item.component_name} ?` : `Install ${item.component_name} ?`
-                                        }
-                                        onConfirm={async () => {
-                                            await axios.post(`/install-components`, {
-                                                path: item.file_path,
-                                                force: true,
-                                                address: item.address,
-                                                branch: item.branch,
-                                                token: githubToken
-                                                // is_remote:item.
-                                            }, {
-                                                timeout: 60000
-                                            })
-                                            message.success(item.installed ? `Reinstall success!` : `Install success!`)
-                                            callback && callback()
-                                            onClose && onClose()
-
-                                        }}>
-
-                                        <DownloadOutlined style={{ cursor: "pointer" }} />
-
-                                    </Popconfirm>
-
-                                </Flex>
-
-                            } description={item?.description} style={{ marginBottom: "1rem" }} />
-
-
-                            {item.tags && Array.isArray(item.tags) && item.tags.map((tag: any, index: any) => (
-                                <Tooltip key={index} title={tag}>
-                                    <Tag style={{
-                                        wordBreak: "break-word",
-                                        whiteSpace: "nowrap",
+                                <Card
+                                    size="small"
+                                    hoverable
+                                    className="custom-card"
+                                    // title={item.label}
+                                    // variant="borderless" 
+                                    style={{
+                                        height: "100%",
+                                        border: "1px solid #f0f0f0",   // 默认灰色边框
+                                        borderRadius: "12px",          // 圆角
                                         overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                        maxWidth: 100,
-                                        display: "inline-block",
-                                        cursor: "default"
-                                    }} color={colors[index]}>{tag}</Tag>
-                                </Tooltip>
+                                        transition: "all 0.3s ease",   // 平滑过渡
 
-                            ))}
+                                    }}
+                                    bodyStyle={{
+                                        padding: "12px 16px",          // 内边距更紧凑
+                                    }}
+                                    cover={<div style={{ height: "15rem" }}>
+                                        <img style={{ height: "100%", width: "100%", objectFit: "cover" }} alt={item.label}
+                                            src={getImgPath(item.img)} />
+                                    </div>}
+                                >
+
+                                    <Meta title={
+
+                                        <Flex justify="space-between" align="center">
+
+                                            <Tooltip title={item?.component_id}>
+                                                {item.component_name}
+                                                <Tag color={item.installed ? "#108ee9" : "#f5222d"} style={{ marginLeft: "1rem" }}>
+                                                    {item.installed ? "Installed" : "Not I nstalled"}
+                                                </Tag>
+                                            </Tooltip>
+
+                                            <Popconfirm
+                                                okButtonProps={{ color: `${item.installed ? "red" : "blue"}`, variant: "solid" }}
+                                                okText={item.installed ? "Reinstall" : "Install"}
+                                                title={
+                                                    item.installed ? `Reinstall ${item.component_name} ?` : `Install ${item.component_name} ?`
+                                                }
+                                                onConfirm={async () => {
+                                                    await axios.post(`/install-components`, {
+                                                        path: item.file_path,
+                                                        force: true,
+                                                        address: item.address,
+                                                        branch: item.branch,
+                                                        token: githubToken
+                                                        // is_remote:item.
+                                                    }, {
+                                                        timeout: 60000
+                                                    })
+                                                    message.success(item.installed ? `Reinstall success!` : `Install success!`)
+                                                    callback && callback()
+                                                    onClose && onClose()
+
+                                                }}>
+
+                                                <DownloadOutlined style={{ cursor: "pointer" }} />
+
+                                            </Popconfirm>
+
+                                        </Flex>
+
+                                    } description={item?.description} style={{ marginBottom: "1rem" }} />
 
 
-                        </Card>
-                    </Col>
-                ))}
+                                    {item.tags && Array.isArray(item.tags) && item.tags.map((tag: any, index: any) => (
+                                        <Tooltip key={index} title={tag}>
+                                            <Tag style={{
+                                                wordBreak: "break-word",
+                                                whiteSpace: "nowrap",
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis",
+                                                maxWidth: 100,
+                                                display: "inline-block",
+                                                cursor: "default"
+                                            }} color={colors[index]}>{tag}</Tag>
+                                        </Tooltip>
 
-            </Row> : <Empty></Empty>}
+                                    ))}
+
+
+                                </Card>
+
+                            </Col>
+                        ))}
+
+                    </Row> : <Empty></Empty>}
+                </Col>
+                <Col lg={3} sm={3} xs={24}>
+                    <Tabs
+                        activeKey={activeCategory}
+                        onChange={(key) => setActiveCategory(key)}
+                        tabBarStyle={{ marginBottom: 0 }}
+                        type="card"
+                        size="small"
+                        tabPosition="right"
+                        items={category.map((cat) => ({
+                            key: cat,
+                            label: cat
+                        }))}
+
+                    ></Tabs>
+                </Col>
+
+            </Row>
+
         </Spin>
     </Modal >
 }
