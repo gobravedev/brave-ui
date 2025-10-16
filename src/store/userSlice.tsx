@@ -35,7 +35,7 @@ const contextSlice = createSlice({
         namespace:namespace?`${namespace}`:`default`,
         project:project?`${project}`:`default`,
         projectObj:{},
-        githubToken:undefined
+        githubToken:githubToken
     },
     reducers: {
         setUserItem(state, action: PayloadAction<Partial<UserState>>) {
@@ -63,8 +63,6 @@ const contextSlice = createSlice({
             }
             if(action.payload.githubToken){
                 localStorage.setItem('githubToken', action.payload.githubToken)
-            }else{
-                localStorage.removeItem('githubToken')
             }
             // debugger
         },

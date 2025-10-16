@@ -780,12 +780,21 @@ const ApiComp: FC<any> = ({ open }) => {
                     <Input placeholder='Optional http://localhost:8089' value={contURL} onChange={(e) => setContURL(e.target.value)}></Input>
                 </Form.Item>
                 <Form.Item label="Github Token">
-                    <Input value={githubToken_} onChange={(e) => setGithubToken(e.target.value)}></Input>
+                    <Input value={githubToken} onChange={(e) => setGithubToken(e.target.value)}></Input>
                 </Form.Item>
+                {githubToken && 
+                <a onClick={() => { 
+                    setGithubToken(undefined)
+                    dispatch(setUserItem({ githubToken: undefined }))
+                    localStorage.removeItem('githubToken') }}>Delete  Github Token </a>}
+
+
                 <p style={{ marginTop: 8, color: "#888", fontSize: 13 }}>
-                    when you encounter issues such as "403 Client Error: rate limit exceeded". please 
+                    when you encounter issues such as "403 Client Error: rate limit exceeded". please
                     generate a personal access token (PAT) with "repo" and "read:packages" scopes to increase the rate limit.
-                     <a target='_blank' href="https://github.com/settings/tokens">Get Github Token</a>
+                    <a target='_blank' href="https://github.com/settings/tokens">Get Github Token</a>
+                    <br />
+
 
                 </p>
 
