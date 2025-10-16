@@ -351,20 +351,20 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
     const [tabKey, setTabkey] = useState<any>()
     const { baseURL } = useSelector((state: any) => state.user)
     const message = useGlobalMessage()
-    const [storePosition, setStorePosition] = useState("Remote")
+    const [address, setAddress] = useState("github")
 
-    const isRemote = storePosition == "Remote"
+    // const isRemote = storePosition == "Remote"
     useEffect(() => {
         if (visible && params?.component_type) {
             loadStoreList()
 
         }
-    }, [visible, params?.component_type, storePosition])
+    }, [visible, params?.component_type, address])
 
     const loadStoreList = async () => {
         try {
             setLoading(true)
-            const resp = await axios.get(`/component-store/list-stores?is_remote=${ isRemote? 'true' : 'false'}`)
+            const resp = await axios.get(`/component-store/list-stores?address=${address}`)
             setStoreList(resp.data)
             if (resp.data.length > 0) {
                 setTabkey(resp.data[0].store_name)
@@ -377,9 +377,15 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
         }
 
     }
-    const loadData = async (store_name: any) => {
+    const loadData = async (store_name: any,remote_force:any=undefined) => {
         setLoading(true)
-        const resp = await axios.get(`/component-store/list-by-type/${store_name}?component_type=${params?.component_type}&is_remote=${isRemote ? 'true' : 'false'}`)
+        // list-by-type/${store_name}?component_type=${params?.component_type}&is_remote=${isRemote ? 'true' : 'false'}
+        const resp = await axios.post(`/component-store/list-components`,{
+            store_name:store_name,
+            component_type:params?.component_type,
+            address:address,
+            remote_force:remote_force
+        })
         setComponents(resp.data)
         setLoading(false)
 
@@ -387,7 +393,14 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
     return <Modal footer={null} title={<Flex gap={"small"}>
 
         <span>{`Install Components`} </span>
-        <RedoOutlined style={{ cursor: "pointer" }} onClick={() => loadData(tabKey)} />
+        <RedoOutlined style={{ cursor: "pointer" }} onClick={() => {
+            if(address=="github"){
+                loadData(tabKey,true)
+            }else{
+                loadData(tabKey)
+            }
+
+        }} />
     </Flex>} width={"90%"} open={visible} onClose={onClose} onCancel={onClose}>
         {/* {JSON.stringify(components)} */}
 
@@ -396,11 +409,19 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
             <Tabs
                 tabBarExtraContent={<>
                     <Segmented<string>
-                        value={storePosition}
-                        options={['Remote', 'Local']}
+                        value={address}
+                        options={[
+                            {
+                                label: "Github",
+                                value: "github"
+                            },{
+                                label: "Local",
+                                value: "local"
+                            }
+                        ]}
                         onChange={(value) => {
                             // console.log(value); // string
-                            setStorePosition(value)
+                            setAddress(value)
                         }}
                     />
                     <RedoOutlined style={{ cursor: "pointer" }} onClick={() => loadStoreList()} />
@@ -460,8 +481,10 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
                                             await axios.post(`/install-components`, {
                                                 path: item.file_path,
                                                 force: true,
+                                                address:item.address
+                                                // is_remote:item.
                                             })
-                                            message.success(item.installed ? `Install success!` : `Reinstall success!`)
+                                            message.success(item.installed ? `Reinstall success!` : `Install success!`)
                                             callback && callback()
                                             onClose && onClose()
 
