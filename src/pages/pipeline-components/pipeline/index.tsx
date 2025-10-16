@@ -203,10 +203,9 @@ const Pipeline: FC<any> = ({ }) => {
         loadData()
     }, [])
     return <div style={{ maxWidth: "1500px", margin: "1rem auto" }}>
-        {contextHolder}
         {/* {JSON.stringify(pipeline)} */}
         <Flex style={{ marginBottom: "1rem" }} justify={"space-between"} align={"center"} gap="small">
-            <div >
+            <div  style={{height: "3.5rem"}}>
                 {pipeline ? <>
                     <h2 style={{ margin: 0 }}>
                         {pipeline?.component_name}
@@ -271,6 +270,7 @@ const Pipeline: FC<any> = ({ }) => {
             setTest(!test)
         }}>测试</Button> */}
 
+        {contextHolder}
 
         {/* {
                 pipeline_type: "wrap_pipeline",

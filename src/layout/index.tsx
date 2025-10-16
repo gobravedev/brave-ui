@@ -705,10 +705,12 @@ const Markdown = lazy(() => import('@/components/markdown'));
 
 const ApiComp: FC<any> = ({ open }) => {
     const { modal, openModal, closeModal } = useModal();
-    const { baseURL, authorization, containerURL } = useSelector((state: any) => state.user)
+    const { baseURL, authorization, containerURL,githubToken:githubToken_ } = useSelector((state: any) => state.user)
     const [value, setValue] = useState<any>(baseURL)
     const [auth, setAuth] = useState<any>(authorization)
     const [contURL, setContURL] = useState<any>(containerURL)
+    const [githubToken, setGithubToken] = useState<any>(githubToken_)
+
 
 
     const dispatch = useDispatch()
@@ -748,6 +750,9 @@ const ApiComp: FC<any> = ({ open }) => {
                         dispatch(setUserItem({ containerURL: `${contURL}` }))
 
                     }
+                    if(githubToken){
+                        dispatch(setUserItem({ githubToken: `${githubToken}` }))
+                    }
                     closeModal()
                     messageApi.success("Connection successful!")
                 } catch (error) {
@@ -774,6 +779,10 @@ const ApiComp: FC<any> = ({ open }) => {
                 <Form.Item label="Container URL">
                     <Input placeholder='Optional http://localhost:8089' value={contURL} onChange={(e) => setContURL(e.target.value)}></Input>
                 </Form.Item>
+                <Form.Item label="Github Token">
+                    <Input  value={githubToken} onChange={(e) => setGithubToken(e.target.value)}></Input>
+                </Form.Item>
+                <a target='_blank' href="https://github.com/settings/tokens">Get Github Token</a>
 
                 <Suspense fallback={<Test></Test>}>
                     <Markdown data={`

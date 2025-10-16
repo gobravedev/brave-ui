@@ -7,6 +7,7 @@ const authorization = localStorage.getItem('authorization')
 const containerURL = localStorage.getItem('containerURL')
 const namespace = localStorage.getItem('namespace')
 const project = localStorage.getItem('project')
+const githubToken = localStorage.getItem('githubToken')
 
 interface UserState {
     locale: string;
@@ -17,6 +18,7 @@ interface UserState {
     namespace:string;
     projectObj:any;
     project:any;
+    githubToken:any
     
 }
 const contextSlice = createSlice({
@@ -31,7 +33,8 @@ const contextSlice = createSlice({
         authorization:authorization,
         namespace:namespace?`${namespace}`:`default`,
         project:project?`${project}`:`default`,
-        projectObj:{}
+        projectObj:{},
+        githubToken:undefined
     },
     reducers: {
         setUserItem(state, action: PayloadAction<Partial<UserState>>) {
@@ -56,6 +59,9 @@ const contextSlice = createSlice({
             }
             if(action.payload.project){
                 localStorage.setItem('project', action.payload.project)
+            }
+            if(action.payload.githubToken){
+                localStorage.setItem('githubToken', action.payload.githubToken)
             }
             // debugger
         },

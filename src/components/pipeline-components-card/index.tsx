@@ -352,7 +352,8 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
     const { baseURL } = useSelector((state: any) => state.user)
     const message = useGlobalMessage()
     const [address, setAddress] = useState("github")
-
+    // const [token, setToken] = useState()
+    const {githubToken} = useSelector((state: any) => state.user)
     // const isRemote = storePosition == "Remote"
     useEffect(() => {
         if (visible && params?.component_type) {
@@ -369,6 +370,8 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
             if (resp.data.length > 0) {
                 setTabkey(resp.data[0].store_name)
                 loadData(resp.data[0].store_name)
+            } else {
+                setComponents([])
             }
             setLoading(false)
 
@@ -384,13 +387,14 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
             store_name: store_name,
             component_type: params?.component_type,
             address: address,
-            remote_force: remote_force
+            remote_force: remote_force,
+            token: githubToken
         })
         setComponents(resp.data)
         setLoading(false)
 
     }
-    const getImgPath = (img:any)=>{
+    const getImgPath = (img: any) => {
         if (img.startsWith("http")) {
             return img
         }
@@ -462,8 +466,8 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
                                 padding: "12px 16px",          // 内边距更紧凑
                             }}
                             cover={<div style={{ height: "15rem" }}>
-                                <img style={{ height: "100%", width: "100%", objectFit: "cover" }} alt={item.label} 
-                                src={getImgPath(item.img)} />
+                                <img style={{ height: "100%", width: "100%", objectFit: "cover" }} alt={item.label}
+                                    src={getImgPath(item.img)} />
                             </div>}
                         >
 
@@ -490,6 +494,7 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
                                                 force: true,
                                                 address: item.address,
                                                 branch: item.branch,
+                                                token: githubToken
                                                 // is_remote:item.
                                             }, {
                                                 timeout: 60000
