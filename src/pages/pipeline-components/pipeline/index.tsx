@@ -1,4 +1,4 @@
-import { Breadcrumb, Button, Card, Empty, Flex, message, Modal, Popconfirm, Skeleton, Switch, Tabs, Tag, Tooltip } from "antd"
+import { Breadcrumb, Button, Card,message, Empty, Flex, Modal, Popconfirm, Skeleton, Switch, Tabs, Tag, Tooltip } from "antd"
 import { FC, useEffect, useRef, useState } from "react"
 import AnalysisPanel, { UpstreamAnalysisInput, UpstreamAnalysisOutput } from '../../../components/analysis-sotware-panel'
 import Meta from "antd/es/card/Meta"
@@ -26,6 +26,7 @@ import SortSoftwareModal from "@/components/sort-software"
 import DescriptionModal from "@/components/description-modal"
 import FormProject from "@/components/form-project"
 import { useSelector } from "react-redux"
+import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 const Pipeline: FC<any> = ({ }) => {
     console.log("Pipeline")
     const { component_type, component_id: name } = useParams()
@@ -381,6 +382,7 @@ const PublishModal: FC<any> = ({ visible, onClose, params }) => {
     const [storeList, setStoreList] = useState<any>([])
     const [loading, setLoading] = useState(false)
     const [force, setForce] = useState(false)
+    const message = useGlobalMessage()
     const loadStoreList = async () => {
         try {
             setLoading(true)
