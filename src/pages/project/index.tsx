@@ -18,21 +18,21 @@ const Project: FC<any> = () => {
             setData(english)
         }
     }
-    return <div style={{ maxWidth: "1800px", margin: "0 auto" }}>
-        <Row>
-            <Col xs={24} sm={12} md={12} lg={12} xl={12} style={{ padding: "0 0.5rem",marginTop:"1rem" }}>
+    return <div style={{ maxWidth: "1800px", margin: "1rem auto" }}>
+        <Row gutter={[16,16]}>
+            <Col xs={24} sm={12} md={12} lg={12} xl={12} >
 
                 <Card >
                     <Markdown data={data}></Markdown>
                 </Card>
             </Col>
-            <Col xs={24} sm={6} md={6} lg={6} xl={6}  style={{ padding: "0 0.5rem",marginTop:"1rem"  }}>
+            <Col xs={24} sm={6} md={6} lg={6} xl={6}  >
 
                 <ContainerComp keys={["traefik", "code-server", "notebook", "rstudio"]}></ContainerComp>
 
             </Col>
 
-            <Col xs={24} sm={6} md={6} lg={6} xl={6}  style={{ padding: "0 0.5rem",marginTop:"1rem"  }}>
+            <Col xs={24} sm={6} md={6} lg={6} xl={6}  >
                 <RunningContainer></RunningContainer>
             </Col>
         </Row>

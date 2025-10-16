@@ -180,7 +180,7 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
                             {pipelineComponents.map((item: any, index: any) => (
                                 <Col key={index} lg={6} sm={4} xs={24} style={{ marginBottom: "1rem", cursor: "pointer" }}>
                                     <Card hoverable
-                                    size="small"
+                                        size="small"
                                         className="custom-card"
                                         // title={item.label}
                                         // variant="borderless" 
@@ -433,6 +433,8 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
     const [storeList, setStoreList] = useState<any>([])
     const [components, setComponents] = useState<any>([])
     const [loading, setLoading] = useState(false)
+    const [componentLoading, setComponentLoading] = useState(false)
+
     const [tabKey, setTabkey] = useState<any>()
     const { baseURL } = useSelector((state: any) => state.user)
     const message = useGlobalMessage()
@@ -469,20 +471,26 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
 
     }
     const loadData = async (store_name: any, remote_force: any = undefined) => {
-        setLoading(true)
+        setComponentLoading(true)
         // list-by-type/${store_name}?component_type=${params?.component_type}&is_remote=${isRemote ? 'true' : 'false'}
-        const resp = await axios.post(`/component-store/list-components`, {
-            store_name: store_name,
-            component_type: params?.component_type,
-            address: address,
-            remote_force: remote_force,
-            token: githubToken
-        })
-        const category = resp.data.map((item: any) => item.category)
-        setCategory(["all", ...Array.from(new Set(category))])
+        try {
+            const resp = await axios.post(`/component-store/list-components`, {
+                store_name: store_name,
+                component_type: params?.component_type,
+                address: address,
+                remote_force: remote_force,
+                token: githubToken
+            })
+            const category = resp.data.map((item: any) => item.category)
+            setCategory(["all", ...Array.from(new Set(category))])
 
-        setComponents(resp.data)
-        setLoading(false)
+            setComponents(resp.data)
+
+        } catch (error) {
+
+        }
+        setComponentLoading(false)
+
 
     }
 
@@ -553,119 +561,121 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
                     label: item.name,
                 }))}></Tabs>
 
-            <Row>
-                <Col lg={21} sm={21} xs={24}>
-                    {Array.isArray(filteredComponents) && filteredComponents.length != 0 ? <Row gutter={16} style={{ position: "relative" }}>
+            <Spin spinning={componentLoading}>
+                <Row>
+                    <Col lg={21} sm={21} xs={24}>
+                        {Array.isArray(filteredComponents) && filteredComponents.length != 0 ? <Row gutter={16} style={{ position: "relative" }}>
 
-                        {filteredComponents.map((item: any, index: any) => (
-                            <Col key={index} lg={4} sm={4} xs={24} style={{ marginBottom: "1rem", cursor: "pointer" }}>
+                            {filteredComponents.map((item: any, index: any) => (
+                                <Col key={index} lg={4} sm={4} xs={24} style={{ marginBottom: "1rem", cursor: "pointer" }}>
+                                    <Popconfirm
+                                        okButtonProps={{ color: `${item.installed ? "red" : "blue"}`, variant: "solid" }}
+                                        okText={item.installed ? "Reinstall" : "Install"}
+                                        title={
+                                            item.installed ? `Reinstall ${item.component_name} ?` : `Install ${item.component_name} ?`
+                                        }
+                                        onConfirm={async () => {
+                                            await axios.post(`/install-components`, {
+                                                path: item.file_path,
+                                                force: true,
+                                                address: item.address,
+                                                branch: item.branch,
+                                                token: githubToken
+                                                // is_remote:item.
+                                            }, {
+                                                timeout: 60000
+                                            })
+                                            message.success(item.installed ? `Reinstall success!` : `Install success!`)
+                                            callback && callback()
+                                            onClose && onClose()
 
-                                <Card
-                                    size="small"
-                                    hoverable
-                                    className="custom-card"
-                                    // title={item.label}
-                                    // variant="borderless" 
-                                    style={{
-                                        height: "100%",
-                                        border: "1px solid #f0f0f0",   // 默认灰色边框
-                                        borderRadius: "12px",          // 圆角
-                                        overflow: "hidden",
-                                        transition: "all 0.3s ease",   // 平滑过渡
-
-                                    }}
-                                    bodyStyle={{
-                                        padding: "12px 16px",          // 内边距更紧凑
-                                    }}
-                                    cover={<div style={{ height: "15rem" }}>
-                                        <img style={{ height: "100%", width: "100%", objectFit: "cover" }} alt={item.label}
-                                            src={getImgPath(item.img)} />
-                                    </div>}
-                                >
-
-                                    <Meta title={
-
-                                        <Flex justify="space-between" align="center">
-
-                                            <Tooltip title={item?.component_id}>
+                                        }}>
+                                        <Card
+                                            size="small"
+                                            hoverable
+                                            className="custom-card"
+                                            title={<Tooltip title={item?.component_id}>
                                                 {item.component_name}
-                                                <Tag color={item.installed ? "#108ee9" : "#f5222d"} style={{ marginLeft: "1rem" }}>
-                                                    {item.installed ? "Installed" : "Not I nstalled"}
-                                                </Tag>
-                                            </Tooltip>
 
-                                            <Popconfirm
-                                                okButtonProps={{ color: `${item.installed ? "red" : "blue"}`, variant: "solid" }}
-                                                okText={item.installed ? "Reinstall" : "Install"}
-                                                title={
-                                                    item.installed ? `Reinstall ${item.component_name} ?` : `Install ${item.component_name} ?`
-                                                }
-                                                onConfirm={async () => {
-                                                    await axios.post(`/install-components`, {
-                                                        path: item.file_path,
-                                                        force: true,
-                                                        address: item.address,
-                                                        branch: item.branch,
-                                                        token: githubToken
-                                                        // is_remote:item.
-                                                    }, {
-                                                        timeout: 60000
-                                                    })
-                                                    message.success(item.installed ? `Reinstall success!` : `Install success!`)
-                                                    callback && callback()
-                                                    onClose && onClose()
-
-                                                }}>
-
-                                                <DownloadOutlined style={{ cursor: "pointer" }} />
-
-                                            </Popconfirm>
-
-                                        </Flex>
-
-                                    } description={item?.description} style={{ marginBottom: "1rem" }} />
-
-
-                                    {item.tags && Array.isArray(item.tags) && item.tags.map((tag: any, index: any) => (
-                                        <Tooltip key={index} title={tag}>
-                                            <Tag style={{
-                                                wordBreak: "break-word",
-                                                whiteSpace: "nowrap",
+                                            </Tooltip>}
+                                            // title={item.label}
+                                            // variant="borderless" 
+                                            style={{
+                                                height: "100%",
+                                                border: "1px solid #f0f0f0",   // 默认灰色边框
+                                                borderRadius: "12px",          // 圆角
                                                 overflow: "hidden",
-                                                textOverflow: "ellipsis",
-                                                maxWidth: 100,
-                                                display: "inline-block",
-                                                cursor: "default"
-                                            }} color={colors[index]}>{tag}</Tag>
-                                        </Tooltip>
+                                                transition: "all 0.3s ease",   // 平滑过渡
 
-                                    ))}
+                                            }}
+                                           
+                                            cover={<div style={{ height: "15rem" }}>
+                                                <img style={{ height: "100%", width: "100%", objectFit: "cover" }} alt={item.label}
+                                                    src={getImgPath(item.img)} />
+                                            </div>}
+                                        >
+
+                                            <Meta title={
+
+                                                <Flex justify="space-between" align="center">
 
 
-                                </Card>
 
-                            </Col>
-                        ))}
+                                                    <Tag color={item.installed ? "#108ee9" : "#f5222d"} >
+                                                        {item.installed ? "Installed" : "Not I nstalled"}
+                                                    </Tag>
 
-                    </Row> : <Empty></Empty>}
-                </Col>
-                <Col lg={3} sm={3} xs={24}>
-                    <Tabs
-                        activeKey={activeCategory}
-                        onChange={(key) => setActiveCategory(key)}
-                        tabBarStyle={{ marginBottom: 0 }}
-                        type="card"
-                        size="small"
-                        tabPosition="right"
-                        items={category.map((cat) => ({
-                            key: cat,
-                            label: cat
-                        }))}
+                                                    <DownloadOutlined style={{ cursor: "pointer" }} />
 
-                    ></Tabs>
-                </Col>
+                                                    {/* </Popconfirm> */}
 
-            </Row>
+                                                </Flex>
+
+                                            } description={item?.description} style={{ marginBottom: "1rem" }} />
+
+
+                                            {item.tags && Array.isArray(item.tags) && item.tags.map((tag: any, index: any) => (
+                                                <Tooltip key={index} title={tag}>
+                                                    <Tag style={{
+                                                        wordBreak: "break-word",
+                                                        whiteSpace: "nowrap",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis",
+                                                        maxWidth: 100,
+                                                        display: "inline-block",
+                                                        cursor: "default"
+                                                    }} color={colors[index]}>{tag}</Tag>
+                                                </Tooltip>
+
+                                            ))}
+
+
+                                        </Card>
+                                    </Popconfirm>
+                                </Col>
+                            ))}
+
+                        </Row> : <Empty></Empty>}
+                    </Col>
+                    <Col lg={3} sm={3} xs={24}>
+                        <Tabs
+                            activeKey={activeCategory}
+                            onChange={(key) => setActiveCategory(key)}
+                            tabBarStyle={{ marginBottom: 0 }}
+                            type="card"
+                            size="small"
+                            tabPosition="right"
+                            items={category.map((cat) => ({
+                                key: cat,
+                                label: cat
+                            }))}
+
+                        ></Tabs>
+                    </Col>
+
+                </Row>
+            </Spin>
+
 
         </Spin>
     </Modal >

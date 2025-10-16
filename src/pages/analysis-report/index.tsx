@@ -137,7 +137,7 @@ const AnalysisReport: FC<any> = () => {
         {/* {JSON.stringify(projectObj)} */}
         {/* {JSON.stringify(analysis)} */}
         {/* {key} */}
-        <Row style={{ marginTop: "1rem" }}>
+        <Row gutter={[16,16]} style={{ marginTop: "1rem" }}>
             <Col lg={6} sm={6} xs={24} ref={containerRef} style={{
 
                 position: "sticky",
@@ -190,7 +190,7 @@ const AnalysisReport: FC<any> = () => {
 
 
             </Col>
-            <Col lg={18} sm={18} xs={24} style={{ paddingLeft: "1rem" }}>
+            <Col lg={18} sm={18} xs={24} >
                 <Tabs
 
                     type="card"
