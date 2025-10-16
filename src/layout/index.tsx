@@ -705,7 +705,7 @@ const Markdown = lazy(() => import('@/components/markdown'));
 
 const ApiComp: FC<any> = ({ open }) => {
     const { modal, openModal, closeModal } = useModal();
-    const { baseURL, authorization, containerURL,githubToken:githubToken_ } = useSelector((state: any) => state.user)
+    const { baseURL, authorization, containerURL, githubToken: githubToken_ } = useSelector((state: any) => state.user)
     const [value, setValue] = useState<any>(baseURL)
     const [auth, setAuth] = useState<any>(authorization)
     const [contURL, setContURL] = useState<any>(containerURL)
@@ -750,7 +750,7 @@ const ApiComp: FC<any> = ({ open }) => {
                         dispatch(setUserItem({ containerURL: `${contURL}` }))
 
                     }
-                    if(githubToken){
+                    if (githubToken) {
                         dispatch(setUserItem({ githubToken: `${githubToken}` }))
                     }
                     closeModal()
@@ -780,9 +780,14 @@ const ApiComp: FC<any> = ({ open }) => {
                     <Input placeholder='Optional http://localhost:8089' value={contURL} onChange={(e) => setContURL(e.target.value)}></Input>
                 </Form.Item>
                 <Form.Item label="Github Token">
-                    <Input  value={githubToken} onChange={(e) => setGithubToken(e.target.value)}></Input>
+                    <Input value={githubToken_} onChange={(e) => setGithubToken(e.target.value)}></Input>
                 </Form.Item>
-                <a target='_blank' href="https://github.com/settings/tokens">Get Github Token</a>
+                <p style={{ marginTop: 8, color: "#888", fontSize: 13 }}>
+                    when you encounter issues such as "403 Client Error: rate limit exceeded". please 
+                    generate a personal access token (PAT) with "repo" and "read:packages" scopes to increase the rate limit.
+                     <a target='_blank' href="https://github.com/settings/tokens">Get Github Token</a>
+
+                </p>
 
                 <Suspense fallback={<Test></Test>}>
                     <Markdown data={`

@@ -1,3 +1,4 @@
+import { el } from '@faker-js/faker'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 const locale = localStorage.getItem('locale')
@@ -62,6 +63,8 @@ const contextSlice = createSlice({
             }
             if(action.payload.githubToken){
                 localStorage.setItem('githubToken', action.payload.githubToken)
+            }else{
+                localStorage.removeItem('githubToken')
             }
             // debugger
         },
