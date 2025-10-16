@@ -377,26 +377,32 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
         }
 
     }
-    const loadData = async (store_name: any,remote_force:any=undefined) => {
+    const loadData = async (store_name: any, remote_force: any = undefined) => {
         setLoading(true)
         // list-by-type/${store_name}?component_type=${params?.component_type}&is_remote=${isRemote ? 'true' : 'false'}
-        const resp = await axios.post(`/component-store/list-components`,{
-            store_name:store_name,
-            component_type:params?.component_type,
-            address:address,
-            remote_force:remote_force
+        const resp = await axios.post(`/component-store/list-components`, {
+            store_name: store_name,
+            component_type: params?.component_type,
+            address: address,
+            remote_force: remote_force
         })
         setComponents(resp.data)
         setLoading(false)
 
     }
+    const getImgPath = (img:any)=>{
+        if (img.startsWith("http")) {
+            return img
+        }
+        return `${baseURL}${img}`
+    }
     return <Modal footer={null} title={<Flex gap={"small"}>
 
         <span>{`Install Components`} </span>
         <RedoOutlined style={{ cursor: "pointer" }} onClick={() => {
-            if(address=="github"){
-                loadData(tabKey,true)
-            }else{
+            if (address == "github") {
+                loadData(tabKey, true)
+            } else {
                 loadData(tabKey)
             }
 
@@ -414,7 +420,7 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
                             {
                                 label: "Github",
                                 value: "github"
-                            },{
+                            }, {
                                 label: "Local",
                                 value: "local"
                             }
@@ -456,7 +462,8 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
                                 padding: "12px 16px",          // 内边距更紧凑
                             }}
                             cover={<div style={{ height: "15rem" }}>
-                                <img style={{ height: "100%", width: "100%", objectFit: "cover" }} alt={item.label} src={`${baseURL}${item.img}`} />
+                                <img style={{ height: "100%", width: "100%", objectFit: "cover" }} alt={item.label} 
+                                src={getImgPath(item.img)} />
                             </div>}
                         >
 
@@ -481,8 +488,11 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
                                             await axios.post(`/install-components`, {
                                                 path: item.file_path,
                                                 force: true,
-                                                address:item.address
+                                                address: item.address,
+                                                branch: item.branch,
                                                 // is_remote:item.
+                                            }, {
+                                                timeout: 60000
                                             })
                                             message.success(item.installed ? `Reinstall success!` : `Install success!`)
                                             callback && callback()
