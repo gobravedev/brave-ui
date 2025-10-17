@@ -47,7 +47,7 @@ const ModuleEdit: FC<any> = ({ visible, onClose, params, callback }) => {
                     }}>保存</Button>
                 </Flex>
             }
-            title="查看文件"
+            title="View File"
             open={visible}
             onClose={onClose} width={"50%"}>
             {/* {JSON.stringify(params)} */}

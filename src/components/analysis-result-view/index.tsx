@@ -164,7 +164,12 @@ const { Paragraph } = Typography;
 const StringView: FC<any> = ({ data }) => {
 
     return <>
-        <MonacoEditor value={data} />
+     <Typography>
+            <pre style={{ margin: 0 }}>
+                {data}
+            </pre>
+        </Typography>
+        {/* <MonacoEditor value={data} /> */}
         {/* <Paragraph style={{ background: "#13c2c2", padding: "1rem", border: "1px solid #1677ff" }}>{data}</Paragraph> */}
     </>
 }

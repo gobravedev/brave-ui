@@ -424,10 +424,21 @@ export const GroupSelectSampleButton: FC<any> = ({ label, name, rules, data, fil
             </Form.Item>
             <Form.Item name={[name, "color"]} >
                 {/* <Input size="small" placeholder="Optional group color" ></Input> */}
-                <ColorPicker defaultValue="#1677ff" />
+                <ColorPickerComp />
             </Form.Item>
         </Flex>
 
+    </>
+}
+
+const ColorPickerComp:FC<any> = ({value,onChange,...rest})=>{
+    
+    return <>
+        <ColorPicker defaultValue={'#1677ff'} {...rest} value={value} onChange={(color)=>{
+            const hexColor = color.toHexString();
+            onChange(hexColor)
+            // console.log(hexColor)
+        }}  ></ColorPicker>
     </>
 }
 export const SelectAll: FC<any> = ({ label, name, data, initialValue, rules, ...rest }) => {
