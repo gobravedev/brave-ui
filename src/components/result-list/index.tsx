@@ -579,7 +579,7 @@ const ResultList = forwardRef<any, any>(({
                     <span style={{ cursor: "pointer" }}>({currentAnalysisMethod?.component_name})</span>
                 </Tooltip>}</>}
             extra={<>{cardExtra}
-                <Flex gap={"small"}>
+                <Flex gap={"small"} wrap>
                     <Input.Search
                         size="small"
                         placeholder="搜索结果..."

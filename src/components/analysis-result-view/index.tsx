@@ -590,7 +590,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
 
             </>}
             extra={
-                <Flex gap={"small"}>
+                <Flex gap={"small"} wrap>
                     {openPanel && <>
                         {analsyisResult && <Button size="small" color="primary" variant="solid" onClick={() =>
                             navigate(`/component/${analsyisResult?.component_type}/${analsyisResult?.component_id}`)

@@ -531,7 +531,7 @@ const ResultList = forwardRef<any, any>(({
                 }
             }}
             title={<><LineChartOutlined />  Analysis Record</>} extra={
-                <Flex gap={"small"}>
+                <Flex gap={"small"} wrap>
                     <Input.Search
                         size="small"
                         placeholder="搜索结果..."

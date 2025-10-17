@@ -148,7 +148,7 @@ const AnalysisReport: FC<any> = () => {
                 alignSelf: "flex-start", // 避免被stretch
                 height: `calc(100vh - ${top}px - 1rem )`, // 可选：固定高度，让内部滚动
             } : {}}
-            gutter={[16, 16]}>
+            gutter={[isSticky?16:0, 16]}>
 
             <Col lg={20} sm={20} xs={24} style={{
 

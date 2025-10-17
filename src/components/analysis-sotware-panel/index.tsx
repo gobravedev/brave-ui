@@ -1076,7 +1076,7 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
                                 {/* {JSON.stringify(downstreamData)} */}
 
 
-                                <Flex gap={"small"}>
+                                <Flex gap={"small"} wrap>
                                     <Button size="small" color="cyan" variant="solid" onClick={() => {
                                         operatePipeline.openModal("modalB", {
                                             // module_type: "py_plot",

@@ -18,8 +18,10 @@ const Project: FC<any> = () => {
             setData(english)
         }
     }
+    const { ref: containerRef, top, isSticky } = useStickyTop(576);
+
     return <div style={{ maxWidth: "1800px", margin: "1rem auto" }}>
-        <Row gutter={[16,16]}>
+        <Row gutter={[isSticky?16:0, 16]}>
             <Col xs={24} sm={12} md={12} lg={12} xl={12} >
 
                 <Card >
@@ -57,6 +59,7 @@ import { CloseOutlined, RedoOutlined } from '@ant-design/icons'
 import { useSSEContext } from "@/context/sse/useSSEContext"
 import { useSelector } from "react-redux"
 import { useModal } from "@/hooks/useModal"
+import { useStickyTop } from "@/hooks/useStickyTop"
 
 const ContainerComp: FC<any> = ({ keys }) => {
     const [data, setData] = useState<any>()

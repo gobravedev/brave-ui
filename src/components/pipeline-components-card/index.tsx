@@ -148,7 +148,7 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
                 alignSelf: "flex-start", // 避免被stretch
                 height: `calc(100vh - ${top}px - 1rem )`, // 可选：固定高度，让内部滚动
             }:{}}
-            gutter={[16,16]}>
+            gutter={[isSticky?16:0,16]}>
             <Col lg={21} sm={21} xs={24}
                 style={{
 
