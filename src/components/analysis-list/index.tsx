@@ -169,8 +169,8 @@ const ResultList = forwardRef<any, any>(({
         message.success("run successfully")
         loadData()
     }
-    const stopAnalysis = async (record: any,run_type:any) => {
-        await stopAnalysisApi(record.analysis_id,run_type)
+    const stopAnalysis = async (record: any, run_type: any) => {
+        await stopAnalysisApi(record.analysis_id, run_type)
         message.success("Stop Success")
         loadData()
     }
@@ -293,15 +293,17 @@ const ResultList = forwardRef<any, any>(({
             ellipsis: true,
             width: 200,
             render: (_: any, record: any) => (
-                <Space size="middle">
+                <Space size="small">
 
                     {/* /analysis/stop-analysis/{analysis_id} */}
-
+                    <Button size="small" color="primary" variant="solid" onClick={() =>
+                        navigate(`/analysis-report?key=${record?.analysis_id}&project=${project}`)
+                    }>Go Report</Button>
                     {record.image_status == "exist" ? <>
                         {record.job_status == "running" ?
                             <>
                                 <Popconfirm title={"Whether or not to stop?"} onConfirm={() => {
-                                    stopAnalysis(record,"job")
+                                    stopAnalysis(record, "job")
 
                                 }}>
                                     <Button size="small" color="red" variant="solid">
@@ -323,38 +325,7 @@ const ResultList = forwardRef<any, any>(({
                             </>
                         }
 
-                        {record.server_status == "running" ?
-                            <>
 
-                                <Tooltip title={<>
-                                    {`${containerURL}/container/${record.analysis_id}/`}
-                                </>}>
-                                    <Button size="small" color="blue" variant="solid" onClick={() => {
-                                        //  console.log("record", record)
-
-                                        window.open(`${containerURL}/container/${record.analysis_id}/`, "_blank")
-                                    }}>Open URL</Button>
-                                </Tooltip>
-                                <Popconfirm title={"Whether or not to stop?"} onConfirm={() => {
-                                    stopAnalysis(record,"server")
-
-                                }}>
-                                    <Button size="small" color="red" variant="solid">
-                                        Stop Server
-                                    </Button>
-                                </Popconfirm>
-
-
-                            </> : <>
-                                <Popconfirm title="Whether to start the server?" onConfirm={() => {
-
-                                    runAnalysis(record, "server")
-                                }}>
-                                    <Button size="small" color="cyan" variant="solid">Run Server</Button>
-                                </Popconfirm>
-
-                            </>
-                        }
 
                     </> : <>
                         <Popconfirm title="Pull?" onConfirm={async () => {
@@ -389,6 +360,56 @@ const ResultList = forwardRef<any, any>(({
                     <Dropdown menu={{
                         items: [
                             {
+                                key: 'server',
+                                label: (<>
+                                    {record.image_status == "exist" && <>
+                                        {record.server_status == "running" ?
+                                            <>
+
+
+                                                <Popconfirm title={"Whether or not to stop?"} onConfirm={() => {
+                                                    stopAnalysis(record, "server")
+
+                                                }}>
+                                                    <a style={{ color: "red" }}>
+                                                        Stop Server
+                                                    </a>
+                                                </Popconfirm>
+
+
+                                            </> : <>
+                                                <Popconfirm title="Whether to start the server?" onConfirm={() => {
+
+                                                    runAnalysis(record, "server")
+                                                }}>
+                                                    <a >Run Server</a>
+                                                </Popconfirm>
+
+                                            </>
+                                        }
+
+                                    </>}
+
+                                </>)
+                            }, {
+                                key: 'open_url',
+                                disabled: record.server_status != "running",
+                                label: (<>
+
+                                    <Tooltip title={<>
+                                        {`${containerURL}/container/${record.analysis_id}/`}
+                                    </>}>
+                                        <a onClick={() => {
+                                            //  console.log("record", record)
+
+                                            window.open(`${containerURL}/container/${record.analysis_id}/`, "_blank")
+                                        }}>Open URL</a>
+                                    </Tooltip>
+
+
+                                </>)
+                            },
+                            {
                                 key: "1",
                                 label: (<>
                                     {
@@ -412,11 +433,11 @@ const ResultList = forwardRef<any, any>(({
                                         openModals("inspectPanel", {
                                             inspect: "inspect",
                                             id: record.analysis_id,
-                                            run_type:"job"
+                                            run_type: "job"
                                         })
                                     }}>Inspect Job</a>
                                 </>)
-                            },  {
+                            }, {
                                 key: 'inspect_server',
                                 disabled: record.server_status != "running",
                                 label: (<>
@@ -425,7 +446,7 @@ const ResultList = forwardRef<any, any>(({
                                         openModals("inspectPanel", {
                                             inspect: "inspect",
                                             id: record.analysis_id,
-                                            run_type:"server"
+                                            run_type: "server"
                                         })
                                     }}>Inspect Server</a>
                                 </>)
@@ -499,9 +520,28 @@ const ResultList = forwardRef<any, any>(({
     return <>
         {contextHolder}
         {/* {JSON.stringify(location.pathname)} */}
-        <Card size="small" title={<><LineChartOutlined />  Analysis Record</>} extra={
-            <Flex gap={"small"}>
-                {/* {software && <>
+        <Card size="small"
+            variant="borderless"
+            style={{
+                boxShadow: "none"
+            }}
+            styles={{
+                body: {
+                    padding: "0.5rem 0 0 0 "
+                }
+            }}
+            title={<><LineChartOutlined />  Analysis Record</>} extra={
+                <Flex gap={"small"}>
+                    <Input.Search
+                        size="small"
+                        placeholder="搜索结果..."
+                        allowClear
+                        enterButton
+                        value={searchText}
+                        onChange={(e: any) => setSearchText(e.target.value)}
+                        style={{ width: 300 }}
+                    />
+                    {/* {software && <>
                     {software.outputFormat && <>
                         {software.outputFormat.map((item: any, index: any) =>
                             <Button key={index} color="cyan" variant="solid" onClick={() => {
@@ -513,9 +553,9 @@ const ResultList = forwardRef<any, any>(({
                             }}>输出解析模块({item.module})</Button>)}
                     </>}
                 </>} */}
-                <Button size="small" type="primary" onClick={loadData}>Refresh</Button>
-            </Flex>
-        } >
+                    <Button size="small" color="cyan"  variant="solid"  onClick={loadData}>Refresh</Button>
+                </Flex>
+            } >
             {/* {software && <ul style={{ marginBottom: "0.5rem" }}>
                 {software.outputFormat && <>
                     {software.outputFormat.map((item: any, index: any) => <li key={index}>
@@ -526,20 +566,20 @@ const ResultList = forwardRef<any, any>(({
             </ul>} */}
 
             <Table
-                title={() => (
-                    <Input.Search
-                        size="small"
-                        placeholder="搜索结果..."
-                        allowClear
-                        enterButton
-                        value={searchText}
-                        onChange={(e: any) => setSearchText(e.target.value)}
-                        style={{ width: 300 }}
-                    />
-                )}
+                // title={() => (
+                //     <Input.Search
+                //         size="small"
+                //         placeholder="搜索结果..."
+                //         allowClear
+                //         enterButton
+                //         value={searchText}
+                //         onChange={(e: any) => setSearchText(e.target.value)}
+                //         style={{ width: 300 }}
+                //     />
+                // )}
                 rowKey="analysis_id"
                 size="small"
-                bordered
+                // bordered
                 pagination={false}
                 loading={loading}
                 scroll={{ x: 'max-content', y: 55 * 5 }}

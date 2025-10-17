@@ -42,7 +42,7 @@ const ResultList = forwardRef<any, any>(({
     }))
 
     const { project, projectObj } = useOutletContext<any>()
-    
+
     const [data, setData] = useState<any>([])
     const [groupedData, setGroupedData] = useState<any>()
     // const [content,setContent] = useState<any>()
@@ -159,7 +159,7 @@ const ResultList = forwardRef<any, any>(({
         reload()
 
         // initData(currentAnalysisMethod)
-    }, [JSON.stringify(params), JSON.stringify(analysisMethod), project,projectObj?.metadata_form])
+    }, [JSON.stringify(params), JSON.stringify(analysisMethod), project, projectObj?.metadata_form])
 
     const onTabChange = (key: any) => {
         setData(groupedData[key])
@@ -554,35 +554,53 @@ const ResultList = forwardRef<any, any>(({
 
 
     return <>
-        <Card size="small" title={<><FileOutlined /> {title}
-            {currentAnalysisMethod?.component_name && <Tooltip title={<>
-                <ul>
-                    <li>namespace: {currentAnalysisMethod?.namespace_name}</li>
-                    {pipeline?.component_id && <li>pipeline: {pipeline?.component_id}</li>}
-                    {software?.component_id && <li>software: {software?.component_id}</li>}
-                    {currentAnalysisMethod?.component_id && <li>file: {currentAnalysisMethod?.component_id}</li>}
-                    {currentAnalysisMethod?.name && <li>name: {currentAnalysisMethod?.name}</li>}
-                </ul>
+        <Card size="small"
+            variant="borderless"
+            style={{
+                boxShadow: "none"
+            }}
+            styles={{
+                body: {
+                    padding: "0.5rem 0 0 0 "
+                }
+            }}
+            title={<><FileOutlined /> {title}
+                {currentAnalysisMethod?.component_name && <Tooltip title={<>
+                    <ul>
+                        <li>namespace: {currentAnalysisMethod?.namespace_name}</li>
+                        {pipeline?.component_id && <li>pipeline: {pipeline?.component_id}</li>}
+                        {software?.component_id && <li>software: {software?.component_id}</li>}
+                        {currentAnalysisMethod?.component_id && <li>file: {currentAnalysisMethod?.component_id}</li>}
+                        {currentAnalysisMethod?.name && <li>name: {currentAnalysisMethod?.name}</li>}
+                    </ul>
 
 
-            </>}>
-                <span style={{ cursor: "pointer" }}>({currentAnalysisMethod?.component_name})</span>
-            </Tooltip>}</>}
+                </>}>
+                    <span style={{ cursor: "pointer" }}>({currentAnalysisMethod?.component_name})</span>
+                </Tooltip>}</>}
             extra={<>{cardExtra}
                 <Flex gap={"small"}>
-                    
+                    <Input.Search
+                        size="small"
+                        placeholder="搜索结果..."
+                        allowClear
+                        enterButton
+                        value={searchText}
+                        onChange={(e: any) => setSearchText(e.target.value)}
+                        style={{ width: 300 }}
+                    />
                     {operatePipeline?.openModal && <>
                         <Button size="small" color="cyan" variant="solid" onClick={() => {
                             // operatePipeline.openModals("modalD", { ...currentAnalysisMethod, operatePipeline: operatePipeline })
-                            openModal("importFile",{ ...currentAnalysisMethod, operatePipeline: operatePipeline })
+                            openModal("importFile", { ...currentAnalysisMethod, operatePipeline: operatePipeline })
                         }}>Import data </Button>
                         {/* <Popconfirm title="是否计算MD5?" onConfirm={() => {
                                 console.log(currentAnalysisMethod.component_id)
                             }}>
                             <Button size="small" color="cyan" variant="solid" >计算MD5</Button>
                         </Popconfirm> */}
-                        <Button size="small" color="primary" variant="solid" onClick={reload}>Refresh</Button>
-                            
+                        <Button  size="small" color="cyan"  variant="solid"  onClick={reload}>Refresh</Button>
+
                         {(rest.component_type == "software" || rest.component_type == "file") && <>
                             <Dropdown menu={{
                                 items: [
@@ -709,20 +727,20 @@ const ResultList = forwardRef<any, any>(({
             {/* {JSON.stringify(currentAnalysisMethod.component_id)} */}
 
             <Table
-                title={() => (
-                    <Input.Search
-                        size="small"
-                        placeholder="搜索结果..."
-                        allowClear
-                        enterButton
-                        value={searchText}
-                        onChange={(e: any) => setSearchText(e.target.value)}
-                        style={{ width: 300 }}
-                    />
-                )}
+                // title={() => (
+                //     <Input.Search
+                //         size="small"
+                //         placeholder="搜索结果..."
+                //         allowClear
+                //         enterButton
+                //         value={searchText}
+                //         onChange={(e: any) => setSearchText(e.target.value)}
+                //         style={{ width: 300 }}
+                //     />
+                // )}
                 rowKey={(it: any) => it.id}
                 size="small"
-                bordered
+                // bordered
                 // pagination={undefined}
                 pagination={{ pageSize: 10 }}
                 loading={loading}
@@ -742,7 +760,7 @@ const ResultList = forwardRef<any, any>(({
         </Card> */}
 
         <ImportData
-            visible={modal.visible && modal.key=="importFile"}
+            visible={modal.visible && modal.key == "importFile"}
             params={modal.params}
             callback={reload}
             onClose={closeModal}></ImportData>

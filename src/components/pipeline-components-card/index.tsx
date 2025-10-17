@@ -1,6 +1,6 @@
 import { Button, Card, Col, Empty, Flex, Input, List, message, Modal, notification, Pagination, Popconfirm, Row, Segmented, Skeleton, Spin, Tabs, Tag, Tooltip } from "antd"
 import Item from "antd/es/list/Item"
-import { FC, use, useEffect, useMemo, useState } from "react"
+import { FC, use, useEffect, useMemo, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate, useOutletContext, useParams } from "react-router"
 import { ApartmentOutlined, CopyOutlined, DeleteOutlined, DownloadOutlined, EditOutlined, RedoOutlined } from '@ant-design/icons';
@@ -19,6 +19,7 @@ import "./index.css"
 import { base } from "@faker-js/faker"
 import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 import { add } from "@dnd-kit/utilities"
+import { useStickyTop } from "@/hooks/useStickyTop"
 const PipelineComponentsCard: FC<any> = ({ params, map }) => {
     const { Search } = Input;
     // const [searchText, setSearchText] = useState("");
@@ -27,6 +28,8 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
     const { messageApi } = useOutletContext<any>()
     const { modal, openModal, closeModal } = useModal();
     const [activeCategory, setActiveCategory] = useState<string | null>("all");
+    const { ref: containerRef, top, isSticky } = useStickyTop(576);
+
 
     // const [pipelineComponents, setPipelineComponents] = useState<any>([])
     const { component_type } = params
@@ -130,51 +133,82 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
     // indivi
     return <div style={{ maxWidth: "1800px", margin: "1rem auto" }}>
         {/* {JSON.stringify(sseData)} */}
-        <Card size="small">
-            <Flex justify="space-between" gap="small">
-                <Search
-                    size="small"
-                    placeholder="Search Components"
-                    allowClear
-                    enterButton
-                    onSearch={(value) => { search(value) }}
-                    style={{ width: 400 }}
-                />
-                <Flex gap="small">
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        openModal("installComponents", { component_type: component_type })
-                    }}>Intsall Components </Button>
 
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
-
-                        openModal("modalA", {
-                            data: undefined,
-                            structure: {
-                                component_type: component_type,
-                            }
-                        })
-                    }}>Create Components </Button>
-
-
-
-                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
-                    openModal("modalB")
-                }}>Create/Update  namespace</Button> */}
-                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
-                    openModal("modalC")
-                }}>Install namespace</Button> */}
-                    <Button size="small" color="primary" variant="solid" onClick={reload}>Refresh</Button>
-                </Flex>
-            </Flex>
-        </Card>
         {/* <div style={{ marginBottom: "2rem" }}>
         </div> */}
 
         {/* {JSON.stringify(pipelineComponents)} */}
 
-        <Row style={{ marginTop: "1rem" }} gutter={16}>
-            <Col lg={21} sm={21} xs={24} >
-                <Card size="small">
+        <Row
+            ref={containerRef} style={isSticky?{
+                overflow: "hidden",
+                // marginTop: "1rem",
+                position: "sticky",
+                top: `${top}px`, // 吸顶距离
+                alignSelf: "flex-start", // 避免被stretch
+                height: `calc(100vh - ${top}px - 1rem )`, // 可选：固定高度，让内部滚动
+            }:{}}
+            gutter={[16,16]}>
+            <Col lg={21} sm={21} xs={24}
+                style={{
+
+                    display: "flex",
+                    flexDirection: "column", // 让 Card 撑满高度
+                    height: "100%",          // 关键：继承 Row 的高度
+                }}
+            >
+                <Card size="small"
+                    style={{
+                        flex: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        height: " 100%"
+                    }}
+                    styles={{
+                        body: {
+                            // height: "90%",
+                            flex: 1,
+                            overflowY: "auto"
+                        }
+                    }}
+                    extra={<>
+                        <Flex gap="small">
+                            <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                openModal("installComponents", { component_type: component_type })
+                            }}>Intsall Components </Button>
+
+                            <Button size="small" color="cyan" variant="solid" onClick={() => {
+
+                                openModal("modalA", {
+                                    data: undefined,
+                                    structure: {
+                                        component_type: component_type,
+                                    }
+                                })
+                            }}>Create Components </Button>
+
+
+
+                            {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
+                    openModal("modalB")
+                }}>Create/Update  namespace</Button> */}
+                            {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
+                    openModal("modalC")
+                }}>Install namespace</Button> */}
+                            <Button size="small" color="primary" variant="solid" onClick={reload}>Refresh</Button>
+                        </Flex>
+                    </>}
+                    title={<>
+                        <Search
+                            size="small"
+                            placeholder="Search Components"
+                            allowClear
+                            enterButton
+                            onSearch={(value) => { search(value) }}
+                            style={{ width: 400 }}
+                        />
+                    </>}
+                >
                     <Spin spinning={loading}>
                         {Array.isArray(pipelineComponents) && pipelineComponents.length != 0 ? <Row gutter={16} style={{ position: "relative" }}>
 
@@ -185,12 +219,14 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
                                         className="custom-card"
                                         // title={item.label}
                                         // variant="borderless" 
+                                        variant="borderless"
                                         style={{
                                             height: "100%",
                                             border: "1px solid #f0f0f0",   // 默认灰色边框
                                             borderRadius: "12px",          // 圆角
                                             overflow: "hidden",
                                             transition: "all 0.3s ease",   // 平滑过渡
+                                            // boxShadow: "none"
 
                                         }}
                                         bodyStyle={{
@@ -321,19 +357,33 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
                     </Flex>}
                 </Card>
             </Col>
-            <Col lg={3} sm={3} xs={24}>
+            <Col lg={3} sm={3} xs={24}
+                style={{
+
+                    display: "flex",
+                    flexDirection: "column", // 让 Card 撑满高度
+                    height: "100%",          // 关键：继承 Row 的高度
+                }}
+            >
                 <Card
+                    style={{
+                        flex: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        height: " 100%"
+                    }}
+                    styles={{
+                        body: {
+                            // height: "90%",
+                            flex: 1,
+                            overflowY: "auto"
+                        }
+                    }}
                     extra={<RedoOutlined style={{ cursor: "pointer" }} onClick={() => loadCateory()} />}
                     size="small"
                     loading={categoryLoading}
                     title={<span style={{ fontWeight: 600 }}>Category</span>}
-                    bordered={false}
-                    style={{
-                        borderRadius: "12px",
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                        height: "100%",
-                    }}
-                    bodyStyle={{ padding: "0.75rem" }}
+
                 >
                     {categoryLoading ? (
                         <Skeleton active paragraph={{ rows: 5 }} />

@@ -164,7 +164,7 @@ const { Paragraph } = Typography;
 const StringView: FC<any> = ({ data }) => {
 
     return <>
-     <Typography>
+        <Typography>
             <pre style={{ margin: 0 }}>
                 {data}
             </pre>
@@ -481,7 +481,7 @@ const AnalysisResultView: FC<any> = forwardRef<any, any>(({ params, visible, onC
     </>
 })
 
-export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalReportCallback, openPanel }) => {
+export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalReportCallback, openPanel, overflowY = "hidden" }) => {
     const [loading, setLoading] = useState<boolean>(false)
     const [analsyisResult, setAnalsyisResult] = useState<any>(null)
     const navigate = useNavigate()
@@ -491,7 +491,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
     // const { messageApi } = useOutletContext<any>()
     const message = useGlobalMessage()
     const { modals, openModals, closeModals } = useModals(["editParams", "moduleEdit"]);
-    const { containerURL } = useSelector((state: any) => state.user);
+    const { containerURL, project } = useSelector((state: any) => state.user);
     const [runingLoading, setRuningLoading] = useState<boolean>(false)
     const [form] = Form.useForm();
 
@@ -550,13 +550,13 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
     return <>
 
         <Card size="small"
-            style={{
+            style={overflowY == "auto" ? {
                 flex: 1,
                 display: "flex",
                 flexDirection: "column",
                 height: " 100%",
                 boxShadow: "none"
-            }}
+            } : { boxShadow: "none" }}
             styles={{
                 body: {
                     // padding: 0,
@@ -564,7 +564,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
                     display: "flex",
                     flexDirection: "column",
                     height: " 100%",
-                    overflowY: "auto"
+                    overflowY: overflowY
                 }
             }}
             // style={{ boxShadow: "none" }}
@@ -591,11 +591,24 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
             </>}
             extra={
                 <Flex gap={"small"}>
-                    {openPanel && <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        openPanel("note")
-                    }}>Open Note</Button>}
+                    {openPanel && <>
+                        {analsyisResult && <Button size="small" color="primary" variant="solid" onClick={() =>
+                            navigate(`/component/${analsyisResult?.component_type}/${analsyisResult?.component_id}`)
+                        }>Go {analsyisResult?.component_type}</Button>}
+                        <Button size="small" color="cyan" variant="solid" onClick={() => {
+                            openPanel("note")
+                        }}>Open Note</Button>
 
-                    {onClose && <Button size="small" color="cyan" variant="solid" onClick={() => onClose()}>Close</Button>}
+                    </>}
+
+                    {onClose && <>
+
+                        <Button size="small" color="cyan" variant="solid" onClick={() => onClose()}>Close</Button>
+                        <Button size="small" color="primary" variant="solid" onClick={() =>
+                            navigate(`/analysis-report?key=${analsyisResult?.analysis_id}&project=${project}`)
+                        }>Go Report</Button>
+
+                    </>}
 
 
 

@@ -1,4 +1,4 @@
-import { Breadcrumb, Button, Card,message, Empty, Flex, Modal, Popconfirm, Skeleton, Switch, Tabs, Tag, Tooltip } from "antd"
+import { Breadcrumb, Button, Card, message, Empty, Flex, Modal, Popconfirm, Skeleton, Switch, Tabs, Tag, Tooltip, Row, Col } from "antd"
 import { FC, useEffect, useRef, useState } from "react"
 import AnalysisPanel, { UpstreamAnalysisInput, UpstreamAnalysisOutput } from '../../../components/analysis-sotware-panel'
 import Meta from "antd/es/card/Meta"
@@ -27,6 +27,7 @@ import DescriptionModal from "@/components/description-modal"
 import FormProject from "@/components/form-project"
 import { useSelector } from "react-redux"
 import { useGlobalMessage } from "@/hooks/useGlobalMessage"
+import { useStickyTop } from "@/hooks/useStickyTop"
 const Pipeline: FC<any> = ({ }) => {
     console.log("Pipeline")
     const { component_type, component_id: name } = useParams()
@@ -59,6 +60,9 @@ const Pipeline: FC<any> = ({ }) => {
     // const [pipelineStructure, setPipelineStructure] = useState<any>()
 
 
+  
+
+    const { ref: containerRef, top, isSticky } = useStickyTop(576);
 
     const loadFunction: any = (data: any[]) => {
         if (!data) return undefined
@@ -203,78 +207,139 @@ const Pipeline: FC<any> = ({ }) => {
     useEffect(() => {
         loadData()
     }, [])
-    return <div style={{ maxWidth: "1500px", margin: "1rem auto" }}>
+    return <div style={{ maxWidth: "1800px", margin: "1rem auto" }}>
         {/* {JSON.stringify(pipeline)} */}
-        <Card size="small" style={{ marginBottom: "1rem" }} >
+        <Row gutter={[16, 16]}
+            ref={containerRef} style={isSticky?{
+                overflow: "hidden",
+                // marginTop: "1rem",
+                position: "sticky",
+                top: `${top}px`, // 吸顶距离
+                alignSelf: "flex-start", // 避免被stretch
+                height: `calc(100vh - ${top}px - 1rem )`, // 可选：固定高度，让内部滚动
+            }:{}}
+        >
+            <Col lg={18} sm={18} xs={24}
+                style={{
 
-            <Flex justify={"space-between"} align={"center"} gap="small">
-                <div style={{ height: "5rem" }}>
-                    {pipeline ? <>
-                        <h2 style={{ margin: 0 }}>
-                            {pipeline?.component_name}
-                            <Tooltip title={pipeline?.namespace}>
-                                <span style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)", fontSize: "1rem" }}> {pipeline?.namespace_name}
-                                    <Tag style={{ marginLeft: "0.5rem" }} color="blue">{pipeline?.category}</Tag>
-                                </span>
-                            </Tooltip>
-                        </h2>
-                        {/* <p style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)" }}>{pipeline?.description}</p> */}
+                    display: "flex",
+                    flexDirection: "column", // 让 Card 撑满高度
+                    height: "100%",          // 关键：继承 Row 的高度
+                }}
+            >
+                <Card size="small"
+                    style={{
+                        flex: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        height: " 100%"
+                    }}
+                    styles={{
+                        body: {
+                            // height: "90%",
+                            flex: 1,
+                            overflowY: "auto"
+                        }
+                    }}
+                    title={<>
+                        {pipeline?.component_name}
+                        {pipeline?.category &&
+                            <Tag style={{ marginLeft: "0.5rem" }} color="blue">{pipeline?.category}</Tag>
+
+                        }
 
 
-                        {import.meta.env.MODE == "development" && <>
-                            <p style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)" }}>{pipeline?.component_id}</p></>}
-
-                        {pipeline.tags && Array.isArray(pipeline.tags) && pipeline.tags.map((tag: any, index: any) => (
-                            <Tag style={{ marginTop: "0.5rem" }} key={index} color={colors[index]}>{tag}</Tag>
-                        ))}
-                    </> : <Skeleton active></Skeleton>}
-                </div>
-                <Flex gap="small" wrap>
-                    {component_type == "pipeline" && <>
-                        <Button size="small" color="cyan" variant="solid" onClick={() => {
-                            openModal("sortSoftware", { software: pipeline.software })
-                        }}>Update Sorting</Button>
                     </>}
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        openModal("publishModal", { ...pipeline, component_type: component_type })
-                    }}>Publish</Button>
+                    extra={<Flex justify={"space-between"} align={"center"} gap="small">
 
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        operatePipeline.openModal("projectForm", { project_id: project_id })
-                    }}>Edit Project</Button>
+                        <Flex gap="small" wrap>
+                            {component_type == "pipeline" && <>
+                                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                    openModal("sortSoftware", { software: pipeline.software })
+                                }}>Update Sorting</Button>
+                            </>}
+                            <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                openModal("publishModal", { ...pipeline, component_type: component_type })
+                            }}>Publish</Button>
 
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        operatePipeline.openModal("modalG", pipeline)
-                    }}>View Dependencies</Button>
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        openModals("metadataModal", { ...pipeline, operatePipeline: operatePipeline })
-                    }}>Metadata</Button>
+                            <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                operatePipeline.openModal("projectForm", { project_id: project_id })
+                            }}>Edit Project</Button>
 
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        openModal("modalC", {
-                            data: pipeline, structure: {
-                                component_type: component_type,
-                            }
-                        })
-                    }}>Update {component_type}</Button>
+                            <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                operatePipeline.openModal("modalG", pipeline)
+                            }}>View Dependencies</Button>
+                            <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                openModals("metadataModal", { ...pipeline, operatePipeline: operatePipeline })
+                            }}>Metadata</Button>
 
-                    <Button size="small" color="primary" variant="solid" onClick={loadData}>Refresh</Button>
-                    <Button size="small" color="primary" variant="solid" onClick={() => navigate(`/${component_type}-card`)}>Back</Button>
-                </Flex>
+                            <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                openModal("modalC", {
+                                    data: pipeline, structure: {
+                                        component_type: component_type,
+                                    }
+                                })
+                            }}>Update {component_type}</Button>
 
-            </Flex>
-        </Card>
+                            <Button  size="small" color="cyan"  variant="solid"  onClick={loadData}>Refresh</Button>
+
+                            <Button size="small" color="primary" variant="solid" onClick={() => navigate(`/${component_type}-card`)}>Back</Button>
+                        </Flex>
+
+                    </Flex>}
+                >
+
+
+                    <MemoizedComponentsRender
+                        component_type={component_type || ""}
+                        component={pipeline}
+                        tableRef={tableRef}
+                        operatePipeline={operatePipeline} />
+                </Card>
+
+            </Col>
+            <Col lg={6} sm={6} xs={24}
+
+                style={{
+
+                    display: "flex",
+                    flexDirection: "column", // 让 Card 撑满高度
+                    height: "100%",          // 关键：继承 Row 的高度
+                }}>
+                <Card
+                    title="Description"
+                    extra={<>
+                    </>}
+                    style={{
+                        flex: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        height: " 100%"
+                    }}
+                    styles={{
+                        body: {
+                            // height: "90%",
+                            flex: 1,
+                            overflowY: "auto"
+                        }
+                    }}
+                    size="small" >
+
+                    {pipeline?.tags && Array.isArray(pipeline.tags) && pipeline.tags.map((tag: any, index: any) => (
+                        <Tag style={{ marginTop: "0.5rem" }} key={index} color={colors[index]}>{tag}</Tag>
+                    ))}
+                
+                </Card>
+            </Col>
+        </Row>
+
         {/* 111111 */}
         {/* <ComponentsRender component_type={component_type || ""} operatePipeline={{
             deletePipelineRelation: deletePipelineRelation,
             openModal: openModal
         }} component={pipeline} /> */}
 
-        <MemoizedComponentsRender
-            component_type={component_type || ""}
-            component={pipeline}
-            tableRef={tableRef}
-            operatePipeline={operatePipeline} />
+
         {/* <PipelineComponent /> */}
         {/* <Button onClick={() => {
             setTest(!test)

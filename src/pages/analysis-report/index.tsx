@@ -9,6 +9,7 @@ import { setUserItem } from "@/store/userSlice"
 import { useModal } from "@/hooks/useModal"
 import FormProject from "@/components/form-project"
 import Markdown from "@/components/markdown"
+import { useStickyTop } from "@/hooks/useStickyTop"
 const AnalysisReport: FC<any> = () => {
     const [loading, setLoading] = useState<boolean>(false)
     // const { project, projectObj } = useOutletContext<any>()
@@ -84,25 +85,10 @@ const AnalysisReport: FC<any> = () => {
     //     const resp = await axios.post("/find-pipeline", { component_id: componentId })
     //     setComponents(resp.data)
     // }
-    const containerRef = useRef<HTMLDivElement>(null);
-    const [top, setTop] = useState<any>(null);
     const [panel, setPanel] = useState<any>("analysis_result");
-    const updateHeight = () => {
-        if (containerRef.current) {
-            const height = containerRef.current.getBoundingClientRect().top // 包含 padding
-            setTop(height);
-        }
-    }
 
-    useEffect(() => {
-        updateHeight(); // 初始化
-        window.addEventListener("resize", updateHeight);
-        // window.addEventListener("scroll", updateHeight);
-        return () => {
-            window.removeEventListener("resize", updateHeight);
-            //   window.removeEventListener("scroll", updateHeight);
-        };
-    }, []);
+    const { ref: containerRef, top, isSticky } = useStickyTop(576);
+
     const loadData = async () => {
         setLoading(true)
         // ?analysis_method=${analysisMethod}&project=${project}
@@ -140,21 +126,28 @@ const AnalysisReport: FC<any> = () => {
     useEffect(() => {
         loadData()
     }, [project])
-    return <div style={{ maxWidth: "1800px", margin: "0 auto" }}>
+    return <div style={{ maxWidth: "1800px", margin: "1rem auto" }}>
 
         {/* <div style={{ marginBottom: "1rem" }}></div> */}
         {/* {JSON.stringify(projectObj)} */}
         {/* {JSON.stringify(analysis)} */}
         {/* {key} */}
+
+        {/* <div style={{ height: "1000px", background: "red" }}>
+
+        </div> */}
+             <div >
+
+        </div>
         <Row
-            ref={containerRef} style={{
+            ref={containerRef} style={isSticky ? {
                 overflowY: "hidden",
-                marginTop: "1rem",
+                // marginTop: "1rem",
                 position: "sticky",
                 top: `${top}px`, // 吸顶距离
                 alignSelf: "flex-start", // 避免被stretch
                 height: `calc(100vh - ${top}px - 1rem )`, // 可选：固定高度，让内部滚动
-            }}
+            } : {}}
             gutter={[16, 16]}>
 
             <Col lg={20} sm={20} xs={24} style={{
@@ -173,6 +166,7 @@ const AnalysisReport: FC<any> = () => {
                     {analysisKey ? <>
 
                         <AnalysisResultViewComp
+                            overflowY="auto"
                             openPanel={setPanel}
                             cancalReportCallback={() => {
                                 loadData()
@@ -186,9 +180,9 @@ const AnalysisReport: FC<any> = () => {
                     </>
                     }
                 </div>
-                
-                {panel=="note" && <div
-                   >
+
+                {panel == "note" && <div
+                >
                     <Card
                         style={{
                             flex: 1,
