@@ -1,4 +1,4 @@
-import { Button, Card, Col, Empty, Flex, Row, Skeleton, Tabs, Tag, Tree, TreeDataNode, TreeProps } from "antd"
+import { Button, Card, Col, Empty, Flex, Row, Segmented, Skeleton, Tabs, Tag, Tree, TreeDataNode, TreeProps } from "antd"
 import axios from "axios"
 import { FC, use, useEffect, useRef, useState } from "react"
 import { useLocation, useNavigate, useOutletContext, useParams } from "react-router"
@@ -22,12 +22,13 @@ const AnalysisReport: FC<any> = () => {
     const projectParam = queryParams.get("project");
     const dispatch = useDispatch()
     const { modal, openModal, closeModal } = useModal();
-    const [queryProject,setQueryProject] = useState<any>()
+    // const [queryProject, setQueryProject] = useState<any>()
     const [analysisKey, setAnalysisKey] = useState<any>(key)
 
     const loadProject = async () => {
         const resp = await axios.get(`/project/find-by-project-id/${project}`)
-        setQueryProject(resp.data)
+        // setQueryProject(resp.data)
+        dispatch(setUserItem({ projectObj: resp.data }))
     }
     useEffect(() => {
         if (projectParam && projectParam != project) {
@@ -85,13 +86,14 @@ const AnalysisReport: FC<any> = () => {
     // }
     const containerRef = useRef<HTMLDivElement>(null);
     const [top, setTop] = useState<any>(null);
+    const [panel, setPanel] = useState<any>("analysis_result");
     const updateHeight = () => {
         if (containerRef.current) {
             const height = containerRef.current.getBoundingClientRect().top // 包含 padding
             setTop(height);
         }
     }
-    
+
     useEffect(() => {
         updateHeight(); // 初始化
         window.addEventListener("resize", updateHeight);
@@ -128,6 +130,13 @@ const AnalysisReport: FC<any> = () => {
     const reloadResult = () => {
         resultRef.current.reload()
     }
+    // useEffect(() => {
+    //     if (panel == "note") {
+    //         loadProject()
+
+    //     }
+
+    // }, [panel])
     useEffect(() => {
         loadData()
     }, [project])
@@ -137,23 +146,193 @@ const AnalysisReport: FC<any> = () => {
         {/* {JSON.stringify(projectObj)} */}
         {/* {JSON.stringify(analysis)} */}
         {/* {key} */}
-        <Row gutter={[16,16]} style={{ marginTop: "1rem" }}>
-            <Col lg={6} sm={6} xs={24} ref={containerRef} style={{
-
+        <Row
+            ref={containerRef} style={{
+                overflowY: "hidden",
+                marginTop: "1rem",
                 position: "sticky",
                 top: `${top}px`, // 吸顶距离
                 alignSelf: "flex-start", // 避免被stretch
                 height: `calc(100vh - ${top}px - 1rem )`, // 可选：固定高度，让内部滚动
+            }}
+            gutter={[16, 16]}>
+
+            <Col lg={20} sm={20} xs={24} style={{
+
+                display: "flex",
+                flexDirection: "column", // 让 Card 撑满高度
+                height: "100%",          // 关键：继承 Row 的高度
             }}>
+                <div
+                    style={{
+                        flex: 1,
+                        display: panel === "analysis_result" ? "block" : "none",
+                        height: "100%",
+                    }}
+                >
+                    {analysisKey ? <>
+
+                        <AnalysisResultViewComp
+                            openPanel={setPanel}
+                            cancalReportCallback={() => {
+                                loadData()
+                            }} analysis_id={analysisKey}></AnalysisResultViewComp>
+                    </> : <>
+                        <Card size="small" variant="borderless">
+                            <Empty></Empty>
+
+                        </Card>
+
+                    </>
+                    }
+                </div>
+                
+                {panel=="note" && <div
+                   >
+                    <Card
+                        style={{
+                            flex: 1,
+                            display: "flex",
+                            flexDirection: "column",
+                            height: " 100%",
+                            boxShadow: "none"
+                        }}
+                        styles={{
+                            body: {
+                                flex: 1,
+                                display: "flex",
+                                flexDirection: "column",
+                                height: " 100%",
+                                padding: 0,
+                                overflowY: "auto"
+                            }
+                        }}
+                        variant="borderless" size="small" extra={
+                            <Flex gap={"small"}>
+                                <Button size="small" color="primary" variant="solid" onClick={() => {
+                                    setPanel("analysis_result")
+                                }}>Back</Button>
+                                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                    openModal("projectForm", { project_id: project })
+                                }}>Edit</Button>
+
+                                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                    loadProject()
+                                    // setProjectObj(resp.data)
+                                    // dispatch(setUserItem({ projectObj: resp.data }))
+                                }}>Refresh</Button>
+                            </Flex>
+
+                        }>
+
+                        {projectObj?.description ? <Markdown data={projectObj?.description}></Markdown> : <Skeleton active />}
+                    </Card>
+                </div>}
+
+                {/* {panel == "analysis_result" ? <>
+
+                </> : <>
+
+
+                </>} */}
+                {/* <Segmented
+                            size="small"
+                            value={panel}
+                            onChange={(val: any) => {
+                                setPanel(val)
+                                if (val == "records") {
+
+                                    loadProject()
+                                }
+                            }}
+                            options={[
+                                {
+                                    value: 'analysis_result',
+                                    label: `Analysis Result`,
+                                }, {
+                                    label: "Records",
+                                    value: "records"
+                                }
+                            ]} /> */}
+                {/* <Card
+                    style={{
+                        flex: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        height: " 100%"
+                    }}
+                    size="small"
+
+                    styles={{
+                        body: {
+                            flex: 1,
+                            display: "flex",
+                            flexDirection: "column",
+                            height: " 100%",
+                            padding: 0
+                            // overflowY: "auto"
+                        }
+                    }}
+                    extra={
+                        }
+                >
+
+
+
+
+                </Card> */}
+                {/* <Tabs
+
+                    type="card"
+                    size="small"
+                    tabPosition="right"
+                    onChange={(val) => {
+                        if (val == "records") {
+                            loadProject()
+                        }
+                    }}
+                    items={[
+                        {
+                            key: 'analysis_result',
+                            label: `Analysis Result`,
+                            children: <>
+
+                            </>
+                        }, {
+                            key: 'records',
+                            label: `records`,
+                            children: <>
+
+                            </>
+                        }
+                    ]}
+                    defaultActiveKey="analysis_result">
+                </Tabs> */}
+
+
+
+            </Col>
+            <Col lg={4} sm={4} xs={24} style={{
+
+                display: "flex",
+                flexDirection: "column", // 让 Card 撑满高度
+                height: "100%",          // 关键：继承 Row 的高度
+            }} >
 
                 <Card
                     loading={loading}
                     title={projectObj?.project_name}
                     size="small"
-                    style={{ height: "100%" }}
+                    style={{
+                        flex: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        height: " 100%"
+                    }}
                     styles={{
                         body: {
-                            height: "90%",
+                            // height: "90%",
+                            flex: 1,
                             overflowY: "auto"
                         }
                     }}
@@ -190,65 +369,6 @@ const AnalysisReport: FC<any> = () => {
 
 
             </Col>
-            <Col lg={18} sm={18} xs={24} >
-                <Tabs
-
-                    type="card"
-                    size="small"
-                    tabPosition="right"
-                    onChange={(val) => {
-                        if(val=="records"){
-                            loadProject()
-                        }
-                    }}
-                    items={[
-                        {
-                            key: 'analysis_result',
-                            label: `Analysis Result`,
-                            children: <>
-                                {analysisKey ? <>
-                                    <AnalysisResultViewComp cancalReportCallback={() => {
-                                        loadData()
-                                    }} analysis_id={analysisKey}></AnalysisResultViewComp>
-                                </> : <>
-                                    <Card size="small">
-                                        <Empty></Empty>
-
-                                    </Card>
-
-                                </>}
-                            </>
-                        }, {
-                            key: 'records',
-                            label: `Records`,
-                            children: <>
-                                <Card size="small" style={{ marginBottom: "1rem" }} extra={
-                                    <Flex gap={"small"}>
-
-                                        <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                            openModal("projectForm", { project_id: project })
-                                        }}>Edit</Button>
-
-                                        <Button size="small" color="cyan" variant="solid" onClick={ () => {
-                                            loadProject()
-                                            // setProjectObj(resp.data)
-                                            // dispatch(setUserItem({ projectObj: resp.data }))
-                                        }}>Refresh</Button>
-                                    </Flex>
-
-                                }>
-                                    
-                                    {queryProject?.description ? <Markdown data={queryProject?.description}></Markdown> : <Skeleton active />}
-                                </Card>
-                            </>
-                        }
-                    ]}
-                    defaultActiveKey="analysis_result">
-                </Tabs>
-
-
-
-            </Col>
         </Row>
         <FormProject
             research={true}
@@ -269,7 +389,9 @@ const LeftPanel: FC<any> = ({ treeData, defaultSelectKey, onSelect: onSelect_ })
 
     // const treeData2: TreeDataNode[] = [
     //     {
-    //         title: 'parent 1',
+    //         title: <span style={{ color: "red" ,whiteSpace:"nowrap",textOverflow:"ellipsis",display:"inline-block",width:"100%",overflow:"hidden"}}>
+    //         parent 111111111111111111111111111
+    //         </span>,
     //         key: '0-0',
     //         children: [
     //             {
@@ -352,8 +474,9 @@ const LeftPanel: FC<any> = ({ treeData, defaultSelectKey, onSelect: onSelect_ })
     return (
         <>
 
-            {/* {defaultSelectKey} */}
+            {/* {JSON.stringify(treeData)} */}
             <Tree
+
                 selectedKeys={[selectedKey]}
                 showLine
                 expandedKeys={expandedKeys}

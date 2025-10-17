@@ -1,4 +1,4 @@
-import { Button, Flex, Form, Input, InputNumber, Select, Switch } from "antd";
+import { Button, ColorPicker, Flex, Form, Input, InputNumber, Select, Switch } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import axios from "axios";
 import { Component, FC, useEffect, useState, memo } from "react";
@@ -421,6 +421,10 @@ export const GroupSelectSampleButton: FC<any> = ({ label, name, rules, data, fil
             </Form.Item>
             <Form.Item name={[name, "group_name"]} >
                 <Input size="small" placeholder="Optional group name"></Input>
+            </Form.Item>
+            <Form.Item name={[name, "color"]} >
+                {/* <Input size="small" placeholder="Optional group color" ></Input> */}
+                <ColorPicker defaultValue="#1677ff" />
             </Form.Item>
         </Flex>
 

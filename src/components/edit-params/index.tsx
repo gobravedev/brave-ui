@@ -255,7 +255,7 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, for
             <Collapse ghost items={[
                 {
                     key: "1",
-                    label: "更多",
+                    label: "More",
                     children: <>
                         <Form.Item noStyle shouldUpdate>
                             {() => (

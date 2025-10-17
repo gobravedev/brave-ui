@@ -980,7 +980,7 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
         {/* {JSON.stringify(currentAnalysisMethod?.downstreamAnalysis)} */}
 
         {/* {JSON.stringify(downstreamData)} */}
-        <Flex style={{ marginBottom: "1rem" }} gap={"small"}>
+        <Flex wrap  style={{ marginBottom: "1rem" }} gap={"small"}>
             {currentAnalysisMethod?.downstreamAnalysis && currentAnalysisMethod?.downstreamAnalysis.map((item: any, index: any) => {
                 return <span key={index}>
                     {/* {JSON.stringify(item)} */}
@@ -1003,7 +1003,7 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
                             component_type: "script"
                         }
                     })
-                }}>新增分析</Button>
+                }}>New Script</Button>
                 <Button size="small" color="cyan" variant="solid" onClick={() => {
                     operatePipeline.openModal("modalA", {
                         data: undefined,
@@ -1014,7 +1014,7 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
                         }
                     })
 
-                }}>添加分析</Button>
+                }}>Add Script</Button>
 
                 {downstreamData?.component_id && <CloseCircleOutlined onClick={() => {
                     setDownstreamData(undefined)

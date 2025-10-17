@@ -1,4 +1,4 @@
-import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Alert, Modal, Tooltip } from "antd";
+import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Alert, Modal, Tooltip, Divider } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { FC, forwardRef, use, useEffect, useImperativeHandle, useRef, useState } from "react";
 import Markdown from '../markdown'
@@ -18,10 +18,13 @@ import { KGMLMapSVG } from "../databases/kegg";
 import { download } from "@antv/s2";
 import { useSelector } from "react-redux";
 import ModuleEdit from "../module-edit";
+import { useGlobalMessage } from "@/hooks/useGlobalMessage";
 
 const UrlComp: FC<any> = ({ url, filename, baseURL }) => {
     return <>
-        {url && <Popover title={`${baseURL}${url}`}>
+        {url && <Popover title={<div style={{ wordBreak: "break-all", maxWidth: "400px" }}>
+            {`${baseURL}${url}`}
+        </div>}>
             <Tag color="success"
                 style={{
                     cursor: "pointer",
@@ -473,17 +476,19 @@ const AnalysisResultView: FC<any> = forwardRef<any, any>(({ params, visible, onC
     </>
 })
 
-export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalReportCallback }) => {
+export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalReportCallback, openPanel }) => {
     const [loading, setLoading] = useState<boolean>(false)
     const [analsyisResult, setAnalsyisResult] = useState<any>(null)
     const navigate = useNavigate()
     const { eventSourceRef, status, reconnect } = useSSEContext();
     const analysisIdRef = useRef<any>(null)
     const sseAnalysisIdRef = useRef<any>(null)
-    const { messageApi } = useOutletContext<any>()
-    const { modals, openModals, closeModals } = useModals(["editParams","moduleEdit"]);
+    // const { messageApi } = useOutletContext<any>()
+    const message = useGlobalMessage()
+    const { modals, openModals, closeModals } = useModals(["editParams", "moduleEdit"]);
     const { containerURL } = useSelector((state: any) => state.user);
-
+    const [runingLoading, setRuningLoading] = useState<boolean>(false)
+    const [form] = Form.useForm();
 
     const loadData = async (analysis_id: any) => {
         setLoading(true)
@@ -491,8 +496,18 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
         const res = await axios.get(`/analysis/visualization-results/${analysis_id}`)
 
         setAnalsyisResult(res.data)
+        form.resetFields()
+        form.setFieldsValue(res.data.request_param)
         analysisIdRef.current = analysis_id
         setLoading(false)
+    }
+    const buildRequest = (values: any) => {
+        const requestParam = {
+            ...analsyisResult?.request_param,
+            ...values
+        }
+        return requestParam
+
     }
     useEffect(() => {
         loadData(analysis_id)
@@ -526,9 +541,31 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
 
     }, [eventSourceRef.current]);
 
+
     return <>
+
         <Card size="small"
-            bodyStyle={{ padding: 0 }}
+            style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                height: " 100%",
+                boxShadow: "none"
+            }}
+            styles={{
+                body: {
+                    // padding: 0,
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    height: " 100%",
+                    overflowY: "auto"
+                }
+            }}
+            // style={{ boxShadow: "none" }}
+            variant="borderless"
+            // bodyStyle={{ padding: 0 }}
+
             title={<>
                 {analsyisResult ? <>
                     <Tag style={{ cursor: "pointer" }} onClick={() => {
@@ -549,19 +586,54 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
             </>}
             extra={
                 <Flex gap={"small"}>
+                    {openPanel && <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        openPanel("note")
+                    }}>Open Note</Button>}
+
                     {onClose && <Button size="small" color="cyan" variant="solid" onClick={() => onClose()}>Close</Button>}
+
+
+
                     {analsyisResult && <>
-                        <Button size="small" color="cyan" variant="solid" onClick={() => {
-                            openModals("editParams", analsyisResult.analysis_id)
-                        }}>
-                            Edit Parameters
-                        </Button>
                         <Button size="small" color="cyan" variant="solid" onClick={() => {
                             openModals("moduleEdit", {
                                 component_id: analsyisResult?.component_id,
                             })
                         }}>Component Code</Button>
-                        {analsyisResult.server_status == "running" ?
+                        <Button size="small" color="cyan" variant="solid" onClick={() => {
+                            openModals("editParams", analsyisResult.analysis_id)
+                        }}>
+                            Edit Parameters
+                        </Button>
+
+
+                        {analsyisResult?.job_status == "running" ?
+                            <>
+                                <Popconfirm title={"Whether or not to stop?"} onConfirm={async () => {
+                                    await stopAnalysisApi(analsyisResult.analysis_id, "job")
+                                    message.success("Stop Success")
+
+                                }}>
+                                    <Button size="small" color="red" variant="solid">
+                                        Stop
+                                    </Button>
+                                </Popconfirm>
+
+                            </> : <>
+                                <Popconfirm title={"Whether or not to run?"} onConfirm={async () => {
+                                    await runAnalysisApi(analsyisResult.analysis_id, "job")
+                                    message.success("run successfully")
+
+
+                                }}>
+                                    <Button size="small" color="cyan" variant="solid">
+                                        {analsyisResult.job_status == "created" ? "Run" : "Re-Run"}
+                                    </Button>
+                                </Popconfirm>
+
+                            </>
+                        }
+                        {analsyisResult?.server_status == "running" ?
                             <>
 
                                 <Tooltip title={<>
@@ -592,65 +664,111 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
 
                             </>
                         }
-                        {analsyisResult?.job_status == "running" ?
-                            <>
-                                <Popconfirm title={"Whether or not to stop?"} onConfirm={async () => {
-                                    await stopAnalysisApi(analsyisResult.analysis_id, "job")
-                                    messageApi.success("Stop Success")
-
-                                }}>
-                                    <Button size="small" color="cyan" variant="solid">
-                                        Stop
-                                    </Button>
-                                </Popconfirm>
-
-                            </> : <>
-                                <Popconfirm title={"Whether or not to run?"} onConfirm={async () => {
-                                    await runAnalysisApi(analsyisResult.analysis_id, "job")
-                                    messageApi.success("run successfully")
-
-
-                                }}>
-                                    <Button size="small" color="cyan" variant="solid">
-                                        {analsyisResult.job_status == "created" ? "Run" : "Rerun"}
-                                    </Button>
-                                </Popconfirm>
-
-                            </>
-                        }
+                        <Popconfirm title={analsyisResult?.is_report ? "Whether to cancel the report?" : "Reported or not?"} onConfirm={async () => {
+                            await axios.post(`/analysis/update-report/${analsyisResult?.analysis_id}`)
+                            message.success("operate successfully!")
+                            setAnalsyisResult(null)
+                            if (cancalReportCallback) {
+                                cancalReportCallback()
+                            }
+                            // loadData()
+                        }}>
+                            <Button size="small" color={"cyan"} variant="solid">{analsyisResult?.is_report ? "Cancel Report" : "Report"}</Button>
+                        </Popconfirm>
                     </>}
 
-                    <Popconfirm title={analsyisResult?.is_report ? "Whether to cancel the report?" : "Reported or not?"} onConfirm={async () => {
-                        await axios.post(`/analysis/update-report/${analsyisResult?.analysis_id}`)
-                        messageApi.success("operate successfully!")
-                        setAnalsyisResult(null)
-                        if (cancalReportCallback) {
-                            cancalReportCallback()
-                        }
-                        // loadData()
-                    }}>
-                        <Button size="small" color={"cyan"} variant="solid">{analsyisResult?.is_report ? "Cancel Report" : "Report"}</Button>
-                    </Popconfirm>
                     <Button size="small" color="cyan" variant="solid" onClick={() => loadData(analysis_id)}>Refresh</Button>
 
                 </Flex>
             }>
 
+            {/* <div >
+                dew<br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
 
+            </div> */}
             {/* {analysis_id} */}
             {analsyisResult?.job_status == "failed" ? <div style={{ textAlign: "center" }}>
+                <div style={{ flex: 1, overflowY: "auto", marginBottom: "1rem" }}>
+                    <LogFile file_path={analsyisResult?.command_log_path}  ></LogFile>
 
-                <LogFile file_path={analsyisResult?.command_log_path}  ></LogFile>
-            </div> : <>
-                {((analsyisResult?.job_status == "running" && analsyisResult?.run_type != "server")) ? <Skeleton active></Skeleton> : <>
+                </div>
+            </div> : <Spin spinning={loading} tip="loading..." style={{ minHeight: "5rem", }}>
+
+                <Row gutter={[8, 8]}
+
+                >
+                    <Col lg={16} sm={16} xs={24}>
+                        {((analsyisResult?.job_status == "running" && analsyisResult?.run_type != "server")) ? <Skeleton active></Skeleton> : <>
 
 
-                    {analysis_id && <AnalysisResultDisplay analsyisResult={analsyisResult} loading={loading}></AnalysisResultDisplay>}
+                            {analysis_id && <AnalysisResultDisplay analsyisResult={analsyisResult} loading={loading}></AnalysisResultDisplay>}
 
-                </>
-                }
+                        </>
+                        }
+                    </Col>
+                    <Col lg={8} sm={8} xs={24} style={{ borderLeft: "1px solid #f0f0f0" }}>
+                        {/* <Divider  /> */}
+                        <Form form={form} layout="vertical"  >
+                            {analsyisResult?.form_json && <>
 
-            </>}
+
+                                <FormJsonComp formJson={analsyisResult?.form_json} dataMap={{}} ></FormJsonComp>
+                                <Form.Item  >
+                                    <Popconfirm
+                                        title={"Whether to submit?"}
+                                        onConfirm={async () => {
+                                            if (analsyisResult?.job_status == "running") {
+                                                message.error("Running, please wait!")
+                                            } else {
+                                                const values = buildRequest(await form.validateFields())
+                                                const resp: any = await axios.post(`/fast-api/analysis-controller?save=true&is_submit=true`, values)
+                                                console.log(values)
+                                                message.success("Submit Success!")
+                                            }
+
+                                            // // console.log('values', values)
+                                            // const requestParam = buildRequest(values)
+                                            // // console.log('requestParam', requestParam)
+                                            // setAnalsyisResult({
+                                            //     ...analsyisResult,
+                                            //     request_param: requestParam
+                                            // })
+                                            // messageApi.success("Update Success")
+                                        }}>
+                                        <Button disabled={analsyisResult?.job_status == "running"} type="primary" size="small" >Submit</Button>
+                                    </Popconfirm>
+
+                                </Form.Item>
+                                <Collapse ghost items={[
+                                    {
+                                        key: "1",
+                                        label: "More",
+                                        children: <>
+                                            <Form.Item noStyle shouldUpdate>
+                                                {() => (
+                                                    <Typography>
+                                                        <pre>{JSON.stringify(buildRequest(form.getFieldsValue()), null, 2)}</pre>
+                                                    </Typography>
+                                                )}
+                                            </Form.Item>
+                                        </>
+                                    }
+                                ]} />
+
+                            </>}
+                        </Form>
+                        {/* {analsyisResult?.params && <ParamsView params={analsyisResult?.params}></ParamsView>} */}
+
+
+                        <Divider />
+                        <Markdown data={analsyisResult?.description}></Markdown>
+
+
+                    </Col>
+                </Row>
+
+
+            </Spin >}
 
             <EditParams
                 callback={() => loadData(analysis_id)}
@@ -667,7 +785,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
             >
             </ModuleEdit>
 
-        </Card>
+        </Card >
 
     </>
 
@@ -679,10 +797,10 @@ const AnalysisResultDisplay: FC<any> = ({ analsyisResult, loading }) => {
     const { baseURL } = useSelector((state: any) => state.user)
     const { projectObj } = useSelector((state: any) => state.user);
 
-    return <Spin spinning={loading}>
+    return <div >
         {analsyisResult && <>
 
-            {analsyisResult.images && <div style={{ marginBottom: "1rem", padding: "1rem", borderBottom: "1px solid #f0f0f0" }}>
+            {analsyisResult.images && <div style={{ padding: "1rem" }}>
 
 
                 {
@@ -710,8 +828,9 @@ const AnalysisResultDisplay: FC<any> = ({ analsyisResult, loading }) => {
             </div>
 
         </>}
-        <Markdown data={analsyisResult?.description}></Markdown>
-    </Spin>
+
+
+    </div>
 }
 export default AnalysisResultView
 
