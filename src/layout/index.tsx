@@ -1,7 +1,7 @@
 import React, { FC, Suspense, useEffect, useState, lazy } from 'react';
 import { ApiOutlined, BookOutlined, LaptopOutlined, NotificationOutlined, PlusOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Breadcrumb, Button, Divider, Drawer, Empty, Flex, Form, Input, Layout, Menu, message, Modal, notification, Popconfirm, Select, Skeleton, Space, Tag, theme, Tooltip } from 'antd';
+import { Breadcrumb, Button, Divider, Drawer, Empty, Flex, Form, Input, Layout, Menu, message, Modal, notification, Popconfirm, Select, Skeleton, Space, Tag, theme, Tooltip, Typography } from 'antd';
 import { NavLink, Outlet, useLocation, useNavigate, useParams } from 'react-router';
 import { Header } from 'antd/es/layout/layout';
 import { useDispatch, useSelector } from 'react-redux';
@@ -22,6 +22,7 @@ import LanguageSelector from '@/components/setting-switcher/language';
 import ThemeSelector from '@/components/setting-switcher/theme';
 import { CreateOrUpdateNamespace, InstallNamespace } from '@/components/namespace-operature';
 import { useGlobalMessage } from '@/hooks/useGlobalMessage';
+import TextArea from 'antd/es/input/TextArea';
 
 const { Content, Sider } = Layout;
 
@@ -705,11 +706,12 @@ const Markdown = lazy(() => import('@/components/markdown'));
 
 const ApiComp: FC<any> = ({ open }) => {
     const { modal, openModal, closeModal } = useModal();
-    const { baseURL, authorization, containerURL, githubToken: githubToken_ } = useSelector((state: any) => state.user)
+    const { baseURL, authorization, containerURL, githubToken: githubToken_, storeRepos: storeRepos_ } = useSelector((state: any) => state.user)
     const [value, setValue] = useState<any>(baseURL)
     const [auth, setAuth] = useState<any>(authorization)
     const [contURL, setContURL] = useState<any>(containerURL)
     const [githubToken, setGithubToken] = useState<any>(githubToken_)
+    const [storeRepos, setStoreRepos] = useState<any>(storeRepos_)
 
 
 
@@ -753,6 +755,9 @@ const ApiComp: FC<any> = ({ open }) => {
                     if (githubToken) {
                         dispatch(setUserItem({ githubToken: `${githubToken}` }))
                     }
+                    if (storeRepos) {
+                        dispatch(setUserItem({ storeRepos: `${storeRepos}` }))
+                    }
                     closeModal()
                     messageApi.success("Connection successful!")
                 } catch (error) {
@@ -782,11 +787,12 @@ const ApiComp: FC<any> = ({ open }) => {
                 <Form.Item label="Github Token">
                     <Input value={githubToken} onChange={(e) => setGithubToken(e.target.value)}></Input>
                 </Form.Item>
-                {githubToken && 
-                <a onClick={() => { 
-                    setGithubToken(undefined)
-                    dispatch(setUserItem({ githubToken: undefined }))
-                    localStorage.removeItem('githubToken') }}>Delete  Github Token </a>}
+                {githubToken &&
+                    <a onClick={() => {
+                        setGithubToken(undefined)
+                        dispatch(setUserItem({ githubToken: undefined }))
+                        localStorage.removeItem('githubToken')
+                    }}>Delete  Github Token </a>}
 
 
                 <p style={{ marginTop: 8, color: "#888", fontSize: 13 }}>
@@ -797,6 +803,20 @@ const ApiComp: FC<any> = ({ open }) => {
 
 
                 </p>
+                <Form.Item label="Store Repos">
+                    <TextArea value={storeRepos} onChange={(e) => setStoreRepos(e.target.value)}></TextArea>
+                </Form.Item>
+                <Typography>
+                    <pre>
+                        {JSON.stringify([{
+                            "store_name": "quick-start",
+                            "store_path": "pybrave",
+                            "name": "Quick Start Store",
+                            "address": "github"
+                        }], null, 2)}
+                    </pre>
+                </Typography>
+
 
                 <Suspense fallback={<Test></Test>}>
                     <Markdown data={`

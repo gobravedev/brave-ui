@@ -18,6 +18,7 @@ import DependComponent from "../depend-component"
 import "./index.css"
 import { base } from "@faker-js/faker"
 import { useGlobalMessage } from "@/hooks/useGlobalMessage"
+import { add } from "@dnd-kit/utilities"
 const PipelineComponentsCard: FC<any> = ({ params, map }) => {
     const { Search } = Input;
     // const [searchText, setSearchText] = useState("");
@@ -309,7 +310,7 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
                         </Row> : <Empty></Empty>}
                     </Spin>
                     {totalPage != 0 && <Flex style={{ marginTop: "1rem" }} align="center">
-                        一共{totalPage}条数据 &nbsp;
+                        A total of {totalPage}records &nbsp;
                         <Pagination
                             current={pageNumber}
                             pageSize={pageSize}
@@ -440,9 +441,10 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
     const message = useGlobalMessage()
     const [address, setAddress] = useState("github")
     // const [token, setToken] = useState()
-    const { githubToken } = useSelector((state: any) => state.user)
+    const { githubToken, storeRepos } = useSelector((state: any) => state.user)
     const [category, setCategory] = useState<any[]>([])
     const [activeCategory, setActiveCategory] = useState("all")
+    const [currStorePath, setCurrStorePath] = useState()
 
     // const isRemote = storePosition == "Remote"
     useEffect(() => {
@@ -456,10 +458,23 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
         try {
             setLoading(true)
             const resp = await axios.get(`/component-store/list-stores?address=${address}`)
-            setStoreList(resp.data)
-            if (resp.data.length > 0) {
-                setTabkey(resp.data[0].store_name)
-                loadData(resp.data[0].store_name)
+            let storesList = resp.data
+            if (address == "github") {
+                const selfStore = JSON.parse(storeRepos || "[]").filter((item: any) => item.address == address)
+                storesList = [
+                    ...selfStore,
+                    ...storesList
+                ]
+
+            }
+            setStoreList(storesList)
+
+            // storeRepos
+            if (storesList.length > 0) {
+                const data = storesList[0]
+                setTabkey(data.store_name)
+                loadData(data.store_name, undefined, data?.store_path)
+                setCurrStorePath(data?.store_path)
             } else {
                 setComponents([])
             }
@@ -470,7 +485,7 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
         }
 
     }
-    const loadData = async (store_name: any, remote_force: any = undefined) => {
+    const loadData = async (store_name: any, remote_force: any = undefined, store_path = undefined) => {
         setComponentLoading(true)
         // list-by-type/${store_name}?component_type=${params?.component_type}&is_remote=${isRemote ? 'true' : 'false'}
         try {
@@ -479,7 +494,9 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
                 component_type: params?.component_type,
                 address: address,
                 remote_force: remote_force,
-                token: githubToken
+                token: githubToken,
+                store_path: store_path ? store_path : currStorePath
+
             })
             const category = resp.data.map((item: any) => item.category)
             setCategory(["all", ...Array.from(new Set(category))])
@@ -527,7 +544,7 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
         }} />
     </Flex>} width={"90%"} open={visible} onClose={onClose} onCancel={onClose}>
         {/* {JSON.stringify(components)} */}
-
+        {/* {storeRepos} */}
         <Spin spinning={loading}>
             {/* {JSON.stringify(storeList)} */}
             <Tabs
@@ -558,7 +575,8 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
                 }}
                 items={storeList.map((item: any) => ({
                     key: item.store_name,
-                    label: item.name,
+                    label: <Tooltip title={item.store_path}>{item.name ? item.name : item.store_name}
+                    </Tooltip>,
                 }))}></Tabs>
 
             <Spin spinning={componentLoading}>
@@ -608,7 +626,7 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
                                                 transition: "all 0.3s ease",   // 平滑过渡
 
                                             }}
-                                           
+
                                             cover={<div style={{ height: "15rem" }}>
                                                 <img style={{ height: "100%", width: "100%", objectFit: "cover" }} alt={item.label}
                                                     src={getImgPath(item.img)} />

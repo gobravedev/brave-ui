@@ -9,6 +9,7 @@ const containerURL = localStorage.getItem('containerURL')
 const namespace = localStorage.getItem('namespace')
 const project = localStorage.getItem('project')
 const githubToken = localStorage.getItem('githubToken')
+const storeRepos = localStorage.getItem('storeRepos')
 
 interface UserState {
     locale: string;
@@ -19,7 +20,8 @@ interface UserState {
     namespace:string;
     projectObj:any;
     project:any;
-    githubToken:any
+    githubToken:any;
+    storeRepos:any
     
 }
 const contextSlice = createSlice({
@@ -35,7 +37,8 @@ const contextSlice = createSlice({
         namespace:namespace?`${namespace}`:`default`,
         project:project?`${project}`:`default`,
         projectObj:{},
-        githubToken:githubToken
+        githubToken:githubToken,
+        storeRepos:storeRepos?storeRepos:"[]"
     },
     reducers: {
         setUserItem(state, action: PayloadAction<Partial<UserState>>) {
@@ -63,6 +66,9 @@ const contextSlice = createSlice({
             }
             if(action.payload.githubToken){
                 localStorage.setItem('githubToken', action.payload.githubToken)
+            }
+            if(action.payload.storeRepos){
+                localStorage.setItem('storeRepos', action.payload.storeRepos)
             }
             // debugger
         },

@@ -152,7 +152,7 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
             columns={columns}
             dataSource={data} />
         {totalPage != 0 && <Flex style={{ marginTop: "1rem" }} align="center">
-            一共{totalPage}条数据 &nbsp;
+             A total of{totalPage} records  &nbsp;
             <Pagination
                 current={pageNumber}
                 pageSize={pageSize}
