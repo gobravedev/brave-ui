@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState, useEffect } from "react"
 import { useTable, Column } from "react-table"
-import { FixedSizeList as List } from "react-window"
+// import { FixedSizeList as List } from "react-window"
 import { useVirtualizer, useWindowVirtualizer } from '@tanstack/react-virtual'
 import { faker } from '@faker-js/faker'
 

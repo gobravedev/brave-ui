@@ -60,7 +60,7 @@ const Pipeline: FC<any> = ({ }) => {
     // const [pipelineStructure, setPipelineStructure] = useState<any>()
 
 
-  
+
 
     const { ref: containerRef, top, isSticky } = useStickyTop(576);
 
@@ -209,15 +209,8 @@ const Pipeline: FC<any> = ({ }) => {
     }, [])
     return <div style={{ maxWidth: "1800px", margin: "1rem auto" }}>
         {/* {JSON.stringify(pipeline)} */}
-        <Row gutter={[isSticky?16:0, 16]}
-            ref={containerRef} style={isSticky?{
-                overflow: "hidden",
-                // marginTop: "1rem",
-                position: "sticky",
-                top: `${top}px`, // 吸顶距离
-                alignSelf: "flex-start", // 避免被stretch
-                height: `calc(100vh - ${top}px - 1rem )`, // 可选：固定高度，让内部滚动
-            }:{}}
+        <Row gutter={[isSticky ? 16 : 0, 16]}
+
         >
             <Col lg={18} sm={18} xs={24}
                 style={{
@@ -236,7 +229,7 @@ const Pipeline: FC<any> = ({ }) => {
                     }}
                     styles={{
                         body: {
-                            padding:0,
+                            padding: 0,
                             // height: "90%",
                             flex: 1,
                             overflowY: "auto"
@@ -282,7 +275,7 @@ const Pipeline: FC<any> = ({ }) => {
                                 })
                             }}>Update {component_type}</Button>
 
-                            <Button  size="small" color="cyan"  variant="solid"  onClick={loadData}>Refresh</Button>
+                            <Button size="small" color="cyan" variant="solid" onClick={loadData}>Refresh</Button>
 
                             <Button size="small" color="primary" variant="solid" onClick={() => navigate(`/${component_type}-card`)}>Back</Button>
                         </Flex>
@@ -300,13 +293,21 @@ const Pipeline: FC<any> = ({ }) => {
 
             </Col>
             <Col lg={6} sm={6} xs={24}
+                ref={containerRef} style={isSticky ? {
+                    overflow: "hidden",
+                    // marginTop: "1rem",
+                    position: "sticky",
+                    top: `${top}px`, // 吸顶距离
+                    alignSelf: "flex-start", // 避免被stretch
+                    height: `calc(100vh - ${top}px - 1rem )`, // 可选：固定高度，让内部滚动
+                } : {}}
+                // style={{
 
-                style={{
-
-                    display: "flex",
-                    flexDirection: "column", // 让 Card 撑满高度
-                    height: "100%",          // 关键：继承 Row 的高度
-                }}>
+                //     display: "flex",
+                //     flexDirection: "column", // 让 Card 撑满高度
+                //     height: "100%",          // 关键：继承 Row 的高度
+                // }}
+                >
                 <Card
                     title="Description"
                     extra={<>
@@ -329,7 +330,7 @@ const Pipeline: FC<any> = ({ }) => {
                     {pipeline?.tags && Array.isArray(pipeline.tags) && pipeline.tags.map((tag: any, index: any) => (
                         <Tag style={{ marginTop: "0.5rem" }} key={index} color={colors[index]}>{tag}</Tag>
                     ))}
-                
+
                 </Card>
             </Col>
         </Row>

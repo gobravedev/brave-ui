@@ -3,13 +3,57 @@ import { SSEContextType } from "@/type/sse"
 import { Venn } from "@ant-design/plots"
 import { Button, Card, Dropdown, Flex, Input, message, Modal, Popconfirm, Popover, Space, Table, Tag, Tooltip, Typography } from "antd"
 import axios from "axios"
-import { FC, forwardRef, useEffect, useImperativeHandle, useMemo, useState } from "react"
+import { FC, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { useOutletContext, useParams } from "react-router"
 import { DownOutlined, FileOutlined, QuestionCircleOutlined, RedoOutlined } from "@ant-design/icons"
 import ImportData from "../import-data"
 import { useModal } from "@/hooks/useModal"
 export const readHdfsAPi = (contentPath: any) => axios.get(`/api/read-hdfs?path=${contentPath}`)
 export const readJsonAPi = (contentPath: any) => axios.get(`/fast-api/read-json?path=${contentPath}`)
+
+// import { FixedSizeList as List } from "react-window";
+// import { useVirtualizer } from "@tanstack/react-virtual"
+
+// import { getScrollbarSize, List, type RowComponentProps } from "react-window";
+// const  Example:FC<any> = ({ addresses }) =>{
+//     const [size] = useState(getScrollbarSize);
+//     return (
+//         <div className="h-55 flex flex-col">
+//             <div className="flex flex-row bg-teal-600 p-1 px-2">
+//                 <div className="grow flex flex-row items-center gap-2 font-bold">
+//                     <div className="flex-1">City</div>
+//                     <div className="flex-1">State</div>
+//                     <div className="w-10">Zip</div>
+//                 </div>
+//                 <div className="shrink" style={{ width: size }} />
+//             </div>
+//             <div className="overflow-hidden">
+//                 <List
+//                     rowComponent={RowComponent}
+//                     rowCount={addresses.length}
+//                     rowHeight={25}
+//                     rowProps={{ addresses }}
+//                 />
+//             </div>
+//         </div>
+//     );
+// }
+// function RowComponent({
+//     index,
+//     addresses,
+//     style
+// }: RowComponentProps<{
+//     addresses: any[];
+// }>) {
+//     const address = addresses[index];
+//     return (
+//         <div className="flex flex-row items-center gap-2 px-2" style={style}>
+//             <div className="flex-1">{address.city}</div>
+//             <div className="flex-1">{address.state}</div>
+//             <div className="w-10 text-xs">{address.zip}</div>
+//         </div>
+//     );
+// }
 
 
 const ResultList = forwardRef<any, any>(({
@@ -196,6 +240,7 @@ const ResultList = forwardRef<any, any>(({
                 project: project,
                 // analysis_method: analysisMethodValues,
                 component_ids: componentIdList,
+                rows: -1,
                 ...params
             })
             const groupedData = resp.data;
@@ -755,30 +800,68 @@ const ResultList = forwardRef<any, any>(({
 
             {/* {JSON.stringify(rest)} */}
             {/* {JSON.stringify(projectObj)} */}
-            {/* {JSON.stringify(currentAnalysisMethod.component_id)} */}
+            {/* {JSON.stringify(filteredData)} */}
 
-            <Table
-                // title={() => (
-                //     <Input.Search
-                //         size="small"
-                //         placeholder="搜索结果..."
-                //         allowClear
-                //         enterButton
-                //         value={searchText}
-                //         onChange={(e: any) => setSearchText(e.target.value)}
-                //         style={{ width: 300 }}
-                //     />
-                // )}
-                rowKey={(it: any) => it.id}
-                size="small"
-                // bordered
-                // pagination={undefined}
-                pagination={{ pageSize: 10 }}
-                loading={loading}
-                scroll={{ x: 'max-content', y: 55 * 5 }}
-                columns={columnsParamsALL ? columnsParamsALL : columns}
-                footer={() => `A total of ${filteredData && Array.isArray(filteredData) && filteredData.length} records`}
-                dataSource={filteredData} />
+            {currentAnalysisMethod?.file_type == "collected" ? <>
+                {/* {data && <>
+                    {data.map((item: any, index: any) => (<div key={index}>
+                    </div>))}
+
+                </>} */}
+
+                <Table
+                    // title={() => (
+                    //     <Input.Search
+                    //         size="small"
+                    //         placeholder="搜索结果..."
+                    //         allowClear
+                    //         enterButton
+                    //         value={searchText}
+                    //         onChange={(e: any) => setSearchText(e.target.value)}
+                    //         style={{ width: 300 }}
+                    //     />
+                    // )}
+                    rowKey={(it: any) => it.id}
+                    size="small"
+                    // bordered
+                    // pagination={undefined}
+                    pagination={{ pageSize: 10 }}
+                    loading={loading}
+                    scroll={{ x: 'max-content', y: 55 * 5 }}
+                    columns={columnsParamsALL ? columnsParamsALL : columns}
+                    footer={() => `A total of ${filteredData && Array.isArray(filteredData) && filteredData.length} records`}
+                    dataSource={filteredData} />
+            </> : <>
+
+                <Table
+                    // title={() => (
+                    //     <Input.Search
+                    //         size="small"
+                    //         placeholder="搜索结果..."
+                    //         allowClear
+                    //         enterButton
+                    //         value={searchText}
+                    //         onChange={(e: any) => setSearchText(e.target.value)}
+                    //         style={{ width: 300 }}
+                    //     />
+                    // )}
+                    rowKey={(it: any) => it.id}
+                    size="small"
+                    // bordered
+                    // pagination={undefined}
+                    pagination={{ pageSize: 10 }}
+                    loading={loading}
+                    scroll={{ x: 'max-content', y: 55 * 5 }}
+                    columns={columnsParamsALL ? columnsParamsALL : columns}
+                    footer={() => `A total of ${filteredData && Array.isArray(filteredData) && filteredData.length} records`}
+                    dataSource={filteredData} />
+
+            </>}
+
+
+
+
+
             {currentAnalysisMethod?.parseFormat && currentAnalysisMethod?.relation_type == "software_output_file" && <Typography>
                 <pre>
                     {JSON.stringify(currentAnalysisMethod.parseFormat, null, 2)}
