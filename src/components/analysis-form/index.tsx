@@ -221,7 +221,7 @@ export const AnalysisForm: FC<any> = ({
         {contextHolder}
         {/* {JSON.stringify(rest)} */}
         <Watermark content={formId && `更新分析(${formValues.analysis_name})(${String(formValues.analysis_id).slice(0, 8)})`}>
-            {/* {JSON.stringify(dataMap)} */}
+            {/* {JSON.stringify(resultTableList)} */}
             <CreateOrUpdateParsms
                 form={form}
                 requestParam={requestParsms}

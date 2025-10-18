@@ -525,6 +525,11 @@ const FileContent: FC<any> = ({ data, form, structure }) => {
                 <pre>{JSON.stringify(structure?.files, null, 2)}</pre>
             </Typography>
         </Card>}
+        <Form.Item name={"file_type"} label="File Type">
+            <Select options={
+                [{ label: "collected", value: "collected" },
+                { label: "individual", value: "individual" }]}></Select>
+        </Form.Item>
         <Form.Item name={"content"} label="content">
             <TextAreaComp templete={templete}></TextAreaComp>
         </Form.Item>

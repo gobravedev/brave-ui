@@ -236,6 +236,7 @@ const Pipeline: FC<any> = ({ }) => {
                     }}
                     styles={{
                         body: {
+                            padding:0,
                             // height: "90%",
                             flex: 1,
                             overflowY: "auto"

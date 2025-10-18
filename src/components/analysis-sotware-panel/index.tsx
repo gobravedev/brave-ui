@@ -1025,7 +1025,7 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
 
         </Flex>
 
-
+{/* 
         {children && React.cloneElement(children, {
             record: record,
             // setHtmlUrl: setHtmlUrl,
@@ -1037,7 +1037,7 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
             // sampleGroup: sampleGroup,
             // dataMap: dataMap
 
-        })}
+        })} */}
         <div>
 
 
@@ -1115,7 +1115,7 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
                                     }} style={{ cursor: "pointer" }} />
                                 </Flex>
                                 <div style={{ marginBottom: "1rem" }}></div>
-                                {/* {JSON.stringify(componentIds)} */}
+                                {/* {JSON.stringify(resultTableList)} */}
 
                                 <AnalysisForm
                                     {...downstreamData}

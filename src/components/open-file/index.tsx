@@ -15,16 +15,21 @@ const OpenFile: FC<any> = ({ visible, onClose, params }) => {
 
     useEffect(() => {
         if (visible) {
-            const paramsList = Object.entries(params.content).map(([key, value]) => ({
-                key: value,
-                label: key
-            }))
-            setFileList(paramsList)
-            if (paramsList.length > 0) {
-                const file_path = paramsList[0].key
-                setTabKey(file_path)
-                readFile(file_path as string)
+            if (params?.fileType && params.fileType === "collected") {
+                readFile(params.content as string)
+            } else {
+                const paramsList = Object.entries(params.content).map(([key, value]) => ({
+                    key: value,
+                    label: key
+                }))
+                setFileList(paramsList)
+                if (paramsList.length > 0) {
+                    const file_path = paramsList[0].key
+                    setTabKey(file_path)
+                    readFile(file_path as string)
+                }
             }
+
         }
     }, [visible])
     const readFile = async (file_path: string) => {
@@ -46,6 +51,7 @@ const OpenFile: FC<any> = ({ visible, onClose, params }) => {
         footer={false}
 
     >
+
         <Tabs tabBarExtraContent={
             <Flex gap={"small"} align={"center"}>
                 <Button size="small" color="cyan" variant="solid" onClick={() => {

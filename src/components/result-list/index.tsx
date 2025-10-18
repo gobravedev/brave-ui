@@ -1,7 +1,7 @@
 import { useSSEContext } from "@/context/sse/useSSEContext"
 import { SSEContextType } from "@/type/sse"
 import { Venn } from "@ant-design/plots"
-import { Button, Card, Dropdown, Flex, Input, message, Modal, Popconfirm, Popover, Space, Table, Tooltip, Typography } from "antd"
+import { Button, Card, Dropdown, Flex, Input, message, Modal, Popconfirm, Popover, Space, Table, Tag, Tooltip, Typography } from "antd"
 import axios from "axios"
 import { FC, forwardRef, useEffect, useImperativeHandle, useMemo, useState } from "react"
 import { useOutletContext, useParams } from "react-router"
@@ -187,36 +187,37 @@ const ResultList = forwardRef<any, any>(({
     }
     const loadData = async ({ analysisMethodValues, params, componentIdList }: any) => {
         setLoading(true)
-        let resp: any = await axios.post(`/analysis-result/list-analysis-result`, {
-            project: project,
-            // analysis_method: analysisMethodValues,
-            component_ids: componentIdList,
-            ...params
-        })
+
 
         if (componentIdList) {
             // const keyMap = getKeyMap()
             // console.log(keyMap)
-
-            const groupedData = resp.data.reduce((acc: any, item: any) => {
-                const key = item.component_id;
-                // const key = keyMap[item.analysis_method]
-                if (!acc[key]) {
-                    acc[key] = [];
-                }
-                const { sample_name, id, sample_group, ...rest } = item
-                // debugger
-                acc[key].push({
-                    label: sample_name,
-                    value: id,
-                    sample_group: sample_group ? sample_group : "no_group",
-                    sample_name: sample_name,
-                    id: id,
-                    // "aaa":"1111",
-                    ...rest
-                });
-                return acc;
-            }, {});
+            let resp: any = await axios.post(`/analysis-result/list-analysis-result-grouped`, {
+                project: project,
+                // analysis_method: analysisMethodValues,
+                component_ids: componentIdList,
+                ...params
+            })
+            const groupedData = resp.data;
+            // const groupedData = resp.data.reduce((acc: any, item: any) => {
+            //     const key = item.component_id;
+            //     // const key = keyMap[item.analysis_method]
+            //     if (!acc[key]) {
+            //         acc[key] = [];
+            //     }
+            //     const { sample_name, id, sample_group, ...rest } = item
+            //     // debugger
+            //     acc[key].push({
+            //         label: sample_name,
+            //         value: id,
+            //         // sample_group: sample_group ? sample_group : "no_group",
+            //         sample_name: sample_name,
+            //         id: id,
+            //         // "aaa":"1111",
+            //         ...rest
+            //     });
+            //     return acc;
+            // }, {});
             console.log("groupedData", groupedData)
             if (setResultTableList) {
                 // console.log(groupedData)
@@ -230,6 +231,12 @@ const ResultList = forwardRef<any, any>(({
                 setData(groupedData[analysisMethod[0]?.component_id] ? groupedData[analysisMethod[0]?.component_id] : [])
             }
         } else {
+            let resp: any = await axios.post(`/analysis-result/list-analysis-result`, {
+                project: project,
+                // analysis_method: analysisMethodValues,
+                component_ids: componentIdList,
+                ...params
+            })
             // console.log(resp.data)
             setData(resp.data)
         }
@@ -486,7 +493,7 @@ const ResultList = forwardRef<any, any>(({
                             // if (cleanDom) {
                             //     cleanDom(undefined)
                             // }
-                            operatePipeline.openModal("openFile", { content: record.content, description: currentAnalysisMethod.description })
+                            operatePipeline.openModal("openFile", { content: record.content, fileType: record.file_type, description: currentAnalysisMethod.description })
 
                             // const param = JSON.parse(record.request_param)
                             // console.log(param)
@@ -561,10 +568,10 @@ const ResultList = forwardRef<any, any>(({
             }}
             styles={{
                 body: {
-                    padding: "0.5rem 0 0 0 "
+                    padding: "0.5rem"
                 }
             }}
-            title={<><FileOutlined /> {title}
+            title={<Flex gap={"small"}><FileOutlined /> {title}
                 {currentAnalysisMethod?.component_name && <Tooltip title={<>
                     <ul>
                         <li>namespace: {currentAnalysisMethod?.namespace_name}</li>
@@ -577,7 +584,12 @@ const ResultList = forwardRef<any, any>(({
 
                 </>}>
                     <span style={{ cursor: "pointer" }}>({currentAnalysisMethod?.component_name})</span>
-                </Tooltip>}</>}
+
+                </Tooltip>}
+
+                <Tag color="success">{currentAnalysisMethod?.file_type}</Tag>
+            </Flex>}
+
             extra={<>{cardExtra}
                 <Flex gap={"small"} wrap>
                     <Input.Search
@@ -599,7 +611,7 @@ const ResultList = forwardRef<any, any>(({
                             }}>
                             <Button size="small" color="cyan" variant="solid" >计算MD5</Button>
                         </Popconfirm> */}
-                        <Button  size="small" color="cyan"  variant="solid"  onClick={reload}>Refresh</Button>
+                        <Button size="small" color="cyan" variant="solid" onClick={reload}>Refresh</Button>
 
                         {(rest.component_type == "software" || rest.component_type == "file") && <>
                             <Dropdown menu={{
@@ -720,7 +732,7 @@ const ResultList = forwardRef<any, any>(({
             activeTabKey={activeTabKey}
             onTabChange={onTabChange}
         >
-            {/* {JSON.stringify(rest)} */}
+            {/* {JSON.stringify(groupedData)} */}
 
             {/* {JSON.stringify(rest)} */}
             {/* {JSON.stringify(projectObj)} */}

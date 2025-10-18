@@ -3,13 +3,14 @@ import TextArea from "antd/es/input/TextArea"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
-import { Button, Card, Collapse, Empty, Flex, Form, Input, Select, Table, Typography } from "antd"
+import { Button, Card, Collapse, Empty, Flex, Form, Input, Select, Switch, Table, Typography } from "antd"
 import axios from "axios"
 import FormJsonComp from "@/components/form-components"
 import { useOutletContext } from "react-router"
 import FileBrowser from "@/components/file-browser"
 import { useSelector } from "react-redux"
 import PasteTable from "@/components/paste-table"
+import { fa } from "@faker-js/faker"
 const markdown = `
 |project|library_name|sample_name|sequencing_target|sequencing_technique|sample_composition|fastq1                                                 |fastq2                                                     |
 |-------|------------|-----------|-----------------|--------------------|------------------|-------------------------------------------------------|-----------------------------------------------------------|
@@ -39,14 +40,14 @@ const RenderTable: FC<any> = ({ parseData, columns, importData }) => {
         footer={() => (
             <div style={{ textAlign: 'right' }}>
                 A total of{parseData.length} records &nbsp;&nbsp;
-                <Button size="small" color="cyan" variant="solid" onClick={importData}>确认</Button>
+                <Button size="small" color="cyan" variant="solid" onClick={importData}>Ok</Button>
             </div>
         )} columns={columns} dataSource={parseData} />;
 };
 
 
-const ImportFile: FC<{ component_type: any, component_id: any, component_name: any, inputForm: any, inputFormMap: any, operatePipeline: any, name: any, callback: any }> = ({
-    component_type, component_id, component_name, inputForm, operatePipeline, name, callback }) => {
+const ImportFile: FC<{ component_type: any, component_id: any, component_name: any, inputForm: any, inputFormMap: any, operatePipeline: any, name: any, callback: any, file_type?: any }> = ({
+    component_type, component_id, component_name, inputForm, operatePipeline, name, file_type, callback }) => {
     // const { component_type,component_id,operatePipeline } = pipeline
     const [form] = Form.useForm();
     // const [components, setComponents] = useState<any>([])
@@ -59,6 +60,7 @@ const ImportFile: FC<{ component_type: any, component_id: any, component_name: a
     const [parseData, setParseData] = useState<any>([])
     // const [selectedFile, setSelectedFile] = useState<any>()
     const setting = useSelector((state: any) => state.global.setting)
+    const [isParseMode, setIsParseMode] = useState<boolean>(false)
     // const [inputFormMap, setInputFormMap] = useState<any>({})
 
     const [columns, setColumns] = useState<any>()
@@ -108,14 +110,15 @@ const ImportFile: FC<{ component_type: any, component_id: any, component_name: a
     };
 
     const getRequestParams = (values: any) => {
-        const { content, sample_name } = values
-        if (parseData) {
+        const { content, sample_name,file_name } = values
+        if (isParseMode) {
             return parseData.map((item: any) => {
                 const { sample_name, ...rest } = item
                 return {
                     ...values,
                     project: project,
                     component_id: component_id,
+                    file_type:file_type,
                     content: JSON.stringify(rest),
                     sample_name: sample_name,
                 }
@@ -125,7 +128,9 @@ const ImportFile: FC<{ component_type: any, component_id: any, component_name: a
                 ...values,
                 project: project,
                 component_id: component_id,
-                content: JSON.stringify(content),
+                file_name:file_name,
+                file_type:file_type,
+                content: (file_type && file_type == "collected") ? content : JSON.stringify(content),
                 sample_name: sample_name,
             }]
         }
@@ -206,8 +211,14 @@ const ImportFile: FC<{ component_type: any, component_id: any, component_name: a
 
     return <>
         <Card
+            variant="borderless"
+            size="small"
+            style={{
+                boxShadow: 'none',
+            }}
             title={`${component_name}(${component_id})`}
             extra={<Flex gap={"small"} >
+                <Switch value={isParseMode} onChange={(val) => setIsParseMode(val)}></Switch>
                 <Button size="small" color="cyan" variant="solid" onClick={() => {
                     operatePipeline.openModal("modalC", {
                         data: { component_id }, structure: {
@@ -227,10 +238,27 @@ const ImportFile: FC<{ component_type: any, component_id: any, component_name: a
 
             <Form form={form}>
                 {/* 同一个样本测序不同部位 */}
-                <Form.Item  name={"sample_source"} label="Sample Source" rules={[{ required: true, message: 'This field cannot be empty!' }]}>
+                <Form.Item name={"sample_source"} label="Sample Source" rules={[{ required: true, message: 'This field cannot be empty!' }]}>
                     <Input placeholder="gut,brain...">
                     </Input>
                 </Form.Item>
+                {!isParseMode &&
+                    <>
+                        {(file_type && file_type == "collected") ?
+                            <Form.Item name={"file_name"} label="File Name" rules={[{ required: true, message: 'This field cannot be empty!' }]}>
+                                <Input >
+                                </Input>
+                            </Form.Item>
+                            :
+
+                            <Form.Item name={"sample_name"} label="Sample Name" rules={[{ required: true, message: 'This field cannot be empty!' }]}>
+                                <Input >
+                                </Input>
+                            </Form.Item>
+                        }
+                      
+                    </>
+                }
 
                 {inputForm ?
                     <>
@@ -250,11 +278,13 @@ const ImportFile: FC<{ component_type: any, component_id: any, component_name: a
                                         component_type: component_type,
                                     }
                                 })
-                            }}>配置inputForm</Button>
+                            }}>Config InputForm</Button>
                         </Empty>
                     </>
                 }
-                <RenderTable parseData={parseData} columns={columns} importData={importData} ></RenderTable>
+                {isParseMode && <RenderTable parseData={parseData} columns={columns} importData={importData} ></RenderTable>}
+
+                {!isParseMode && <Button size="small" color="cyan" variant="solid" onClick={importData}>Ok</Button>}
                 <Collapse ghost items={[
                     {
                         key: "1",
