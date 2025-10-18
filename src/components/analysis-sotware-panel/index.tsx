@@ -402,7 +402,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
         const requestParams = {
             ...values,
             project: project,
-            inputFormJson:inputAnalysisMethod,
+            inputFormJson: inputAnalysisMethod,
             // analysis_pipline: analysisPipline,
             // parse_analysis_module: rest.parse_analysis_module,
             component_id: rest.component_id,
@@ -545,7 +545,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
                                     {/* {JSON.stringify(inputAnalysisMethod)} */}
                                     <FormJsonComp formJson={inputAnalysisMethod} dataMap={resultTableList}></FormJsonComp>
                                     {/* {JSON.stringify(rest)} */}
-                                    <BioDatabaseForm openModal={()=>operatePipeline.openModal("modalE",rest.databases)} formJson={rest.databases}></BioDatabaseForm>
+                                    <BioDatabaseForm openModal={() => operatePipeline.openModal("modalE", rest.databases)} formJson={rest.databases}></BioDatabaseForm>
                                     {/* <FormJsonComp formJson={rest.databases} dataMap={resultTableList}></FormJsonComp> */}
 
                                     {/* {resultTableList && inputAnalysisMethod.map((it: any) => (<> */}
@@ -710,7 +710,7 @@ export const SelectComp: FC<any> = ({ it, resultTableList, value, onChange }) =>
 
 
 export const UpstreamAnalysisOutput: FC<any> = (rest) => {
-    const {pipeline, component_id, component_type, operatePipeline, children, project, onClickItem, analysisType, analysisMethod, appendSampleColumns, script} = rest
+    const { pipeline, component_id, component_type, operatePipeline, children, project, onClickItem, analysisType, analysisMethod, appendSampleColumns, script } = rest
     const [form] = Form.useForm();
 
     // const [loading, setLoading] = useState(false)
@@ -980,7 +980,7 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
         {/* {JSON.stringify(currentAnalysisMethod?.downstreamAnalysis)} */}
 
         {/* {JSON.stringify(downstreamData)} */}
-        <Flex wrap  style={{ marginBottom: "1rem" }} gap={"small"}>
+        <Flex wrap style={{ marginBottom: "1rem" }} gap={"small"}>
             {currentAnalysisMethod?.downstreamAnalysis && currentAnalysisMethod?.downstreamAnalysis.map((item: any, index: any) => {
                 return <span key={index}>
                     {/* {JSON.stringify(item)} */}
@@ -1025,7 +1025,7 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
 
         </Flex>
 
-{/* 
+        {/* 
         {children && React.cloneElement(children, {
             record: record,
             // setHtmlUrl: setHtmlUrl,
@@ -1046,6 +1046,24 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
                     <Input></Input>
                 </Form.Item> */}
             {/* {JSON.stringify(rest)} */}
+
+            {/* {JSON.stringify(downstreamData?.parent)} */}
+{/* 
+            {(downstreamData?.parent && Array.isArray(downstreamData?.parent)) && <Flex gap="small">
+
+
+
+                {downstreamData?.parent.map((item: any, index: any) => (<Flex gap="small" key={index}>
+                 
+                    <Popconfirm title="Are you sure to delete?" onConfirm={() => {
+                        operatePipeline.deletePipelineRelation(item.relation_id)
+                        setBtnName(undefined)
+                    }}>
+                        <Button size="small" color="danger" variant="solid" >Delete {item?.component_name}</Button>
+                    </Popconfirm>
+                </Flex>))}
+            </Flex>} */}
+
             {downstreamData && <>
                 {/* {JSON.stringify(downstreamData)} */}
                 <Collapse
@@ -1096,20 +1114,39 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
 
                                     <Button size="small" color="cyan" variant="solid" onClick={() => {
                                         operatePipeline.openModal("modalA", {
-                                            data: downstreamData,
+                                            data: undefined,
                                             pipelineStructure: {
-                                                relation_type: "file_script",
-                                                pipeline_id: pipeline.component_id
+                                                relation_type: "parent_file_script",
+                                                // pipeline_id: pipeline.component_id,
+                                                component_id: downstreamData.component_id,
                                             }
                                         })
 
-                                    }}>Replace Analysis</Button>
-                                    <Popconfirm title="Are you sure to delete?" onConfirm={() => {
-                                        operatePipeline.deletePipelineRelation(downstreamData.relation_id)
-                                        setBtnName(undefined)
-                                    }}>
-                                        <Button size="small" color="danger" variant="solid" >Delete Analysis</Button>
-                                    </Popconfirm>
+                                    }}>Add File</Button>
+
+
+                                    {downstreamData.relation_id && <>
+
+                                        <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                            operatePipeline.openModal("modalA", {
+                                                data: downstreamData,
+                                                pipelineStructure: {
+                                                    relation_type: "file_script",
+                                                    // pipeline_id: downstreamData.component_id,
+
+                                                }
+                                            })
+
+                                        }}>Replace Analysis</Button>
+                                        <Popconfirm title="Are you sure to delete?" onConfirm={() => {
+                                            operatePipeline.deletePipelineRelation(downstreamData.relation_id)
+                                            setBtnName(undefined)
+                                        }}>
+                                            <Button size="small" color="danger" variant="solid" >Delete Analysis</Button>
+                                        </Popconfirm>
+                                    </>
+                                    }
+
                                     <QuestionCircleOutlined onClick={() => {
                                         operatePipeline.openModal("descriptionModal", downstreamData.description)
                                     }} style={{ cursor: "pointer" }} />

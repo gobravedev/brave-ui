@@ -24,7 +24,8 @@ export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClo
         pipeline_software: DefaultComponentRelation,
         software_input_file: DefaultComponentRelation,
         software_output_file: DefaultComponentRelation,
-        file_script: DefaultComponentRelation
+        file_script: DefaultComponentRelation,
+        parent_file_script:AddFileComponentRelation
     }
     const ComponentsRender = ({ relation_type, data, form }: any) => {
         const Component = componentMap[relation_type] || (() => <div>未知类型 {JSON.stringify(data)}</div>);
@@ -80,8 +81,11 @@ export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClo
         if (visible) {
             if (pipelineStructure.relation_type == "pipeline_software") {
                 listPipelineComponents("software")
-            } else if (pipelineStructure.relation_type == "software_input_file" || pipelineStructure.relation_type == "software_output_file") {
+            } else if (pipelineStructure.relation_type == "software_input_file" 
+                || pipelineStructure.relation_type == "parent_file_script"
+                || pipelineStructure.relation_type == "software_output_file") {
                 listPipelineComponents("file")
+           
             } else if (pipelineStructure.relation_type == "file_script") {
                 listPipelineComponents("script")
             }
@@ -100,6 +104,9 @@ export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClo
             ...values,
             ...pipelineStructure,
 
+        }
+        if(params.relation_type == "parent_file_script"){
+            params.relation_type = "file_script"
         }
         if (data) {
             params['relation_id'] = pipelineRelation.relation_id
@@ -454,6 +461,15 @@ const UploadComp: FC<any> = ({ value, onChange, component_id }) => {
     </>
 }
 
+const AddFileComponentRelation: FC<any> = ({ data, form, components }) => {
+    return <>
+
+        <Form.Item name={"parent_component_id"} label="File Component">
+            <Select showSearch options={components}></Select>
+        </Form.Item>
+
+    </>
+}
 const DefaultComponentRelation: FC<any> = ({ data, form, components }) => {
     return <>
 

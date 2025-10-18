@@ -601,7 +601,24 @@ const ResultList = forwardRef<any, any>(({
                         onChange={(e: any) => setSearchText(e.target.value)}
                         style={{ width: 300 }}
                     />
+                    {currentAnalysisMethod?.relation_id && <Popconfirm title="Are you sure to delete?" onConfirm={() => {
+                        operatePipeline.deletePipelineRelation(currentAnalysisMethod.relation_id)
+                    }}>
+                        <Button size="small" color="danger" variant="solid" >Delete {currentAnalysisMethod?.component_name}</Button>
+                    </Popconfirm>}
+
                     {operatePipeline?.openModal && <>
+                        {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        operatePipeline.openModal("modalA", {
+                            data: downstreamData,
+                            pipelineStructure: {
+                                relation_type: "file_script",
+                                // pipeline_id: downstreamData.component_id,
+
+                            }
+                        })
+
+                    }}>Replace {item?.component_name}</Button> */}
                         <Button size="small" color="cyan" variant="solid" onClick={() => {
                             // operatePipeline.openModals("modalD", { ...currentAnalysisMethod, operatePipeline: operatePipeline })
                             openModal("importFile", { ...currentAnalysisMethod, operatePipeline: operatePipeline })
@@ -732,7 +749,9 @@ const ResultList = forwardRef<any, any>(({
             activeTabKey={activeTabKey}
             onTabChange={onTabChange}
         >
-            {/* {JSON.stringify(groupedData)} */}
+            {/* <pre>
+                {JSON.stringify(analysisMethod,null,2)}
+            </pre> */}
 
             {/* {JSON.stringify(rest)} */}
             {/* {JSON.stringify(projectObj)} */}
