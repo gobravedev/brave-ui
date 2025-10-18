@@ -7,7 +7,7 @@ import { useModal } from "@/hooks/useModal"
 import { data } from "react-router"
 import { useForm } from "antd/es/form/Form"
 import { MonacoEditor } from "../react-monaco-editor"
-import { es } from "@faker-js/faker"
+import { es, tr } from "@faker-js/faker"
 import { PlusOutlined } from '@ant-design/icons'
 export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClose, params, callback }) => {
     if (!visible) return null;
@@ -25,7 +25,7 @@ export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClo
         software_input_file: DefaultComponentRelation,
         software_output_file: DefaultComponentRelation,
         file_script: DefaultComponentRelation,
-        parent_file_script:AddFileComponentRelation
+        parent_file_script: AddFileComponentRelation
     }
     const ComponentsRender = ({ relation_type, data, form }: any) => {
         const Component = componentMap[relation_type] || (() => <div>未知类型 {JSON.stringify(data)}</div>);
@@ -81,11 +81,11 @@ export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClo
         if (visible) {
             if (pipelineStructure.relation_type == "pipeline_software") {
                 listPipelineComponents("software")
-            } else if (pipelineStructure.relation_type == "software_input_file" 
+            } else if (pipelineStructure.relation_type == "software_input_file"
                 || pipelineStructure.relation_type == "parent_file_script"
                 || pipelineStructure.relation_type == "software_output_file") {
                 listPipelineComponents("file")
-           
+
             } else if (pipelineStructure.relation_type == "file_script") {
                 listPipelineComponents("script")
             }
@@ -105,7 +105,7 @@ export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClo
             ...pipelineStructure,
 
         }
-        if(params.relation_type == "parent_file_script"){
+        if (params.relation_type == "parent_file_script") {
             params.relation_type = "file_script"
         }
         if (data) {
@@ -133,13 +133,19 @@ export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClo
         }
 
         console.log(params)
-        const resp = await axios.post("/save-pipeline-relation", params)
-        console.log(resp)
-        setLoaidng(false)
-        if (callback) {
-            callback()
+        try {
+            const resp = await axios.post("/save-pipeline-relation", params)
+            console.log(resp)
+            setLoaidng(false)
+            onClose()
+            if (callback) {
+                callback()
+            }
+        } catch (error) {
+            setLoaidng(false)
         }
-        onClose()
+
+
     }
     return <>
         <Modal
