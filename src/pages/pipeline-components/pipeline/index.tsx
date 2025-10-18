@@ -209,7 +209,7 @@ const Pipeline: FC<any> = ({ }) => {
     }, [])
     return <div style={{ maxWidth: "1800px", margin: "1rem auto" }}>
         {/* {JSON.stringify(pipeline)} */}
-        <Row gutter={[isSticky?16:0,, 16]}
+        <Row gutter={[isSticky?16:0, 16]}
             ref={containerRef} style={isSticky?{
                 overflow: "hidden",
                 // marginTop: "1rem",
