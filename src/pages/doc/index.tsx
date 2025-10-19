@@ -3,7 +3,7 @@ import Markdown from "../../components/markdown"
 import { Button, Tabs } from "antd"
 
 import { EmbedLLM } from '../../components/embed-llm'
-import Demo from "@/components/smart-table"
+// import Demo from "@/components/smart-table"
 import { useNavigate } from "react-router"
 const Project: FC<any> = () => {
 

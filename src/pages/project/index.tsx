@@ -7,7 +7,7 @@ import { english } from './english'
 import { introduction } from './introduction'
 
 import { EmbedLLM } from '../../components/embed-llm'
-import Demo from "@/components/smart-table"
+// import Demo from "@/components/smart-table"
 import axios from "axios"
 const Project: FC<any> = () => {
     const [data, setData] = useState<any>(introduction)

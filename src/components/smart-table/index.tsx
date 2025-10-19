@@ -253,142 +253,142 @@ const generateLogs = (start: number, count: number): LogEntry[] =>
   }))
 
 const PAGE_SIZE = 50
-function VirtualLogViewer2() {
-  const [logs, setLogs] = useState<LogEntry[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [autoScroll, setAutoScroll] = useState(true)
-  const parentRef = useRef<HTMLDivElement>(null)
+// function VirtualLogViewer2() {
+//   const [logs, setLogs] = useState<LogEntry[]>([])
+//   const [isLoading, setIsLoading] = useState(false)
+//   const [autoScroll, setAutoScroll] = useState(true)
+//   const parentRef = useRef<HTMLDivElement>(null)
 
-  const rowVirtualizer = useVirtualizer({
-    count: logs.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 32,
-    overscan: 10,
-  })
+//   const rowVirtualizer = useVirtualizer({
+//     count: logs.length,
+//     getScrollElement: () => parentRef.current,
+//     estimateSize: () => 32,
+//     overscan: 10,
+//   })
 
-  // 初始化加载最新页，并滚到底部
-  useEffect(() => {
-    const initial = generateLogs(1000, PAGE_SIZE)
-    console.log('initial', initial)
-    setLogs(initial)
-    requestAnimationFrame(() => {
-      parentRef.current!.scrollTop = parentRef.current!.scrollHeight
-    })
-  }, [])
+//   // 初始化加载最新页，并滚到底部
+//   useEffect(() => {
+//     const initial = generateLogs(1000, PAGE_SIZE)
+//     console.log('initial', initial)
+//     setLogs(initial)
+//     requestAnimationFrame(() => {
+//       parentRef.current!.scrollTop = parentRef.current!.scrollHeight
+//     })
+//   }, [])
 
-  // 向上滚动加载历史日志（prepend）
-  const loadOlderLogs = () => {
-    if (isLoading) return
-    setIsLoading(true)
-    const prevHeight = parentRef.current?.scrollHeight ?? 0
+//   // 向上滚动加载历史日志（prepend）
+//   const loadOlderLogs = () => {
+//     if (isLoading) return
+//     setIsLoading(true)
+//     const prevHeight = parentRef.current?.scrollHeight ?? 0
 
-    const older = generateLogs(logs[0]?.id - PAGE_SIZE || 0, PAGE_SIZE).map(
-      (log, idx) => ({
-        ...log,
-        id: logs[0]?.id - PAGE_SIZE + idx,
-        message: `[OLD] ${log.message}`,
-      })
-    )
-    console.log('older', older)
+//     const older = generateLogs(logs[0]?.id - PAGE_SIZE || 0, PAGE_SIZE).map(
+//       (log, idx) => ({
+//         ...log,
+//         id: logs[0]?.id - PAGE_SIZE + idx,
+//         message: `[OLD] ${log.message}`,
+//       })
+//     )
+//     console.log('older', older)
 
-    setLogs(prev => [...older, ...prev])
+//     setLogs(prev => [...older, ...prev])
 
-    requestAnimationFrame(() => {
-      const newHeight = parentRef.current!.scrollHeight
-      parentRef.current!.scrollTop = newHeight - prevHeight
-      setIsLoading(false)
-    })
-  }
+//     requestAnimationFrame(() => {
+//       const newHeight = parentRef.current!.scrollHeight
+//       parentRef.current!.scrollTop = newHeight - prevHeight
+//       setIsLoading(false)
+//     })
+//   }
 
-  // 监听用户是否在顶部 or 底部
-  const handleScroll = () => {
-    console.log('handleScroll', logs.length)
-    const el = parentRef.current
-    if (!el) return
-    const { scrollTop, scrollHeight, clientHeight } = el
+//   // 监听用户是否在顶部 or 底部
+//   const handleScroll = () => {
+//     console.log('handleScroll', logs.length)
+//     const el = parentRef.current
+//     if (!el) return
+//     const { scrollTop, scrollHeight, clientHeight } = el
 
-    // 向上滚动到顶部，加载历史
-    if (scrollTop <= 10) {
-      loadOlderLogs()
-    }
+//     // 向上滚动到顶部，加载历史
+//     if (scrollTop <= 10) {
+//       loadOlderLogs()
+//     }
 
-    // 判断是否到底部，用于后续追加新日志时是否自动滚动
-    setAutoScroll(scrollTop + clientHeight >= scrollHeight - 10)
-  }
+//     // 判断是否到底部，用于后续追加新日志时是否自动滚动
+//     setAutoScroll(scrollTop + clientHeight >= scrollHeight - 10)
+//   }
 
-  // 模拟实时日志追加（定时器替代 SSE/WebSocket）
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const next: LogEntry = {
-        id: logs.length > 0 ? logs[logs.length - 1].id + 1 : 1,
-        level: Math.random() > 0.9 ? "ERROR" : "INFO",
-        message: `Live log #${Date.now()}`,
-      }
-      setLogs(prev => [...prev, next])
+//   // 模拟实时日志追加（定时器替代 SSE/WebSocket）
+//   useEffect(() => {
+//     const timer = setInterval(() => {
+//       const next: LogEntry = {
+//         id: logs.length > 0 ? logs[logs.length - 1].id + 1 : 1,
+//         level: Math.random() > 0.9 ? "ERROR" : "INFO",
+//         message: `Live log #${Date.now()}`,
+//       }
+//       setLogs(prev => [...prev, next])
 
-      // 如果当前滚到底部，则自动滚动
-      if (autoScroll) {
-        requestAnimationFrame(() => {
-          parentRef.current!.scrollTop = parentRef.current!.scrollHeight
-        })
-      }
-    }, 1500)
+//       // 如果当前滚到底部，则自动滚动
+//       if (autoScroll) {
+//         requestAnimationFrame(() => {
+//           parentRef.current!.scrollTop = parentRef.current!.scrollHeight
+//         })
+//       }
+//     }, 1500)
 
-    return () => clearInterval(timer)
-  }, [logs, autoScroll])
+//     return () => clearInterval(timer)
+//   }, [logs, autoScroll])
 
-  return (
-    <div
-      ref={parentRef}
-      onScroll={handleScroll}
-      style={{
-        height: "400px",
-        width: "100%",
-        overflow: "auto",
-        fontFamily: "monospace",
-        fontSize: 14,
-        border: "1px solid #ccc",
-        background: "#fafafa",
-      }}
-    >
-      <div
-        style={{
-          height: `${rowVirtualizer.getTotalSize()}px`,
-          position: "relative",
-        }}
-      >
-        {rowVirtualizer.getVirtualItems().map(virtualRow => {
-          const log = logs[virtualRow.index]
-          return (
-            <div
-              key={log?.id ?? virtualRow.index}
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: `${virtualRow.size}px`,
-                transform: `translateY(${virtualRow.start}px)`,
-                padding: "4px 12px",
-                color: log?.level === "ERROR" ? "red" : "#333",
-                borderBottom: "1px solid #eee",
-              }}
-            >
-              [{log?.level}] {log?.message}
-            </div>
-          )
-        })}
-      </div>
-      {isLoading && (
-        <div style={{ padding: "8px", textAlign: "center", color: "#888" }}>
-          加载旧日志中...
-        </div>
-      )}
-    </div>
-  )
-}
+//   return (
+//     <div
+//       ref={parentRef}
+//       onScroll={handleScroll}
+//       style={{
+//         height: "400px",
+//         width: "100%",
+//         overflow: "auto",
+//         fontFamily: "monospace",
+//         fontSize: 14,
+//         border: "1px solid #ccc",
+//         background: "#fafafa",
+//       }}
+//     >
+//       <div
+//         style={{
+//           height: `${rowVirtualizer.getTotalSize()}px`,
+//           position: "relative",
+//         }}
+//       >
+//         {rowVirtualizer.getVirtualItems().map(virtualRow => {
+//           const log = logs[virtualRow.index]
+//           return (
+//             <div
+//               key={log?.id ?? virtualRow.index}
+//               style={{
+//                 position: "absolute",
+//                 top: 0,
+//                 left: 0,
+//                 width: "100%",
+//                 height: `${virtualRow.size}px`,
+//                 transform: `translateY(${virtualRow.start}px)`,
+//                 padding: "4px 12px",
+//                 color: log?.level === "ERROR" ? "red" : "#333",
+//                 borderBottom: "1px solid #eee",
+//               }}
+//             >
+//               [{log?.level}] {log?.message}
+//             </div>
+//           )
+//         })}
+//       </div>
+//       {isLoading && (
+//         <div style={{ padding: "8px", textAlign: "center", color: "#888" }}>
+//           加载旧日志中...
+//         </div>
+//       )}
+//     </div>
+//   )
+// }
 
-export default VirtualLogViewer2
+// export default VirtualLogViewer2
 
 
 // export default VirtualLogViewer
