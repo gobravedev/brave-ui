@@ -1,20 +1,103 @@
 import { useSSEContext } from "@/context/sse/useSSEContext"
 import { SSEContextType } from "@/type/sse"
 import { Venn } from "@ant-design/plots"
-import { Button, Card, Dropdown, Flex, Input, message, Modal, Popconfirm, Popover, Space, Table, Tag, Tooltip, Typography } from "antd"
+import { Button, Card, Dropdown, Flex, Input, InputNumber, message, Modal, Popconfirm, Popover, Space, Spin, Table, Tabs, Tag, theme, Tooltip, Typography } from "antd"
 import axios from "axios"
 import { FC, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { useOutletContext, useParams } from "react-router"
-import { DownOutlined, FileOutlined, QuestionCircleOutlined, RedoOutlined } from "@ant-design/icons"
+import { DeleteFilled, DownOutlined, FileOutlined, QuestionCircleOutlined, RedoOutlined } from "@ant-design/icons"
 import ImportData from "../import-data"
 import { useModal } from "@/hooks/useModal"
 export const readHdfsAPi = (contentPath: any) => axios.get(`/api/read-hdfs?path=${contentPath}`)
 export const readJsonAPi = (contentPath: any) => axios.get(`/fast-api/read-json?path=${contentPath}`)
+// import { List } from "react-window";
+// import { getScrollbarSize, List, type RowComponentProps } from "react-window";
 
-// import { FixedSizeList as List } from "react-window";
+// interface LargeDataTableProps {
+//     columns: string[];
+//     rows: any[][];
+// }
+
+// // 每行渲染组件
+// function RowComponent({
+//     index,
+//     style,
+//     rows,
+// }: RowComponentProps<{
+//     rows: any[][];
+// }>) {
+//     const row = rows[index];
+//     return (
+//         <div
+//             role="row"
+//             className="flex flex-row items-center border-b border-gray-200 px-2"
+//             style={style}
+//         >
+//             {row.map((value: any, j: number) => (
+//                 <div
+//                     key={j}
+//                     role="cell"
+//                     className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm"
+//                 >
+//                     {String(value)}
+//                 </div>
+//             ))}
+//         </div>
+//     );
+// }
+// // const  Example2:FC<any> = ({ names })=> {
+// //     return (
+// //         <List
+// //             rowComponent={RowComponent}
+// //             rowCount={names.length}
+// //             rowHeight={25}
+// //         />
+// //     );
+// // }
+
+// const LargeDataTable: FC<LargeDataTableProps> = ({ columns, rows }) => {
+//     const [scrollbarWidth] = useState(getScrollbarSize);
+
+//     return (
+//         <div
+//             role="table"
+//             className="flex flex-col border border-gray-300 rounded-md"
+//         >
+//             {/* 表头 */}
+//             <div
+//                 role="rowgroup"
+//                 className="flex flex-row bg-gray-100 font-semibold px-2 py-1 border-b border-gray-300"
+//             >
+//                 <div className="grow flex flex-row items-center gap-2 w-full">
+//                     {columns.map((col, i) => (
+//                         <div
+//                             key={i}
+//                             role="columnheader"
+//                             className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap"
+//                         >
+//                             {col}
+//                         </div>
+//                     ))}
+//                 </div>
+//                 {/* 滚动条预留空间 */}
+//                 <div className="shrink-0" style={{ width: scrollbarWidth }} />
+//             </div>
+
+//             {/* 虚拟滚动主体 */}
+//             <div className="overflow-hidden">
+//                 <List
+//                     //   height={600}
+//                     rowCount={rows.length}
+//                     rowHeight={35}
+//                     rowProps={{ rows }}
+//                     rowComponent={RowComponent}
+//                 />
+//             </div>
+//         </div>
+//     );
+// };
 // import { useVirtualizer } from "@tanstack/react-virtual"
 
-// import { getScrollbarSize, List, type RowComponentProps } from "react-window";
 // const  Example:FC<any> = ({ addresses }) =>{
 //     const [size] = useState(getScrollbarSize);
 //     return (
@@ -55,6 +138,35 @@ export const readJsonAPi = (contentPath: any) => axios.get(`/fast-api/read-json?
 //     );
 // }
 
+// import { List } from "react-window";
+// function Example({ names }: { names: string[] }) {
+//     return (
+//         <List
+//             rowComponent={RowComponent}
+//             rowCount={names.length}
+//             rowHeight={25}
+//             rowProps={{ names }}
+//         />
+//     );
+// }
+// import { type RowComponentProps } from "react-window";
+// function RowComponent({
+//     index,
+//     names,
+//     style
+// }: RowComponentProps<{
+//     names: string[];
+// }>) {
+//     return (
+//         <div className="flex items-center justify-between" style={style}>
+//             {names[index]}
+//             <div className="text-slate-500 text-xs">{`${index + 1} of ${names.length}`}</div>
+//         </div>
+//     );
+// }
+
+
+
 
 const ResultList = forwardRef<any, any>(({
     pipeline,
@@ -90,11 +202,15 @@ const ResultList = forwardRef<any, any>(({
     const [data, setData] = useState<any>([])
     const [groupedData, setGroupedData] = useState<any>()
     // const [content,setContent] = useState<any>()
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
     // const { eventSource } = useOutletContext<SSEContextType>();
     const { eventSourceRef, status, reconnect } = useSSEContext();
     const { modal, openModal, closeModal } = useModal();
-
+    const [tableRows, setTableRows] = useState<any[]>([])
+    const [tableColumns, setTableColumns] = useState<any[]>([])
+    const [tableRowLoading, setTableRowLoading] = useState<boolean>(true)
+    const [analysisResultId, setAnalysisResultId] = useState<any>()
+    const [rowNum, setRowNum] = useState<number>(200)
 
     useEffect(() => {
         if (!eventSourceRef) return;
@@ -197,6 +313,8 @@ const ResultList = forwardRef<any, any>(({
                 // console.log("currentAnalysisMethod",currentAnalysisMethod)
 
                 setCurrentAnalysisMethod(currentAnalysisMethod)
+
+
             }
         }
 
@@ -206,29 +324,61 @@ const ResultList = forwardRef<any, any>(({
     }, [JSON.stringify(params), JSON.stringify(analysisMethod), project, projectObj?.metadata_form])
 
     const onTabChange = (key: any) => {
-        setData(groupedData[key])
+        const data = groupedData[key]
+
+        setData(data)
         setActiveTabKey(key)
         const currentAnalysisMethod = getCurrentAnalysisMenthod(key)
         setCurrentAnalysisMethod(currentAnalysisMethod)
+
+        if (data.length > 0) {
+            setAnalysisResultId(data[0].analysis_result_id)
+            setTableColumns(data[0].columns)
+        } else {
+            setTableColumns([])
+            setAnalysisResultId(undefined)
+        }
+
     }
 
-    const getKeyMap = () => {
-        const analysisMethodMap = Object.fromEntries(analysisMethod.map((item: any) => [item.name, item.inputKey]));
-        // console.log(analysisMethodMap)
-        const result: any = {};
-        Object.entries(analysisMethodMap).forEach(([key, values]) => {
-            if (Array.isArray(values)) {
-                values.forEach((value: any) => {
-                    result[value] = key;
-                });
-            } else {
-                result[values] = key;
-            }
+    // const getKeyMap = () => {
+    //     const analysisMethodMap = Object.fromEntries(analysisMethod.map((item: any) => [item.name, item.inputKey]));
+    //     // console.log(analysisMethodMap)
+    //     const result: any = {};
+    //     Object.entries(analysisMethodMap).forEach(([key, values]) => {
+    //         if (Array.isArray(values)) {
+    //             values.forEach((value: any) => {
+    //                 result[value] = key;
+    //             });
+    //         } else {
+    //             result[values] = key;
+    //         }
 
 
-        });
-        return result
+    //     });
+    //     return result
+    // }
+
+    const loadTable = async () => {
+        if (analysisResultId) {
+            setTableRowLoading(true)
+            const resp = await axios.get(`/analysis-result/table/${analysisResultId}?row_num=${rowNum}`, {
+                timeout: 20000
+            })
+            setTableRows(resp.data)
+            setTableRowLoading(false)
+        }else{
+            setTableRows([])
+        }
     }
+
+    useEffect(() => {
+
+        loadTable()
+
+    }, [analysisResultId])
+
+
     const loadData = async ({ analysisMethodValues, params, componentIdList }: any) => {
         setLoading(true)
 
@@ -240,7 +390,7 @@ const ResultList = forwardRef<any, any>(({
                 project: project,
                 // analysis_method: analysisMethodValues,
                 component_ids: componentIdList,
-                rows: -1,
+                // rows: -1,
                 ...params
             })
             const groupedData = resp.data;
@@ -270,11 +420,21 @@ const ResultList = forwardRef<any, any>(({
             }
             setGroupedData(groupedData)
             // console.log("activeTabKey: ", activeTabKey)
+            let currentData;
             if (activeTabKey) {
-                setData(groupedData[activeTabKey] ? groupedData[activeTabKey] : [])
+                currentData = groupedData[activeTabKey] ? groupedData[activeTabKey] : []
+
             } else {
-                setData(groupedData[analysisMethod[0]?.component_id] ? groupedData[analysisMethod[0]?.component_id] : [])
+                currentData = groupedData[analysisMethod[0]?.component_id] ? groupedData[analysisMethod[0]?.component_id] : []
+                // setData(groupedData[analysisMethod[0]?.component_id] ? groupedData[analysisMethod[0]?.component_id] : [])
             }
+            setData(currentData)
+
+            if (currentData.length > 0) {
+                setAnalysisResultId(currentData[0].analysis_result_id)
+                setTableColumns(currentData[0].columns)
+            }
+
         } else {
             let resp: any = await axios.post(`/analysis-result/list-analysis-result`, {
                 project: project,
@@ -804,12 +964,55 @@ const ResultList = forwardRef<any, any>(({
 
             {currentAnalysisMethod?.file_type == "collected" ? <>
                 {/* {data && <>
-                    {data.map((item: any, index: any) => (<div key={index}>
+
+                    {data.map((item: any, index: any) => (<div key={index} >
+
                     </div>))}
 
                 </>} */}
+                <Tabs
+                    activeKey={analysisResultId}
+                    onChange={(key) => {
+                        // debugger
+                        const currentData = data.filter((it: any) => it.analysis_result_id == key)
+                        if (currentData.length > 0) {
+                            setTableColumns(currentData[0].columns)
+                        }
 
-                <Table
+                        setAnalysisResultId(key)
+                    }}
+                    tabBarExtraContent={
+                        <Flex gap={"small"}>
+
+                            <InputNumber size="small" value={rowNum} onChange={(val: any) => setRowNum(val)} />
+                            <Popconfirm title={`Are you sure you want to delete ${analysisResultId}?`} onConfirm={async () => {
+                                await deleteById(analysisResultId)
+                            }}>
+                                <DeleteFilled style={{ cursor: "pointer", color: "red" }} />
+                            </Popconfirm>
+                            <RedoOutlined style={{ cursor: "pointer" }} onClick={() => loadTable()} />
+
+                        </Flex>
+                    }
+                    items={data.map((item: any, index: any) => ({
+                        key: item.analysis_result_id,
+                        label: <Tooltip title={`${item?.content} ${item.analysis_result_id}`}>
+                            {`${item?.file_name} (${item?.sample_source})`}
+
+                        </Tooltip>
+                    }))}></Tabs>
+
+                <Spin spinning={tableRowLoading}>
+
+                    <div style={{ height: '50vh' }}>
+                        <Example rows={tableRows} columns={tableColumns} />
+                    </div>
+
+                </Spin>
+
+
+                {/* <App></App> */}
+                {/* <Table
                     // title={() => (
                     //     <Input.Search
                     //         size="small"
@@ -830,7 +1033,7 @@ const ResultList = forwardRef<any, any>(({
                     scroll={{ x: 'max-content', y: 55 * 5 }}
                     columns={columnsParamsALL ? columnsParamsALL : columns}
                     footer={() => `A total of ${filteredData && Array.isArray(filteredData) && filteredData.length} records`}
-                    dataSource={filteredData} />
+                    dataSource={filteredData} /> */}
             </> : <>
 
                 <Table
@@ -895,3 +1098,80 @@ export const AnalysisResultModal: FC<any> = ({ visible, onClose, params }) => {
         </Modal>
     </>
 }
+
+
+import { List } from "react-window";
+
+
+function Example({ rows, columns }: { rows: any[], columns: any[] }) {
+    return (
+        <>
+
+
+            {Array.isArray(columns) && <>
+                {columns.map((it: any, index: any) => (<span key={index}>
+                    <Tooltip title={it.analysis_result_id}>
+
+                        {it.columns_name}
+                    </Tooltip>
+                </span>))}
+            </>}
+            <List
+                rowComponent={RowComponent}
+                rowCount={rows?.length}
+                rowHeight={30}
+                rowProps={{ rows }}
+            />
+        </>
+
+    );
+}
+
+import { type RowComponentProps } from "react-window";
+import { AnyAaaaRecord, AnyCnameRecord } from "dns"
+function RowComponent({
+    index,
+    rows,
+    style
+}: RowComponentProps<{
+    rows: any[];
+}>) {
+    // const { rows } = data;
+    const row = rows[index];
+    const { token } = theme.useToken();
+
+    return (
+        <Flex
+            align="center"
+            style={{
+                ...style,
+                backgroundColor: index % 2 ? token.colorBgContainer : token.colorBgElevated,
+                borderBottom: `1px solid ${token.colorBorderSecondary}`,
+                padding: "0 8px",
+            }}
+            className="table-row"
+        >
+            {row.map((value: any, j: number) => (
+                <div
+                    key={j}
+                    style={{
+                        flex: 1,
+                        // overflow: "hidden",
+                        whiteSpace: "nowrap",
+                        textOverflow: "ellipsis",
+                        padding: "0 8px",
+                    }}
+                    title={String(value)}
+                >
+                    {String(value)}
+                </div>
+            ))}
+        </Flex>
+    );
+}
+// const App: FC<any> = () => {
+
+//     return <div style={{ height: '400px' }}>
+//         <Example names={Array.from({ length: 100000 }, (_, i) => `Item ${i + 1}`)} />
+//     </div>
+// }

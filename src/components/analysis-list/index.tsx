@@ -53,7 +53,7 @@ const ResultList = forwardRef<any, any>(({
     // const analysisResultRef = useRef<any>(null)
     const pipelineInfoRef = useRef<any>(null)
     // const [content,setContent] = useState<any>()
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
     const [currentAnalysis, setCurrentAnalysis] = useState<any>()
     const { containerURL } = useSelector((state: any) => state.user);
 

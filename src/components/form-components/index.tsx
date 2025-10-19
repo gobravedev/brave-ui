@@ -392,9 +392,9 @@ export const CollectedGroupSelectSampleButton: FC<any> = ({ label, name, rules, 
     useEffect(() => {
         if (selectCollectFile) {
             let columnsData = data.find((it: any) => it.id == selectCollectFile)
-            columnsData = columnsData.colnames.map((it: any) => ({
-                label: it.colnames_name,
-                value: it.colnames_name,
+            columnsData = columnsData.columns.map((it: any) => ({
+                label: it.columns_name,
+                value: it.columns_name,
                 ...it
             }))
             if (filter && customFilterValue) {

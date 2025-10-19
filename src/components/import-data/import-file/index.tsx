@@ -110,7 +110,7 @@ const ImportFile: FC<{ component_type: any, component_id: any, component_name: a
     };
 
     const getRequestParams = (values: any) => {
-        const { content, sample_name,file_name } = values
+        const { content, sample_name, file_name } = values
         if (isParseMode) {
             return parseData.map((item: any) => {
                 const { sample_name, ...rest } = item
@@ -118,7 +118,7 @@ const ImportFile: FC<{ component_type: any, component_id: any, component_name: a
                     ...values,
                     project: project,
                     component_id: component_id,
-                    file_type:file_type,
+                    file_type: file_type,
                     content: JSON.stringify(rest),
                     sample_name: sample_name,
                 }
@@ -128,8 +128,8 @@ const ImportFile: FC<{ component_type: any, component_id: any, component_name: a
                 ...values,
                 project: project,
                 component_id: component_id,
-                file_name:file_name,
-                file_type:file_type,
+                file_name: file_name,
+                file_type: file_type,
                 content: (file_type && file_type == "collected") ? content : JSON.stringify(content),
                 sample_name: sample_name,
             }]
@@ -256,9 +256,10 @@ const ImportFile: FC<{ component_type: any, component_id: any, component_name: a
                                 </Input>
                             </Form.Item>
                         }
-                      
+
                     </>
                 }
+
 
                 {inputForm ?
                     <>
