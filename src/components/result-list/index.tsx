@@ -367,7 +367,7 @@ const ResultList = forwardRef<any, any>(({
             })
             setTableRows(resp.data)
             setTableRowLoading(false)
-        }else{
+        } else {
             setTableRows([])
         }
     }
@@ -1005,7 +1005,8 @@ const ResultList = forwardRef<any, any>(({
                 <Spin spinning={tableRowLoading}>
 
                     <div style={{ height: '50vh' }}>
-                        <Example rows={tableRows} columns={tableColumns} />
+                        <Example rows={[tableColumns.map((it:any)=>it.columns_name),
+                            ...tableRows]}  />
                     </div>
 
                 </Spin>
@@ -1101,21 +1102,45 @@ export const AnalysisResultModal: FC<any> = ({ visible, onClose, params }) => {
 
 
 import { List } from "react-window";
+import { type RowComponentProps } from "react-window";
 
 
-function Example({ rows, columns }: { rows: any[], columns: any[] }) {
+function Example({ rows, columns }: { rows: any[], columns?: any[] }) {
+    const { token } = theme.useToken();
+
     return (
         <>
 
+            {columns && <Flex
+                align="center"
+                style={{
+                    background: token.colorBgContainerDisabled,
+                    borderBottom: `1px solid ${token.colorBorderSecondary}`,
+                    padding: "0 8px",
+                    fontWeight: 500,
+                }}
+            >
+                {Array.isArray(columns) && <>
+                    {columns.map((it: any, index: any) => (<span key={index}>
+                        <div
+                            key={index}
+                            style={{
+                                flex: "0 0 200px", // ✅ 与表头列宽一致
+                                whiteSpace: "nowrap",
+                                textOverflow: "ellipsis",
+                                overflow: "hidden",
+                                padding: "0 8px",
+                            }}
+                            title={it.columns_name}
+                        >
+                            <Tooltip title={it.analysis_result_id}>{it.columns_name}</Tooltip>
+                        </div>
+                    </span>))}
+                </>}
 
-            {Array.isArray(columns) && <>
-                {columns.map((it: any, index: any) => (<span key={index}>
-                    <Tooltip title={it.analysis_result_id}>
+            </Flex>
+            }
 
-                        {it.columns_name}
-                    </Tooltip>
-                </span>))}
-            </>}
             <List
                 rowComponent={RowComponent}
                 rowCount={rows?.length}
@@ -1127,16 +1152,12 @@ function Example({ rows, columns }: { rows: any[], columns: any[] }) {
     );
 }
 
-import { type RowComponentProps } from "react-window";
-import { AnyAaaaRecord, AnyCnameRecord } from "dns"
+
 function RowComponent({
     index,
     rows,
     style
-}: RowComponentProps<{
-    rows: any[];
-}>) {
-    // const { rows } = data;
+}: RowComponentProps<{ rows: any[] }>) {
     const row = rows[index];
     const { token } = theme.useToken();
 
@@ -1145,20 +1166,29 @@ function RowComponent({
             align="center"
             style={{
                 ...style,
-                backgroundColor: index % 2 ? token.colorBgContainer : token.colorBgElevated,
+                backgroundColor: index % 2 ? token.colorBgContainer : token.colorFillQuaternary,
                 borderBottom: `1px solid ${token.colorBorderSecondary}`,
                 padding: "0 8px",
+                fontSize: 13,
+                minWidth: "fit-content",
+                transition: "background-color 0.2s",
             }}
             className="table-row"
+            onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = token.colorFillTertiary;
+            }}
+            onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = index % 2 ? token.colorBgContainer : token.colorFillQuaternary;
+            }}
         >
             {row.map((value: any, j: number) => (
                 <div
                     key={j}
                     style={{
-                        flex: 1,
-                        // overflow: "hidden",
+                        flex: "0 0 200px", // ✅ 与表头列宽一致
                         whiteSpace: "nowrap",
                         textOverflow: "ellipsis",
+                        overflow: "hidden",
                         padding: "0 8px",
                     }}
                     title={String(value)}
@@ -1169,9 +1199,3 @@ function RowComponent({
         </Flex>
     );
 }
-// const App: FC<any> = () => {
-
-//     return <div style={{ height: '400px' }}>
-//         <Example names={Array.from({ length: 100000 }, (_, i) => `Item ${i + 1}`)} />
-//     </div>
-// }
