@@ -360,7 +360,7 @@ const ResultList = forwardRef<any, any>(({
     // }
 
     const loadTable = async () => {
-        if (analysisResultId) {
+        if (currentAnalysisMethod?.file_type == "collected"  && analysisResultId) {
             setTableRowLoading(true)
             const resp = await axios.get(`/analysis-result/table/${analysisResultId}?row_num=${rowNum}`, {
                 timeout: 20000
