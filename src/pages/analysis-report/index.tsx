@@ -136,19 +136,12 @@ const AnalysisReport: FC<any> = () => {
         {/* <div style={{ height: "1000px", background: "red" }}>
 
         </div> */}
-             <div >
+        <div >
 
         </div>
         <Row
-            ref={containerRef} style={isSticky ? {
-                overflowY: "hidden",
-                // marginTop: "1rem",
-                position: "sticky",
-                top: `${top}px`, // 吸顶距离
-                alignSelf: "flex-start", // 避免被stretch
-                height: `calc(100vh - ${top}px - 1rem )`, // 可选：固定高度，让内部滚动
-            } : {}}
-            gutter={[isSticky?16:0, 16]}>
+
+            gutter={[isSticky ? 16 : 0, 16]}>
 
             <Col lg={20} sm={20} xs={24} style={{
 
@@ -306,12 +299,23 @@ const AnalysisReport: FC<any> = () => {
 
 
             </Col>
-            <Col lg={4} sm={4} xs={24} style={{
+            <Col lg={4} sm={4} xs={24}
 
-                display: "flex",
-                flexDirection: "column", // 让 Card 撑满高度
-                height: "100%",          // 关键：继承 Row 的高度
-            }} >
+                ref={containerRef} style={isSticky ? {
+                    overflowY: "hidden",
+                    // marginTop: "1rem",
+                    position: "sticky",
+                    top: `${top}px`, // 吸顶距离
+                    alignSelf: "flex-start", // 避免被stretch
+                    height: `calc(100vh - ${top}px - 1rem )`, // 可选：固定高度，让内部滚动
+                } : {}}
+            // style={{
+
+            //     display: "flex",
+            //     flexDirection: "column", // 让 Card 撑满高度
+            //     height: "100%",          // 关键：继承 Row 的高度
+            // }}
+            >
 
                 <Card
                     loading={loading}

@@ -9,7 +9,7 @@ import PipelineInfo from "../pipeline-monitor"
 import { runAnalysisApi, stopAnalysisApi } from "@/api/analysis"
 import AnalysisResultView from "../analysis-result-view"
 import { useSSEContext } from "@/context/sse/useSSEContext"
-import { DownOutlined, LineChartOutlined } from '@ant-design/icons'
+import { DownOutlined, LineChartOutlined, RedoOutlined } from '@ant-design/icons'
 export const readHdfsAPi = (contentPath: any) => axios.get(`/api/read-hdfs?path=${contentPath}`)
 export const readJsonAPi = (contentPath: any) => axios.get(`/fast-api/read-json?path=${contentPath}`)
 import EditParams from '../edit-params'
@@ -553,7 +553,8 @@ const ResultList = forwardRef<any, any>(({
                             }}>输出解析模块({item.module})</Button>)}
                     </>}
                 </>} */}
-                    <Button size="small" color="cyan"  variant="solid"  onClick={loadData}>Refresh</Button>
+                    <RedoOutlined style={{ cursor: "pointer" }} onClick={loadData} />
+                    {/* <Button size="small" color="cyan"  variant="solid"  onClick={loadData}>Refresh</Button> */}
                 </Flex>
             } >
             {/* {software && <ul style={{ marginBottom: "0.5rem" }}>

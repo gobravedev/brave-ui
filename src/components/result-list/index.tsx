@@ -1,11 +1,11 @@
 import { useSSEContext } from "@/context/sse/useSSEContext"
 import { SSEContextType } from "@/type/sse"
 import { Venn } from "@ant-design/plots"
-import { Button, Card, Dropdown, Flex, Input, InputNumber, message, Modal, Popconfirm, Popover, Space, Spin, Table, Tabs, Tag, theme, Tooltip, Typography } from "antd"
+import { Button, Card, Dropdown, Empty, Flex, Input, InputNumber, message, Modal, Popconfirm, Popover, Space, Spin, Table, Tabs, Tag, theme, Tooltip, Typography } from "antd"
 import axios from "axios"
 import { FC, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { useOutletContext, useParams } from "react-router"
-import { DeleteFilled, DownOutlined, FileOutlined, QuestionCircleOutlined, RedoOutlined } from "@ant-design/icons"
+import { DeleteFilled, DeleteOutlined, DownOutlined, EditOutlined, FileOutlined, ImportOutlined, QuestionCircleOutlined, RedoOutlined } from "@ant-design/icons"
 import ImportData from "../import-data"
 import { useModal } from "@/hooks/useModal"
 export const readHdfsAPi = (contentPath: any) => axios.get(`/api/read-hdfs?path=${contentPath}`)
@@ -360,7 +360,7 @@ const ResultList = forwardRef<any, any>(({
     // }
 
     const loadTable = async () => {
-        if (currentAnalysisMethod?.file_type == "collected"  && analysisResultId) {
+        if (currentAnalysisMethod?.file_type == "collected" && analysisResultId) {
             setTableRowLoading(true)
             const resp = await axios.get(`/analysis-result/table/${analysisResultId}?row_num=${rowNum}`, {
                 timeout: 20000
@@ -369,6 +369,7 @@ const ResultList = forwardRef<any, any>(({
             setTableRowLoading(false)
         } else {
             setTableRows([])
+            setTableRowLoading(false)
         }
     }
 
@@ -433,6 +434,9 @@ const ResultList = forwardRef<any, any>(({
             if (currentData.length > 0) {
                 setAnalysisResultId(currentData[0].analysis_result_id)
                 setTableColumns(currentData[0].columns)
+            } else {
+                setTableColumns([])
+                setAnalysisResultId(undefined)
             }
 
         } else {
@@ -809,8 +813,17 @@ const ResultList = forwardRef<any, any>(({
                     {currentAnalysisMethod?.relation_id && <Popconfirm title="Are you sure to delete?" onConfirm={() => {
                         operatePipeline.deletePipelineRelation(currentAnalysisMethod.relation_id)
                     }}>
-                        <Button size="small" color="danger" variant="solid" >Delete {currentAnalysisMethod?.component_name}</Button>
+                        <Tooltip title={`Delete ${currentAnalysisMethod?.component_name}`}>
+                            <DeleteOutlined style={{ cursor: "pointer", color: "red" }} />
+                        </Tooltip>
+                        {/* <Button size="small" color="danger" variant="solid" ></Button> */}
                     </Popconfirm>}
+
+                    {/* <Popconfirm title={`Are you sure you want to delete ${analysisResultId}?`} onConfirm={async () => {
+                        await deleteById(analysisResultId)
+                    }}>
+                        
+                    </Popconfirm> */}
 
                     {operatePipeline?.openModal && <>
                         {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
@@ -824,18 +837,23 @@ const ResultList = forwardRef<any, any>(({
                         })
 
                     }}>Replace {item?.component_name}</Button> */}
-                        <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        {/* <Button size="small" color="cyan" variant="solid" >Import data </Button> */}
+                        <ImportOutlined style={{ cursor: "pointer" }} onClick={() => {
                             // operatePipeline.openModals("modalD", { ...currentAnalysisMethod, operatePipeline: operatePipeline })
                             openModal("importFile", { ...currentAnalysisMethod, operatePipeline: operatePipeline })
-                        }}>Import data </Button>
+                        }} />
                         {/* <Popconfirm title="是否计算MD5?" onConfirm={() => {
                                 console.log(currentAnalysisMethod.component_id)
                             }}>
                             <Button size="small" color="cyan" variant="solid" >计算MD5</Button>
                         </Popconfirm> */}
-                        <Button size="small" color="cyan" variant="solid" onClick={reload}>Refresh</Button>
+                        {/* <Button size="small" color="cyan" variant="solid" onClick={reload}>Refresh</Button> */}
 
-                        {(rest.component_type == "software" || rest.component_type == "file") && <>
+
+                        <RedoOutlined style={{ cursor: "pointer" }} onClick={reload} />
+
+
+                        {(rest.component_type == "software" || rest.component_type == "file" || rest.component_type == "script") && <>
                             <Dropdown menu={{
                                 items: [
                                     // {
@@ -970,71 +988,64 @@ const ResultList = forwardRef<any, any>(({
                     </div>))}
 
                 </>} */}
-                <Tabs
-                    activeKey={analysisResultId}
-                    onChange={(key) => {
-                        // debugger
-                        const currentData = data.filter((it: any) => it.analysis_result_id == key)
-                        if (currentData.length > 0) {
-                            setTableColumns(currentData[0].columns)
-                        }
 
-                        setAnalysisResultId(key)
-                    }}
-                    tabBarExtraContent={
-                        <Flex gap={"small"}>
-
-                            <InputNumber size="small" value={rowNum} onChange={(val: any) => setRowNum(val)} />
-                            <Popconfirm title={`Are you sure you want to delete ${analysisResultId}?`} onConfirm={async () => {
-                                await deleteById(analysisResultId)
-                            }}>
-                                <DeleteFilled style={{ cursor: "pointer", color: "red" }} />
-                            </Popconfirm>
-                            <RedoOutlined style={{ cursor: "pointer" }} onClick={() => loadTable()} />
-
-                        </Flex>
-                    }
-                    items={data.map((item: any, index: any) => ({
-                        key: item.analysis_result_id,
-                        label: <Tooltip title={`${item?.content} ${item.analysis_result_id}`}>
-                            {`${item?.file_name} (${item?.sample_source})`}
-
-                        </Tooltip>
-                    }))}></Tabs>
 
                 <Spin spinning={tableRowLoading}>
+                    {(Array.isArray(tableRows) && tableRows.length == 0) ? <Empty description="No Data" /> :
+                        <>
 
-                    <div style={{ height: '50vh' }}>
-                        <Example rows={[tableColumns.map((it:any)=>it.columns_name),
-                            ...tableRows]}  />
-                    </div>
+                            <Tabs
+                                activeKey={analysisResultId}
+                                onChange={(key) => {
+                                    // debugger
+                                    const currentData = data.filter((it: any) => it.analysis_result_id == key)
+                                    if (currentData.length > 0) {
+                                        setTableColumns(currentData[0].columns)
+                                    }
+
+                                    setAnalysisResultId(key)
+                                }}
+                                tabBarExtraContent={
+                                    <Flex gap={"small"}>
+
+                                        <InputNumber size="small" value={rowNum} onChange={(val: any) => setRowNum(val)} />
+
+                                        <EditOutlined style={{ cursor: "pointer" }} 
+                                        onClick={()=>{
+                                            console.log("analysisResultId",analysisResultId)
+                                            openModal("analysisResultEdit",{analysis_result_id:analysisResultId})
+                                        }} />
+                                        
+                                        <Popconfirm title={`Are you sure you want to delete ${analysisResultId}?`} onConfirm={async () => {
+                                            await deleteById(analysisResultId)
+                                        }}>
+                                            <Tooltip title={`Delete current tab ${analysisResultId}`}>
+                                                <DeleteOutlined style={{ cursor: "pointer", color: "red" }} />
+                                            </Tooltip>
+                                        </Popconfirm>
+                                        <RedoOutlined style={{ cursor: "pointer" }} onClick={() => loadTable()} />
+
+                                    </Flex>
+                                }
+                                items={data.map((item: any, index: any) => ({
+                                    key: item.analysis_result_id,
+                                    label: <Tooltip title={`${item?.content} ${item.analysis_result_id}`}>
+                                        {`${item?.file_name} (${item?.sample_source})`}
+
+                                    </Tooltip>
+                                }))}></Tabs>
+
+                            <div style={{ height: '50vh' }}>
+                                <Example rows={[tableColumns?tableColumns:[].map((it: any) => it.columns_name),
+                                ...tableRows]} />
+                            </div>
+
+                        </>}
+
 
                 </Spin>
 
 
-                {/* <App></App> */}
-                {/* <Table
-                    // title={() => (
-                    //     <Input.Search
-                    //         size="small"
-                    //         placeholder="搜索结果..."
-                    //         allowClear
-                    //         enterButton
-                    //         value={searchText}
-                    //         onChange={(e: any) => setSearchText(e.target.value)}
-                    //         style={{ width: 300 }}
-                    //     />
-                    // )}
-                    rowKey={(it: any) => it.id}
-                    size="small"
-                    // bordered
-                    // pagination={undefined}
-                    pagination={{ pageSize: 10 }}
-                    loading={loading}
-                    scroll={{ x: 'max-content', y: 55 * 5 }}
-                    columns={columnsParamsALL ? columnsParamsALL : columns}
-                    footer={() => `A total of ${filteredData && Array.isArray(filteredData) && filteredData.length} records`}
-                    dataSource={filteredData} /> */}
             </> : <>
 
                 <Table
@@ -1083,9 +1094,20 @@ const ResultList = forwardRef<any, any>(({
             callback={reload}
             onClose={closeModal}></ImportData>
 
+        <AnalysisResultEdit
+            visible={modal.visible && modal.key == "analysisResultEdit"}
+            params={modal.params}
+            callback={reload}
+            onClose={closeModal}
+        ></AnalysisResultEdit>
+
     </>
 
 })
+
+
+
+
 
 export default ResultList
 
@@ -1103,6 +1125,7 @@ export const AnalysisResultModal: FC<any> = ({ visible, onClose, params }) => {
 
 import { List } from "react-window";
 import { type RowComponentProps } from "react-window";
+import AnalysisResultEdit from "../analysis-result-edit"
 
 
 function Example({ rows, columns }: { rows: any[], columns?: any[] }) {
