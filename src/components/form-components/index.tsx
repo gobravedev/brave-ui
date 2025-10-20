@@ -1,6 +1,7 @@
 import { Button, ColorPicker, Flex, Form, Input, InputNumber, Select, Switch } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import axios from "axios";
+import { A } from "ollama/dist/shared/ollama.d792a03f.mjs";
 import { Component, FC, useEffect, useState, memo } from "react";
 import { data, useOutletContext } from "react-router";
 
@@ -435,15 +436,15 @@ export const CollectedGroupSelectSampleButton: FC<any> = ({ label, name, rules, 
 
     }, [data, selectCollectFile, groupField, customFilterValue])
 
-    useEffect(() => {
-        if (selectCollectFile) {
-            // form.setFieldsValue(requestParam)
-            setTimeout(() => {
-                form.setFieldsValue(requestParam)
+    // useEffect(() => {
+    //     if (selectCollectFile) {
+    //         // form.setFieldsValue(requestParam)
+    //         setTimeout(() => {
+    //             form.setFieldsValue(requestParam)
 
-            }, 50);
-        }
-    }, [selectCollectFile])
+    //         }, 50);
+    //     }
+    // }, [selectCollectFile])
     return <>
         {/* <pre>
             {JSON.stringify(data, null, 2)}
@@ -619,48 +620,24 @@ const GroupSelectSample: FC<any> = ({ value, onChange, sampleGroup, watch, sampl
     // const [groupedLabel,setGroupedLabel] = useState<any>([])
     // const [grouped, setGrouped] = useState<any>({})
     // const [groupedKey, setGroupedKey] = useState<any>({})
-    const [group, setGroup] = useState<any>()
+    // const [group, setGroup] = useState<any>()
 
     const form = Form.useFormInstance();
     const group_ = Form.useWatch(watch, form);
     useEffect(() => {
-        setGroup(group_)
-    }, [group_])
-    //
-    //  const [optionsValues,setOptionsValues] = useState<any>(value)
-    // useEffect(() => {
-    //     const grouped = sampleGroup.reduce((acc: any, item: any) => {
-    //         const key = item[group_field];
-    //         if (!acc[key]) {
-    //             acc[key] = [];
-    //         }
-    //         acc[key].push(item.value);
-    //         return acc;
-    //     }, {});
-    //     setGrouped(grouped)
-    //     // const groupedArray = Object.entries(grouped).map(([key, value])=>{
-    //     //     return {
-    //     //         label:key,
-    //     //         value:key
+        // setGroup(group_)
+        if (group_ && (Array.isArray(group_) &&  group_.length > 0) ) {
+            // console.log("group_", group_)
 
-    //     //     }
-    //     // });
-    //     // setGroupedLabel(groupedArray)
-    //     // const options = sampleGroup.map((it: any) => {
-    //     //     return {
-    //     //         label: `${it.sample_key}(${it[group_field]})`,
-    //     //         value: it.sample_key
-    //     //     }
-    //     // })
-    //     // setOptions(options)
-    // }, [sampleGroup, group_field])
-    // const onSelectChange = (value: any) => {
-    //     // const values = sampleGroup[value]
-    //     // setOptionsValues(values)
-    //     onChange(value)
-    //     // console.log(group)
-    //     console.log(value)
-    // }
+            // console.log(group)
+            onSelectGroup(group_)
+        }
+    }, [group_])
+    // useEffect(() => {
+
+    //     // onSelectGroup(group)
+    // }, [group])
+
     const onSelectGroup = (keys: any) => {
         const merged = Object.entries(sampleGrouped ? sampleGrouped : {})
             .filter(([key]) => keys.includes(key)) // 只保留特定 key
@@ -672,13 +649,7 @@ const GroupSelectSample: FC<any> = ({ value, onChange, sampleGroup, watch, sampl
         // setGroupedKey(key)
     }
 
-    useEffect(() => {
-        if (group) {
-            // console.log(group)
-            onSelectGroup(group)
-        }
-        // onSelectGroup(group)
-    }, [group])
+
     return <>
         {/* {watch}{group} */}
         <Select showSearch filterOption={(input: any, option: any) =>
