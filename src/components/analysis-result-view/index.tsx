@@ -509,7 +509,8 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
     const buildRequest = (values: any) => {
         const requestParam = {
             ...analsyisResult?.request_param,
-            ...values
+            ...values,
+            project: project
         }
         return requestParam
 

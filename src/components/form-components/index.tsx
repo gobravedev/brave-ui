@@ -632,7 +632,7 @@ const GroupSelectSample: FC<any> = ({ value, onChange, sampleGroup, watch, sampl
             // console.log(group)
             onSelectGroup(group_)
         }
-    }, [group_])
+    }, [group_,sampleGrouped])
     // useEffect(() => {
 
     //     // onSelectGroup(group)
@@ -652,6 +652,7 @@ const GroupSelectSample: FC<any> = ({ value, onChange, sampleGroup, watch, sampl
 
     return <>
         {/* {watch}{group} */}
+        {/* {JSON.stringify(sampleGrouped)} */}
         <Select showSearch filterOption={(input: any, option: any) =>
             (option?.label ?? '').toLowerCase().includes(input.toLowerCase())} mode={"multiple"} value={value} onChange={onChange} options={sampleGroup}></Select>
         {value && <>A total of {value.length} samples were selected</>}
