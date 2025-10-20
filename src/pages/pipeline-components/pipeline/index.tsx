@@ -28,6 +28,7 @@ import FormProject from "@/components/form-project"
 import { useSelector } from "react-redux"
 import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 import { useStickyTop } from "@/hooks/useStickyTop"
+import Markdown from "@/components/markdown"
 const Pipeline: FC<any> = ({ }) => {
     console.log("Pipeline")
     const { component_type, component_id: name } = useParams()
@@ -336,6 +337,12 @@ const Pipeline: FC<any> = ({ }) => {
                         {pipeline?.tags && Array.isArray(pipeline.tags) && pipeline.tags.map((tag: any, index: any) => (
                             <Tag style={{ marginTop: "0.5rem" }} key={index} color={colors[index]}>{tag}</Tag>
                         ))}
+
+                        {/* {JSON.stringify(pipeline.description)} */}
+                        {pipeline?.description && <>
+                        
+                            <Markdown data={pipeline?.description}></Markdown>
+                        </>}
 
                     </Card>
                 </Col>

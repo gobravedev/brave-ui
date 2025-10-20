@@ -815,6 +815,8 @@ const AnalysisResultDisplay: FC<any> = ({ analsyisResult, loading }) => {
     const { baseURL } = useSelector((state: any) => state.user)
     const { projectObj } = useSelector((state: any) => state.user);
 
+    const { modal, openModal, closeModal } = useModal()
+
     return <div >
         {analsyisResult && <>
 
@@ -836,6 +838,24 @@ const AnalysisResultDisplay: FC<any> = ({ analsyisResult, loading }) => {
             </div>}
 
             <div style={{ padding: "1rem" }}>
+                {analsyisResult.htmls && Array.isArray(analsyisResult.htmls) && <>
+                    {analsyisResult.htmls.map((item: any, index: any) => (
+                        <div key={index}>
+
+                            {/* <iframe width={"100%"} height={"1000px"} src={`${baseURL}${item.url}`}></iframe> */}
+                            <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                openModal("HtmlPreview", { data: item.url })
+                            }}>Open {item.filename}</Button>
+                            &nbsp;
+                            <UrlComp url={item.url} filename={item.filename} baseURL={baseURL}></UrlComp>
+
+                        </div>
+
+                    ))}
+                </>}
+            </div>
+
+            <div style={{ padding: "1rem" }}>
                 {analsyisResult.tables && Array.isArray(analsyisResult.tables) && <>
                     {analsyisResult.tables.map((item: any, index: any) => (
                         <ComponentsRender projectObj={projectObj} key={index} {...item} baseURL={baseURL}></ComponentsRender>
@@ -847,8 +867,22 @@ const AnalysisResultDisplay: FC<any> = ({ analsyisResult, loading }) => {
 
         </>}
 
-
+        <HtmlPreview
+            baseURL={baseURL}
+            visible={modal.visible && modal.key == "HtmlPreview"}
+            onClose={closeModal}
+            params={modal.params}
+        ></HtmlPreview>
     </div>
 }
 export default AnalysisResultView
 
+const HtmlPreview: FC<any> = ({ visible, onClose, params, baseURL }) => {
+    return <Modal open={visible} onCancel={onClose} onClose={onClose} width={"80%"} title={"HTML Preview"} footer={null}>
+        {params?.data && <>
+            <iframe src={`${baseURL}${params?.data}`} width={"100%"} style={{ height: "80vh", border: "none" }}>
+            </iframe>
+        </>}
+
+    </Modal>
+}
