@@ -59,7 +59,10 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
         // console.log([...resp.data.content?.formJson || [],...resp.data?.inputFormJson || []])
         // console.log(resp.data.content?.formJson)
         // console.log(resp.data?.inputFormJson)
+        // setTimeout(() => {
+        //     form.setFieldsValue(resp.data.request_param)
 
+        // }, 50);
         setLoading(false)
 
 
@@ -82,21 +85,22 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
     // }, [form])
     return <>
 
-        <Drawer size="default" loading={loading} title={
-            <>
+        <Drawer
 
-                {data && <>
-                    <Tag>{data?.component_name}</Tag>
-                    <Tag>{data?.analysis_name}</Tag>
-                    <Tag>{String(data?.analysis_id).slice(0, 8)}</Tag>
-                </>}
+            size="default" loading={loading} title={
+                <>
 
-            </>
-        } width={"50%"} open={visible} onClose={onClose} >
+                    {data && <>
+                        <Tag>{data?.component_name}</Tag>
+                        <Tag>{data?.analysis_name}</Tag>
+                        <Tag>{String(data?.analysis_id).slice(0, 8)}</Tag>
+                    </>}
+
+                </>
+            } width={"50%"} open={visible} onClose={onClose} >
             {/* {JSON.stringify(addedProject)} */}
 
             {data && <>
-
 
                 <CreateOrUpdateParsms
                     form={form}
@@ -211,7 +215,7 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, for
                         forceRender: true,
                         children: <>
 
-                            <FormJsonComp formJson={[...dbFormJson]} dataMap={dataMap} ></FormJsonComp>
+                            <FormJsonComp requestParam={requestParam}  formJson={[...dbFormJson]} dataMap={dataMap} ></FormJsonComp>
                             {databases && <BioDatabaseForm openModal={() => {
                                 openModals("bioDatabases", databases)
                             }} formJson={databases}></BioDatabaseForm>}

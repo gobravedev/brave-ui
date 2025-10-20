@@ -1,11 +1,11 @@
 import { useSSEContext } from "@/context/sse/useSSEContext"
 import { SSEContextType } from "@/type/sse"
 import { Venn } from "@ant-design/plots"
-import { Button, Card, Dropdown, Empty, Flex, Input, InputNumber, message, Modal, Popconfirm, Popover, Space, Spin, Table, Tabs, Tag, theme, Tooltip, Typography } from "antd"
+import { Button, Card, Dropdown, Empty, Flex, GetProp, Input, InputNumber, Modal, Popconfirm, Popover, Space, Spin, Table, Tabs, Tag, theme, Tooltip, Typography, Upload, UploadFile, UploadProps } from "antd"
 import axios from "axios"
 import { FC, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { useOutletContext, useParams } from "react-router"
-import { DeleteFilled, DeleteOutlined, DownOutlined, EditOutlined, FileOutlined, ImportOutlined, QuestionCircleOutlined, RedoOutlined } from "@ant-design/icons"
+import { DeleteFilled, DeleteOutlined, DownloadOutlined, DownOutlined, EditOutlined, FileOutlined, ImportOutlined, InboxOutlined, QuestionCircleOutlined, RedoOutlined, UploadOutlined } from "@ant-design/icons"
 import ImportData from "../import-data"
 import { useModal } from "@/hooks/useModal"
 export const readHdfsAPi = (contentPath: any) => axios.get(`/api/read-hdfs?path=${contentPath}`)
@@ -198,7 +198,7 @@ const ResultList = forwardRef<any, any>(({
     }))
 
     const { project, projectObj } = useOutletContext<any>()
-
+    const message = useGlobalMessage()
     const [data, setData] = useState<any>([])
     const [groupedData, setGroupedData] = useState<any>()
     // const [content,setContent] = useState<any>()
@@ -207,11 +207,18 @@ const ResultList = forwardRef<any, any>(({
     const { eventSourceRef, status, reconnect } = useSSEContext();
     const { modal, openModal, closeModal } = useModal();
     const [tableRows, setTableRows] = useState<any[]>([])
-    const [tableColumns, setTableColumns] = useState<any[]>([])
+    const [tableRowsInfo, setTableRowsInfo] = useState<any>({})
+
+    const [tableColumns, setTableColumns_] = useState<any[]>([])
     const [tableRowLoading, setTableRowLoading] = useState<boolean>(true)
     const [analysisResultId, setAnalysisResultId] = useState<any>()
     const [rowNum, setRowNum] = useState<number>(200)
+    const { baseURL } = useSelector((state: any) => state.user)
 
+    const setTableColumns = (columns: any[]) => {
+        const columns_ = columns.map((it: any) => it.columns_name)
+        setTableColumns_([])
+    }
     useEffect(() => {
         if (!eventSourceRef) return;
 
@@ -365,7 +372,11 @@ const ResultList = forwardRef<any, any>(({
             const resp = await axios.get(`/analysis-result/table/${analysisResultId}?row_num=${rowNum}`, {
                 timeout: 20000
             })
-            setTableRows(resp.data)
+            setTableRows(resp.data.tables)
+            setTableRowsInfo({
+                "nrow": resp.data.nrow,
+                "ncol": resp.data.ncol
+            })
             setTableRowLoading(false)
         } else {
             setTableRows([])
@@ -394,6 +405,7 @@ const ResultList = forwardRef<any, any>(({
                 // rows: -1,
                 ...params
             })
+            setLoading(false)
             const groupedData = resp.data;
             // const groupedData = resp.data.reduce((acc: any, item: any) => {
             //     const key = item.component_id;
@@ -438,7 +450,7 @@ const ResultList = forwardRef<any, any>(({
                 setTableColumns([])
                 setAnalysisResultId(undefined)
             }
-
+            
         } else {
             let resp: any = await axios.post(`/analysis-result/list-analysis-result`, {
                 project: project,
@@ -759,15 +771,123 @@ const ResultList = forwardRef<any, any>(({
         },
     ]
     const [searchText, setSearchText] = useState("");
-    const filteredData = useMemo(() => {
-        if (!searchText) return data;
-        return data.filter((item: any) =>
-            Object.values(item).some((val) =>
-                String(val).toLowerCase().includes(searchText.toLowerCase())
-            )
-        );
-    }, [data, searchText]);
+    let filteredData: any = useMemo(() => {
+        if (!searchText) {
+            if (currentAnalysisMethod?.file_type == "collected") {
+                return tableRows
+            } else {
+                return data
+            }
+        }
+        if (currentAnalysisMethod?.file_type == "collected") {
+            return tableRows.filter((item: any) =>
+                Object.values(item).some((val) =>
+                    String(val).toLowerCase().includes(searchText.toLowerCase())
+                )
+            );
+        } else {
+            return data.filter((item: any) =>
+                Object.values(item).some((val) =>
+                    String(val).toLowerCase().includes(searchText.toLowerCase())
+                )
+            );
+        }
 
+    }, [data, tableRows, searchText]);
+
+    // if (currentAnalysisMethod?.file_type == "collected") {
+    //     filteredTableRows = useMemo(() => {
+    //         if (!searchText) return data;
+    //         return tableRows.filter((item: any) =>
+    //             Object.values(item).some((val) =>
+    //                 String(val).toLowerCase().includes(searchText.toLowerCase())
+    //             )
+    //         );
+    //     }, [data, searchText]);
+    // } else {
+
+    // }
+
+
+
+
+
+    const [fileList, setFileList] = useState<UploadFile[]>([]);
+    const [uploading, setUploading] = useState(false);
+    // const [file, setFile] = useState<any>();
+
+    const props: UploadProps = {
+        onRemove: (file) => {
+            const index = fileList.indexOf(file);
+            const newFileList = fileList.slice();
+            newFileList.splice(index, 1);
+            setFileList(newFileList);
+        },
+        beforeUpload: (file) => {
+            // setFileList([...fileList, file]);
+            // console.log("file", file)
+            handleUpload(file);
+            // setFile(file)
+            return false;
+        },
+        fileList,
+        // onChange(info) {
+        //     console.log("onChange: ", info.fileList);
+        //     // if (info.fileList.length > 0) {
+        //     //     handleUpload(info.fileList[0] as FileType);
+        //     // }
+
+        // }
+    };
+    type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
+
+    const handleUpload = async (file: any) => {
+        setUploading(true);
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('project', project);
+        // formData.append('file_type', currentAnalysisMethod?.file_type)
+        formData.append('component_id', currentAnalysisMethod?.component_id)
+        // console.log("formData", formData)f
+        for (let [key, value] of formData.entries()) {
+            console.log(key, value);
+        }
+        // /analysis-result/upload
+        try {
+            const resp = await axios.post('/analysis-result/upload', formData, {
+                timeout: 60000
+            })
+            message.success(`${resp.data.file_path} file uploaded successfully`);
+        } catch (error) {
+
+        }
+
+        setUploading(false);
+        reload()
+
+
+
+        // fileList.forEach((file) => {
+        //     formData.append('files[]', file as FileType);
+        // });
+        // setUploading(true);
+        // You can use any AJAX library you like
+        // fetch('https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload', {
+        //     method: 'POST',
+        //     body: formData,
+        // })
+        //     .then((res) => res.json())
+        //     .then(() => {
+        //         setFileList([]);
+        //         message.success('upload successfully.');
+        //     })
+        //     .catch(() => {
+        //         message.error('upload failed.');
+        //     })
+        //     .finally(() => {
+        //         setUploading(false);
+        //     });
+    };
 
     return <>
         <Card size="small"
@@ -810,6 +930,20 @@ const ResultList = forwardRef<any, any>(({
                         onChange={(e: any) => setSearchText(e.target.value)}
                         style={{ width: 300 }}
                     />
+                    <Popconfirm title="Confirm adding example?" onConfirm={async () => {
+                        await axios.post(`/analysis-result/add-example/${currentAnalysisMethod.component_id}?project=${project}`)
+                        message.success("Example added successfully!")
+                        reload()
+                    }}>
+                        <a>Example</a>
+                    </Popconfirm>
+
+                    <a onClick={async () => {
+                        const resp = await axios.get(`/analysis-result/download-example/${currentAnalysisMethod.component_id}`)
+                        window.open(`${baseURL}${resp.data.example_url}`, '_blank');
+
+                    }}>Example <DownloadOutlined /></a>
+
                     {currentAnalysisMethod?.relation_id && <Popconfirm title="Are you sure to delete?" onConfirm={() => {
                         operatePipeline.deletePipelineRelation(currentAnalysisMethod.relation_id)
                     }}>
@@ -990,8 +1124,26 @@ const ResultList = forwardRef<any, any>(({
                 </>} */}
 
 
-                <Spin spinning={tableRowLoading}>
-                    {(Array.isArray(tableRows) && tableRows.length == 0) ? <Empty description="No Data" /> :
+                <Spin spinning={tableRowLoading} tip={"Loading table data..."}>
+
+
+                    {(Array.isArray(tableRows) && tableRows.length == 0) ? <>
+
+                        <Spin spinning={uploading} tip={"Uploading..."}>
+                            <Dragger {...props} maxCount={1} >
+                                <p className="ant-upload-drag-icon">
+                                    <InboxOutlined />
+                                </p>
+                                <p className="ant-upload-text">Click or drag file to this area to upload</p>
+                                {/* <p className="ant-upload-hint">
+                                Support for a single or bulk upload. Strictly prohibited from uploading company data or other
+                                banned files.
+                            </p> */}
+                            </Dragger>
+                        </Spin>
+
+                        {/* <Button onClick={handleUpload}>aa</Button> */}
+                    </> :
                         <>
 
                             <Tabs
@@ -1010,12 +1162,28 @@ const ResultList = forwardRef<any, any>(({
 
                                         <InputNumber size="small" value={rowNum} onChange={(val: any) => setRowNum(val)} />
 
-                                        <EditOutlined style={{ cursor: "pointer" }} 
-                                        onClick={()=>{
-                                            console.log("analysisResultId",analysisResultId)
-                                            openModal("analysisResultEdit",{analysis_result_id:analysisResultId})
+                                        <Upload {...props}>
+                                            <Tooltip title="Upload new file">
+                                                <UploadOutlined style={{ cursor: "pointer" }} />
+                                            </Tooltip>
+
+                                        </Upload>
+
+                                        <DownloadOutlined style={{ cursor: "pointer" }} onClick={() => {
+                                            const currentData = data.find((it: any) => it.analysis_result_id == analysisResultId)
+                                            console.log("currentData", currentData)
+                                            window.open(`${baseURL}${currentData.url}`, '_blank');
+                                            //  if(currentData.length){
+
+                                            //  }
+
                                         }} />
-                                        
+                                        <EditOutlined style={{ cursor: "pointer" }}
+                                            onClick={() => {
+                                                console.log("analysisResultId", analysisResultId)
+                                                openModal("analysisResultEdit", { analysis_result_id: analysisResultId })
+                                            }} />
+
                                         <Popconfirm title={`Are you sure you want to delete ${analysisResultId}?`} onConfirm={async () => {
                                             await deleteById(analysisResultId)
                                         }}>
@@ -1030,14 +1198,14 @@ const ResultList = forwardRef<any, any>(({
                                 items={data.map((item: any, index: any) => ({
                                     key: item.analysis_result_id,
                                     label: <Tooltip title={`${item?.content} ${item.analysis_result_id}`}>
-                                        {`${item?.file_name} (${item?.sample_source})`}
+                                        {`${item?.file_name}`}
 
                                     </Tooltip>
                                 }))}></Tabs>
 
                             <div style={{ height: '50vh' }}>
-                                <Example rows={[tableColumns?tableColumns:[].map((it: any) => it.columns_name),
-                                ...tableRows]} />
+                                <Example shape={tableRowsInfo} rows={[tableColumns,
+                                    ...filteredData]} />
                             </div>
 
                         </>}
@@ -1126,9 +1294,13 @@ export const AnalysisResultModal: FC<any> = ({ visible, onClose, params }) => {
 import { List } from "react-window";
 import { type RowComponentProps } from "react-window";
 import AnalysisResultEdit from "../analysis-result-edit"
+import Dragger from "antd/es/upload/Dragger"
+import { useGlobalMessage } from "@/hooks/useGlobalMessage"
+import { el } from "@faker-js/faker"
+import { useSelector } from "react-redux"
 
 
-function Example({ rows, columns }: { rows: any[], columns?: any[] }) {
+function Example({ rows, shape, columns }: { rows: any[], shape: any, columns?: any[] }) {
     const { token } = theme.useToken();
 
     return (
@@ -1170,6 +1342,10 @@ function Example({ rows, columns }: { rows: any[], columns?: any[] }) {
                 rowHeight={30}
                 rowProps={{ rows }}
             />
+            <Flex justify="end" gap="small" >
+                <Tag color="default">Rows: {shape?.nrow}</Tag>
+                <Tag color="default">Columns: {shape?.ncol}</Tag>
+            </Flex>
         </>
 
     );

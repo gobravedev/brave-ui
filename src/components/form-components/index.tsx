@@ -26,7 +26,7 @@ const ComponentsRender = ({ type, dataMap, constDataMap, componentMap, inputAnal
     let data: any = []
     if (data_) {
         data = data_
-        
+
         //下游分析从数据库加载其它数据
     } else if (inputAnalysisMethod) {
 
@@ -77,7 +77,7 @@ const ComponentsRender = ({ type, dataMap, constDataMap, componentMap, inputAnal
     return <Component {...crest}  {...rest} data={data} name={name} />;
 };
 
-const FormJsonComp: FC<any> = memo(({ formJson, dataMap }) => {
+const FormJsonComp: FC<any> = memo(({ formJson, dataMap, requestParam }) => {
     if (!formJson) return null
     const { projectObj } = useOutletContext<any>()
 
@@ -173,10 +173,10 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap }) => {
         {/* {JSON.stringify(dataMap)} */}
 
         {formJson.map((it: any, index: any) => (
-          <>
-          {/* {JSON.stringify(it)} */}
-            <ComponentsRender key={index} {...it} dataMap={dataMap} componentMap={componentMap} constDataMap={constDataMap}></ComponentsRender>
-          </>
+            <>
+                {/* {JSON.stringify(it)} */}
+                <ComponentsRender requestParam={requestParam} key={index} {...it} dataMap={dataMap} componentMap={componentMap} constDataMap={constDataMap}></ComponentsRender>
+            </>
         ))}
 
     </>
@@ -344,7 +344,7 @@ export const BaseSelect: FC<any> = ({ label, name, data, initialValue, rules, ..
 }
 
 
-export const CollectedGroupSelectSampleButton: FC<any> = ({ label, name, rules, data, filter, group, groupField: groupField_ }) => {
+export const CollectedGroupSelectSampleButton: FC<any> = ({ label, name, rules, data, filter, group, groupField: groupField_, requestParam }) => {
     const [sampleGrouped, setSampleGrouped] = useState<any>()
     const [options, setOptions] = useState<any>([])
     const [collectFiles, setCollectFiles] = useState<any>([])
@@ -382,7 +382,7 @@ export const CollectedGroupSelectSampleButton: FC<any> = ({ label, name, rules, 
     useEffect(() => {
         if (data && Array.isArray(data)) {
             const collectedFiles = data.map((it: any) => ({
-                label: `${it.file_name}(${it.sample_source})`,
+                label: `${it.file_name}`,
                 value: it.id,
             }))
             setCollectFiles(collectedFiles)
@@ -392,56 +392,64 @@ export const CollectedGroupSelectSampleButton: FC<any> = ({ label, name, rules, 
     useEffect(() => {
         if (selectCollectFile) {
             let columnsData = data.find((it: any) => it.id == selectCollectFile)
-            columnsData = columnsData.columns.map((it: any) => ({
-                label: it.columns_name,
-                value: it.columns_name,
-                ...it
-            }))
-            if (filter && customFilterValue) {
-                columnsData = filter.reduce((result: any, filterHandle: any) => {
-                    return result.filter((item: any) => {
-                        return filterHandle.method(item) === customFilterValue[filterHandle.name];
-                    });
-                }, columnsData);
+            // debugger
+            if (columnsData) {
+                columnsData = columnsData.columns.map((it: any) => ({
+                    label: it.columns_name,
+                    value: it.columns_name,
+                    ...it
+                }))
+                if (filter && customFilterValue) {
+                    columnsData = filter.reduce((result: any, filterHandle: any) => {
+                        return result.filter((item: any) => {
+                            return filterHandle.method(item) === customFilterValue[filterHandle.name];
+                        });
+                    }, columnsData);
 
-                columnsData = columnsData.map((it: any) => {
-                    const { label, id, value, ...rest } = it
-                    return {
-                        label: `${it.label}(${filter[0].method(it)})`,
-                        value: it.value,
-                        ...rest
+                    columnsData = columnsData.map((it: any) => {
+                        const { label, id, value, ...rest } = it
+                        return {
+                            label: `${it.label}(${filter[0].method(it)})`,
+                            value: it.value,
+                            ...rest
 
-                    }
-                })
+                        }
+                    })
 
-            }
-            // console.log(data)
-            // console.log(data)
-            if (columnsData && groupField_) {
-                // console.log(data)
-                calculateGroup(columnsData, groupField_)
-            } else {
-                if (columnsData && groupField) {
-                    calculateGroup(columnsData, groupField)
                 }
+                // console.log(data)
+                // console.log(data)
+                if (columnsData && groupField_) {
+                    // console.log(data)
+                    calculateGroup(columnsData, groupField_)
+                } else {
+                    if (columnsData && groupField) {
+                        calculateGroup(columnsData, groupField)
+                    }
+                }
+
+                setOptions(columnsData)
             }
 
-            setOptions(columnsData)
-            // form.resetFields()
-            // if (groupField && sampleGroup && sampleGroup.length > 0) {
-            //     // console.log("2222222")
-            //     const sampleGroupedOptions = calculateGroup(sampleGroup, groupField)
-            //     setSampleGroupedOptions(sampleGroupedOptions)
-
-            // }
         }
 
     }, [data, selectCollectFile, groupField, customFilterValue])
+
+    useEffect(() => {
+        if (selectCollectFile) {
+            // form.setFieldsValue(requestParam)
+            setTimeout(() => {
+                form.setFieldsValue(requestParam)
+
+            }, 50);
+        }
+    }, [selectCollectFile])
     return <>
         {/* <pre>
             {JSON.stringify(data, null, 2)}
         </pre> */}
         {/* {JSON.stringify(data)} */}
+        {/* {JSON.stringify(requestParam)} */}
         <Form.Item label={`${label} File`} name={[name, "file"]} rules={rules}>
             <Select options={collectFiles} ></Select>
         </Form.Item>
@@ -457,7 +465,6 @@ export const CollectedGroupSelectSampleButton: FC<any> = ({ label, name, rules, 
                 <Input size="small" placeholder="Optional group name"></Input>
             </Form.Item>
             <Form.Item name={[name, "color"]} >
-                {/* <Input size="small" placeholder="Optional group color" ></Input> */}
                 <ColorPickerComp />
             </Form.Item>
         </Flex>
