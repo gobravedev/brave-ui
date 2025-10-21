@@ -1112,7 +1112,7 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
                                                 component_type: "script",
                                             }
                                         })
-                                    }}>Update Analysis</Button>
+                                    }}>Edit Script</Button>
 
                                     <Button size="small" color="cyan" variant="solid" onClick={() => {
                                         operatePipeline.openModal("modalA", {

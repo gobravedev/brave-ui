@@ -19,6 +19,7 @@ import { download } from "@antv/s2";
 import { useSelector } from "react-redux";
 import ModuleEdit from "../module-edit";
 import { useGlobalMessage } from "@/hooks/useGlobalMessage";
+import { CreateOrUpdatePipelineComponent } from "../create-pipeline";
 
 const UrlComp: FC<any> = ({ url, filename, baseURL }) => {
     return <>
@@ -490,11 +491,11 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
     const sseAnalysisIdRef = useRef<any>(null)
     // const { messageApi } = useOutletContext<any>()
     const message = useGlobalMessage()
-    const { modals, openModals, closeModals } = useModals(["editParams", "moduleEdit"]);
+    const { modals, openModals, closeModals } = useModals(["editParams", "moduleEdit","createOrUpdatePipelineComponent"]);
     const { containerURL, project } = useSelector((state: any) => state.user);
     const [runingLoading, setRuningLoading] = useState<boolean>(false)
     const [form] = Form.useForm();
-
+  
     const loadData = async (analysis_id: any) => {
         setLoading(true)
         // const res = await axios.get(`/file-operation/visualization-results?path=${output_dir}`)
@@ -601,7 +602,15 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
                         }}>Open Note</Button>
 
                     </>}
-
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                       openModals("createOrUpdatePipelineComponent", {
+                            data: {
+                                component_id: analsyisResult?.component_id,
+                            }, structure: {
+                                component_type: "script",
+                            }
+                        })
+                    }}>Edit Script</Button>
                     {onClose && <>
 
                         <Button size="small" color="cyan" variant="solid" onClick={() => onClose()}>Close</Button>
@@ -803,6 +812,13 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
                 params={modals.moduleEdit.params}
             >
             </ModuleEdit>
+            <CreateOrUpdatePipelineComponent
+                callback={() => loadData(analysis_id)}
+                // pipelineStructure={pipelineStructure}
+                // data={record}
+                visible={modals.createOrUpdatePipelineComponent.visible}
+                onClose={() => closeModals("createOrUpdatePipelineComponent")}
+                params={modals.createOrUpdatePipelineComponent.params}></CreateOrUpdatePipelineComponent>
 
         </Card >
 

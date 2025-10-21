@@ -452,7 +452,7 @@ const ResultList = forwardRef<any, any>(({
             }
             setData(currentData)
 
-            if (currentData.length > 0 ) {
+            if (currentData.length > 0) {
                 setAnalysisResultId(currentData[0].analysis_result_id)
                 setTableColumns(currentData[0].columns)
             } else {
@@ -947,11 +947,14 @@ const ResultList = forwardRef<any, any>(({
                         <a>Example</a>
                     </Popconfirm>
 
-                    <a onClick={async () => {
-                        const resp = await axios.get(`/analysis-result/download-example/${currentAnalysisMethod.component_id}`)
-                        window.open(`${baseURL}${resp.data.example_url}`, '_blank');
+                    <Tooltip title="Download Example File">
 
-                    }}>Example <DownloadOutlined /></a>
+                        <a onClick={async () => {
+                            const resp = await axios.get(`/analysis-result/download-example/${currentAnalysisMethod.component_id}`)
+                            window.open(`${baseURL}${resp.data.example_url}`, '_blank');
+                            message.success(`Example ${baseURL}${resp.data.example_url} downloading...`)
+                        }}>Example <DownloadOutlined /></a>
+                    </Tooltip>
 
                     {currentAnalysisMethod?.relation_id && <Popconfirm title="Are you sure to delete?" onConfirm={() => {
                         operatePipeline.deletePipelineRelation(currentAnalysisMethod.relation_id)
@@ -1122,7 +1125,7 @@ const ResultList = forwardRef<any, any>(({
             {/* {JSON.stringify(rest)} */}
             {/* {JSON.stringify(projectObj)} */}
             {/* {JSON.stringify(filteredData)} */}
-            
+
             {/* {analysisResultId} */}
             {currentAnalysisMethod?.file_type == "collected" ? <>
                 {/* {data && <>
@@ -1134,11 +1137,11 @@ const ResultList = forwardRef<any, any>(({
                 </>} */}
 
 
+                <Spin spinning={uploading} tip={"Uploading..."}>
+
+                    {(Array.isArray(data) && data.length == 0) ? <>
 
 
-                {(Array.isArray(data) && data.length == 0) ? <>
-
-                    <Spin spinning={uploading} tip={"Uploading..."}>
                         <Dragger {...props} maxCount={1} >
                             <p className="ant-upload-drag-icon">
                                 <InboxOutlined />
@@ -1149,78 +1152,78 @@ const ResultList = forwardRef<any, any>(({
                                 banned files.
                             </p> */}
                         </Dragger>
-                    </Spin>
 
-                    {/* <Button onClick={handleUpload}>aa</Button> */}
-                </> :
-                    <>
 
-                        <Tabs
-                            activeKey={analysisResultId}
-                            onChange={(key) => {
-                                // debugger
-                                const currentData = data.filter((it: any) => it.analysis_result_id == key)
-                                if (currentData.length > 0) {
-                                    setTableColumns(currentData[0].columns)
-                                }
+                        {/* <Button onClick={handleUpload}>aa</Button> */}
+                    </> :
+                        <>
 
-                                setAnalysisResultId(key)
-                            }}
-                            tabBarExtraContent={
-                                <Flex gap={"small"}>
+                            <Tabs
+                                activeKey={analysisResultId}
+                                onChange={(key) => {
+                                    // debugger
+                                    const currentData = data.filter((it: any) => it.analysis_result_id == key)
+                                    if (currentData.length > 0) {
+                                        setTableColumns(currentData[0].columns)
+                                    }
 
-                                    <InputNumber size="small" value={rowNum} onChange={(val: any) => setRowNum(val)} />
+                                    setAnalysisResultId(key)
+                                }}
+                                tabBarExtraContent={
+                                    <Flex gap={"small"}>
 
-                                    <Upload {...props}>
-                                        <Tooltip title="Upload new file">
-                                            <UploadOutlined style={{ cursor: "pointer" }} />
-                                        </Tooltip>
+                                        <InputNumber size="small" value={rowNum} onChange={(val: any) => setRowNum(val)} />
 
-                                    </Upload>
+                                        <Upload {...props}>
+                                            <Tooltip title="Upload new file">
+                                                <UploadOutlined style={{ cursor: "pointer" }} />
+                                            </Tooltip>
 
-                                    <DownloadOutlined style={{ cursor: "pointer" }} onClick={() => {
-                                        const currentData = data.find((it: any) => it.analysis_result_id == analysisResultId)
-                                        console.log("currentData", currentData)
-                                        window.open(`${baseURL}${currentData.url}`, '_blank');
-                                        //  if(currentData.length){
+                                        </Upload>
 
-                                        //  }
+                                        <DownloadOutlined style={{ cursor: "pointer" }} onClick={() => {
+                                            const currentData = data.find((it: any) => it.analysis_result_id == analysisResultId)
+                                            console.log("currentData", currentData)
+                                            window.open(`${baseURL}${currentData.url}`, '_blank');
+                                            //  if(currentData.length){
 
-                                    }} />
-                                    <EditOutlined style={{ cursor: "pointer" }}
-                                        onClick={() => {
-                                            console.log("analysisResultId", analysisResultId)
-                                            openModal("analysisResultEdit", { analysis_result_id: analysisResultId })
+                                            //  }
+
                                         }} />
+                                        <EditOutlined style={{ cursor: "pointer" }}
+                                            onClick={() => {
+                                                console.log("analysisResultId", analysisResultId)
+                                                openModal("analysisResultEdit", { analysis_result_id: analysisResultId })
+                                            }} />
 
-                                    <Popconfirm title={`Are you sure you want to delete ${analysisResultId}?`} onConfirm={async () => {
-                                        await deleteById(analysisResultId)
-                                    }}>
-                                        <Tooltip title={`Delete current tab ${analysisResultId}`}>
-                                            <DeleteOutlined style={{ cursor: "pointer", color: "red" }} />
-                                        </Tooltip>
-                                    </Popconfirm>
-                                    <RedoOutlined style={{ cursor: "pointer" }} onClick={() => loadTable()} />
+                                        <Popconfirm title={`Are you sure you want to delete ${analysisResultId}?`} onConfirm={async () => {
+                                            await deleteById(analysisResultId)
+                                        }}>
+                                            <Tooltip title={`Delete current tab ${analysisResultId}`}>
+                                                <DeleteOutlined style={{ cursor: "pointer", color: "red" }} />
+                                            </Tooltip>
+                                        </Popconfirm>
+                                        <RedoOutlined style={{ cursor: "pointer" }} onClick={() => loadTable()} />
 
-                                </Flex>
-                            }
-                            items={data.map((item: any, index: any) => ({
-                                key: item.analysis_result_id,
-                                label: <Tooltip title={`${item?.content} ${item.analysis_result_id}`}>
-                                    {`${item?.file_name}`}
+                                    </Flex>
+                                }
+                                items={data.map((item: any, index: any) => ({
+                                    key: item.analysis_result_id,
+                                    label: <Tooltip title={`${item?.content} ${item.analysis_result_id}`}>
+                                        {`${item?.file_name}`}
 
-                                </Tooltip>
-                            }))}></Tabs>
-                        <Spin spinning={tableRowLoading} tip={"Loading table data..."}>
+                                    </Tooltip>
+                                }))}></Tabs>
+                            <Spin spinning={tableRowLoading} tip={"Loading table data..."}>
 
-                            <div style={{ height: '50vh' }}>
-                                <Example shape={tableRowsInfo} rows={[tableColumns,
-                                    ...filteredData]} />
-                            </div>
-                        </Spin>
-                    </>}
+                                <div style={{ height: '50vh' }}>
+                                    <Example shape={tableRowsInfo} rows={[tableColumns,
+                                        ...filteredData]} />
+                                </div>
+                            </Spin>
+                        </>}
 
-
+                </Spin>
 
 
 
