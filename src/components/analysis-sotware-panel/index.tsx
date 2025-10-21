@@ -944,6 +944,7 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
         }
 
     }, [analysisMethod])
+    const [analysisResultId, setAnalysisResultId] = useState<any>()
 
     return <>
         {contextHolder}
@@ -952,6 +953,7 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
         {analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 0 && <>
             <ResultList
                 {...rest}
+                onChangeAnalysisResultId={setAnalysisResultId}
                 pipeline={pipeline}
                 software={rest}
                 currentAnalysisMethod={currentAnalysisMethod}
@@ -1153,9 +1155,10 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
                                 </Flex>
                                 <div style={{ marginBottom: "1rem" }}></div>
                                 {/* {JSON.stringify(resultTableList)} */}
-
+                                    {/* {} */}
                                 <AnalysisForm
                                     {...downstreamData}
+                                    analysisResultId={analysisResultId}
                                     pipeline={pipeline}
                                     form={form}
                                     resultTableList={resultTableList}

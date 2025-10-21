@@ -78,7 +78,7 @@ const ComponentsRender = ({ type, dataMap, constDataMap, componentMap, inputAnal
     return <Component {...crest}  {...rest} data={data} name={name} />;
 };
 
-const FormJsonComp: FC<any> = memo(({ formJson, dataMap, requestParam }) => {
+const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => {
     if (!formJson) return null
     const { projectObj } = useOutletContext<any>()
 
@@ -162,6 +162,8 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, requestParam }) => {
         }, CollectedGroupSelectSampleButton: {
             Component: CollectedGroupSelectSampleButton,
             // dataKey: "sample_group_list"
+        },CollectedGroupSelectSampleButton2:{
+            Component: CollectedGroupSelectSampleButton2,
         }, MetaphlanCladeSelect: {
             Component: MetaphlanCladeSelect,
         }, SelectAll: {
@@ -176,7 +178,7 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, requestParam }) => {
         {formJson.map((it: any, index: any) => (
             <>
                 {/* {JSON.stringify(it)} */}
-                <ComponentsRender requestParam={requestParam} key={index} {...it} dataMap={dataMap} componentMap={componentMap} constDataMap={constDataMap}></ComponentsRender>
+                <ComponentsRender analysisResultId={analysisResultId} key={index} {...it} dataMap={dataMap} componentMap={componentMap} constDataMap={constDataMap}></ComponentsRender>
             </>
         ))}
 
@@ -345,7 +347,141 @@ export const BaseSelect: FC<any> = ({ label, name, data, initialValue, rules, ..
 }
 
 
-export const CollectedGroupSelectSampleButton: FC<any> = ({ label, name, rules, data, filter, group, groupField: groupField_, requestParam }) => {
+export const CollectedGroupSelectSampleButton2: FC<any> = ({ label, name, rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
+    const [sampleGrouped, setSampleGrouped] = useState<any>()
+    const [options, setOptions] = useState<any>([])
+    // const [collectFiles, setCollectFiles] = useState<any>([])
+    const [analysisResult, setAnalysisResult] = useState<any>([])
+
+    // const {  project } = useOutletContext<any>()
+
+    // const [sampleGroupedOptions, setSampleGroupedOptions] = useState<any>([])
+    const form = Form.useFormInstance();
+    let filterName: any = []
+    if (filter) {
+        filterName = filter.map((it: any) => it.name)
+    }
+    const customFilterValue = Form.useWatch((values) => {
+        const data = Object.entries(values).filter(([key]) => filterName.includes(key))
+        return Object.fromEntries(data)
+    }, form);
+
+    const groupField = Form.useWatch(group, form);
+    // const selectCollectFile = Form.useWatch([name, "file"], form);
+
+
+    const calculateGroup = (sampleGroup: any, groupField: any) => {
+
+        const grouped = sampleGroup.reduce((acc: any, item: any) => {
+            const key = item[groupField];
+            if (!acc[key]) {
+                acc[key] = [];
+            }
+            acc[key].push(item.value);
+            return acc;
+        }, {});
+        setSampleGrouped(grouped)
+
+
+    }
+    useEffect(() => {
+        if (data && Array.isArray(data)) {
+            const analysisResult = data.find((it: any) => it.analysis_result_id == analysisResultId)
+            setAnalysisResult(analysisResult)
+        }
+
+    }, [data, analysisResultId])
+
+    useEffect(() => {
+        if (analysisResult) {
+            // console.log("analysisResult: ", analysisResult)
+            // let columnsData = data.find((it: any) => it.id == selectCollectFile)
+            // debugger
+            if (Array.isArray(analysisResult.columns)) {
+                let columnsData = analysisResult.columns.map((it: any) => ({
+                    label: it.columns_name,
+                    value: it.columns_name,
+                    ...it
+                }))
+                // console.log("columnsData: ", columnsData)
+                if (filter && customFilterValue) {
+                    columnsData = filter.reduce((result: any, filterHandle: any) => {
+                        return result.filter((item: any) => {
+                            return filterHandle.method(item) === customFilterValue[filterHandle.name];
+                        });
+                    }, columnsData);
+
+                    columnsData = columnsData.map((it: any) => {
+                        const { label, id, value, ...rest } = it
+                        return {
+                            label: `${it.label}(${filter[0].method(it)})`,
+                            value: it.value,
+                            ...rest
+
+                        }
+                    })
+
+                }
+                // console.log(data)
+                // console.log(data)
+                if (columnsData && groupField_) {
+                    // console.log(data)
+                    calculateGroup(columnsData, groupField_)
+                } else {
+                    if (columnsData && groupField) {
+                        calculateGroup(columnsData, groupField)
+                    }
+                }
+                setOptions(columnsData)
+
+
+            }
+
+
+
+        }
+
+    }, [data, analysisResult, groupField, customFilterValue])
+
+    // useEffect(() => {
+    //     if (selectCollectFile) {
+    //         // form.setFieldsValue(requestParam)
+    //         setTimeout(() => {
+    //             form.setFieldsValue(requestParam)
+
+    //         }, 50);
+    //     }
+    // }, [selectCollectFile])
+    return <>
+        {/* <pre>
+            {JSON.stringify(data, null, 2)}
+        </pre> */}
+        {/* {JSON.stringify(sampleGrouped)} */}
+        {/* {JSON.stringify(requestParam)} */}
+        {/* {JSON.stringify(analysisResult)} */}
+        {/* <Form.Item label={`${label} File`} name={[name, "file"]} rules={rules}>
+            <Select options={collectFiles} ></Select>
+        </Form.Item> */}
+
+        <Form.Item label={`${label} Columns`} name={[name, "columns"]} rules={rules}>
+            <GroupSelectSample sampleGrouped={sampleGrouped} sampleGroup={options} watch={[name, "group"]}></GroupSelectSample>
+        </Form.Item>
+        <Flex gap="small">
+            <Form.Item label={label} name={[name, "group"]} noStyle >
+                <GroupSelectButton sampleGrouped={sampleGrouped}></GroupSelectButton>
+            </Form.Item>
+            <Form.Item name={[name, "group_name"]} >
+                <Input size="small" placeholder="Optional group name"></Input>
+            </Form.Item>
+            <Form.Item name={[name, "color"]} >
+                <ColorPickerComp />
+            </Form.Item>
+        </Flex>
+
+    </>
+}
+
+export const CollectedGroupSelectSampleButton: FC<any> = ({ label, name, rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
     const [sampleGrouped, setSampleGrouped] = useState<any>()
     const [options, setOptions] = useState<any>([])
     const [collectFiles, setCollectFiles] = useState<any>([])
@@ -451,11 +587,12 @@ export const CollectedGroupSelectSampleButton: FC<any> = ({ label, name, rules, 
         </pre> */}
         {/* {JSON.stringify(data)} */}
         {/* {JSON.stringify(requestParam)} */}
+        {/* {analysisResultId} */}
         <Form.Item label={`${label} File`} name={[name, "file"]} rules={rules}>
             <Select options={collectFiles} ></Select>
         </Form.Item>
 
-        <Form.Item label={`${label} Columns`} name={[name, "sample"]} rules={rules}>
+        <Form.Item label={`${label} Columns`} name={[name, "columns"]} rules={rules}>
             <GroupSelectSample sampleGrouped={sampleGrouped} sampleGroup={options} watch={[name, "group"]}></GroupSelectSample>
         </Form.Item>
         <Flex gap="small">
@@ -626,13 +763,13 @@ const GroupSelectSample: FC<any> = ({ value, onChange, sampleGroup, watch, sampl
     const group_ = Form.useWatch(watch, form);
     useEffect(() => {
         // setGroup(group_)
-        if (group_ && (Array.isArray(group_) &&  group_.length > 0) ) {
+        if (group_ && (Array.isArray(group_) && group_.length > 0)) {
             // console.log("group_", group_)
 
             // console.log(group)
             onSelectGroup(group_)
         }
-    }, [group_,sampleGrouped])
+    }, [group_, sampleGrouped])
     // useEffect(() => {
 
     //     // onSelectGroup(group)

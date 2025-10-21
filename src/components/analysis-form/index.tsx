@@ -26,6 +26,7 @@ export const AnalysisForm: FC<any> = ({
     callback,
     dataComponentIds,
     name,
+    analysisResultId,
     ...rest
 }) => {
     const formId = Form.useWatch((values: any) => values?.analysis_id, form);
@@ -173,6 +174,7 @@ export const AnalysisForm: FC<any> = ({
 
         ...params,
         project: project,
+        analysis_result_id: analysisResultId,
         analysis_method: saveAnalysisMethod,
         table_type: tableType,
         imgType: imgType,
@@ -223,6 +225,7 @@ export const AnalysisForm: FC<any> = ({
         <Watermark content={formId && `更新分析(${formValues.analysis_name})(${String(formValues.analysis_id).slice(0, 8)})`}>
             {/* {JSON.stringify(resultTableList)} */}
             <CreateOrUpdateParsms
+                analysisResultId={analysisResultId}
                 form={form}
                 requestParam={requestParsms}
                 dataMap={dataMap}

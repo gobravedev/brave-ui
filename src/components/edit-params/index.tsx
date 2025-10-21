@@ -138,7 +138,7 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
 
 export default EditParams
 
-export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, formJson: formJson_, databases, callback, showCancal = false }) => {
+export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, formJson: formJson_, databases, callback, analysisResultId,showCancal = false }) => {
     const { modals, openModals, closeModals } = useModals(["paramsView", "bioDatabases"]);
     const [dbFormJson, setDbFormJson] = useState<any>([])
     const [formJson, setFormJson] = useState<any>([])
@@ -215,7 +215,7 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, for
                         forceRender: true,
                         children: <>
 
-                            <FormJsonComp requestParam={requestParam}  formJson={[...dbFormJson]} dataMap={dataMap} ></FormJsonComp>
+                            <FormJsonComp analysisResultId={analysisResultId}  formJson={[...dbFormJson]} dataMap={dataMap} ></FormJsonComp>
                             {databases && <BioDatabaseForm openModal={() => {
                                 openModals("bioDatabases", databases)
                             }} formJson={databases}></BioDatabaseForm>}

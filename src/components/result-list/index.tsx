@@ -188,6 +188,7 @@ const ResultList = forwardRef<any, any>(({
     cardExtra,
     operatePipeline,
     relationType,
+    onChangeAnalysisResultId,
     currentAnalysisMethod,
     setCurrentAnalysisMethod,
     params,
@@ -211,10 +212,18 @@ const ResultList = forwardRef<any, any>(({
 
     const [tableColumns, setTableColumns_] = useState<any[]>([])
     const [tableRowLoading, setTableRowLoading] = useState<boolean>(true)
-    const [analysisResultId, setAnalysisResultId] = useState<any>()
+    const [analysisResultId, setAnalysisResultId_] = useState<any>()
     const [rowNum, setRowNum] = useState<number>(200)
     const { baseURL } = useSelector((state: any) => state.user)
 
+
+    const setAnalysisResultId = (analysis_result_id: any) => {
+        setAnalysisResultId_(analysis_result_id)
+        if (onChangeAnalysisResultId) {
+            onChangeAnalysisResultId(analysis_result_id)
+
+        }
+    }
     const setTableColumns = (columns: any[]) => {
         const columns_ = columns.map((it: any) => it.columns_name)
         setTableColumns_([])
@@ -443,7 +452,7 @@ const ResultList = forwardRef<any, any>(({
             }
             setData(currentData)
 
-            if (currentData.length > 0) {
+            if (currentData.length > 0 ) {
                 setAnalysisResultId(currentData[0].analysis_result_id)
                 setTableColumns(currentData[0].columns)
             } else {
@@ -1113,7 +1122,8 @@ const ResultList = forwardRef<any, any>(({
             {/* {JSON.stringify(rest)} */}
             {/* {JSON.stringify(projectObj)} */}
             {/* {JSON.stringify(filteredData)} */}
-
+            
+            {/* {analysisResultId} */}
             {currentAnalysisMethod?.file_type == "collected" ? <>
                 {/* {data && <>
 
