@@ -1,4 +1,4 @@
-import { Button, ColorPicker, Flex, Form, Input, InputNumber, Select, Switch } from "antd";
+import { Button, Col, ColorPicker, Divider, Flex, Form, Input, InputNumber, Row, Select, Switch } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import axios from "axios";
 import { A } from "ollama/dist/shared/ollama.d792a03f.mjs";
@@ -126,6 +126,9 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
         Input: {
             Component: BaseTextArea,
         },
+        BaseTextAreaNum: {
+            Component: BaseTextAreaNum,
+        },
         GroupCompareSelect: {
             Component: GroupCompareSelect,
         },
@@ -162,25 +165,33 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
         }, CollectedGroupSelectSampleButton: {
             Component: CollectedGroupSelectSampleButton,
             // dataKey: "sample_group_list"
-        },CollectedGroupSelectSampleButton2:{
+        }, CollectedGroupSelectSampleButton2: {
             Component: CollectedGroupSelectSampleButton2,
         }, MetaphlanCladeSelect: {
             Component: MetaphlanCladeSelect,
         }, SelectAll: {
             Component: SelectAll,
             dataKey: "sample_group_list"
+        }, Divider: {
+            Component: DividerComp,
         }
     };
 
     return <>
         {/* {JSON.stringify(dataMap)} */}
+        <Row gutter={[8, 0]}>
+            {formJson.map((it: any, index: any) => (<>
+                <Col span={it?.col ? it?.col : 12} >
+                    {/* {JSON.stringify(it)} */}
 
-        {formJson.map((it: any, index: any) => (
-            <>
-                {/* {JSON.stringify(it)} */}
-                <ComponentsRender analysisResultId={analysisResultId} key={index} {...it} dataMap={dataMap} componentMap={componentMap} constDataMap={constDataMap}></ComponentsRender>
+                    <ComponentsRender analysisResultId={analysisResultId} key={index} {...it} dataMap={dataMap} componentMap={componentMap} constDataMap={constDataMap}></ComponentsRender>
+                </Col>
+                
             </>
-        ))}
+
+            ))}
+        </Row>
+
 
     </>
 },
@@ -200,6 +211,9 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
 
 export default FormJsonComp
 
+const DividerComp:FC<any> =  ({text})=>{
+    return <Divider orientation="left" >{text}</Divider>
+}
 const FilterSelect: FC<any> = ({ label, name, data, rules, field, ...rest }) => {
     const [options, setOptions] = useState<any>()
     const form = Form.useFormInstance();
@@ -306,6 +320,20 @@ export const GroupCompareSelect: FC<any> = ({ label, name, data, initialValue, r
         </Form.Item>
     </>
 }
+const BaseTextAreaNum: FC<any> = ({ label, name, tooltip, data, initialValue, rules, ...rest }) => {
+    const form = Form.useFormInstance();
+
+    const content = Form.useWatch(name, form);
+
+    return <>
+
+        <Form.Item tooltip={tooltip} extra={`A total of ${content ? content.split(",").length : 0} features are entered`} initialValue={initialValue} label={label} name={name} rules={rules}>
+            <TextArea {...rest} rows={3} />
+
+        </Form.Item>
+
+    </>
+}
 const BaseTextArea: FC<any> = ({ label, name, data, initialValue, rules, ...rest }) => {
     return <>
         <Form.Item initialValue={initialValue} label={label} name={name} rules={rules}>
@@ -335,10 +363,10 @@ const BaseInputNumber: FC<any> = ({ label, name, data, initialValue, rules, ...r
         </Form.Item>
     </>
 }
-export const BaseSelect: FC<any> = ({ label, name, data, initialValue, rules, ...rest }) => {
+export const BaseSelect: FC<any> = ({ extra, tooltip, label, name, data, initialValue, rules, ...rest }) => {
     return <>
         {/* {JSON.stringify(initialValue)} */}
-        <Form.Item initialValue={initialValue ? initialValue : null} label={label} name={name} rules={rules}>
+        <Form.Item extra={extra} tooltip={tooltip} initialValue={initialValue ? initialValue : null} label={label} name={name} rules={rules}>
             <BasicSelect {...rest} options={data}></BasicSelect>
             {/* <Select showSearch filterOption={(input: any, option: any) =>
                 (option?.label ?? '').toLowerCase().includes(input.toLowerCase())} {...rest} options={data}></Select> */}

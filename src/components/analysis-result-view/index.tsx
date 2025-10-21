@@ -509,6 +509,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
     }
     const buildRequest = (values: any) => {
         const requestParam = {
+            analysis_id: analysis_id,
             ...analsyisResult?.request_param,
             ...values,
             project: project
@@ -735,8 +736,8 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
                         }
                     </Col>
                     <Col lg={8} sm={8} xs={24} style={{ borderLeft: "1px solid #f0f0f0" }}>
-                        {/* <Divider  /> */}
-                        <Form form={form} layout="vertical"  >
+                        {/* <Divider  />  layout="vertical" */}
+                        <Form form={form}  size="small"    layout="vertical"  >
                             {analsyisResult?.form_json && <>
 
 
