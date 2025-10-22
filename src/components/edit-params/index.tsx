@@ -1,10 +1,10 @@
-import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form } from "antd";
+import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Tooltip } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { FC, forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import Markdown from '../markdown'
 import axios from "axios";
 import LogFile from "../log-file";
-import { QuestionCircleOutlined } from "@ant-design/icons"
+import { DeleteColumnOutlined, DeleteOutlined, QuestionCircleOutlined } from "@ant-design/icons"
 import { MonacoEditor } from "../react-monaco-editor";
 import { useNavigate, useOutletContext } from "react-router";
 import { useSSEContext } from "@/context/sse/useSSEContext";
@@ -86,14 +86,19 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
     return <>
 
         <Drawer
+            extra={<>
+                
+            </>}
 
             size="default" loading={loading} title={
                 <>
 
                     {data && <>
                         <Tag>{data?.component_name}</Tag>
-                        <Tag>{data?.analysis_name}</Tag>
-                        <Tag>{String(data?.analysis_id).slice(0, 8)}</Tag>
+                        <Tag color="success">{data?.analysis_name}</Tag>
+                        <Tooltip title={data?.analysis_id}>
+                            <Tag>{String(data?.analysis_id).slice(0, 8)}</Tag>
+                        </Tooltip>
                     </>}
 
                 </>
@@ -138,7 +143,7 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
 
 export default EditParams
 
-export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, formJson: formJson_, databases, callback, analysisResultId,showCancal = false }) => {
+export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, formJson: formJson_, databases, callback, analysisResultId, showCancal = false }) => {
     const { modals, openModals, closeModals } = useModals(["paramsView", "bioDatabases"]);
     const [dbFormJson, setDbFormJson] = useState<any>([])
     const [formJson, setFormJson] = useState<any>([])
@@ -167,6 +172,28 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, for
         }
         return requestParams
     }
+    const createAnalysis = async () => {
+        const values = await form.validateFields()
+        const requestParams = getRequestParams(values)
+        delete requestParams.analysis_id
+        console.log(requestParams)
+        try {
+            const resp: any = await axios.post(`/fast-api/analysis-controller?save=true&is_submit=true&is_report=true`, requestParams)
+            // setFilePlot(resp.data)
+            // setAnalysisParams(resp.data)
+            console.log(resp)
+
+            messageApi.success("Created Successfully!")
+            if (callback) {
+                callback()
+            }
+        } catch (error: any) {
+            console.log(error)
+            if (error.response?.data) {
+                messageApi.error(error.response.data.detail)
+            }
+        }
+    }
     const saveUpstreamAnalysis = async (save: any, is_submit: any = false) => {
         const values = await form.validateFields()
         const requestParams = getRequestParams(values)
@@ -181,6 +208,7 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, for
                 messageApi.success("执行成功!")
                 if (callback) {
                     callback()
+
                 }
             } else {
                 openModals("paramsView", resp.data)
@@ -208,6 +236,7 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, for
             {/* {JSON.stringify(formJson_)} */}
             <Tabs
                 // ={true}
+
                 items={[
                     {
                         key: "1",
@@ -215,7 +244,7 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, for
                         forceRender: true,
                         children: <>
 
-                            <FormJsonComp analysisResultId={analysisResultId}  formJson={[...dbFormJson]} dataMap={dataMap} ></FormJsonComp>
+                            <FormJsonComp analysisResultId={analysisResultId} formJson={[...dbFormJson]} dataMap={dataMap} ></FormJsonComp>
                             {databases && <BioDatabaseForm openModal={() => {
                                 openModals("bioDatabases", databases)
                             }} formJson={databases}></BioDatabaseForm>}
@@ -254,6 +283,11 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, for
                     {requestParam?.analysis_id ? <>Update Analysis({requestParam.analysis_name})({String(requestParam.analysis_id).slice(0, 8)})</> : <>Save Analysis</>}</Button>
                 {(requestParam?.analysis_id && showCancal) && <Button size="small" color="cyan" onClick={() => form.setFieldValue("analysis_id", undefined)}>Cancel Analysis</Button>}
                 {/* <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>更新分析</Button> */}
+                <Popconfirm title="Are you sure to create a new analysis?"
+                    onConfirm={createAnalysis}
+                >
+                    <Button size="small" color="orange" variant="solid" onClick={() => form.setFieldValue("analysis_id", undefined)}>Create Analysis</Button>
+                </Popconfirm>
             </Flex>
 
             <Collapse ghost items={[

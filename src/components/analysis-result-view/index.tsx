@@ -1,10 +1,10 @@
 import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Alert, Modal, Tooltip, Divider } from "antd";
 import TextArea from "antd/es/input/TextArea";
-import { FC, forwardRef, use, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { FC, forwardRef, use, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import Markdown from '../markdown'
 import axios from "axios";
 import LogFile from "../log-file";
-import { DownloadOutlined, QuestionCircleOutlined } from "@ant-design/icons"
+import { DeleteOutlined, DownloadOutlined, QuestionCircleOutlined, RedoOutlined } from "@ant-design/icons"
 import { MonacoEditor } from "../react-monaco-editor";
 import { useNavigate, useOutletContext } from "react-router";
 import { useSSEContext } from "@/context/sse/useSSEContext";
@@ -20,6 +20,7 @@ import { useSelector } from "react-redux";
 import ModuleEdit from "../module-edit";
 import { useGlobalMessage } from "@/hooks/useGlobalMessage";
 import { CreateOrUpdatePipelineComponent } from "../create-pipeline";
+import BigTable from '@/components/big-table';
 
 const UrlComp: FC<any> = ({ url, filename, baseURL }) => {
     return <>
@@ -40,7 +41,7 @@ const UrlComp: FC<any> = ({ url, filename, baseURL }) => {
     </>
 }
 
-export const TableView: FC<any> = ({ data, url, filename, columns, baseURL, projectObj }) => {
+export const TableView2: FC<any> = ({ data, url, filename, columns, baseURL, projectObj }) => {
     const { Search } = Input;
     const [tableData, setTableData] = useState<any>([])
     const [research, setResearch] = useState<any>()
@@ -142,6 +143,54 @@ export const TableView: FC<any> = ({ data, url, filename, columns, baseURL, proj
 
     </>
 }
+export const TableView: FC<any> = ({ data, url, filename, columns, baseURL, projectObj }) => {
+    const [tableRowsInfo, setTableRowsInfo] = useState<any>({
+
+    })
+    const [searchText, setSearchText] = useState("");
+    const [tables, setTables] = useState<any>([])
+    useEffect(() => {
+        if (data) {
+            setTableRowsInfo({
+                "nrow": data?.nrow,
+                "ncol": data?.ncol
+            })
+            setTables(data?.tables || [])
+        }
+    }, [data])
+
+    let filteredData: any = useMemo(() => {
+        if (!searchText) return tables
+        return tables.filter((item: any) =>
+            Object.values(item).some((val) =>
+                String(val).toLowerCase().includes(searchText.toLowerCase())
+            )
+        );
+
+    }, [tables, searchText]);
+    return <>
+        {/* {JSON.stringify(data)} */}
+        <Flex gap={"small"}>
+            <Input.Search
+                size="small"
+                placeholder="搜索结果..."
+                allowClear
+                enterButton
+                value={searchText}
+                onChange={(e: any) => setSearchText(e.target.value)}
+                style={{ width: 300 }}
+            />
+            <UrlComp url={url} filename={filename} baseURL={baseURL}></UrlComp>
+        </Flex>
+
+
+        <div style={{ height: '50vh' }}>
+            <BigTable shape={tableRowsInfo} rows={[...filteredData]} />
+        </div>
+    </>
+}
+
+
 
 const ImgView: FC<any> = ({ data, url, filename, baseURL }) => {
     return <div >
@@ -482,7 +531,7 @@ const AnalysisResultView: FC<any> = forwardRef<any, any>(({ params, visible, onC
     </>
 })
 
-export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalReportCallback, openPanel, overflowY = "hidden" }) => {
+export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree, openPanel, overflowY = "hidden" }) => {
     const [loading, setLoading] = useState<boolean>(false)
     const [analsyisResult, setAnalsyisResult] = useState<any>(null)
     const navigate = useNavigate()
@@ -717,16 +766,27 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
                             await axios.post(`/analysis/update-report/${analsyisResult?.analysis_id}`)
                             message.success("operate successfully!")
                             setAnalsyisResult(null)
-                            if (cancalReportCallback) {
-                                cancalReportCallback()
+                            if (loadTree) {
+                                loadTree()
                             }
                             // loadData()
                         }}>
                             <Button size="small" color={"cyan"} variant="solid">{analsyisResult?.is_report ? "Cancel Report" : "Report"}</Button>
                         </Popconfirm>
                     </>}
+                    <Popconfirm title={`Delete ${analysis_id}?`} onConfirm={async () => {
+                        await axios.delete(`/fast-api/analysis/${analysis_id}`)
+                        message.success("Deleted Successfully!")
+                        if(loadTree){
+                            loadTree()
+                        }
+                        onClose()
+                    }}>
+                        <DeleteOutlined style={{ cursor: "pointer", color: "red" }} />
+                    </Popconfirm>
+                    <RedoOutlined style={{ cursor: "pointer" }} onClick={() => loadData(analysis_id)} />
 
-                    <Button size="small" color="cyan" variant="solid" onClick={() => loadData(analysis_id)}>Refresh</Button>
+                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => loadData(analysis_id)}>Refresh</Button> */}
 
                 </Flex>
             }>
@@ -826,7 +886,10 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
             </Spin >}
 
             <EditParams
-                callback={() => loadData(analysis_id)}
+                callback={() => {
+                    loadTree()
+                    loadData(analysis_id)
+                }}
                 visible={modals.editParams.visible}
                 params={modals.editParams.params}
                 onClose={() => closeModals("editParams")}

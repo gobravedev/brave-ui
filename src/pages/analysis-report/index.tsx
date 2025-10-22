@@ -2,7 +2,7 @@ import { Button, Card, Col, Empty, Flex, Row, Segmented, Skeleton, Tabs, Tag, Tr
 import axios from "axios"
 import { FC, use, useEffect, useRef, useState } from "react"
 import { useLocation, useNavigate, useOutletContext, useParams } from "react-router"
-import { DownOutlined } from '@ant-design/icons'
+import { DownOutlined, RedoOutlined } from '@ant-design/icons'
 import { AnalysisResultViewComp } from '@/components/analysis-result-view'
 import { useDispatch, useSelector } from "react-redux"
 import { setUserItem } from "@/store/userSlice"
@@ -136,9 +136,7 @@ const AnalysisReport: FC<any> = () => {
         {/* <div style={{ height: "1000px", background: "red" }}>
 
         </div> */}
-        <div >
 
-        </div>
         <Row
 
             gutter={[isSticky ? 16 : 0, 16]}>
@@ -161,7 +159,7 @@ const AnalysisReport: FC<any> = () => {
                         <AnalysisResultViewComp
                             overflowY="auto"
                             openPanel={setPanel}
-                            cancalReportCallback={() => {
+                            loadTree={() => {
                                 loadData()
                             }} analysis_id={analysisKey}></AnalysisResultViewComp>
                     </> : <>
@@ -337,8 +335,9 @@ const AnalysisReport: FC<any> = () => {
                     extra={
                         <Flex gap={"small"}>
 
+                            <RedoOutlined style={{ cursor: "pointer" }} onClick={loadData} />
 
-                            <Button size="small" color="cyan" variant="solid" onClick={loadData}>Refresh</Button>
+                            {/* <Button size="small" color="cyan" variant="solid" onClick={loadData}>Refresh</Button> */}
                         </Flex>
                     }>
                     {/* {JSON.stringify(analysis)} */}
@@ -430,6 +429,7 @@ const LeftPanel: FC<any> = ({ treeData, defaultSelectKey, onSelect: onSelect_ })
     //         ],
     //     },
     // ];
+
     const [selectedKey, setSelectedKey] = useState<any>(defaultSelectKey)
     const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
 

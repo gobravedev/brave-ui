@@ -10,6 +10,12 @@ import ImportData from "../import-data"
 import { useModal } from "@/hooks/useModal"
 export const readHdfsAPi = (contentPath: any) => axios.get(`/api/read-hdfs?path=${contentPath}`)
 export const readJsonAPi = (contentPath: any) => axios.get(`/fast-api/read-json?path=${contentPath}`)
+import AnalysisResultEdit from "../analysis-result-edit"
+import Dragger from "antd/es/upload/Dragger"
+import { useGlobalMessage } from "@/hooks/useGlobalMessage"
+import { useSelector } from "react-redux"
+import BigTable from '@/components/big-table';
+
 // import { List } from "react-window";
 // import { getScrollbarSize, List, type RowComponentProps } from "react-window";
 
@@ -1217,7 +1223,7 @@ const ResultList = forwardRef<any, any>(({
                             <Spin spinning={tableRowLoading} tip={"Loading table data..."}>
 
                                 <div style={{ height: '50vh' }}>
-                                    <Example shape={tableRowsInfo} rows={[tableColumns,
+                                    <BigTable shape={tableRowsInfo} rows={[tableColumns,
                                         ...filteredData]} />
                                 </div>
                             </Spin>
@@ -1301,113 +1307,4 @@ export const AnalysisResultModal: FC<any> = ({ visible, onClose, params }) => {
             <ResultList {...params} analysisType="sample" ></ResultList>
         </Modal>
     </>
-}
-
-
-import { List } from "react-window";
-import { type RowComponentProps } from "react-window";
-import AnalysisResultEdit from "../analysis-result-edit"
-import Dragger from "antd/es/upload/Dragger"
-import { useGlobalMessage } from "@/hooks/useGlobalMessage"
-import { el } from "@faker-js/faker"
-import { useSelector } from "react-redux"
-
-
-function Example({ rows, shape, columns }: { rows: any[], shape: any, columns?: any[] }) {
-    const { token } = theme.useToken();
-
-    return (
-        <>
-
-            {columns && <Flex
-                align="center"
-                style={{
-                    background: token.colorBgContainerDisabled,
-                    borderBottom: `1px solid ${token.colorBorderSecondary}`,
-                    padding: "0 8px",
-                    fontWeight: 500,
-                }}
-            >
-                {Array.isArray(columns) && <>
-                    {columns.map((it: any, index: any) => (<span key={index}>
-                        <div
-                            key={index}
-                            style={{
-                                flex: "0 0 200px", // ✅ 与表头列宽一致
-                                whiteSpace: "nowrap",
-                                textOverflow: "ellipsis",
-                                overflow: "hidden",
-                                padding: "0 8px",
-                            }}
-                            title={it.columns_name}
-                        >
-                            <Tooltip title={it.analysis_result_id}>{it.columns_name}</Tooltip>
-                        </div>
-                    </span>))}
-                </>}
-
-            </Flex>
-            }
-
-            <List
-                rowComponent={RowComponent}
-                rowCount={rows?.length}
-                rowHeight={30}
-                rowProps={{ rows }}
-            />
-            <Flex justify="end" gap="small" >
-                <Tag color="default">Rows: {shape?.nrow}</Tag>
-                <Tag color="default">Columns: {shape?.ncol}</Tag>
-            </Flex>
-        </>
-
-    );
-}
-
-
-function RowComponent({
-    index,
-    rows,
-    style
-}: RowComponentProps<{ rows: any[] }>) {
-    const row = rows[index];
-    const { token } = theme.useToken();
-
-    return (
-        <Flex
-            align="center"
-            style={{
-                ...style,
-                backgroundColor: index % 2 ? token.colorBgContainer : token.colorFillQuaternary,
-                borderBottom: `1px solid ${token.colorBorderSecondary}`,
-                padding: "0 8px",
-                fontSize: 13,
-                minWidth: "fit-content",
-                transition: "background-color 0.2s",
-            }}
-            className="table-row"
-            onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = token.colorFillTertiary;
-            }}
-            onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = index % 2 ? token.colorBgContainer : token.colorFillQuaternary;
-            }}
-        >
-            {row.map((value: any, j: number) => (
-                <div
-                    key={j}
-                    style={{
-                        flex: "0 0 200px", // ✅ 与表头列宽一致
-                        whiteSpace: "nowrap",
-                        textOverflow: "ellipsis",
-                        overflow: "hidden",
-                        padding: "0 8px",
-                    }}
-                    title={String(value)}
-                >
-                    {String(value)}
-                </div>
-            ))}
-        </Flex>
-    );
 }
