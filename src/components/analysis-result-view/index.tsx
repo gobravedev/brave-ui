@@ -226,7 +226,7 @@ const StringView: FC<any> = ({ data }) => {
 const InfoView: FC<any> = ({ data }) => {
 
     return <div >
-        <Alert closable message={data} type="info" showIcon />
+        <Alert closable message={data} type="info" />
 
         {/* <Typography>
             <pre style={{ margin: 0 }}>
@@ -415,6 +415,19 @@ const KeggMap: FC<any> = ({ data, ...rest }) => {
         {JSON.stringify(data)} */}
     </>
 }
+
+const FeatureList: FC<any> = ({ data }) => {
+
+    return <div >
+        <Alert closable message={data} type="success" action={<>
+
+        </>} />
+        <Flex justify="end" style={{ marginBottom: "0.5rem", marginTop: "0.5rem" }}>
+            <Tag color="success">A total of {data?.split(",").length} features</Tag>
+
+        </Flex>
+    </div>
+}
 const componentMap: any = {
     table: TableView,
     string: StringView,
@@ -424,8 +437,13 @@ const componentMap: any = {
     text: TextView,
     info: InfoView,
     kegg_map: KeggMap,
-    download: Download
+    download: Download,
+    feature_list: FeatureList
 };
+
+
+
+
 
 export const ComponentsRender = ({ type, ...rest }: any) => {
     const Component = componentMap[type] || (() => <div>未知类型 {type}</div>)
@@ -672,7 +690,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
                         }}>Open Note</Button>
 
                     </>}
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                    {analsyisResult && <Button size="small" color="cyan" variant="solid" onClick={() => {
                         openModals("createOrUpdatePipelineComponent", {
                             data: {
                                 component_id: analsyisResult?.component_id,
@@ -680,7 +698,8 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
                                 component_type: "script",
                             }
                         })
-                    }}>Edit Script</Button>
+                    }}>Edit Script</Button>}
+
                     {onClose && <>
 
                         <Button size="small" color="cyan" variant="solid" onClick={() => onClose()}>Close</Button>
@@ -773,18 +792,33 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
                         }}>
                             <Button size="small" color={"cyan"} variant="solid">{analsyisResult?.is_report ? "Cancel Report" : "Report"}</Button>
                         </Popconfirm>
+                        <Popconfirm title={`Delete ${analysis_id}?`} onConfirm={async () => {
+                            await axios.delete(`/fast-api/analysis/${analysis_id}`)
+                            message.success("Deleted Successfully!")
+                            if (loadTree) {
+                                loadTree()
+                            }
+                            onClose()
+                        }}>
+                            <DeleteOutlined style={{ cursor: "pointer", color: "red" }} />
+                        </Popconfirm>
                     </>}
-                    <Popconfirm title={`Delete ${analysis_id}?`} onConfirm={async () => {
-                        await axios.delete(`/fast-api/analysis/${analysis_id}`)
-                        message.success("Deleted Successfully!")
-                        if(loadTree){
-                            loadTree()
-                        }
-                        onClose()
-                    }}>
-                        <DeleteOutlined style={{ cursor: "pointer", color: "red" }} />
-                    </Popconfirm>
-                    <RedoOutlined style={{ cursor: "pointer" }} onClick={() => loadData(analysis_id)} />
+
+
+                    {/* <Button
+                        type="link" // 可选：primary / default / text / link
+                        color="cyan"
+                        icon={<RedoOutlined color="cyan" />}
+                        onClick={() => loadData(analysis_id)}
+
+             
+                    >
+
+                    </Button> */}
+
+                    <RedoOutlined
+
+                        style={{ cursor: "pointer" }} onClick={() => loadData(analysis_id)} />
 
                     {/* <Button size="small" color="cyan" variant="solid" onClick={() => loadData(analysis_id)}>Refresh</Button> */}
 
@@ -928,10 +962,7 @@ const AnalysisResultDisplay: FC<any> = ({ analsyisResult, loading }) => {
         {analsyisResult && <>
 
             {analsyisResult.images && <div style={{ padding: "1rem" }}>
-
-
                 {
-                    //  
                     Array.isArray(analsyisResult.images) ? <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
                         {analsyisResult.images.map((it: any, index: any) => (<Col key={index} span={4}>
                             <ImgView {...it} baseURL={baseURL}></ImgView>
@@ -939,7 +970,6 @@ const AnalysisResultDisplay: FC<any> = ({ analsyisResult, loading }) => {
                     </Row> :
                         <>
                             <ImgView {...analsyisResult.images} baseURL={baseURL}></ImgView>
-
                         </>
                 }
             </div>}

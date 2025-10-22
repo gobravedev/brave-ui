@@ -1,11 +1,11 @@
-import { Button, Col, ColorPicker, Divider, Flex, Form, Input, InputNumber, Row, Select, Switch } from "antd";
+import { Button, Col, ColorPicker, ColorPickerProps, Divider, Flex, Form, Input, InputNumber, Row, Select, Switch, Tooltip } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import axios from "axios";
 import { A } from "ollama/dist/shared/ollama.d792a03f.mjs";
 import { Component, FC, useEffect, useState, memo } from "react";
 import { useSelector } from "react-redux";
 import { data, useOutletContext } from "react-router";
-
+import { QuestionCircleOutlined } from "@ant-design/icons";
 
 
 const ComponentsRender = ({ type, dataMap, constDataMap, componentMap, inputAnalysisMethod, dataKey: dataKey_, data: data_, name, component_id, inputKey, ...rest }: any) => {
@@ -82,14 +82,14 @@ const ComponentsRender = ({ type, dataMap, constDataMap, componentMap, inputAnal
 const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => {
     if (!formJson) return null
     // const { projectObj } = useOutletContext<any>()
-    const {  projectObj} = useSelector((state: any) => state.user); 
-    const [parameter,setParameter] = useState<any>()
+    const { projectObj } = useSelector((state: any) => state.user);
+    const [parameter, setParameter] = useState<any>()
     useEffect(() => {
-        if(projectObj?.parameter){
-            try{
-                const param = JSON.parse( projectObj?.parameter)
+        if (projectObj?.parameter) {
+            try {
+                const param = JSON.parse(projectObj?.parameter)
                 setParameter(param)
-            }catch(e){
+            } catch (e) {
                 setParameter({})
             }
         }
@@ -189,9 +189,13 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
             dataKey: "sample_group_list"
         }, Divider: {
             Component: DividerComp,
+        }, BaseColorPicker: {
+            Component: BaseColorPicker,
+        }, ThreeColorPicker: {
+            Component: ThreeColorPicker,
         }
     };
-     
+
     return <>
         {/* {JSON.stringify(dataMap)} */}
         <Row gutter={[8, 0]}>
@@ -525,7 +529,7 @@ export const CollectedGroupSelectSampleButton2: FC<any> = ({ label, name, rules,
     </>
 }
 
-export const CollectedGroupSelectSampleButton: FC<any> = ({ label,projParameter, name, rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
+export const CollectedGroupSelectSampleButton: FC<any> = ({ label, projParameter, name, rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
     const [sampleGrouped, setSampleGrouped] = useState<any>()
     const [options, setOptions] = useState<any>([])
     const [collectFiles, setCollectFiles] = useState<any>([])
@@ -647,7 +651,7 @@ export const CollectedGroupSelectSampleButton: FC<any> = ({ label,projParameter,
                 <Input size="small" placeholder="Optional group name"></Input>
             </Form.Item>
             <Form.Item name={[name, "color"]} >
-                <ColorPickerComp projParameter={projParameter}/>
+                <ColorPickerComp projParameter={projParameter} />
             </Form.Item>
         </Flex>
 
@@ -657,7 +661,7 @@ export const CollectedGroupSelectSampleButton: FC<any> = ({ label,projParameter,
 
 
 
-export const SimplpeGroupSelect: FC<any> = ({ label,projParameter, name, rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
+export const SimplpeGroupSelect: FC<any> = ({ label, projParameter, name, rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
 
     return <>
         <div>
@@ -668,14 +672,14 @@ export const SimplpeGroupSelect: FC<any> = ({ label,projParameter, name, rules, 
                 <Input size="small" placeholder="Optional group name"></Input>
             </Form.Item>
             <Form.Item name={[name, "color"]} noStyle>
-                <ColorPickerComp projParameter={projParameter}/>
+                <ColorPickerComp projParameter={projParameter} />
             </Form.Item>
 
         </Flex>
     </>
 }
 
-export const GroupSelectSampleButton: FC<any> = ({ label,projParameter, name, rules, data, filter, group, groupField: groupField_ }) => {
+export const GroupSelectSampleButton: FC<any> = ({ label, projParameter, name, rules, data, filter, group, groupField: groupField_ }) => {
     const [sampleGrouped, setSampleGrouped] = useState<any>()
     const [options, setOptions] = useState<any>([])
     // const {  project } = useOutletContext<any>()
@@ -767,18 +771,81 @@ export const GroupSelectSampleButton: FC<any> = ({ label,projParameter, name, ru
             </Form.Item>
             <Form.Item name={[name, "color"]} >
                 {/* <Input size="small" placeholder="Optional group color" ></Input> */}
-                <ColorPickerComp projParameter={projParameter}/>
+                <ColorPickerComp projParameter={projParameter} />
             </Form.Item>
         </Flex>
 
     </>
 }
+const ThreeColorPicker: FC<any> = ({ label, name, data, initialValue:initialValue_, rules, ...rest }) => {
+    const [initialValue,setInitialValue] = useState<any>([null,null,null])
+    useEffect(()=>{
+        if(initialValue_ && Array.isArray(initialValue_) && initialValue_.length==3){
+            setInitialValue(initialValue_)
+        }
+    },[initialValue_])
 
-const ColorPickerComp: FC<any> = ({projParameter, value, onChange, ...rest }) => {
-  
     return <>
- 
-        <ColorPicker presets={(projParameter?.colors)?projParameter?.colors:[]} allowClear {...rest} value={value} onChange={(color) => {
+        <Flex gap={"small"}>
+            <div>{label}</div>
+            <Tooltip title={`The first color represents a low value, and the third color represents a high value.`}>
+                <QuestionCircleOutlined style={{ color: "rgba(0,0,0,0.45)" }} />
+            </Tooltip>
+        </Flex>
+
+        <Row gutter={[8, 0]}>
+
+            <Col span={8}>
+                <Form.Item noStyle initialValue={initialValue[0]} name={[name, "color1"]} rules={rules}>
+                    <ColorPickerComp {...rest} />
+                </Form.Item>
+            </Col>
+            <Col span={8}>
+                <Form.Item initialValue={initialValue[1]} noStyle name={[name, "color2"]} rules={rules}>
+                    <ColorPickerComp {...rest} />
+                </Form.Item>
+            </Col>
+            <Col span={8}>
+                <Form.Item initialValue={initialValue[2]} noStyle name={[name, "color3"]} rules={rules}>
+                    <ColorPickerComp {...rest} />
+                </Form.Item>
+            </Col>
+        </Row>
+
+    </>
+}
+const BaseColorPicker: FC<any> = ({ label, name, data, initialValue, rules, ...rest }) => {
+    return <>
+        <Form.Item initialValue={initialValue} label={label} name={name} rules={rules}>
+            <ColorPicker {...rest} />
+        </Form.Item>
+    </>
+}
+
+const ColorPickerComp: FC<any> = ({ projParameter, value, onChange, ...rest }) => {
+    const customPanelRender: ColorPickerProps['panelRender'] = (
+        _,
+        { components: { Picker, Presets } },
+    ) => (
+        <Row justify="space-between" wrap={false}>
+            <Col span={12}>
+                <Presets />
+            </Col>
+            <Divider type="vertical" style={{ height: 'auto' }} />
+            <Col flex="auto">
+                <Picker />
+            </Col>
+        </Row>
+    );
+    return <>
+
+
+        {/* <ColorPicker
+            styles={{ popupOverlayInner: { width: 480 } }}
+            presets={presets}
+           
+        /> */}
+        <ColorPicker styles={{ popupOverlayInner: { width: 480 } }} panelRender={customPanelRender} presets={(projParameter?.colors) ? projParameter?.colors : []} allowClear {...rest} value={value} onChange={(color) => {
             const hexColor = color.toHexString();
             onChange(hexColor)
             // console.log(hexColor)
