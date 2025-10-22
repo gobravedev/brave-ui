@@ -3,6 +3,7 @@ import TextArea from "antd/es/input/TextArea";
 import axios from "axios";
 import { A } from "ollama/dist/shared/ollama.d792a03f.mjs";
 import { Component, FC, useEffect, useState, memo } from "react";
+import { useSelector } from "react-redux";
 import { data, useOutletContext } from "react-router";
 
 
@@ -80,7 +81,19 @@ const ComponentsRender = ({ type, dataMap, constDataMap, componentMap, inputAnal
 
 const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => {
     if (!formJson) return null
-    const { projectObj } = useOutletContext<any>()
+    // const { projectObj } = useOutletContext<any>()
+    const {  projectObj} = useSelector((state: any) => state.user); 
+    const [parameter,setParameter] = useState<any>()
+    useEffect(() => {
+        if(projectObj?.parameter){
+            try{
+                const param = JSON.parse( projectObj?.parameter)
+                setParameter(param)
+            }catch(e){
+                setParameter({})
+            }
+        }
+    }, [projectObj?.parameter])
 
     const rank = [
         {
@@ -162,6 +175,8 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
         GroupSelectSampleButton: {
             Component: GroupSelectSampleButton,
             // dataKey: "sample_group_list"
+        }, SimplpeGroupSelect: {
+            Component: SimplpeGroupSelect,
         }, CollectedGroupSelectSampleButton: {
             Component: CollectedGroupSelectSampleButton,
             // dataKey: "sample_group_list"
@@ -176,17 +191,18 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
             Component: DividerComp,
         }
     };
-
+     
     return <>
         {/* {JSON.stringify(dataMap)} */}
         <Row gutter={[8, 0]}>
+            {/* {JSON.stringify(projectObj?.parameter)} */}
             {formJson.map((it: any, index: any) => (<>
                 <Col span={it?.col ? it?.col : 12} >
                     {/* {JSON.stringify(it)} */}
 
-                    <ComponentsRender analysisResultId={analysisResultId} key={index} {...it} dataMap={dataMap} componentMap={componentMap} constDataMap={constDataMap}></ComponentsRender>
+                    <ComponentsRender projParameter={parameter} analysisResultId={analysisResultId} key={index} {...it} dataMap={dataMap} componentMap={componentMap} constDataMap={constDataMap}></ComponentsRender>
                 </Col>
-                
+
             </>
 
             ))}
@@ -211,7 +227,7 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
 
 export default FormJsonComp
 
-const DividerComp:FC<any> =  ({text})=>{
+const DividerComp: FC<any> = ({ text }) => {
     return <Divider orientation="left" >{text}</Divider>
 }
 const FilterSelect: FC<any> = ({ label, name, data, rules, field, ...rest }) => {
@@ -328,7 +344,7 @@ const BaseTextAreaNum: FC<any> = ({ label, name, tooltip, data, initialValue, ru
     return <>
 
         <Form.Item tooltip={tooltip} extra={`A total of ${content ? content.split(",").length : 0} features are entered`} initialValue={initialValue} label={label} name={name} rules={rules}>
-            <TextArea {...rest} rows={3} />
+            <TextArea allowClear {...rest} rows={3} />
 
         </Form.Item>
 
@@ -509,7 +525,7 @@ export const CollectedGroupSelectSampleButton2: FC<any> = ({ label, name, rules,
     </>
 }
 
-export const CollectedGroupSelectSampleButton: FC<any> = ({ label, name, rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
+export const CollectedGroupSelectSampleButton: FC<any> = ({ label,projParameter, name, rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
     const [sampleGrouped, setSampleGrouped] = useState<any>()
     const [options, setOptions] = useState<any>([])
     const [collectFiles, setCollectFiles] = useState<any>([])
@@ -631,14 +647,35 @@ export const CollectedGroupSelectSampleButton: FC<any> = ({ label, name, rules, 
                 <Input size="small" placeholder="Optional group name"></Input>
             </Form.Item>
             <Form.Item name={[name, "color"]} >
-                <ColorPickerComp />
+                <ColorPickerComp projParameter={projParameter}/>
             </Form.Item>
         </Flex>
 
     </>
 }
 
-export const GroupSelectSampleButton: FC<any> = ({ label, name, rules, data, filter, group, groupField: groupField_ }) => {
+
+
+
+export const SimplpeGroupSelect: FC<any> = ({ label,projParameter, name, rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
+
+    return <>
+        <div>
+            {label}:
+        </div>
+        <Flex gap="small">
+            <Form.Item name={[name, "group_name"]} noStyle >
+                <Input size="small" placeholder="Optional group name"></Input>
+            </Form.Item>
+            <Form.Item name={[name, "color"]} noStyle>
+                <ColorPickerComp projParameter={projParameter}/>
+            </Form.Item>
+
+        </Flex>
+    </>
+}
+
+export const GroupSelectSampleButton: FC<any> = ({ label,projParameter, name, rules, data, filter, group, groupField: groupField_ }) => {
     const [sampleGrouped, setSampleGrouped] = useState<any>()
     const [options, setOptions] = useState<any>([])
     // const {  project } = useOutletContext<any>()
@@ -730,17 +767,18 @@ export const GroupSelectSampleButton: FC<any> = ({ label, name, rules, data, fil
             </Form.Item>
             <Form.Item name={[name, "color"]} >
                 {/* <Input size="small" placeholder="Optional group color" ></Input> */}
-                <ColorPickerComp />
+                <ColorPickerComp projParameter={projParameter}/>
             </Form.Item>
         </Flex>
 
     </>
 }
 
-const ColorPickerComp: FC<any> = ({ value, onChange, ...rest }) => {
-
+const ColorPickerComp: FC<any> = ({projParameter, value, onChange, ...rest }) => {
+  
     return <>
-        <ColorPicker defaultValue={'#1677ff'} {...rest} value={value} onChange={(color) => {
+ 
+        <ColorPicker presets={(projParameter?.colors)?projParameter?.colors:[]} allowClear {...rest} value={value} onChange={(color) => {
             const hexColor = color.toHexString();
             onChange(hexColor)
             // console.log(hexColor)

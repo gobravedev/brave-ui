@@ -491,11 +491,11 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
     const sseAnalysisIdRef = useRef<any>(null)
     // const { messageApi } = useOutletContext<any>()
     const message = useGlobalMessage()
-    const { modals, openModals, closeModals } = useModals(["editParams", "moduleEdit","createOrUpdatePipelineComponent"]);
+    const { modals, openModals, closeModals } = useModals(["editParams", "moduleEdit", "createOrUpdatePipelineComponent"]);
     const { containerURL, project } = useSelector((state: any) => state.user);
     const [runingLoading, setRuningLoading] = useState<boolean>(false)
     const [form] = Form.useForm();
-  
+
     const loadData = async (analysis_id: any) => {
         setLoading(true)
         // const res = await axios.get(`/file-operation/visualization-results?path=${output_dir}`)
@@ -507,12 +507,32 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
         analysisIdRef.current = analysis_id
         setLoading(false)
     }
+    function deepMerge(target: any, source: any) {
+        for (const key in source) {
+            if (
+                source[key] &&
+                typeof source[key] === "object" &&
+                !Array.isArray(source[key])
+            ) {
+                // 如果是对象，则递归合并
+                if (!target[key] || typeof target[key] !== "object") {
+                    target[key] = {};
+                }
+                deepMerge(target[key], source[key]);
+            } else {
+                // 否则直接覆盖
+                target[key] = source[key];
+            }
+        }
+        return target;
+    }
     const buildRequest = (values: any) => {
+        const merged = deepMerge({ ...analsyisResult?.request_param }, values);
+
         const requestParam = {
             analysis_id: analysis_id,
-            ...analsyisResult?.request_param,
-            ...values,
-            project: project
+            project: project,
+            ...merged,
         }
         return requestParam
 
@@ -604,7 +624,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
 
                     </>}
                     <Button size="small" color="cyan" variant="solid" onClick={() => {
-                       openModals("createOrUpdatePipelineComponent", {
+                        openModals("createOrUpdatePipelineComponent", {
                             data: {
                                 component_id: analsyisResult?.component_id,
                             }, structure: {
@@ -735,62 +755,68 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, cancalRe
                         </>
                         }
                     </Col>
-                    <Col lg={8} sm={8} xs={24} style={{ borderLeft: "1px solid #f0f0f0" }}>
+                    <Col lg={8} sm={8} xs={24} style={{}}>
                         {/* <Divider  />  layout="vertical" */}
-                        <Form form={form}  size="small"    layout="vertical"  >
-                            {analsyisResult?.form_json && <>
+                        <div style={{ border: "1px solid rgba(5,5,5,0.06)", maxHeight: "70vh", overflowY: "auto", padding: "0.5rem", marginBottom: "1rem" }}>
+                            <Form form={form} size="small" layout="vertical"  >
+                                {analsyisResult?.form_json && <>
 
 
-                                <FormJsonComp formJson={analsyisResult?.form_json} dataMap={{}} ></FormJsonComp>
-                                <Form.Item  >
-                                    <Popconfirm
-                                        title={"Whether to submit?"}
-                                        onConfirm={async () => {
-                                            if (analsyisResult?.job_status == "running") {
-                                                message.error("Running, please wait!")
-                                            } else {
-                                                const values = buildRequest(await form.validateFields())
-                                                const resp: any = await axios.post(`/fast-api/analysis-controller?save=true&is_submit=true`, values)
-                                                console.log(values)
-                                                message.success("Submit Success!")
-                                            }
+                                    <FormJsonComp formJson={analsyisResult?.form_json} dataMap={{}} ></FormJsonComp>
+                                    <Form.Item  >
+                                        <Popconfirm
+                                            title={"Whether to submit?"}
+                                            onConfirm={async () => {
+                                                if (analsyisResult?.job_status == "running") {
+                                                    message.error("Running, please wait!")
+                                                } else {
+                                                    const values = buildRequest(await form.validateFields())
+                                                    const resp: any = await axios.post(`/fast-api/analysis-controller?save=true&is_submit=true`, values)
+                                                    console.log(values)
+                                                    message.success("Submit Success!")
+                                                }
 
-                                            // // console.log('values', values)
-                                            // const requestParam = buildRequest(values)
-                                            // // console.log('requestParam', requestParam)
-                                            // setAnalsyisResult({
-                                            //     ...analsyisResult,
-                                            //     request_param: requestParam
-                                            // })
-                                            // messageApi.success("Update Success")
-                                        }}>
-                                        <Button disabled={analsyisResult?.job_status == "running"} type="primary" size="small" >Submit</Button>
-                                    </Popconfirm>
+                                                // // console.log('values', values)
+                                                // const requestParam = buildRequest(values)
+                                                // // console.log('requestParam', requestParam)
+                                                // setAnalsyisResult({
+                                                //     ...analsyisResult,
+                                                //     request_param: requestParam
+                                                // })
+                                                // messageApi.success("Update Success")
+                                            }}>
+                                            <Button disabled={analsyisResult?.job_status == "running"} type="primary" size="small" >Submit</Button>
+                                        </Popconfirm>
 
-                                </Form.Item>
-                                <Collapse ghost items={[
-                                    {
-                                        key: "1",
-                                        label: "More",
-                                        children: <>
-                                            <Form.Item noStyle shouldUpdate>
-                                                {() => (
-                                                    <Typography>
-                                                        <pre>{JSON.stringify(buildRequest(form.getFieldsValue()), null, 2)}</pre>
-                                                    </Typography>
-                                                )}
-                                            </Form.Item>
-                                        </>
-                                    }
-                                ]} />
+                                    </Form.Item>
+                                    <Collapse ghost items={[
+                                        {
+                                            key: "1",
+                                            label: "More",
+                                            children: <>
+                                                <Form.Item noStyle shouldUpdate>
+                                                    {() => (
+                                                        <Typography>
+                                                            <pre>{JSON.stringify(buildRequest(form.getFieldsValue()), null, 2)}</pre>
+                                                        </Typography>
+                                                    )}
+                                                </Form.Item>
+                                            </>
+                                        }
+                                    ]} />
 
-                            </>}
-                        </Form>
+                                </>}
+                            </Form>
+                        </div>
+
                         {/* {analsyisResult?.params && <ParamsView params={analsyisResult?.params}></ParamsView>} */}
 
 
-                        <Divider />
-                        <Markdown data={analsyisResult?.description}></Markdown>
+                        {/* <Divider /> */}
+                        <div style={{ border: "1px solid rgba(5,5,5,0.06)", maxHeight: "70vh", overflowY: "auto", padding: "0.5rem", marginBottom: "1rem" }}>
+                            <Markdown data={analsyisResult?.description}></Markdown>
+
+                        </div>
 
 
                     </Col>
