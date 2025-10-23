@@ -1,6 +1,6 @@
 import { Button, Card, Col, Empty, Flex, Row, Segmented, Skeleton, Tabs, Tag, Tree, TreeDataNode, TreeProps } from "antd"
 import axios from "axios"
-import { FC, use, useEffect, useRef, useState } from "react"
+import { FC, lazy, use, useEffect, useRef, useState } from "react"
 import { useLocation, useNavigate, useOutletContext, useParams } from "react-router"
 import { DownOutlined, RedoOutlined } from '@ant-design/icons'
 import { AnalysisResultViewComp } from '@/components/analysis-result-view'
@@ -10,6 +10,11 @@ import { useModal } from "@/hooks/useModal"
 import FormProject from "@/components/form-project"
 import Markdown from "@/components/markdown"
 import { useStickyTop } from "@/hooks/useStickyTop"
+import { cp } from "fs"
+import { E } from "node_modules/@faker-js/faker/dist/airline-CLphikKp"
+
+const ResultParse = lazy(() => import("@/components/result-parse"))
+
 const AnalysisReport: FC<any> = () => {
     const [loading, setLoading] = useState<boolean>(false)
     // const { project, projectObj } = useOutletContext<any>()
@@ -23,6 +28,7 @@ const AnalysisReport: FC<any> = () => {
     const projectParam = queryParams.get("project");
     const dispatch = useDispatch()
     const { modal, openModal, closeModal } = useModal();
+    const [componentType,setComponentType] = useState<any>()
     // const [queryProject, setQueryProject] = useState<any>()
     const [analysisKey, setAnalysisKey] = useState<any>(key)
 
@@ -100,13 +106,18 @@ const AnalysisReport: FC<any> = () => {
 
 
         setData(resp.data)
+        // debugger
         if (!key && resp.data.length > 0) {
             if (resp.data[0]?.children && resp.data[0]?.children.length > 0) {
                 setAnalysis(resp.data[0]?.children[0])
                 setAnalysisKey(resp.data[0]?.children[0]?.key)
+                console.log(resp.data[0]?.children[0])
+                setComponentType(resp.data[0]?.children[0]?.component_type)
                 updateQueryParam("project", project);
                 updateQueryParam("key", resp.data[0]?.children[0]?.key);
             }
+        }else{
+
         }
 
         setLoading(false)
@@ -155,13 +166,16 @@ const AnalysisReport: FC<any> = () => {
                     }}
                 >
                     {analysisKey ? <>
-
+                        {/* <ResultParse analysis_id={analysisKey}  ></ResultParse> */}
+                        {/* {componentType}111 */}
                         <AnalysisResultViewComp
                             overflowY="auto"
                             openPanel={setPanel}
                             loadTree={() => {
                                 loadData()
                             }} analysis_id={analysisKey}></AnalysisResultViewComp>
+
+
                     </> : <>
                         <Card size="small" variant="borderless">
                             <Empty></Empty>
@@ -348,6 +362,7 @@ const AnalysisReport: FC<any> = () => {
                             if (val.node?.type == "analysis") {
                                 setAnalysis(val.node)
                                 setAnalysisKey(val.node.key)
+                                setComponentType(val.node.component_type)
                                 updateQueryParam("project", project);
                                 updateQueryParam("key", val.node.key);
                             } else if (val.node?.type == "components") {

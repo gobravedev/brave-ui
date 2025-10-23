@@ -55,7 +55,7 @@ const Pipeline: FC<any> = ({ }) => {
     const { modal, openModal, closeModal } = useModal();
     const { modals, openModals, closeModals } = useModals(["modalD", "metadataModal", "bindSample"])
     // const { project: { project_id } } = useSelector((state: any) => state.context)
-    const { project: project_id } = useSelector((state: any) => state.user);
+    const { project: project_id, componentLayout } = useSelector((state: any) => state.user);
 
     // const [createOpen, setCreateOpen] = useState<any>(false)
     // const [record, setRecord] = useState<any>()
@@ -292,6 +292,7 @@ const Pipeline: FC<any> = ({ }) => {
 
 
                         <MemoizedComponentsRender
+                            componentLayout={componentLayout}
                             component_type={component_type || ""}
                             component={pipeline}
                             tableRef={tableRef}
@@ -340,7 +341,7 @@ const Pipeline: FC<any> = ({ }) => {
 
                         {/* {JSON.stringify(pipeline.description)} */}
                         {pipeline?.description && <>
-                        
+
                             <Markdown data={pipeline?.description}></Markdown>
                         </>}
 
@@ -545,6 +546,8 @@ interface PipelineComponentProps {
     operatePipeline: any,
     component: any,
     tableRef: any,
+    componentLayout: string
+
 }
 interface PipelineComponentRenderProps extends PipelineComponentProps {
     component_type: string
@@ -567,14 +570,14 @@ const MemoizedComponentsRender = React.memo(ComponentsRender, (prevProps, nextPr
     return JSON.stringify(prevProps) === JSON.stringify(nextProps)
 });
 
-const SoftwareComponent = ({ operatePipeline, component, ...rest }: PipelineComponentProps) => {
+const SoftwareComponent = ({ operatePipeline, component, componentLayout,...rest }: PipelineComponentProps) => {
 
-
+    // 
     return <>
 
 
         <AnalysisPanel
-
+            componentLayout={componentLayout}
             // inputAnalysisMethod={item.inputAnalysisMethod}
             // analysisPipline={item.analysisPipline}
             // analysisMethod={item.analysisMethod}

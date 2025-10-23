@@ -21,7 +21,8 @@ interface UserState {
     projectObj:any;
     project:any;
     githubToken:any;
-    storeRepos:any
+    storeRepos:any;
+    componentLayout:"simple"|"complex"
     
 }
 const contextSlice = createSlice({
@@ -38,7 +39,8 @@ const contextSlice = createSlice({
         project:project?`${project}`:`default`,
         projectObj:{},
         githubToken:githubToken,
-        storeRepos:storeRepos?storeRepos:"[]"
+        storeRepos:storeRepos?storeRepos:"[]",
+        componentLayout:"simple"
     },
     reducers: {
         setUserItem(state, action: PayloadAction<Partial<UserState>>) {
@@ -69,6 +71,9 @@ const contextSlice = createSlice({
             }
             if(action.payload.storeRepos){
                 localStorage.setItem('storeRepos', action.payload.storeRepos)
+            }
+            if(action.payload.componentLayout){
+                localStorage.setItem('componentLayout', action.payload.componentLayout)
             }
             // debugger
         },

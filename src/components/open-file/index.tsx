@@ -47,9 +47,11 @@ const OpenFile: FC<any> = ({ visible, onClose, params }) => {
         width="80vw"
         open={visible}
         onCancel={onClose}
-        title="打开文件"
-        footer={false}
-
+        title="Open Task File"
+        footer={<>
+        {tabKey}
+        </>}
+        
     >
 
         <Tabs tabBarExtraContent={

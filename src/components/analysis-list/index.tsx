@@ -1,5 +1,5 @@
 import { Venn } from "@ant-design/plots"
-import { Button, Card, Dropdown, Flex, Form, Input, message, Modal, Popconfirm, Popover, Select, Space, Table, Tag, Tooltip } from "antd"
+import { Button, Card, Dropdown, Flex, Form, Input, message, Modal, Pagination, Popconfirm, Popover, Select, Space, Table, Tag, Tooltip } from "antd"
 import axios from "axios"
 import { FC, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { useLocation, useNavigate, useOutletContext, useParams } from "react-router"
@@ -15,30 +15,31 @@ export const readJsonAPi = (contentPath: any) => axios.get(`/fast-api/read-json?
 import EditParams from '../edit-params'
 import { useSelector } from "react-redux"
 import { InspectPanel } from "@/pages/container"
+import ResultParsePanel from "../result-parse/panel"
+import { usePagination } from "@/hooks/usePagination"
+import AnalysisTaskDrawer from "../analysis-task/drawer"
+import AnalysisTaskPanel from "../analysis-task/panel"
 
-const ResultList = forwardRef<any, any>(({
-    title,
-    form,
-    appendSampleColumns = [],
-    setResultTableList,
-    cleanDom,
-    analysisType,
-    setRecord: setRecord_,
-    setTableLoading,
-    setTabletData,
-    shouldTrigger,
-    // analysisMethod,
-    columnsParamsALL,
+const AnalysisList = forwardRef<any, any>(({
     project,
-    software,
     component_id,
     component_ids,
-    operatePipeline,
-    editParams
+
 }, ref) => {
+    const { data, pageNumber, totalPage, loading, reload: loadData, pageSize, setPageNumber, search } = usePagination({
+        url: `/list-analysis`,
+        params: {
+            component_id: component_id,
+            component_ids: component_ids,
+            project: project
+        },
+        initialPageSize: 10
+    })
+
     useImperativeHandle(ref, () => ({
         reload: loadData
     }))
+
     const [record, setRecord0] = useState<any>()
     const [messageApi, contextHolder] = message.useMessage();
     const { modal, openModal, closeModal } = useModal();
@@ -47,13 +48,13 @@ const ResultList = forwardRef<any, any>(({
     const [openMonitor, setOpenMonitor] = useState<any>(false)
     const navigate = useNavigate()
     const location = useLocation()
-    const { eventSourceRef, status, reconnect } = useSSEContext();
-    const [data, setData] = useState<any>([])
+    // const { eventSourceRef, status, reconnect } = useSSEContext();
+    // const [data, setData] = useState<any>([])
     const analysisIdRef = useRef<any>([])
     // const analysisResultRef = useRef<any>(null)
     const pipelineInfoRef = useRef<any>(null)
     // const [content,setContent] = useState<any>()
-    const [loading, setLoading] = useState(true)
+    // const [loading, setLoading] = useState(true)
     const [currentAnalysis, setCurrentAnalysis] = useState<any>()
     const { containerURL } = useSelector((state: any) => state.user);
 
@@ -69,80 +70,102 @@ const ResultList = forwardRef<any, any>(({
 
         }
     }, [data, modal.params])
-
+    const sseData = useSelector((state: any) => state.global.sseData)
     useEffect(() => {
-        if (eventSourceRef) {
-            const handler = (event: MessageEvent) => {
-                // console.log('event', event)
-                const data = JSON.parse(event.data)
-                console.log('analysisId', analysisIdRef.current)
-                if (analysisIdRef.current.includes(data.analysis_id)) {
+        // console.log("sseData in result list:", data.msgType)
+        const data = sseData
+        if (analysisIdRef.current.includes(data.analysis_id)) {
 
-                    if (data.event == "analysis_complete" || data.event == "analysis_failed" || data.event == "analysis_started") {
-                        loadData()
-                        // if (analysisResultRef.current) {
-                        //     analysisResultRef.current?.relaod()
-                        // }
-                        if (pipelineInfoRef.current) {
-                            pipelineInfoRef.current?.relaod()
-                        }
-                    }
-
-                } else if (data.run_type == "retry") {
-                    if (data.event == "container_pulled") {
-                        loadData()
-                    }
+            if (data.event == "analysis_complete" || data.event == "analysis_failed" || data.event == "analysis_started") {
+                loadData()
+                // if (analysisResultRef.current) {
+                //     analysisResultRef.current?.relaod()
+                // }
+                if (pipelineInfoRef.current) {
+                    pipelineInfoRef.current?.relaod()
                 }
-            };
+            }
 
-            eventSourceRef.current?.addEventListener('message', handler);
-
-            return () => {
-                console.log("removeEventListener")
-                eventSourceRef.current?.removeEventListener('message', handler);
-            };
+        } else if (data.run_type == "retry") {
+            if (data.event == "container_pulled") {
+                loadData()
+            }
         }
+    }, [sseData])
 
+    // useEffect(() => {
+    //     if (eventSourceRef) {
+    //         const handler = (event: MessageEvent) => {
+    //             // console.log('event', event)
+    //             const data = JSON.parse(event.data)
+    //             console.log('analysisId', analysisIdRef.current)
+    //             if (analysisIdRef.current.includes(data.analysis_id)) {
 
+    //                 if (data.event == "analysis_complete" || data.event == "analysis_failed" || data.event == "analysis_started") {
+    //                     loadData()
+    //                     // if (analysisResultRef.current) {
+    //                     //     analysisResultRef.current?.relaod()
+    //                     // }
+    //                     if (pipelineInfoRef.current) {
+    //                         pipelineInfoRef.current?.relaod()
+    //                     }
+    //                 }
 
+    //             } else if (data.run_type == "retry") {
+    //                 if (data.event == "container_pulled") {
+    //                     loadData()
+    //                 }
+    //             }
+    //         };
 
-    }, [eventSourceRef.current, project]);
+    //         eventSourceRef.current?.addEventListener('message', handler);
+
+    //         return () => {
+    //             console.log("removeEventListener")
+    //             eventSourceRef.current?.removeEventListener('message', handler);
+    //         };
+    //     }
+    // }, [eventSourceRef.current, project]);
 
 
 
     const setRecord = (record: any) => {
-        if (setRecord_) {
-            setRecord_(record)
-        }
 
         setRecord0(record)
     }
 
-    const loadData = async () => {
-        setLoading(true)
-        // ?analysis_method=${analysisMethod}&project=${project}
-        let resp: any = await axios.post(`/list-analysis`, {
-            // analysisMethod: analysisMethod,
-            component_id: component_id,
-            component_ids: component_ids,
-            project: project
-        });
-        // if (analysisMethod) {
-        //     resp = await axios.get(`/api/analysis-result?project=${project}&analysis_method=${analysisMethod}`)
-        // } else {
-        //     resp 
-        // }
-        if (setResultTableList) {
-            setResultTableList(resp.data)
+    useEffect(() => {
+        if (data && data.length > 0) {
+            const analysisId = data.map((item: any) => item.analysis_id)
+
+            analysisIdRef.current = analysisId
         }
 
-        setData(resp.data)
-        const analysisId = resp.data.map((item: any) => item.analysis_id)
-        // console.log('>>>>>>>>analysisId', analysisId)
+    }, [data])
+    // const loadData = async () => {
+    //     setLoading(true)
+    //     // ?analysis_method=${analysisMethod}&project=${project}
+    //     let resp: any = await axios.post(`/list-analysis`, {
+    //         // analysisMethod: analysisMethod,
+    //         component_id: component_id,
+    //         component_ids: component_ids,
+    //         project: project
+    //     });
+    //     // if (analysisMethod) {
+    //     //     resp = await axios.get(`/api/analysis-result?project=${project}&analysis_method=${analysisMethod}`)
+    //     // } else {
+    //     //     resp 
+    //     // }
 
-        analysisIdRef.current = analysisId
-        setLoading(false)
-    }
+
+    //     setData(resp.data)
+    //     const analysisId = resp.data.map((item: any) => item.analysis_id)
+    //     // console.log('>>>>>>>>analysisId', analysisId)
+
+    //     analysisIdRef.current = analysisId
+    //     setLoading(false)
+    // }
+
     const deleteById = async (id: any) => {
         const resp: any = await axios.delete(`/fast-api/analysis/${id}`)
         message.success("successfully delete!")
@@ -150,19 +173,10 @@ const ResultList = forwardRef<any, any>(({
     }
 
 
-    const readJOSN = async (contentPath: any) => {
-        setTableLoading(true)
-        const resp: any = await readJsonAPi(contentPath)
-        setTabletData(resp.data)
-        setTableLoading(false)
-        // reset()
-        // console.log(resp.data)
-        // setData(resp.datafv)
-    }
 
-    const isSelected = (record: any, key: any) => {
+    const isSelected = (record: any, keys: any[]) => {
         if (!modal.params) return false
-        return record.analysis_id == modal.params.analysis_id && key == modal.key
+        return record.analysis_id == modal.params.analysis_id && keys.includes(modal.key)
     }
     const runAnalysis = async (record: any, run_type: string) => {
         await runAnalysisApi(record.analysis_id, run_type)
@@ -276,6 +290,16 @@ const ResultList = forwardRef<any, any>(({
                     </Tag>
                 </Tooltip>
             )
+        }, {
+            title: "Created At",
+            dataIndex: "created_at",
+            key: "created_at",
+            ellipsis: true,
+        }, {
+            title: "Updated At",
+            dataIndex: "updated_at",
+            key: "updated_at",
+            ellipsis: true,
         },
         // {
         //     title: "ports",
@@ -314,7 +338,14 @@ const ResultList = forwardRef<any, any>(({
                             </> : <>
                                 <Popconfirm title={"Whether or not to run?"} onConfirm={() => {
                                     runAnalysis(record, "job")
-                                    openModal("modalA", record)
+                                    if (record.component_type == "software") {
+                                        openModal("resultParsePanel", {
+                                            analysis_id: record.analysis_id,
+                                        })
+                                    } else if (record.component_type == "script") {
+                                        openModal("modalA", record)
+                                    }
+                                    // openModal("modalA", record)
                                     setRecord(record)
                                 }}>
                                     <Button size="small" color="cyan" variant="solid">
@@ -346,14 +377,25 @@ const ResultList = forwardRef<any, any>(({
                     {/* {editParams && <Button size="small" color="cyan" variant="solid" onClick={() => editParams(record)}>编辑参数</Button>} */}
                     <Button size="small" color="cyan" variant="solid" onClick={() => openModal("editParams", record.analysis_id)}>Edit Parameters</Button>
                     {
-                        isSelected(record, "modalA") ?
-                            <Button size="small" color={"cyan"} variant="solid" onClick={() => {
+                        isSelected(record, ["modalA", "resultParsePanel"]) ?
+                            <Button size="small" color={"red"} variant="solid" onClick={() => {
                                 closeModal()
                             }}>Close</Button> :
-                            <Button size="small" color={"cyan"} variant="solid" onClick={() => {
-                                openModal("modalA", record)
-                                // setRecord(record)
-                            }}>View Results</Button>
+                            <Tooltip title={record.component_type}>
+                                <Button size="small" color={"cyan"} variant="solid" onClick={() => {
+                                    if (record.component_type == "software") {
+                                        openModal("resultParsePanel", {
+                                            analysis_id: record.analysis_id,
+                                        })
+                                    } else if (record.component_type == "script") {
+                                        openModal("modalA", record)
+                                    }
+                                    //
+
+                                    // setRecord(record)
+                                }}>View Results</Button>
+                            </Tooltip>
+
                     }
 
 
@@ -413,7 +455,7 @@ const ResultList = forwardRef<any, any>(({
                                 key: "1",
                                 label: (<>
                                     {
-                                        isSelected(record, "modalB") ?
+                                        isSelected(record, ["modalB"]) ?
                                             <a onClick={() => {
                                                 closeModal()
                                             }}>Close</a> :
@@ -468,7 +510,7 @@ const ResultList = forwardRef<any, any>(({
                                     await deleteById(record.analysis_id)
                                     loadData()
                                 }}>
-                                    <a >Delete</a>
+                                    <a style={{ color: 'red' }}>Delete</a>
                                 </Popconfirm></>)
                             }, {
                                 key: '5',
@@ -478,6 +520,14 @@ const ResultList = forwardRef<any, any>(({
                                 }}>
                                     {record.is_report ? "Cancel Report" : "Report"}
                                 </Popconfirm></>)
+                            },
+                            {
+                                key: 'analysisTaskDrawer',
+                                label: (<>
+                                    <a onClick={() => {
+                                        openModal("analysisTaskDrawer", { analysis_id: record.analysis_id })
+                                    }}>Analysis Task</a>
+                                </>)
                             },
                             {
                                 key: '6',
@@ -585,7 +635,18 @@ const ResultList = forwardRef<any, any>(({
                 loading={loading}
                 scroll={{ x: 'max-content', y: 55 * 5 }}
                 columns={columns}
-                footer={() => `A total of ${filteredData.length} records`}
+                footer={() => <>
+                    {totalPage != 0 && <Flex style={{ marginTop: "1rem" }} align="center">
+                        A total of {totalPage} records  &nbsp;
+                        <Pagination
+                            current={pageNumber}
+                            pageSize={pageSize}
+                            total={totalPage}
+                            onChange={(p) => setPageNumber(p)}
+                            showSizeChanger={false}
+                        />
+                    </Flex>}
+                </>}
                 dataSource={filteredData} />
 
         </Card>
@@ -596,6 +657,19 @@ const ResultList = forwardRef<any, any>(({
             visible={modal.key == "modalA" && modal.visible}
             params={modal.params}
             onClose={closeModal}></AnalysisResultView>
+
+        <ResultParsePanel
+            visible={modal.key == "resultParsePanel" && modal.visible}
+            onClose={closeModal}
+            callback={loadData}
+            params={modal.params}
+        ></ResultParsePanel>
+        <AnalysisTaskPanel
+            visible={modal.key == "analysisTaskDrawer" && modal.visible}
+            onClose={closeModal}
+            callback={loadData}
+            params={modal.params}
+        ></AnalysisTaskPanel>
         <PipelineInfo
             ref={pipelineInfoRef}
             visible={modal.key == "modalB" && modal.visible}
@@ -621,6 +695,9 @@ const ResultList = forwardRef<any, any>(({
             params={modals.inspectPanel.params}
             onClose={() => closeModals("inspectPanel")}
         ></InspectPanel>
+
+
+
         {/* <ResultParse
             visible={modal.key == "modalA" && modal.visible}
             onClose={closeModal}
@@ -631,7 +708,7 @@ const ResultList = forwardRef<any, any>(({
     </>
 })
 
-export default ResultList
+export default AnalysisList
 
 
 const AddProject: FC<any> = ({ visible, params, onClose, callback }) => {

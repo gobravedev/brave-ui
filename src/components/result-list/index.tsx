@@ -1,10 +1,10 @@
 import { useSSEContext } from "@/context/sse/useSSEContext"
 import { SSEContextType } from "@/type/sse"
 import { Venn } from "@ant-design/plots"
-import { Button, Card, Dropdown, Empty, Flex, GetProp, Input, InputNumber, Modal, Popconfirm, Popover, Space, Spin, Table, Tabs, Tag, theme, Tooltip, Typography, Upload, UploadFile, UploadProps } from "antd"
+import { Alert, Button, Card, Dropdown, Empty, Flex, GetProp, Input, InputNumber, Modal, Popconfirm, Popover, Space, Spin, Table, Tabs, Tag, theme, Tooltip, Typography, Upload, UploadFile, UploadProps } from "antd"
 import axios from "axios"
 import { FC, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
-import { useOutletContext, useParams } from "react-router"
+import { useNavigate, useOutletContext, useParams } from "react-router"
 import { DeleteFilled, DeleteOutlined, DownloadOutlined, DownOutlined, EditOutlined, FileOutlined, ImportOutlined, InboxOutlined, QuestionCircleOutlined, RedoOutlined, UploadOutlined } from "@ant-design/icons"
 import ImportData from "../import-data"
 import { useModal } from "@/hooks/useModal"
@@ -15,163 +15,7 @@ import Dragger from "antd/es/upload/Dragger"
 import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 import { useSelector } from "react-redux"
 import BigTable from '@/components/big-table';
-
-// import { List } from "react-window";
-// import { getScrollbarSize, List, type RowComponentProps } from "react-window";
-
-// interface LargeDataTableProps {
-//     columns: string[];
-//     rows: any[][];
-// }
-
-// // 每行渲染组件
-// function RowComponent({
-//     index,
-//     style,
-//     rows,
-// }: RowComponentProps<{
-//     rows: any[][];
-// }>) {
-//     const row = rows[index];
-//     return (
-//         <div
-//             role="row"
-//             className="flex flex-row items-center border-b border-gray-200 px-2"
-//             style={style}
-//         >
-//             {row.map((value: any, j: number) => (
-//                 <div
-//                     key={j}
-//                     role="cell"
-//                     className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm"
-//                 >
-//                     {String(value)}
-//                 </div>
-//             ))}
-//         </div>
-//     );
-// }
-// // const  Example2:FC<any> = ({ names })=> {
-// //     return (
-// //         <List
-// //             rowComponent={RowComponent}
-// //             rowCount={names.length}
-// //             rowHeight={25}
-// //         />
-// //     );
-// // }
-
-// const LargeDataTable: FC<LargeDataTableProps> = ({ columns, rows }) => {
-//     const [scrollbarWidth] = useState(getScrollbarSize);
-
-//     return (
-//         <div
-//             role="table"
-//             className="flex flex-col border border-gray-300 rounded-md"
-//         >
-//             {/* 表头 */}
-//             <div
-//                 role="rowgroup"
-//                 className="flex flex-row bg-gray-100 font-semibold px-2 py-1 border-b border-gray-300"
-//             >
-//                 <div className="grow flex flex-row items-center gap-2 w-full">
-//                     {columns.map((col, i) => (
-//                         <div
-//                             key={i}
-//                             role="columnheader"
-//                             className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap"
-//                         >
-//                             {col}
-//                         </div>
-//                     ))}
-//                 </div>
-//                 {/* 滚动条预留空间 */}
-//                 <div className="shrink-0" style={{ width: scrollbarWidth }} />
-//             </div>
-
-//             {/* 虚拟滚动主体 */}
-//             <div className="overflow-hidden">
-//                 <List
-//                     //   height={600}
-//                     rowCount={rows.length}
-//                     rowHeight={35}
-//                     rowProps={{ rows }}
-//                     rowComponent={RowComponent}
-//                 />
-//             </div>
-//         </div>
-//     );
-// };
-// import { useVirtualizer } from "@tanstack/react-virtual"
-
-// const  Example:FC<any> = ({ addresses }) =>{
-//     const [size] = useState(getScrollbarSize);
-//     return (
-//         <div className="h-55 flex flex-col">
-//             <div className="flex flex-row bg-teal-600 p-1 px-2">
-//                 <div className="grow flex flex-row items-center gap-2 font-bold">
-//                     <div className="flex-1">City</div>
-//                     <div className="flex-1">State</div>
-//                     <div className="w-10">Zip</div>
-//                 </div>
-//                 <div className="shrink" style={{ width: size }} />
-//             </div>
-//             <div className="overflow-hidden">
-//                 <List
-//                     rowComponent={RowComponent}
-//                     rowCount={addresses.length}
-//                     rowHeight={25}
-//                     rowProps={{ addresses }}
-//                 />
-//             </div>
-//         </div>
-//     );
-// }
-// function RowComponent({
-//     index,
-//     addresses,
-//     style
-// }: RowComponentProps<{
-//     addresses: any[];
-// }>) {
-//     const address = addresses[index];
-//     return (
-//         <div className="flex flex-row items-center gap-2 px-2" style={style}>
-//             <div className="flex-1">{address.city}</div>
-//             <div className="flex-1">{address.state}</div>
-//             <div className="w-10 text-xs">{address.zip}</div>
-//         </div>
-//     );
-// }
-
-// import { List } from "react-window";
-// function Example({ names }: { names: string[] }) {
-//     return (
-//         <List
-//             rowComponent={RowComponent}
-//             rowCount={names.length}
-//             rowHeight={25}
-//             rowProps={{ names }}
-//         />
-//     );
-// }
-// import { type RowComponentProps } from "react-window";
-// function RowComponent({
-//     index,
-//     names,
-//     style
-// }: RowComponentProps<{
-//     names: string[];
-// }>) {
-//     return (
-//         <div className="flex items-center justify-between" style={style}>
-//             {names[index]}
-//             <div className="text-slate-500 text-xs">{`${index + 1} of ${names.length}`}</div>
-//         </div>
-//     );
-// }
-
-
+import { useGlobalNotification } from "@/hooks/useGlobalNotification"
 
 
 const ResultList = forwardRef<any, any>(({
@@ -203,6 +47,7 @@ const ResultList = forwardRef<any, any>(({
     useImperativeHandle(ref, () => ({
         reload
     }))
+    const notify = useGlobalNotification();
 
     const { project, projectObj } = useOutletContext<any>()
     const message = useGlobalMessage()
@@ -211,7 +56,7 @@ const ResultList = forwardRef<any, any>(({
     // const [content,setContent] = useState<any>()
     const [loading, setLoading] = useState(true)
     // const { eventSource } = useOutletContext<SSEContextType>();
-    const { eventSourceRef, status, reconnect } = useSSEContext();
+    // const { eventSourceRef, status, reconnect } = useSSEContext();
     const { modal, openModal, closeModal } = useModal();
     const [tableRows, setTableRows] = useState<any[]>([])
     const [tableRowsInfo, setTableRowsInfo] = useState<any>({})
@@ -221,7 +66,7 @@ const ResultList = forwardRef<any, any>(({
     const [analysisResultId, setAnalysisResultId_] = useState<any>()
     const [rowNum, setRowNum] = useState<number>(200)
     const { baseURL } = useSelector((state: any) => state.user)
-
+    const navigate = useNavigate()
 
     const setAnalysisResultId = (analysis_result_id: any) => {
         setAnalysisResultId_(analysis_result_id)
@@ -231,54 +76,67 @@ const ResultList = forwardRef<any, any>(({
         }
     }
     const setTableColumns = (columns: any[]) => {
-        const columns_ = columns.map((it: any) => it.columns_name)
+        // const columns_ = columns.map((it: any) => it.columns_name)
         setTableColumns_([])
     }
+    const sseData = useSelector((state: any) => state.global.sseData)
     useEffect(() => {
-        if (!eventSourceRef) return;
-
-        const handler = (event: MessageEvent) => {
-            const data = JSON.parse(event.data)
-            // console.log("analysis_result", data)
-            if (data.msgType === "analysis_result") {
-                // message.success(data.msg)
-                const componentIdList = analysisMethod.map((it: any) => it.component_id)
-                console.log("componentIdList", componentIdList)
-                console.log("data.component_id ", data.component_id)
-                console.log(" componentIdList.includes(data.component_id) ", componentIdList.includes(data.component_id))
-                if (componentIdList.includes(data.component_id)) {
-                    reload()
-                    // console.log("reload", currentAnalysisMethod?.component_id)   
-                }
+        // console.log("sseData in result list:", data.msgType)
+        const data = sseData
+        if (data.msgType === "analysis_result") {
+            // notify.info({ message: "qqqqqqqqqq" })
+            const componentIdList = analysisMethod.map((it: any) => it.component_id)
+            if (componentIdList.includes(data.component_id)) {
+                reload()
             }
-            // if (data.analysis_id == analysis_id) {
-            //     if (data.msgType === "workflow_log") {
-            //         setFileTabKey("workflow_log_file")
-            //         console.log("workflow_log_file", data)
-            //         readLogFile(fileMap["workflow_log_file"])
-            //     } else if (data.msgType === "executor_log") {
-            //         setFileTabKey("executor_log_file")
-            //         readLogFile(fileMap["executor_log_file"])
-            //     } else if (data.msgType === "trace") {
-            //         setFileTabKey("trace_file")
-            //         readLogFile(fileMap["trace_file"])
-            //     } else if (data.msgType == "process_end") {
-            //         setFileTabKey("workflow_log_file")
-            //         readLogFile(fileMap["workflow_log_file"])
-            //         if (callback) {
-            //             callback()
-            //         }
-            //     }
-            // }
-        };
+        }
+    }, [sseData])
 
-        eventSourceRef.current?.addEventListener('message', handler);
+    // useEffect(() => {
+    //     if (!eventSourceRef) return;
 
-        return () => {
-            console.log("removeEventListener")
-            eventSourceRef.current?.removeEventListener('message', handler);
-        };
-    }, [eventSourceRef.current]);
+    //     const handler = (event: MessageEvent) => {
+    //         const data = JSON.parse(event.data)
+    //         // console.log("analysis_result", data)
+    //         if (data.msgType === "analysis_result") {
+    //             // message.success(data.msg)
+    //             const componentIdList = analysisMethod.map((it: any) => it.component_id)
+    //             console.log("componentIdList", componentIdList)
+    //             console.log("data.component_id ", data.component_id)
+    //             console.log(" componentIdList.includes(data.component_id) ", componentIdList.includes(data.component_id))
+    //             if (componentIdList.includes(data.component_id)) {
+    //                 reload()
+    //                 // console.log("reload", currentAnalysisMethod?.component_id)   
+    //             }
+    //         }
+    //         // if (data.analysis_id == analysis_id) {
+    //         //     if (data.msgType === "workflow_log") {
+    //         //         setFileTabKey("workflow_log_file")
+    //         //         console.log("workflow_log_file", data)
+    //         //         readLogFile(fileMap["workflow_log_file"])
+    //         //     } else if (data.msgType === "executor_log") {
+    //         //         setFileTabKey("executor_log_file")
+    //         //         readLogFile(fileMap["executor_log_file"])
+    //         //     } else if (data.msgType === "trace") {
+    //         //         setFileTabKey("trace_file")
+    //         //         readLogFile(fileMap["trace_file"])
+    //         //     } else if (data.msgType == "process_end") {
+    //         //         setFileTabKey("workflow_log_file")
+    //         //         readLogFile(fileMap["workflow_log_file"])
+    //         //         if (callback) {
+    //         //             callback()
+    //         //         }
+    //         //     }
+    //         // }
+    //     };
+
+    //     eventSourceRef.current?.addEventListener('message', handler);
+
+    //     return () => {
+    //         console.log("removeEventListener")
+    //         eventSourceRef.current?.removeEventListener('message', handler);
+    //     };
+    // }, [eventSourceRef.current]);
     // const [currentAnalysisMenthod, setCurrentAnalysisMenthod] = useState<any>()
     // const [currentAnalysisMethod, setCurrentAnalysisMethod] = useState<any>()
     // const { setPipelineStructure, setOperateOpen, setPipelineRecord, datelePipeline } = operatePipeline
@@ -388,11 +246,11 @@ const ResultList = forwardRef<any, any>(({
                 timeout: 20000
             })
             setTableRows(resp.data.tables)
+            setTableRowLoading(false)
             setTableRowsInfo({
                 "nrow": resp.data.nrow,
                 "ncol": resp.data.ncol
             })
-            setTableRowLoading(false)
         } else {
             setTableRows([])
             setTableRowLoading(false)
@@ -915,10 +773,9 @@ const ResultList = forwardRef<any, any>(({
                     padding: "0.5rem"
                 }
             }}
-            title={<Flex gap={"small"}><FileOutlined /> {title}
+            title={<Flex gap={"small"}><FileOutlined />
                 {currentAnalysisMethod?.component_name && <Tooltip title={<>
                     <ul>
-                        <li>namespace: {currentAnalysisMethod?.namespace_name}</li>
                         {pipeline?.component_id && <li>pipeline: {pipeline?.component_id}</li>}
                         {software?.component_id && <li>software: {software?.component_id}</li>}
                         {currentAnalysisMethod?.component_id && <li>file: {currentAnalysisMethod?.component_id}</li>}
@@ -927,7 +784,11 @@ const ResultList = forwardRef<any, any>(({
 
 
                 </>}>
-                    <span style={{ cursor: "pointer" }}>({currentAnalysisMethod?.component_name})</span>
+                    <span
+                        onClick={() => {
+                            navigate(`/component/file/${currentAnalysisMethod.component_id}`)
+                        }}
+                        style={{ cursor: "pointer" }}>{title} ({currentAnalysisMethod?.component_name})</span>
 
                 </Tooltip>}
 
@@ -945,6 +806,11 @@ const ResultList = forwardRef<any, any>(({
                         onChange={(e: any) => setSearchText(e.target.value)}
                         style={{ width: 300 }}
                     />
+
+                    {/* {(currentAnalysisMethod?.component_type != "file" )&&  <>
+                      
+                    </>} */}
+
                     <Popconfirm title="Confirm adding example?" onConfirm={async () => {
                         await axios.post(`/analysis-result/add-example/${currentAnalysisMethod.component_id}?project=${project}`)
                         message.success("Example added successfully!")
@@ -1131,7 +997,11 @@ const ResultList = forwardRef<any, any>(({
             {/* {JSON.stringify(rest)} */}
             {/* {JSON.stringify(projectObj)} */}
             {/* {JSON.stringify(filteredData)} */}
-
+            {sseData.msgType === "analysis_result" &&<>
+                <Alert closable message={`${sseData?.analysis_name}: Add Analsyis: ${sseData?.add_num}; Update Analysis: ${sseData?.update_num}; Complete Analysis: ${sseData?.complete_num}`}/>
+                {/* {JSON.stringify(sseData)} */}
+            </>}
+           
             {/* {analysisResultId} */}
             {currentAnalysisMethod?.file_type == "collected" ? <>
                 {/* {data && <>
@@ -1287,6 +1157,8 @@ const ResultList = forwardRef<any, any>(({
             callback={reload}
             onClose={closeModal}
         ></AnalysisResultEdit>
+
+
 
     </>
 

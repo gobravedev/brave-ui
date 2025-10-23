@@ -1,6 +1,6 @@
 import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Tooltip } from "antd";
 import TextArea from "antd/es/input/TextArea";
-import { FC, forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { FC, forwardRef, lazy, Suspense, useEffect, useImperativeHandle, useRef, useState } from "react";
 import Markdown from '../markdown'
 import axios from "axios";
 import LogFile from "../log-file";
@@ -10,12 +10,12 @@ import { useNavigate, useOutletContext } from "react-router";
 import { useSSEContext } from "@/context/sse/useSSEContext";
 import { findAnalysisById, runAnalysisApi, stopAnalysisApi } from "@/api/analysis";
 import { useModal, useModals } from "@/hooks/useModal";
-import FormJsonComp from "../form-components";
+// import FormJsonComp from "../form-components";
 import ParamsView from "../params-view";
 import Project from "@/pages/project";
 import BioDatabaseForm from "../bio-database-form";
 import BioDatabases from "../bio-databases";
-
+const FormJsonComp = lazy(() => import("../form-components"));
 
 const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
     const [form] = Form.useForm()
@@ -222,7 +222,7 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, for
 
     }
 
-    return <>
+    return <Suspense fallback={<Skeleton active></Skeleton>}>
         <Form form={form} onValuesChange={(changedValues, allValues) => {
             // onChange(allFields);
             // console.log(_)
@@ -316,5 +316,5 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, for
             visible={modals.bioDatabases.visible}
             onClose={() => closeModals("bioDatabases")}
             params={modals.bioDatabases.params}></BioDatabases>
-    </>
+    </Suspense>
 }

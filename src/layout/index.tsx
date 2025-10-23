@@ -111,13 +111,13 @@ const App: React.FC = () => {
             }
             if (data.msgType === "analysis_result") {
 
-                openNotification({ type: "info", message: data.msg })
+                openNotification({ type: "info", message:`${data?.analysis_name}: Add Analsyis: ${data?.add_num}; Update Analysis: ${data?.update_num}; Complete Analysis: ${data?.complete_num}` })
             }
 
             if (data.msgType === "test") {
                 openNotification({ type: "info", message: data.msg })
             }
-            dispatch(setSseData(event.data))
+            dispatch(setSseData(data))
         };
 
         eventSourceRef.current?.addEventListener('message', handler);
@@ -227,20 +227,7 @@ const App: React.FC = () => {
                 }
             ]
         },
-        {
-            key: `/file-card`,
-            label: {
-                zh_CN: "分析文件",
-                en_US: "File"
-            },
-            children: [
-                {
-                    key: `/component/file`,
-                    // label: "分析报告",
-                    hidden: true
-                }
-            ]
-        },
+
         {
             key: `/script-card`,
             label: {
@@ -250,6 +237,19 @@ const App: React.FC = () => {
             children: [
                 {
                     key: `/component/script`,
+                    // label: "分析报告",
+                    hidden: true
+                }
+            ]
+        }, {
+            key: `/file-card`,
+            label: {
+                zh_CN: "分析文件",
+                en_US: "File"
+            },
+            children: [
+                {
+                    key: `/component/file`,
                     // label: "分析报告",
                     hidden: true
                 }

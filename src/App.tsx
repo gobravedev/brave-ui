@@ -7,13 +7,14 @@ import enUS from 'antd/locale/en_US'
 import { ConfigProvider, theme as antdTheme, Button } from 'antd';
 import { useSelector } from "react-redux";
 import { setupGlobalMessage } from "./hooks/useGlobalMessage";
+import { setupGlobalNotification } from "./hooks/useGlobalNotification";
 
 const App: FC<any> = () => {
   const { locale, t } = useI18n()
   const antdLocale = locale === 'zh_CN' ? zhCN : enUS
   const { theme } = useSelector((state: any) => state.user) //light dark
   const messageHolder = setupGlobalMessage();
-
+  const notificationHolder  = setupGlobalNotification()
   // const themeConfig =
   //   theme === 'dark'
   //     ? antdTheme.defaultAlgorithm
@@ -23,6 +24,7 @@ const App: FC<any> = () => {
  
     </Suspense> */}
     {messageHolder}
+    {notificationHolder}
     <ConfigProvider
       theme={{
         algorithm:

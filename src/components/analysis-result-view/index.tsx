@@ -553,7 +553,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
     const [loading, setLoading] = useState<boolean>(false)
     const [analsyisResult, setAnalsyisResult] = useState<any>(null)
     const navigate = useNavigate()
-    const { eventSourceRef, status, reconnect } = useSSEContext();
+    // const { eventSourceRef, status, reconnect } = useSSEContext();
     const analysisIdRef = useRef<any>(null)
     const sseAnalysisIdRef = useRef<any>(null)
     // const { messageApi } = useOutletContext<any>()
@@ -607,34 +607,51 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
     useEffect(() => {
         loadData(analysis_id)
     }, [analysis_id])
+
+
+    const sseData = useSelector((state: any) => state.global.sseData)
     useEffect(() => {
-        if (eventSourceRef) {
-            const handler = (event: MessageEvent) => {
-                // console.log('event', event)
-                const data = JSON.parse(event.data)
-                // console.log('analysisId', analysisIdRef.current)
-                sseAnalysisIdRef.current = data
-                if (analysisIdRef.current == data.analysis_id) {
+        // console.log("sseData in result list:", data.msgType)
+        const data = sseData
+        sseAnalysisIdRef.current = data
+        if (analysisIdRef.current == data.analysis_id) {
 
-                    if (data.event == "analysis_complete" || data.event == "analysis_failed" || data.event == "analysis_started") {
-                        loadData(analysisIdRef.current)
-                    }
-
-                }
-            };
-
-            eventSourceRef.current?.addEventListener('message', handler);
-
-            return () => {
-                console.log("removeEventListener")
-                eventSourceRef.current?.removeEventListener('message', handler);
-            };
+            if (data.event == "analysis_complete" || data.event == "analysis_failed" || data.event == "analysis_started") {
+                loadData(analysisIdRef.current)
+            }
         }
+    }, [sseData])
+
+    // useEffect(() => {
+    //     if (eventSourceRef) {
+    //         const handler = (event: MessageEvent) => {
+    //             // console.log('event', event)
+    //             const data = JSON.parse(event.data)
+    //             // console.log('analysisId', analysisIdRef.current)
+    //             sseAnalysisIdRef.current = data
+    //             if (analysisIdRef.current == data.analysis_id) {
+
+    //                 if (data.event == "analysis_complete" || data.event == "analysis_failed" || data.event == "analysis_started") {
+    //                     loadData(analysisIdRef.current)
+    //                 }
+
+    //             }
+    //         };
+
+    //         eventSourceRef.current?.addEventListener('message', handler);
+
+    //         return () => {
+    //             console.log("removeEventListener")
+    //             eventSourceRef.current?.removeEventListener('message', handler);
+    //         };
+    //     }
 
 
 
 
-    }, [eventSourceRef.current]);
+    // }, [eventSourceRef.current]);
+
+
 
 
     return <>

@@ -76,8 +76,8 @@ const ContainerComp: FC<any> = ({ keys }) => {
     const [containerIds, setContainerIds] = useState<any>([])
     useEffect(() => {
         try {
-            const sseData_ = JSON.parse(sseData)
-            if (containerIds.includes(sseData_.analysis_id)) {
+            // const sseData_ = JSON.parse(sseData)
+            if (containerIds.includes(sseData.analysis_id)) {
                 // if (data.event == "container_pulled" || data.event == "analysis_complete" || data.event == "analysis_failed" || data.event == "analysis_started") {
                 loadData()
                 // }
@@ -245,7 +245,7 @@ const RunningContainer: FC<any> = () => {
 
     useEffect(() => {
         try {
-            const sseData_ = JSON.parse(sseData)
+            const sseData_ = sseData //JSON.parse(sseData)
             if (sseData_.event == "analysis_complete" || sseData_.event == "analysis_failed" || sseData_.event == "analysis_started") {
                 // if (data.event == "container_pulled" || data.event == "analysis_complete" || data.event == "analysis_failed" || data.event == "analysis_started") {
                 loadData(false)
