@@ -64,7 +64,7 @@ const TableView: FC<any> = ({ data }) => {
                 title={() => <Flex gap={"small"}>
                     <Input.Search
                         size="small"
-                        placeholder="搜索结果..."
+                        placeholder="Search..."
                         allowClear
                         enterButton
                         value={searchText}

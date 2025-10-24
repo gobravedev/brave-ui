@@ -87,7 +87,7 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
 
         <Drawer
             extra={<>
-                
+
             </>}
 
             size="default" loading={loading} title={
@@ -108,6 +108,7 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
             {data && <>
 
                 <CreateOrUpdateParsms
+                    showCreate={true}
                     form={form}
                     requestParam={{ ...data.request_param, analysis_id: data?.analysis_id }}
                     dataMap={{ ...resultData, first_data_key: getFirstKey(resultData) }}
@@ -143,7 +144,9 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
 
 export default EditParams
 
-export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, formJson: formJson_, databases, callback, analysisResultId, showCancal = false }) => {
+export const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
+    requestParam, dataMap, formJson: formJson_,
+    databases, callback, analysisResultId, showCancal = false }) => {
     const { modals, openModals, closeModals } = useModals(["paramsView", "bioDatabases"]);
     const [dbFormJson, setDbFormJson] = useState<any>([])
     const [formJson, setFormJson] = useState<any>([])
@@ -280,14 +283,18 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, requestParam, dataMap, for
                 }}>View Parameters</Button>
 
                 <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>
-                    {requestParam?.analysis_id ? <>Update Analysis({requestParam.analysis_name})({String(requestParam.analysis_id).slice(0, 8)})</> : <>Save Analysis</>}</Button>
+                    {requestParam?.analysis_id ? <>Update Analysis({requestParam.analysis_name})({String(requestParam.analysis_id).slice(0, 8)})</> : <>Create Analysis</>}</Button>
                 {(requestParam?.analysis_id && showCancal) && <Button size="small" color="cyan" onClick={() => form.setFieldValue("analysis_id", undefined)}>Cancel Analysis</Button>}
                 {/* <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>更新分析</Button> */}
-                <Popconfirm title="Are you sure to create a new analysis?"
-                    onConfirm={createAnalysis}
-                >
-                    <Button size="small" color="orange" variant="solid" onClick={() => form.setFieldValue("analysis_id", undefined)}>Create Analysis</Button>
-                </Popconfirm>
+
+                {showCreate &&
+                    <Popconfirm title="Are you sure to create a new analysis?"
+                        onConfirm={createAnalysis}
+                    >
+                        <Button size="small" color="orange" variant="solid" onClick={() => form.setFieldValue("analysis_id", undefined)}>Create Analysis</Button>
+                    </Popconfirm>
+                }
+
             </Flex>
 
             <Collapse ghost items={[

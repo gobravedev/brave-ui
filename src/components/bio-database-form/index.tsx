@@ -35,8 +35,8 @@ const BioDatabaseForm: FC<any> = ({ formJson, openModal }) => {
             <div style={{ flex: 1 }}>
                 <FormJsonComp formJson={formJson} dataMap={data}></FormJsonComp>
             </div>
-            <Button size="small" color="cyan" variant="solid" onClick={openModal}>配置数据库</Button>
-            <Button onClick={loadData} size="small" type="primary">刷新</Button>
+            <Button size="small" color="cyan" variant="solid" onClick={openModal}>DB Settings</Button>
+            <Button onClick={loadData} size="small" type="primary">Refresh</Button>
         </Flex>
 
 

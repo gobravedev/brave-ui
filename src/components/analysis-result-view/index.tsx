@@ -173,7 +173,7 @@ export const TableView: FC<any> = ({ data, url, filename, columns, baseURL, proj
         <Flex gap={"small"}>
             <Input.Search
                 size="small"
-                placeholder="搜索结果..."
+                placeholder="Search..."
                 allowClear
                 enterButton
                 value={searchText}

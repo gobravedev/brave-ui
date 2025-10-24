@@ -269,7 +269,7 @@ const Pipeline: FC<any> = ({ }) => {
 
                                 <Button size="small" color="cyan" variant="solid" onClick={() => {
                                     operatePipeline.openModal("modalG", pipeline)
-                                }}>View Dependencies</Button>
+                                }}>Dependencies</Button>
                                 <Button size="small" color="cyan" variant="solid" onClick={() => {
                                     openModals("metadataModal", { ...pipeline, operatePipeline: operatePipeline })
                                 }}>Metadata</Button>
@@ -280,7 +280,7 @@ const Pipeline: FC<any> = ({ }) => {
                                             component_type: component_type,
                                         }
                                     })
-                                }}>Update {component_type}</Button>
+                                }}>Edit {component_type}</Button>
 
                                 <Button size="small" color="cyan" variant="solid" onClick={loadData}>Refresh</Button>
 

@@ -181,19 +181,19 @@ const ResultParse: FC<any> = memo(({ analysis_id: analysisId, callback, onClose 
                                         pagination={false}
                                         rowKey={"component_id"}
                                         columns={[{
-                                            title: "名称",
+                                            title: "Name",
                                             dataIndex: "name",
                                             key: "name",
                                         }, {
-                                            title: "目录",
+                                            title: "Dir",
                                             dataIndex: "dir",
                                             key: "dir",
                                         }, {
-                                            title: "文件组件ID",
+                                            title: "File Component Id",
                                             dataIndex: "component_id",
                                             key: "component_id",
                                         }, {
-                                            title: "文件格式",
+                                            title: "File Format",
                                             dataIndex: "fileFormat",
                                             key: "fileFormat",
                                             render: (_, record: any) => {
@@ -202,9 +202,9 @@ const ResultParse: FC<any> = memo(({ analysis_id: analysisId, callback, onClose 
                                                 </div>
                                             }
                                         }, {
-                                            title: "操作",
-                                            dataIndex: "component_id",
-                                            key: "component_id",
+                                            title: "Action",
+                                            dataIndex: "action",
+                                            key: "action",
                                             render: (_, record: any) => {
                                                 return <>
                                                     <Button color="cyan" variant="solid" size="small" onClick={() => {
@@ -214,7 +214,7 @@ const ResultParse: FC<any> = memo(({ analysis_id: analysisId, callback, onClose 
                                                                 files: data?.file_dict[record.dir]
                                                             }
                                                         })
-                                                    }}>编辑</Button>
+                                                    }}>Edit</Button>
                                                 </>
                                             }
                                         }]}

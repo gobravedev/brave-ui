@@ -799,7 +799,7 @@ const ResultList = forwardRef<any, any>(({
                 <Flex gap={"small"} wrap>
                     <Input.Search
                         size="small"
-                        placeholder="搜索结果..."
+                        placeholder="Search..."
                         allowClear
                         enterButton
                         value={searchText}
