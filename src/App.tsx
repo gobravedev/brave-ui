@@ -6,15 +6,61 @@ import zhCN from 'antd/locale/zh_CN'
 import enUS from 'antd/locale/en_US'
 import { ConfigProvider, theme as antdTheme, Button } from 'antd';
 import { useSelector } from "react-redux";
-import { setupGlobalMessage } from "./hooks/useGlobalMessage";
+import { setupGlobalMessage, useGlobalMessage } from "./hooks/useGlobalMessage";
 import { setupGlobalNotification } from "./hooks/useGlobalNotification";
+import axios from "axios";
+
+
 
 const App: FC<any> = () => {
   const { locale, t } = useI18n()
   const antdLocale = locale === 'zh_CN' ? zhCN : enUS
-  const { theme } = useSelector((state: any) => state.user) //light dark
+  const { theme, network } = useSelector((state: any) => state.user) //light dark
   const messageHolder = setupGlobalMessage();
-  const notificationHolder  = setupGlobalNotification()
+  const notificationHolder = setupGlobalNotification()
+
+
+  const baseURL = localStorage.getItem('baseURL') || ""
+  axios.defaults.baseURL = `${baseURL}/brave-api`;
+  const authorization = localStorage.getItem('authorization')
+  if (authorization) {
+    axios.defaults.headers.common['Authorization'] = `Bearer ${authorization}`;
+
+  }
+  axios.defaults.timeout = 5000;
+
+  axios.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      // console.log(error)
+      const message = useGlobalMessage();
+
+      if (error.response) {
+
+        const { status, data } = error.response;
+        switch (status) {
+          // case 401:
+          //   window.location.href = "/login";
+          //   break;
+          default:
+            if (network == "CONNECT") {
+
+              console.error("HTTP Error:", status);
+              console.error(data?.detail)
+              message.error(data?.detail)
+            } else if (network == "NOT_CONNECT") {
+              // message.error("NOT_CONNECT")
+            } else {
+              // message.error("UNKNOW")
+            }
+
+        }
+      } else {
+        console.error("网络异常:", error.message);
+      }
+      return Promise.reject(error);
+    }
+  );
   // const themeConfig =
   //   theme === 'dark'
   //     ? antdTheme.defaultAlgorithm

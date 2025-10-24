@@ -56,7 +56,7 @@ const Test = () => {
     return <Skeleton active></Skeleton>
 }
 const App: React.FC = () => {
-
+    const { theme, baseURL, projectObj, project: project_id, network } = useSelector((state: any) => state.user); // 'light' | 'dark'
     const navigate = useNavigate();
     const location = useLocation();
     const [leftMenus, setLeftMenus] = useState<any>([])
@@ -69,11 +69,29 @@ const App: React.FC = () => {
     const [menus, setMenus] = useState<any>([])
     const [selectedKeyMap, setSelectedKeyMap] = useState<any>()
     const { t, locale } = useI18n();
-    const { theme, baseURL, projectObj, project: project_id } = useSelector((state: any) => state.user); // 'light' | 'dark'
 
     const isDark = theme === 'dark';
     const bgColor = isDark ? '#001529' : '#fff'; // 深色/白色
     const textColor = isDark ? '#fff' : '#000';
+
+
+    // const [isConnect, setIsConnect] = useState<"UNKNOW" | "CONNECT" | "NOT_CONNECT">("UNKNOW")
+
+    const ping = async () => {
+        try {
+            await axios.get(`${baseURL}/brave-api/ping`)
+            // setIsConnect("CONNECT")
+            dispatch(setUserItem({ network: "CONNECT" }))
+
+        } catch (error) {
+            // setIsConnect("NOT_CONNECT")
+            dispatch(setUserItem({ network: "NOT_CONNECT" }))
+
+        }
+    }
+    useEffect(() => {
+        ping()
+    }, [baseURL])
 
     const openNotification = ({ type, message = "", description = "" }: { type: NotificationType, message: string, description?: string }) => {
         notificationApi[type]({
@@ -111,7 +129,7 @@ const App: React.FC = () => {
             }
             if (data.msgType === "analysis_result") {
 
-                openNotification({ type: "info", message:`${data?.analysis_name}: Add Analsyis: ${data?.add_num}; Update Analysis: ${data?.update_num}; Complete Analysis: ${data?.complete_num}` })
+                openNotification({ type: "info", message: `${data?.analysis_name}: Add Analsyis: ${data?.add_num}; Update Analysis: ${data?.update_num}; Complete Analysis: ${data?.complete_num}` })
             }
 
             if (data.msgType === "test") {
@@ -494,16 +512,7 @@ const App: React.FC = () => {
         },
     ]
 
-    const [isConnect, setIsConnect] = useState<"UNKNOW" | "CONNECT" | "NOT_CONNECT">("UNKNOW")
 
-    const ping = async () => {
-        try {
-            await axios.get(`${baseURL}/brave-api/ping`)
-            setIsConnect("CONNECT")
-        } catch (error) {
-            setIsConnect("NOT_CONNECT")
-        }
-    }
     const loadProject = async () => {
         if (!project_id) return;
         const resp = await axios.get(`/project/find-by-project-id/${project_id}`)
@@ -511,9 +520,7 @@ const App: React.FC = () => {
         dispatch(setUserItem({ projectObj: resp.data }))
     }
 
-    useEffect(() => {
-        ping()
-    }, [baseURL])
+
     useEffect(() => {
 
         loadProject()
@@ -588,7 +595,7 @@ const App: React.FC = () => {
                     <BookOutlined style={{ cursor: "pointer" }} onClick={() => {
                         window.open(`https://pybrave.github.io/brave-doc`, "_blank")
                     }} />
-                    <ApiComp open={isConnect == "NOT_CONNECT"}></ApiComp>
+                    <ApiComp open={network == "NOT_CONNECT"}></ApiComp>
 
                     <SettingOutlined style={{ cursor: "pointer" }} onClick={() => {
                         openModals("setting")

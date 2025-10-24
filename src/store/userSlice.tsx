@@ -22,7 +22,9 @@ interface UserState {
     project:any;
     githubToken:any;
     storeRepos:any;
-    componentLayout:"simple"|"complex"
+    componentLayout:"simple"|"complex",
+    network:"UNKNOW" | "CONNECT" | "NOT_CONNECT"
+
     
 }
 const contextSlice = createSlice({
@@ -40,7 +42,8 @@ const contextSlice = createSlice({
         projectObj:{},
         githubToken:githubToken,
         storeRepos:storeRepos?storeRepos:"[]",
-        componentLayout:"simple"
+        componentLayout:"simple",
+        network:"UNKNOW"
     },
     reducers: {
         setUserItem(state, action: PayloadAction<Partial<UserState>>) {
