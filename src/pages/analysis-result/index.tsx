@@ -1,7 +1,7 @@
 import { useRef, useState } from "react"
 import ResultList from "../../components/result-list"
 import { Button, Card, Drawer, Flex, Form, Radio, RadioChangeEvent, Spin } from "antd"
-import AnalysisResultView from '../../components/analysis-result-view'
+import AnalysisResultPanel from '../../components/analysis-result-view/panel'
 import AnalysisForm from '../../components/analysis-form'
 import axios from "axios"
 import Literature from '../literature'
@@ -91,9 +91,9 @@ const AnalysisResult = () => {
                     }
                 }}>重新分析</Button>
             </>}>
-                <AnalysisResultView
+                <AnalysisResultPanel
                     plotLoading={plotLoading}
-                    filePlot={filePlot}></AnalysisResultView>
+                    filePlot={filePlot}></AnalysisResultPanel>
             </Card>
             <hr />
             <Literature params={{

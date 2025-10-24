@@ -1,20 +1,18 @@
 import { Button, Card, Col, Empty, Flex, Row, Segmented, Skeleton, Tabs, Tag, Tree, TreeDataNode, TreeProps } from "antd"
 import axios from "axios"
-import { FC, lazy, use, useEffect, useRef, useState } from "react"
+import { FC, lazy, Suspense, use, useEffect, useRef, useState } from "react"
 import { useLocation, useNavigate, useOutletContext, useParams } from "react-router"
 import { DownOutlined, RedoOutlined } from '@ant-design/icons'
-import { AnalysisResultViewComp } from '@/components/analysis-result-view'
 import { useDispatch, useSelector } from "react-redux"
 import { setUserItem } from "@/store/userSlice"
 import { useModal } from "@/hooks/useModal"
 import FormProject from "@/components/form-project"
 import Markdown from "@/components/markdown"
 import { useStickyTop } from "@/hooks/useStickyTop"
-import { cp } from "fs"
-import { E } from "node_modules/@faker-js/faker/dist/airline-CLphikKp"
 
 const ResultParse = lazy(() => import("@/components/result-parse"))
-
+// import AnalysisResultPanel from '@/components/analysis-result-view/panel'
+const AnalysisResultView = lazy(() => import('@/components/analysis-result-view'))
 const AnalysisReport: FC<any> = () => {
     const [loading, setLoading] = useState<boolean>(false)
     // const { project, projectObj } = useOutletContext<any>()
@@ -28,7 +26,7 @@ const AnalysisReport: FC<any> = () => {
     const projectParam = queryParams.get("project");
     const dispatch = useDispatch()
     const { modal, openModal, closeModal } = useModal();
-    const [componentType,setComponentType] = useState<any>()
+    const [componentType, setComponentType] = useState<any>()
     // const [queryProject, setQueryProject] = useState<any>()
     const [analysisKey, setAnalysisKey] = useState<any>(key)
 
@@ -40,7 +38,6 @@ const AnalysisReport: FC<any> = () => {
     useEffect(() => {
         if (projectParam && projectParam != project) {
             dispatch(setUserItem({ project: projectParam }))
-
         }
     }, [projectParam])
 
@@ -104,7 +101,7 @@ const AnalysisReport: FC<any> = () => {
             project: project
         });
 
-
+        const data = resp.data;
         setData(resp.data)
         // debugger
         if (!key && resp.data.length > 0) {
@@ -116,9 +113,14 @@ const AnalysisReport: FC<any> = () => {
                 updateQueryParam("project", project);
                 updateQueryParam("key", resp.data[0]?.children[0]?.key);
             }
-        }else{
-
+        } else {
+            // debugger
+            const componentType = data
+                .flatMap((item: any) => item.children || [])
+                .find((child: any) => child.key === key)?.component_type;
+            setComponentType(componentType)
         }
+
 
         setLoading(false)
     }
@@ -165,18 +167,20 @@ const AnalysisReport: FC<any> = () => {
                         height: "100%",
                     }}
                 >
-                    {analysisKey ? <>
-                        {/* <ResultParse analysis_id={analysisKey}  ></ResultParse> */}
-                        {/* {componentType}111 */}
-                        <AnalysisResultViewComp
-                            overflowY="auto"
-                            openPanel={setPanel}
-                            loadTree={() => {
-                                loadData()
-                            }} analysis_id={analysisKey}></AnalysisResultViewComp>
+                    {analysisKey ? <Suspense fallback={<Skeleton active></Skeleton>}>
+                        {componentType == "software" ? <>
+                            <ResultParse analysis_id={analysisKey}  ></ResultParse>
 
+                        </> : <>
+                            <AnalysisResultView
+                                overflowY="auto"
+                                openPanel={setPanel}
+                                loadTree={() => {
+                                    loadData()
+                                }} analysis_id={analysisKey}></AnalysisResultView>
 
-                    </> : <>
+                        </>}
+                    </Suspense> : <>
                         <Card size="small" variant="borderless">
                             <Empty></Empty>
 
@@ -227,88 +231,6 @@ const AnalysisReport: FC<any> = () => {
                         {projectObj?.description ? <Markdown data={projectObj?.description}></Markdown> : <Skeleton active />}
                     </Card>
                 </div>}
-
-                {/* {panel == "analysis_result" ? <>
-
-                </> : <>
-
-
-                </>} */}
-                {/* <Segmented
-                            size="small"
-                            value={panel}
-                            onChange={(val: any) => {
-                                setPanel(val)
-                                if (val == "records") {
-
-                                    loadProject()
-                                }
-                            }}
-                            options={[
-                                {
-                                    value: 'analysis_result',
-                                    label: `Analysis Result`,
-                                }, {
-                                    label: "Records",
-                                    value: "records"
-                                }
-                            ]} /> */}
-                {/* <Card
-                    style={{
-                        flex: 1,
-                        display: "flex",
-                        flexDirection: "column",
-                        height: " 100%"
-                    }}
-                    size="small"
-
-                    styles={{
-                        body: {
-                            flex: 1,
-                            display: "flex",
-                            flexDirection: "column",
-                            height: " 100%",
-                            padding: 0
-                            // overflowY: "auto"
-                        }
-                    }}
-                    extra={
-                        }
-                >
-
-
-
-
-                </Card> */}
-                {/* <Tabs
-
-                    type="card"
-                    size="small"
-                    tabPosition="right"
-                    onChange={(val) => {
-                        if (val == "records") {
-                            loadProject()
-                        }
-                    }}
-                    items={[
-                        {
-                            key: 'analysis_result',
-                            label: `Analysis Result`,
-                            children: <>
-
-                            </>
-                        }, {
-                            key: 'records',
-                            label: `records`,
-                            children: <>
-
-                            </>
-                        }
-                    ]}
-                    defaultActiveKey="analysis_result">
-                </Tabs> */}
-
-
 
             </Col>
             <Col lg={4} sm={4} xs={24}

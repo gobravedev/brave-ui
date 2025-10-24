@@ -1,14 +1,10 @@
-import { Venn } from "@ant-design/plots"
 import { Button, Card, Dropdown, Flex, Form, Input, message, Modal, Pagination, Popconfirm, Popover, Select, Space, Table, Tag, Tooltip } from "antd"
 import axios from "axios"
 import { FC, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { useLocation, useNavigate, useOutletContext, useParams } from "react-router"
-import ResultParse from "../result-parse"
 import { useModal, useModals } from "@/hooks/useModal"
 import PipelineInfo from "../pipeline-monitor"
 import { runAnalysisApi, stopAnalysisApi } from "@/api/analysis"
-import AnalysisResultView from "../analysis-result-view"
-import { useSSEContext } from "@/context/sse/useSSEContext"
 import { DownOutlined, LineChartOutlined, RedoOutlined } from '@ant-design/icons'
 export const readHdfsAPi = (contentPath: any) => axios.get(`/api/read-hdfs?path=${contentPath}`)
 export const readJsonAPi = (contentPath: any) => axios.get(`/fast-api/read-json?path=${contentPath}`)
@@ -17,8 +13,8 @@ import { useSelector } from "react-redux"
 import { InspectPanel } from "@/pages/container"
 import ResultParsePanel from "../result-parse/panel"
 import { usePagination } from "@/hooks/usePagination"
-import AnalysisTaskDrawer from "../analysis-task/drawer"
 import AnalysisTaskPanel from "../analysis-task/panel"
+import AnalysisResultPanel from "../analysis-result-view/panel"
 
 const AnalysisList = forwardRef<any, any>(({
     project,
@@ -652,11 +648,11 @@ const AnalysisList = forwardRef<any, any>(({
         </Card>
         <div style={{ marginBottom: "1rem" }}></div>
 
-        <AnalysisResultView
+        <AnalysisResultPanel
             // ref={analysisResultRef}
             visible={modal.key == "modalA" && modal.visible}
             params={modal.params}
-            onClose={closeModal}></AnalysisResultView>
+            onClose={closeModal}></AnalysisResultPanel>
 
         <ResultParsePanel
             visible={modal.key == "resultParsePanel" && modal.visible}

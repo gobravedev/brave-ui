@@ -9,7 +9,6 @@ import React from "react"
 
 import FormJsonComp from "../form-components"
 import AnalysisList from '../analysis-list'
-import AnalysisResultView from '../analysis-result-view'
 import { GroupSelectSampleButton, BaseSelect } from '@/components/form-components'
 import AnalysisForm from '../analysis-form'
 import PipelineMonitor from '@/components/pipeline-monitor'
@@ -618,9 +617,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
 
 
                                     {/* {markdown} */}
-                                    {/* <AnalysisResultView
-                                        plotLoading={false}
-                                        markdown={markdown}></AnalysisResultView> */}
+                               
                                     {/* <Literature params={{
                                     obj_key: analysisPipline,
                                     obj_type: "analysis_img"
@@ -1096,10 +1093,6 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
 
 
 
-                                    {/* <AnalysisResultView
-                                    plotLoading={plotLoading}
-                                    filePlot={filePlot}
-                                    {...downstreamData}></AnalysisResultView> */}
 
                                 </>
 

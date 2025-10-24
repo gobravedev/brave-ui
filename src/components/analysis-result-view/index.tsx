@@ -510,44 +510,7 @@ export const ComponentsRender = ({ type, ...rest }: any) => {
 
 //     </>
 // }
-const AnalysisResultView: FC<any> = forwardRef<any, any>(({ params, visible, onClose }, ref) => {
 
-    const { output_dir, analysis_id } = params || {}
-    // const loadData = async () => {
-    //     if (visible) {
-    //         setLoading(true)
-    //         // const res = await axios.get(`/file-operation/visualization-results?path=${output_dir}`)
-    //         const res = await axios.get(`/analysis/visualization-results/${analysis_id}`)
-
-    //         setAnalsyisResult(res.data)
-    //         setLoading(false)
-    //     }
-
-    // }
-
-    // useEffect(() => {
-    //     if (visible) {
-    //         loadData()
-    //     }
-    // }, [visible, params?.output_dir])
-
-    if (!visible) {
-        return null
-    }
-
-
-
-
-    // if (runningAnalysisId.includes(params.analysis_id)) {
-    //     return <Spin spinning={loading} tip="请求中..." ></Spin>
-    // }
-    return <>
-        {analysis_id && <AnalysisResultViewComp onClose={onClose} analysis_id={analysis_id}></AnalysisResultViewComp>}
-
-
-
-    </>
-})
 
 export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree, openPanel, overflowY = "hidden" }) => {
     const [loading, setLoading] = useState<boolean>(false)
@@ -698,6 +661,9 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
             </>}
             extra={
                 <Flex gap={"small"} wrap>
+                    {onClose && <>
+                        <Button size="small" color="red" variant="solid" onClick={() => onClose()}>Close</Button>
+                    </>}
                     {openPanel && <>
                         {analsyisResult && <Button size="small" color="primary" variant="solid" onClick={() =>
                             navigate(`/component/${analsyisResult?.component_type}/${analsyisResult?.component_id}`)
@@ -717,14 +683,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
                         })
                     }}>Edit Script</Button>}
 
-                    {onClose && <>
 
-                        <Button size="small" color="cyan" variant="solid" onClick={() => onClose()}>Close</Button>
-                        <Button size="small" color="primary" variant="solid" onClick={() =>
-                            navigate(`/analysis-report?key=${analsyisResult?.analysis_id}&project=${project}`)
-                        }>Go Report</Button>
-
-                    </>}
 
 
 
@@ -801,7 +760,8 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
                         <Popconfirm title={analsyisResult?.is_report ? "Whether to cancel the report?" : "Reported or not?"} onConfirm={async () => {
                             await axios.post(`/analysis/update-report/${analsyisResult?.analysis_id}`)
                             message.success("operate successfully!")
-                            setAnalsyisResult(null)
+                            // setAnalsyisResult(null)
+                            loadData(analysis_id)
                             if (loadTree) {
                                 loadTree()
                             }
@@ -809,6 +769,10 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
                         }}>
                             <Button size="small" color={"cyan"} variant="solid">{analsyisResult?.is_report ? "Cancel Report" : "Report"}</Button>
                         </Popconfirm>
+                        {onClose && <Button size="small" color="primary" variant="solid" onClick={() =>
+                            navigate(`/analysis-report?key=${analsyisResult?.analysis_id}&project=${project}`)
+                        }>Go Report</Button>}
+
                         <Popconfirm title={`Delete ${analysis_id}?`} onConfirm={async () => {
                             await axios.delete(`/fast-api/analysis/${analysis_id}`)
                             message.success("Deleted Successfully!")
@@ -968,6 +932,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
 }
 
 
+export default AnalysisResultViewComp
 
 const AnalysisResultDisplay: FC<any> = ({ analsyisResult, loading }) => {
     const { baseURL } = useSelector((state: any) => state.user)
@@ -1029,7 +994,6 @@ const AnalysisResultDisplay: FC<any> = ({ analsyisResult, loading }) => {
         ></HtmlPreview>
     </div>
 }
-export default AnalysisResultView
 
 const HtmlPreview: FC<any> = ({ visible, onClose, params, baseURL }) => {
     return <Modal open={visible} onCancel={onClose} onClose={onClose} width={"80%"} title={"HTML Preview"} footer={null}>
