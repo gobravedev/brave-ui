@@ -308,13 +308,14 @@ const App: React.FC = () => {
                         zh_CN: "管道监控",
                         en_US: "Monitor"
                     },
-                }, {
-                    key: `/psycmicrograph`,
-                    label: {
-                        zh_CN: "菌群知识库",
-                        en_US: "PsycMicroGraph"
-                    }
                 },
+                //  {
+                //     key: `/psycmicrograph`,
+                //     label: {
+                //         zh_CN: "菌群知识库",
+                //         en_US: "PsycMicroGraph"
+                //     }
+                // },
                 {
                     key: `/analysis-result`,
                     label: {
@@ -676,7 +677,11 @@ export default App;
 const SettingDrawer: FC<any> = ({ visible, onClose, project_id, openModal: openModal_ }) => {
     const { modal, openModal, closeModal } = useModal();
 
-    return <Drawer title="Setting" open={visible} onClose={onClose} >
+    return <Drawer  title="Setting" 
+        extra={<>
+        Version: 0.1.0
+        </>}
+    open={visible} onClose={onClose} >
         <Flex vertical gap={"small"}>
 
             <div>
