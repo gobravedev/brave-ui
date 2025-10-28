@@ -135,7 +135,11 @@ const App: React.FC = () => {
             if (data.msgType === "test") {
                 openNotification({ type: "info", message: data.msg })
             }
-            dispatch(setSseData(data))
+            if (data?.type != "ping") {
+                console.log("layout SSE message:", event.data);
+                dispatch(setSseData(data))
+
+            }
         };
 
         eventSourceRef.current?.addEventListener('message', handler);
@@ -677,11 +681,11 @@ export default App;
 const SettingDrawer: FC<any> = ({ visible, onClose, project_id, openModal: openModal_ }) => {
     const { modal, openModal, closeModal } = useModal();
 
-    return <Drawer  title="Setting" 
+    return <Drawer title="Setting"
         extra={<>
-        Version: 0.1.1
+            Version: 0.1.1
         </>}
-    open={visible} onClose={onClose} >
+        open={visible} onClose={onClose} >
         <Flex vertical gap={"small"}>
 
             <div>
