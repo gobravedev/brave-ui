@@ -330,8 +330,10 @@ const Sample: FC<any> = ({ operatePipeline, rowSelection }) => {
             size="small"
             bordered
             // rowClassName="cursor-pointer"
-            pagination={{ pageSize: 30 }}
+            // pagination={{ pageSize: 30 }}
+            pagination={false}
             loading={loading}
+            virtual
             scroll={{ x: 'max-content', y: 55 * 5 }}
             columns={columns}
             footer={() => `A total of ${sampleData.length} records`}
@@ -390,7 +392,7 @@ export const BindSample: FC<any> = ({ visible, onClose, operatePipeline, params 
 export const MetadataModal: FC<any> = ({ visible, onClose, params }: any) => {
     if (!visible) return null
     const { operatePipeline, ...rest } = params
-    return <Modal title="metadata" open={visible} onClose={onClose} onCancel={onClose} width={"80%"} footer={null}>
+    return <Modal title="Metadata" open={visible} onClose={onClose} onCancel={onClose} width={"80%"} footer={null}>
 
         {/* <Button onClick={() => {
             operatePipeline.openModal("metadataForm")

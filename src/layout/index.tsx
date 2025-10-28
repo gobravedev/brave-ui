@@ -679,7 +679,7 @@ const SettingDrawer: FC<any> = ({ visible, onClose, project_id, openModal: openM
 
     return <Drawer  title="Setting" 
         extra={<>
-        Version: 0.1.0
+        Version: 0.1.1
         </>}
     open={visible} onClose={onClose} >
         <Flex vertical gap={"small"}>

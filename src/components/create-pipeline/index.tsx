@@ -617,7 +617,7 @@ const TextAreaComp: FC<any> = ({ value, onChange, templete }) => {
         }}></TextArea> */}
         {/* {templete} */}
 
-        <MonacoEditor value={value} onChange={onChange} editorRef={editorRef} defaultLanguage="json" ></MonacoEditor>
+        {/* <MonacoEditor value={value} onChange={onChange} editorRef={editorRef} defaultLanguage="json" ></MonacoEditor> */}
         {/* <Button onClick={() => {
             setData(JSON.stringify(value, null, 2))
         }}>格式化</Button> */}
