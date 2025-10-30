@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@ant-design/plots": "^2.3.3",
-    "@ant-design/x": "^1.6.0",
+    "@ant-design/x": "^1.6.1",
     "@antv/s2": "^2.4.0",
     "@antv/s2-react": "^2.2.0",
     "@dnd-kit/core": "^6.3.1",
@@ -26,9 +26,11 @@
     "@types/node": "^22.14.1",
     "@xyflow/react": "^12.8.2",
     "antd": "^5.24.8",
+    "antd-style": "^3.7.1",
     "axios": "^1.8.4",
     "i18next": "^25.5.2",
     "lodash.debounce": "^4.0.8",
+    "markdown-it": "^14.1.0",
     "monaco-editor": "^0.52.2",
     "ollama": "^0.5.16",
     "react": "^19.0.0",
@@ -55,6 +57,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
+    "@types/markdown-it": "^14.1.2",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@types/react-table": "^7.7.20",

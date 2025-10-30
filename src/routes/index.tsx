@@ -66,7 +66,7 @@ const Test = lazy(()=>import("@/pages/test"))
 const Mining = lazy(()=>import("@/pages/mining"))
 const MiningData = lazy(()=>import("@/pages/mining/components/mining-data"))
 const ToolKit = lazy(()=>import("@/pages/tool-kit"))
-
+const DigitalTwins = lazy(()=>import("@/pages/digital-twins"))
 const ContainerPage = lazy(() => import('@/pages/container'));
 import axios from "axios";
 import { Skeleton } from "antd";
@@ -345,6 +345,9 @@ if (appType == "index") {
         },{
             path: "/mining-data/:entity_id",
             element: <MiningData />
+        },{
+            path: "/digital-twins",
+            element: <DigitalTwins />
         },
         
         

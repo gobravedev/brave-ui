@@ -176,7 +176,7 @@ const App: React.FC = () => {
                 zh_CN: "主页",
                 en_US: "Home"
             }
-        },{
+        }, {
             key: `/entity-relation`,
             label: {
                 zh_CN: "Microbial Graph",
@@ -184,21 +184,28 @@ const App: React.FC = () => {
             }
 
         }, {
+
+            key: `/digital-twins`,
+            label: {
+                zh_CN: "Digital Twins",
+                en_US: "Digital Twins"
+            }
+        }, {
             key: `/entity-page`,
             label: {
                 zh_CN: "Ontology",
                 en_US: "Ontology"
             }
 
-        },  {
+        }, {
             key: `/mining`,
             label: {
                 zh_CN: "Mining",
                 en_US: "Mining"
-            },children: [
+            }, children: [
                 {
                     key: `/mining-data`,
-                    label:{
+                    label: {
                         zh_CN: "Mining Data",
                         en_US: "Mining Data"
                     },
@@ -296,7 +303,7 @@ const App: React.FC = () => {
         }
     }, [location.pathname])
 
-    
+
     // individual meta
 
     // const checkProject = () => {
@@ -324,7 +331,7 @@ const App: React.FC = () => {
         },
     ]
     return (
-        <Layout  style={{ minHeight: '100vh'}}>
+        <Layout style={{ minHeight: '100vh' }}>
             {notificationContextHolder}
             {messageContextHolder}
             {/* <Header style={{ display: 'flex', alignItems: 'center' }}>
@@ -356,7 +363,7 @@ const App: React.FC = () => {
             }}>
                 {/* 左侧：LOGO + 菜单 */}
                 <div style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0 }}>
-                    <div  style={{ color: textColor, marginRight: '1rem', cursor: 'pointer' }} onClick={async () => {
+                    <div style={{ color: textColor, marginRight: '1rem', cursor: 'pointer' }} onClick={async () => {
                         await axios.get("/send-test")
                     }}>PsycMicroGraph</div>
                     <Menu
@@ -370,7 +377,7 @@ const App: React.FC = () => {
                             onMenuClick(k.key)
                             console.log(k)
                         }}
-                        style={{ flex: 1, minWidth: 0 ,background: 'transparent'}}
+                        style={{ flex: 1, minWidth: 0, background: 'transparent' }}
                     />
                 </div>
 
@@ -405,7 +412,7 @@ const App: React.FC = () => {
                 </Flex>
             </Header>
             <Layout
-                // style={{ padding: '0 0 0  0', background: colorBgContainer, borderRadius: borderRadiusLG }}
+            // style={{ padding: '0 0 0  0', background: colorBgContainer, borderRadius: borderRadiusLG }}
             >
                 {/* <Sider style={{ background: colorBgContainer }} width={120}>
                     <Menu
