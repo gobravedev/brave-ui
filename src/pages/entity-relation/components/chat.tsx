@@ -10,8 +10,9 @@ const ChatView: FC<any> = ({ close ,height}) => {
         styles={{
             body: {
                 padding: "0.5rem",
-                height:"100%",
+                height:"85vh",
                 display: "flex",
+                // flex:1,
             }
         }}
         size="small"
