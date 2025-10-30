@@ -6,7 +6,7 @@ import { fa } from "@faker-js/faker";
 import { json } from "stream/consumers";
 import ChatView from "@/pages/entity-relation/components/chat";
 import AIChat from '@/components/chat'
-import { FireOutlined, HeartOutlined, ReloadOutlined, SmileOutlined } from '@ant-design/icons';
+import { ClusterOutlined, FireOutlined, HeartOutlined, ReloadOutlined, SmileOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import { ExperimentOutlined, DatabaseOutlined, CloudSyncOutlined, LineChartOutlined } from "@ant-design/icons";
 // Digital Twin Dashboard: shows time-series for weight, temp, BMI, BP, HR, activity and microbiome metrics
 import humann from "@/assets/human.svg";
@@ -710,11 +710,11 @@ const GutTwinIntervention = () => {
         exercise: "moderate",
     });
     const [predicted, setPredicted] = useState({
-        microbiome: 78,
-        inflammation: 62,
+        microbiome: 80,
+        inflammation: 20,
         metabolism: 85,
         diversity: 70,
-        mood: 88,
+        mood: 90,
     });
 
     const onSimulate = () => {
@@ -882,6 +882,14 @@ const GutTwinIntervention = () => {
                                 <Flex align="center" justify="space-between">
                                     <span style={{ whiteSpace: "nowrap" }}><SmileOutlined /> 情绪状态</span>
                                     <Progress percent={predicted.mood} size="small" showInfo={false} />
+                                </Flex>
+                                <Flex align="center" justify="space-between">
+                                    <span style={{ whiteSpace: "nowrap" }}><ThunderboltOutlined /> 代谢活性</span>
+                                    <Progress percent={predicted.metabolism} size="small" showInfo={false} />
+                                </Flex>
+                                <Flex align="center" justify="space-between">
+                                    <span style={{ whiteSpace: "nowrap" }}><ClusterOutlined /> 多样性</span>
+                                    <Progress percent={predicted.diversity} size="small" showInfo={false} />
                                 </Flex>
                             </Flex>
                         </div>
