@@ -178,7 +178,7 @@ const App2: FC<any> = ({ questions = MOCK_QUESTIONS }) => {
     request: async ({ message }, { onSuccess, onUpdate, onError }) => {
       try {
         const res = await fetch(
-          `${baseURL}/llm/chat/stream`,
+          `${baseURL}/brave-api/llm/chat/stream`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
