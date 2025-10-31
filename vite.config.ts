@@ -15,7 +15,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         index: resolve(__dirname, 'index.html'),
-        psycmicrograph: resolve(__dirname, 'psycmicrograph.html')
+        // psycmicrograph: resolve(__dirname, 'psycmicrograph.html')
         // nested: resolve(__dirname, 'nested/index.html'),
       },
     },

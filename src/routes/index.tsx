@@ -55,7 +55,7 @@ const PielineMonitorPanal = lazy(() => import('@/pages/pipeline-monitor-panal'))
 const AnalysisSoftware = lazy(() => import('@/pages/pipeline-components/software'));
 const AnalysisFile = lazy(() => import('@/pages/pipeline-components/file'));
 const Script = lazy(() => import('@/pages/pipeline-components/script'));
-const Pipeline = lazy(() => import('@/pages/pipeline-components/pipeline'));
+const Pipeline = lazy(() => import('@/pages/pipeline-components'));
 const PipelineComponentsCard = lazy(() => import('@/components/pipeline-components-card'));
 const SoftwareAnalysisEditor = lazy(() => import('@/pages/software-analysis-editor'));
 const AnalysisReport = lazy(() => import('@/pages/analysis-report'));
@@ -68,6 +68,8 @@ const MiningData = lazy(()=>import("@/pages/mining/components/mining-data"))
 const ToolKit = lazy(()=>import("@/pages/tool-kit"))
 const DigitalTwins = lazy(()=>import("@/pages/digital-twins"))
 const ContainerPage = lazy(() => import('@/pages/container'));
+
+const InteractiveTools = lazy(() => import('@/pages/interactive-tools'));
 import axios from "axios";
 import { Skeleton } from "antd";
 import { useDispatch } from "react-redux";
@@ -211,7 +213,11 @@ if (appType == "index") {
         }, {
             path: "/:project/single_genome/gene-expression",
             element: <GeneExpressison />
+        },{
+            path: "/interactive-tools",
+            element: <InteractiveTools />
         }
+        
     ]
     routes = [
         {
@@ -351,7 +357,6 @@ if (appType == "index") {
         },
         
         
-        
 
         {
             path: "/:project/meta_genome/reads-based-abundance-analysis",
@@ -410,6 +415,7 @@ if (appType == "index") {
 }
 
 import { listPipeline } from '@/api/pipeline'
+import { p } from "node_modules/react-router/dist/development/fog-of-war-CyHis97d.d.mts";
 const RenderRouter: FC = () => {
     // const [routes, setRoutes] = useState<RouteObject[] | null>([]);
     // const dispatch = useDispatch()

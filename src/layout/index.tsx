@@ -221,8 +221,8 @@ const App: React.FC = () => {
         {
             key: `/pipeline-card`,
             label: {
-                zh_CN: "分析管道",
-                en_US: "Pipeline"
+                zh_CN: "分析流程",
+                en_US: "Workflows"
             },
             children: [
                 {
@@ -238,8 +238,8 @@ const App: React.FC = () => {
         {
             key: `/software-card`,
             label: {
-                zh_CN: "分析软件",
-                en_US: "Software"
+                zh_CN: "工具",
+                en_US: "Tools"
             },
             children: [
                 {
@@ -253,8 +253,8 @@ const App: React.FC = () => {
         {
             key: `/script-card`,
             label: {
-                zh_CN: "分析脚本",
-                en_US: "Script"
+                zh_CN: "可视化",
+                en_US: "Visualizations"
             },
             children: [
                 {
@@ -264,18 +264,11 @@ const App: React.FC = () => {
                 }
             ]
         }, {
-            key: `/file-card`,
+            key: `/interactive-tools`,
             label: {
-                zh_CN: "分析文件",
-                en_US: "File"
-            },
-            children: [
-                {
-                    key: `/component/file`,
-                    // label: "分析报告",
-                    hidden: true
-                }
-            ]
+                zh_CN: "交互工具",
+                en_US: "Interactive Tools"
+            }
         }, {
             key: `/analysis-report`,
             label: {
@@ -307,6 +300,19 @@ const App: React.FC = () => {
             },
             children: [
                 {
+                    key: `/file-card`,
+                    label: {
+                        zh_CN: "分析文件",
+                        en_US: "File"
+                    },
+                    children: [
+                        {
+                            key: `/component/file`,
+                            // label: "分析报告",
+                            hidden: true
+                        }
+                    ]
+                }, {
                     key: `/pipeline-monitor-panal`,
                     label: {
                         zh_CN: "管道监控",

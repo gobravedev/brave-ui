@@ -162,24 +162,7 @@ const MyLayout = () => {
             ],
         }
     ];
-    // const items2: MenuProps['items'] = [UserOutlined, LaptopOutlined, NotificationOutlined].map(
-    //     (icon, index) => {
-    //         const key = String(index + 1);
-
-    //         return {
-    //             key: `sub${key}`,
-    //             icon: React.createElement(icon),
-    //             label: `subnav ${key}`,
-    //             children: Array.from({ length: 4 }).map((_, j) => {
-    //                 const subKey = index * 4 + j + 1;
-    //                 return {
-    //                     key: subKey,
-    //                     label: `option${subKey}`,
-    //                 };
-    //             }),
-    //         };
-    //     },
-    // );
+    
 
     const siderStyle: React.CSSProperties = {
         overflow: 'auto',
@@ -193,17 +176,7 @@ const MyLayout = () => {
         scrollbarWidth: 'thin',
         scrollbarGutter: 'stable',
         boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-        // position: "fixed",
-        // top: `${headerHeight}px`,
-        // left: 0,
-        // height: `${innerHeight}px`,
-        // background: bgColor,
-        // color: textColor,
-        // overflowY: "auto",
-        // boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
-        // scrollbarWidth: "thin",
-        // scrollbarGutter: "stable",
-        // zIndex: 100, // 确保不会被覆盖
+
     };
     return (
         <Layout ref={containerRef}>
