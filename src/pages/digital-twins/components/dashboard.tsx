@@ -1,12 +1,12 @@
 import React, { Children, useEffect, useMemo, useRef, useState } from "react";
-import { Card, Row, Col, Space, Button, Descriptions, Statistic, Progress, Tabs, Form, Slider, Steps, Tag, Flex, Select, Divider } from "antd";
+import { Card, Row, Col, Space, Button, Descriptions, Statistic, Progress, Tabs, Form, Slider, Steps, Tag, Flex, Select, Divider, Typography, Collapse, Timeline } from "antd";
 import { Line, DualAxes, Gauge, Pie } from "@ant-design/plots";
 import dayjs from "dayjs";
 import { fa } from "@faker-js/faker";
 import { json } from "stream/consumers";
 import ChatView from "@/pages/entity-relation/components/chat";
 import AIChat from '@/components/chat'
-import { ClusterOutlined, FireOutlined, HeartOutlined, ReloadOutlined, SmileOutlined, ThunderboltOutlined } from '@ant-design/icons';
+import { ClusterOutlined, FireOutlined, HeartOutlined, ReloadOutlined, RobotOutlined, SafetyOutlined, SmileOutlined, SyncOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import { ExperimentOutlined, DatabaseOutlined, CloudSyncOutlined, LineChartOutlined } from "@ant-design/icons";
 // Digital Twin Dashboard: shows time-series for weight, temp, BMI, BP, HR, activity and microbiome metrics
 import humann from "@/assets/human.svg";
@@ -348,6 +348,12 @@ export default function GutTwinDashboard({ height }: { height?: number }) {
                         size="small"
                         items={[
                             {
+                                key: 'diseak_risk',
+                                label: `疾病风险预测`,
+                                children: <>
+                                    <DiseaseRiskPrediction></DiseaseRiskPrediction>
+                                </>
+                            }, {
                                 key: '0',
                                 label: `干预设置与预测`,
                                 children: <>
@@ -818,7 +824,7 @@ const GutTwinIntervention = () => {
                     {/* <div >
                         <iframe title="Gut Barrier"    allow="autoplay; fullscreen; xr-spatial-tracking" xr-spatial-tracking execution-while-out-of-viewport execution-while-not-rendered web-share src="https://sketchfab.com/models/3f1641c252a1410e8b3414fa128d9a0d/embed"> </iframe>
                     </div> */}
-                    <iframe title="HUMAN CIRCULATORY SYSTEM" style={{width:"100%",height:"100%",border:"none"}} allow="autoplay; fullscreen; xr-spatial-tracking" xr-spatial-tracking execution-while-out-of-viewport execution-while-not-rendered web-share src="https://sketchfab.com/models/b80352ff2ed54b9eb19475464b189640/embed?ui_infos=0&ui_watermark=0&ui_stop=1&ui_help=0&ui_vr=0&ui_settings=0&ui_inspector=0&ui_animations=0&ui_annotations=0&ui_hint=2"> </iframe>
+                    <iframe title="HUMAN CIRCULATORY SYSTEM" style={{ width: "100%", height: "100%", border: "none" }} allow="autoplay; fullscreen; xr-spatial-tracking" xr-spatial-tracking execution-while-out-of-viewport execution-while-not-rendered web-share src="https://sketchfab.com/models/b80352ff2ed54b9eb19475464b189640/embed?ui_infos=0&ui_watermark=0&ui_stop=1&ui_help=0&ui_vr=0&ui_settings=0&ui_inspector=0&ui_animations=0&ui_annotations=0&ui_hint=2"> </iframe>
                     {/* <iframe style={{width:"100%",height:"100%"}} title="Circulatory System Human Anatomy" allow="autoplay; fullscreen; xr-spatial-tracking" xr-spatial-tracking execution-while-out-of-viewport execution-while-not-rendered web-share src="https://sketchfab.com/models/e7abdabd3a6d422cb25e6e63b45b1ab0/embed"> </iframe> */}
                     {/* <HumanSvg></HumanSvg> */}
                     {/* <div className="digital-twin-wrapper light" style={{ height: "100%" }}>
@@ -902,68 +908,52 @@ const GutTwinIntervention = () => {
 
 
 
-function ConceptualGutDemo() {
-    const canvasRef = useRef(null);
 
-    useEffect(() => {
-        const canvas: any = canvasRef.current;
-        const ctx = canvas.getContext("2d");
-        const width = canvas.width = canvas.parentElement.clientWidth;
-        const height = canvas.height = canvas.parentElement.clientHeight;
+const { Panel } = Collapse;
+const { Title, Paragraph } = Typography;
 
-        // 人体躯干位置
-        const torso = { x: width * 0.7, y: height / 2, w: 50, h: 200 };
+// 模拟风险评分数据（可来自后端接口）
+const diseaseRiskData = [
+    { name: "抑郁症", score: 82 },
+    { name: "自闭症", score: 68 },
+    { name: "焦虑障碍", score: 55 },
+    { name: "双相障碍", score: 40 },
+];
 
-        // 肠道曲线点
-        const gutPoints = Array.from({ length: 30 }, (_, i) => ({
-            x: torso.x - i * 5,
-            y: torso.y + Math.sin(i * 0.5) * 50
-        }));
+function DiseaseRiskPrediction() {
+    const gaugeConfig = (score: any) => ({
+        autoFit: true,
+        data: {
+            target: score,
+            total: 100,
+            name: 'score',
+            thresholds: [20, 80, 100],
+        },
+        scale: {
+            color: {
+                range: [ 'green', '#FAAD14','#F4664A'],
+            },
+        },
+        style: {
+            textContent: (target: any, total: any) => `风险值：${target}`,
+        },
+    });
 
-        const particles = Array.from({ length: 60 }, () => ({
-            i: Math.random() * gutPoints.length,
-            offset: Math.random()
-        }));
+    return (
 
-        let animationId: any;
-        const animate = () => {
-            ctx.clearRect(0, 0, width, height);
-
-            // 绘制躯干
-            ctx.fillStyle = "rgba(255, 224, 192, 0.3)";
-            ctx.fillRect(torso.x - torso.w / 2, torso.y - torso.h / 2, torso.w, torso.h);
-
-            // 绘制肠道曲线
-            ctx.strokeStyle = "#69c0ff";
-            ctx.lineWidth = 12;
-            ctx.beginPath();
-            gutPoints.forEach((p, idx) => {
-                if (idx === 0) ctx.moveTo(p.x, p.y);
-                else ctx.lineTo(p.x, p.y);
-            });
-            ctx.stroke();
-
-            // 绘制菌群粒子
-            particles.forEach(p => {
-                p.i += 0.05;
-                if (p.i >= gutPoints.length) p.i = 0;
-                const idx = Math.floor(p.i);
-                const nextIdx = (idx + 1) % gutPoints.length;
-                const t = p.i - idx;
-                const x = gutPoints[idx].x * (1 - t) + gutPoints[nextIdx].x * t;
-                const y = gutPoints[idx].y * (1 - t) + gutPoints[nextIdx].y * t;
-                ctx.fillStyle = "#ffd666";
-                ctx.beginPath();
-                ctx.arc(x, y, 4, 0, Math.PI * 2);
-                ctx.fill();
-            });
-
-            animationId = requestAnimationFrame(animate);
-        };
-        animate();
-
-        return () => cancelAnimationFrame(animationId);
-    }, []);
-
-    return <canvas ref={canvasRef} style={{ width: "100%", height: "100%" }} />;
+        <Row gutter={[16, 16]}>
+            {diseaseRiskData.map((d) => (
+                <Col key={d.name} xs={24} sm={12} md={12} lg={12}>
+                    <Card styles={{
+                        body:{
+                            padding: "0"
+                        }
+                    }} hoverable size="small" style={{ textAlign: "center" }}>
+                        <Title level={5}>{d.name}</Title>
+                        <Gauge {...gaugeConfig(d.score)} height={300} />
+                    </Card>
+                </Col>
+            ))}
+        </Row>
+    );
 }

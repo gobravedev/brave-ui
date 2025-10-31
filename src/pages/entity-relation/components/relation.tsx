@@ -1,4 +1,4 @@
-import { Button, Card, Flex, Popconfirm } from "antd"
+import { Button, Card, Flex, List, Popconfirm, Tag, Typography } from "antd"
 import { FC, useEffect, useState } from "react"
 import { CloseOutlined, DeleteOutlined, RedoOutlined } from '@ant-design/icons'
 import axios from "axios"
@@ -58,7 +58,10 @@ const RelationView: FC<any> = ({ close, height, data: params, loadGraph, ...rest
             height: height,
         }}
     >
-        {JSON.stringify(data)}
+        {/* {JSON.stringify()} */}
+
+        <StudyList data={data?.map((it:any)=>it.study)}></StudyList>
+
 
         {/* <Button size="small" danger variant="solid" onClick={async () => {
             await axios.delete(`/entity-relation/relation/${data.rid}`)
@@ -68,3 +71,40 @@ const RelationView: FC<any> = ({ close, height, data: params, loadGraph, ...rest
     </Card>
 }
 export default RelationView
+
+
+
+
+
+
+// const data = [
+//     {
+//         entity_id: '2ygM3iJ9yeGdWPgHHfpaPD',
+//         entity_name: 'Zhang Q 2021',
+//         title: 'Comparison of gut microbiota between adults with autism spectrum disorder and obese adults',
+//         pmid: '33717692',
+//         doi: '10.7717/peerj.10946',
+//     },
+// ];
+
+
+function StudyList({data}:any) {
+    return (
+        <Card title="Supporting Studies">
+            <List
+                itemLayout="vertical"
+                dataSource={data}
+                renderItem={(study:any) => (
+                    <List.Item key={study.entity_id}>
+                        {/* <Typography.Title level={5}>{study.entity_name}</Typography.Title> */}
+                        <Typography.Paragraph>{study.title}</Typography.Paragraph>
+                        <div>
+                            <Tag color="blue">PMID: {study.pmid}</Tag>
+                            <Tag color="green">DOI: {study.doi}</Tag>
+                        </div>
+                    </List.Item>
+                )}
+            />
+        </Card>
+    );
+}

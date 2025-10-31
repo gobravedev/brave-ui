@@ -208,7 +208,7 @@ export const EntityView: FC<any> = forwardRef<any, any>(({ openModals, rowSelect
                     const action = getAction("mesh", openModal, reload, messageApi)
                     return [...columns, ...action]
                 }}
-                hiddenSwitch={hiddenSwitch}
+                hiddenSwitch={false}
                 rowSelection={rowSelection} ref={entityRef} openModal={openModals} params={params}
                 api={`/entity/page/mesh`}></DataPage>
         </>}

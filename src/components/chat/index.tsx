@@ -4,6 +4,7 @@ import { Button, Flex, GetRef, Space, Spin, Typography, type GetProp } from 'ant
 import { createStyles } from 'antd-style';
 import React, { FC, useEffect, useRef, useState } from 'react';
 import markdownit from 'markdown-it';
+import { useSelector } from 'react-redux';
 
 const sleep = () => new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -154,13 +155,14 @@ const MOCK_SUGGESTIONS = [
 ];
 
 
-const App2:FC<any> = ({questions=MOCK_QUESTIONS}) => {
+const App2: FC<any> = ({ questions = MOCK_QUESTIONS }) => {
   const [content, setContent] = React.useState('');
   const { styles } = useCopilotStyle();
   const attachmentsRef = useRef<GetRef<typeof Attachments>>(null);
   const abortController = useRef<AbortController>(null);
 
   // ==================== State ====================
+  const { baseURL } = useSelector((state: any) => state.user)
 
   const [messageHistory, setMessageHistory] = useState<Record<string, any>>({});
 
@@ -176,7 +178,7 @@ const App2:FC<any> = ({questions=MOCK_QUESTIONS}) => {
     request: async ({ message }, { onSuccess, onUpdate, onError }) => {
       try {
         const res = await fetch(
-          "https://10.110.1.11:5005/brave-api/llm/chat/stream",
+          `${baseURL}/llm/chat/stream`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -271,7 +273,7 @@ const App2:FC<any> = ({questions=MOCK_QUESTIONS}) => {
 
         <Bubble.List
           roles={roles}
-          
+
           style={{ height: '100%', paddingInline: 16 }}
           items={messages.map(({ id, message, status }) => ({
             key: id,
@@ -294,7 +296,7 @@ const App2:FC<any> = ({questions=MOCK_QUESTIONS}) => {
           <Prompts
             vertical
             title="I can help："
-            items={questions.map((i:any) => ({ key: i, description: i }))}
+            items={questions.map((i: any) => ({ key: i, description: i }))}
             onItemClick={(info) => handleUserSubmit(info?.data?.description as string)}
             style={{
               marginInline: 16,
