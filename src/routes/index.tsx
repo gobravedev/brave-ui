@@ -415,7 +415,6 @@ if (appType == "index") {
 }
 
 import { listPipeline } from '@/api/pipeline'
-import { p } from "node_modules/react-router/dist/development/fog-of-war-CyHis97d.d.mts";
 const RenderRouter: FC = () => {
     // const [routes, setRoutes] = useState<RouteObject[] | null>([]);
     // const dispatch = useDispatch()
