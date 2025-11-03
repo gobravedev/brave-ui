@@ -766,154 +766,316 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
 
         </Flex>}
 
-        {componentLayout != "simple" && <>
-            <div style={{ marginBottom: "1rem" }}></div>
 
-            <Flex wrap style={{ marginBottom: "1rem" }} gap={"small"}>
-                {currentAnalysisMethod?.downstreamAnalysis && currentAnalysisMethod?.downstreamAnalysis.map((item: any, index: any) => {
-                    return <span key={index}>
-                        {getScript(item)}
-
-                    </span>
-                })}
-
-                {/* 
-                {downstreamData?.component_id && <CloseCircleOutlined onClick={() => {
-                    setDownstreamData(undefined)
-                }} />} */}
-            </Flex>
-
-
-            <div>
-                {downstreamData && <>
-                    <Collapse
-                        style={{ marginTop: "1rem" }}
-                        defaultActiveKey={['1']}
-                        size="small"
-                        items={[
-                            {
-                                key: '1',
-                                label: <Tooltip title={<>
-                                    <ul>
-                                        <li>software:{rest?.component_id}</li>
-                                        <li>file:{currentAnalysisMethod?.component_id}</li>
-                                        <li>script:{downstreamData?.component_id}</li>
-                                    </ul>
-                                </>}>Run  Analysis {downstreamData ? `(${downstreamData.component_name})` : ""}{analysis_id ? `(${analysis_id})` : ""}</Tooltip>,
-                                children: <>
-
-
-                                    <Flex gap={"small"} wrap>
-                                        <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                            operatePipeline.openModal("modalB", {
-                                                // module_type: "py_plot",
-                                                // file_type: "py",
-                                                // module_name: downstreamData.moduleName,
-                                                component_id: downstreamData.component_id,
-                                                // module_dir: downstreamData.moduleDir
-                                            })
-                                        }}>Component Code</Button>
-                                        <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                            operatePipeline.openModal("modalC", {
-                                                data: downstreamData, structure: {
-                                                    component_type: "script",
-                                                }
-                                            })
-                                        }}>Edit Script</Button>
-
-                                        <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                            operatePipeline.openModal("modalA", {
-                                                data: undefined,
-                                                pipelineStructure: {
-                                                    relation_type: "parent_file_script",
-                                                    // pipeline_id: pipeline.component_id,
-                                                    component_id: downstreamData.component_id,
-                                                }
-                                            })
-
-                                        }}>Add File</Button>
-
-
-                                        {downstreamData.relation_id && <>
-
-                                            <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                                operatePipeline.openModal("modalA", {
-                                                    data: downstreamData,
-                                                    pipelineStructure: {
-                                                        relation_type: "file_script",
-                                                        // pipeline_id: downstreamData.component_id,
-
-                                                    }
-                                                })
-
-                                            }}>Replace Analysis</Button>
-                                            <Popconfirm title="Are you sure to delete?" onConfirm={() => {
-                                                operatePipeline.deletePipelineRelation(downstreamData.relation_id)
-                                                setBtnName(undefined)
-                                            }}>
-                                                <Button size="small" color="danger" variant="solid" >Delete Analysis</Button>
-                                            </Popconfirm>
-                                        </>
-                                        }
-
-                                        <QuestionCircleOutlined onClick={() => {
-                                            operatePipeline.openModal("descriptionModal", downstreamData.description)
-                                        }} style={{ cursor: "pointer" }} />
-                                    </Flex>
-                                    <div style={{ marginBottom: "1rem" }}></div>
-
-
-                                    <AnalysisForm
-                                        {...downstreamData}
-                                        analysisResultId={analysisResultId}
-                                        pipeline={pipeline}
-                                        form={form}
-                                        resultTableList={resultTableList}
-                                        formJson={formJson}
-                                        formDom={formDom}
-                                        // activeTabKey={activeTabKey}
-                                        sampleGroupApI={sampleGroupApI}
-                                        // moduleName={moduleName}
-                                        operatePipeline={operatePipeline}
-                                        params={params}
-                                        name={btnName}
-                                        setPlotLoading={setPlotLoading}
-                                        dataComponentIds={analysisMethod.map((item: any) => item.component_id)}
-                                        inputAnalysisMethod={currentAnalysisMethod}
-                                        saveAnalysisMethod={saveAnalysisMethod}
-                                        project={project}
-                                        setFilePlot={setFilePlot}
-                                        callback={() => {
-                                            if (tableRef.current) {
-                                                tableRef.current.reload()
-                                            }
-                                        }}
-                                        plotReloadTable={() => {
-                                            if (tableRef.current) {
-                                                tableRef.current.reload()
-                                            }
-                                        }}
-
-                                    ></AnalysisForm>
-                                </>
-                            },
-
-                        ]}
-                    />
-                </>}
-            </div>
-            <div style={{ marginBottom: "1rem" }}></div>
-            {componentIds &&
-                <AnalysisList
-                    ref={tableRef}
-                    project={project}
-                    component_ids={componentIds}
-                ></AnalysisList>
-            }
-
-        </>}
     </>
 }
 
 
+export const ScriptAnalysis: FC<any> = (rest) => {
+    const { pipeline, component_id, component_type, componentLayout, operatePipeline, children, project, onClickItem, analysisType, analysisMethod, appendSampleColumns, script } = rest
+    const [form] = Form.useForm();
+
+    // const [loading, setLoading] = useState(false)
+    // const [data, setData] = useState<any>()
+    const [record, setRecord] = useState<any>()
+    const [filePlot, setFilePlot] = useState<any>()
+    const [plotLoading, setPlotLoading] = useState<boolean>(false)
+
+    const [formDom, setFormDom] = useState<any>()
+    const [formJson, setFormJson] = useState<any>()
+
+
+    // const [htmlUrl, setHtmlUrl_] = useState<any>()
+    const [params, setParams] = useState<any>()
+    // const [tableDesc, setTableDesc] = useState<any>()
+    const [downstreamData, setDownstreamData] = useState<any>()
+
+    const [resultTableList, setResultTableList] = useState<any>([])
+    const [saveAnalysisMethod, setSaveAnalysisMethod] = useState<any>()
+    const [collapseActiveKey, setCollapseActiveKey] = useState<any>("1")
+    const [activeTabKey, setActiveTabKey] = useState<any>()
+    const [currentAnalysisMethod, setCurrentAnalysisMethod] = useState<any>()
+
+    const [sampleGroupJSON, setSampleGroupJSON] = useState<any>()
+    const [btnName, setBtnName] = useState<any>()
+    const [origin, setOrigin] = useState<any>(false)
+
+    const tableRef = useRef<any>(null)
+
+
+    const [sampleGroupApI, setSampleGroupApI] = useState<any>(false)
+    const analysis_id = Form.useWatch((values: any) => values?.analysis_id, form);
+
+
+
+    useEffect(() => {
+        if (downstreamData && currentAnalysisMethod?.downstreamAnalysis) {
+            const findDownstreamData = currentAnalysisMethod?.downstreamAnalysis.find((item: any) => item.component_id == downstreamData.component_id)
+            // console.log("1111",findDownstreamData)
+            // setDownstreamData(findDownstreamData)
+            plot(findDownstreamData)
+        }
+
+    }, [JSON.stringify(currentAnalysisMethod?.downstreamAnalysis)])
+
+
+    const plot = async (data: any) => {
+        let { origin = false, url, moduleName, params, paramsFun, formDom, formJson, saveAnalysisMethod, sampleSelectComp = false, sampleGroupJSON = true, sampleGroupApI = false, ...rest } = data
+        cleanDom()
+        setCollapseActiveKey("1")
+        setDownstreamData(data)
+        setFormDom(formDom)
+        setParams(params)
+        setSampleGroupApI(sampleGroupApI)
+        setOrigin(origin)
+        form.resetFields()
+        form.setFieldValue("analysis_name", rest.component_name)
+        // setBtnName(name)
+        setFormJson(formJson)
+        setSampleGroupJSON(sampleGroupJSON)
+        // debugger
+        // console.log(paramsFun)
+        if (paramsFun) {
+            paramsFun = eval(paramsFun)
+            params = paramsFun(record)
+            console.log(params)
+            setParams(params)
+        }
+
+        if (saveAnalysisMethod) {
+
+            setSaveAnalysisMethod(saveAnalysisMethod)
+        }
+
+        if (origin) {
+            const resp: any = await axios.post(`/fast-api/file-parse-plot/${moduleName}`, {
+                ...params,
+                is_save_analysis_result: false,
+                origin: true
+            })
+            console.log(resp)
+            setFilePlot(resp.data)
+            // await runPlot({ moduleName: moduleName, params: params })
+        }
+
+
+
+
+
+    }
+
+    const cleanDom = () => {
+        setFormDom(undefined)
+        setFilePlot(undefined)
+        // setHtmlUrl(undefined)
+        setDownstreamData(undefined)
+        setSaveAnalysisMethod(undefined)
+    }
+
+    const getScript = (item: any) => {
+        const { name, analysisType, ...rest } = item
+
+        if (record && analysisType == 'one') {
+            return <Button size="small" color="purple" variant={downstreamData?.component_id == rest.component_id ? "solid" : "filled"} onClick={() => plot({ ...rest })}>{rest.component_name}({record.sample_name})</Button>
+        } else {
+            return <Button size="small" color="primary" variant={downstreamData?.component_id == rest.component_id ? "solid" : "filled"} onClick={() => plot({ ...rest })}>{rest.component_name}</Button>
+
+        }
+
+    }
+    const [componentIds, setComponentIds] = useState<any>()
+    useEffect(() => {
+        const downstreamAnalysisList = analysisMethod.filter((item: any) => item.downstreamAnalysis).map((item: any) => item.downstreamAnalysis).flat()
+
+        console.log(downstreamAnalysisList)
+        // if (currentAnalysisMethod?.downstreamAnalysis) {
+        const componentIds = downstreamAnalysisList.map((item: any) => item.component_id)
+        if (componentIds.length > 0) {
+            setComponentIds(componentIds)
+
+        }
+        // }
+    }, [])
+    useEffect(() => {
+        if (script) {
+            plot({ ...script, name: script.name })
+            // const componentIds = analysisMethod.map((item: any) => item.component_id)
+            // setComponentIds(componentIds)
+            setComponentIds([script.component_id])
+        }
+    }, [script])
+
+
+    const [analysisResultId, setAnalysisResultId] = useState<any>()
+
+    return <>
+
+
+
+
+        <Flex wrap style={{ marginBottom: "1rem" }} gap={"small"}>
+            {currentAnalysisMethod?.downstreamAnalysis && currentAnalysisMethod?.downstreamAnalysis.map((item: any, index: any) => {
+                return <span key={index}>
+                    {getScript(item)}
+
+                </span>
+            })}
+
+            {/* 
+                {downstreamData?.component_id && <CloseCircleOutlined onClick={() => {
+                    setDownstreamData(undefined)
+                }} />} */}
+        </Flex>
+
+
+        <div>
+            {downstreamData && <>
+                <Collapse
+                    style={{ marginTop: "1rem" }}
+                    // defaultActiveKey={['1']}
+                    size="small"
+                    items={[
+                        {
+                            key: '1',
+                            label: <Tooltip title={<>
+                                <ul>
+                                    <li>software:{rest?.component_id}</li>
+                                    <li>file:{currentAnalysisMethod?.component_id}</li>
+                                    <li>script:{downstreamData?.component_id}</li>
+                                </ul>
+                            </>}>Run  Analysis {downstreamData ? `(${downstreamData.component_name})` : ""}{analysis_id ? `(${analysis_id})` : ""}</Tooltip>,
+                            children: <>
+                                {analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 0 && <>
+                                    <ResultList
+                                        {...rest}
+                                        onChangeAnalysisResultId={setAnalysisResultId}
+                                        pipeline={pipeline}
+                                        software={rest}
+                                        currentAnalysisMethod={currentAnalysisMethod}
+                                        setCurrentAnalysisMethod={setCurrentAnalysisMethod}
+                                        operatePipeline={operatePipeline}
+                                        relationType="software_output_file"
+                                        title={`Output File ${analysisMethod.length > 0 ? "" : analysisMethod.map((it: any) => it.name)}`}
+                                        appendSampleColumns={appendSampleColumns}
+                                        activeTabKey={activeTabKey}
+                                        setActiveTabKey={setActiveTabKey}
+                                        cleanDom={cleanDom}
+                                        analysisType={"sample"}
+                                        analysisMethod={analysisMethod}
+                                        setResultTableList={setResultTableList}
+                                        setRecord={(data: any) => { setRecord(data) }}
+                                    ></ResultList>
+                                </>}
+
+                                <Flex gap={"small"} wrap>
+                                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                        operatePipeline.openModal("modalB", {
+                                            // module_type: "py_plot",
+                                            // file_type: "py",
+                                            // module_name: downstreamData.moduleName,
+                                            component_id: downstreamData.component_id,
+                                            // module_dir: downstreamData.moduleDir
+                                        })
+                                    }}>Component Code</Button>
+                                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                        operatePipeline.openModal("modalC", {
+                                            data: downstreamData, structure: {
+                                                component_type: "script",
+                                            }
+                                        })
+                                    }}>Edit Script</Button>
+
+                                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                        operatePipeline.openModal("modalA", {
+                                            data: undefined,
+                                            pipelineStructure: {
+                                                relation_type: "parent_file_script",
+                                                // pipeline_id: pipeline.component_id,
+                                                component_id: downstreamData.component_id,
+                                            }
+                                        })
+
+                                    }}>Add File</Button>
+
+
+                                    {downstreamData.relation_id && <>
+
+                                        <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                            operatePipeline.openModal("modalA", {
+                                                data: downstreamData,
+                                                pipelineStructure: {
+                                                    relation_type: "file_script",
+                                                    // pipeline_id: downstreamData.component_id,
+
+                                                }
+                                            })
+
+                                        }}>Replace Analysis</Button>
+                                        <Popconfirm title="Are you sure to delete?" onConfirm={() => {
+                                            operatePipeline.deletePipelineRelation(downstreamData.relation_id)
+                                            setBtnName(undefined)
+                                        }}>
+                                            <Button size="small" color="danger" variant="solid" >Delete Analysis</Button>
+                                        </Popconfirm>
+                                    </>
+                                    }
+
+                                    <QuestionCircleOutlined onClick={() => {
+                                        operatePipeline.openModal("descriptionModal", downstreamData.description)
+                                    }} style={{ cursor: "pointer" }} />
+                                </Flex>
+                                <div style={{ marginBottom: "1rem" }}></div>
+
+
+                                <AnalysisForm
+                                    {...downstreamData}
+                                    analysisResultId={analysisResultId}
+                                    pipeline={pipeline}
+                                    form={form}
+                                    resultTableList={resultTableList}
+                                    formJson={formJson}
+                                    formDom={formDom}
+                                    // activeTabKey={activeTabKey}
+                                    sampleGroupApI={sampleGroupApI}
+                                    // moduleName={moduleName}
+                                    operatePipeline={operatePipeline}
+                                    params={params}
+                                    name={btnName}
+                                    setPlotLoading={setPlotLoading}
+                                    dataComponentIds={analysisMethod.map((item: any) => item.component_id)}
+                                    inputAnalysisMethod={currentAnalysisMethod}
+                                    saveAnalysisMethod={saveAnalysisMethod}
+                                    project={project}
+                                    setFilePlot={setFilePlot}
+                                    callback={() => {
+                                        if (tableRef.current) {
+                                            tableRef.current.reload()
+                                        }
+                                    }}
+                                    plotReloadTable={() => {
+                                        if (tableRef.current) {
+                                            tableRef.current.reload()
+                                        }
+                                    }}
+
+                                ></AnalysisForm>
+                            </>
+                        },
+
+                    ]}
+                />
+            </>}
+        </div>
+        <div style={{ marginBottom: "1rem" }}></div>
+        {componentIds &&
+            <AnalysisList
+                ref={tableRef}
+                project={project}
+                component_ids={componentIds}
+            ></AnalysisList>
+        }
+
+
+    </>
+}
 

@@ -379,12 +379,12 @@ const Pipeline: FC<any> = ({ size: size_ }) => {
     useEffect(() => {
         loadData()
     }, [])
-    return <div style={{ maxWidth: "1800px", margin: "1rem auto" }}>
+    return <div style={{ maxWidth: "1800px", margin: "1rem auto", padding: `${isSticky ? '0 16px 0 16px' : '0'}` }}>
 
         <Spin spinning={loading}>
             {/* {JSON.stringify(pipeline)} */}
             {/* {menuKey} */}
-            <Row gutter={[isSticky ? 16 : 0, 16]}>
+            <Row gutter={[isSticky ? 16 : 0, 16]} style={{}}>
                 {(component_type && ["software", "pipeline"].includes(component_type)) &&
                     <Col lg={size[0]} sm={size[0]} xs={24}
                         ref={containerRef} style={isSticky ? {
@@ -632,6 +632,12 @@ const Pipeline: FC<any> = ({ size: size_ }) => {
                             tableRef={tableRef}
                             operatePipeline={operatePipeline} /> */}
                     </Card>
+                    <Card style={{marginTop: "1rem"}} size="small" >
+                        {pipeline?.description && <>
+
+                            <Markdown data={pipeline?.description}></Markdown>
+                        </>}
+                    </Card>
 
                 </Col>
 
@@ -648,7 +654,7 @@ const Pipeline: FC<any> = ({ size: size_ }) => {
 
                     >
                         <Card
-                            title="Description"
+                            title="More Info"
                             extra={<>
                             </>}
                             style={{
@@ -671,10 +677,10 @@ const Pipeline: FC<any> = ({ size: size_ }) => {
                             ))}
 
                             {/* {JSON.stringify(pipeline.description)} */}
-                            {pipeline?.description && <>
+                            {/* {pipeline?.description && <>
 
                                 <Markdown data={pipeline?.description}></Markdown>
-                            </>}
+                            </>} */}
 
                         </Card>
                     </Col>

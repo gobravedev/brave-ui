@@ -1,4 +1,4 @@
-import { UpstreamAnalysisOutput } from "@/components/analysis-sotware-panel"
+import { ScriptAnalysis } from "@/components/analysis-sotware-panel"
 import { useOutletContext } from "react-router"
 
 const ScriptComponent = ({ operatePipeline, component, ...rest }: any) => {
@@ -6,13 +6,13 @@ const ScriptComponent = ({ operatePipeline, component, ...rest }: any) => {
 
     return <>
         {/* {JSON.stringify(component)} */}
-        <UpstreamAnalysisOutput
+        <ScriptAnalysis
             component_type={component.component_type}
             script={component}
             analysisMethod={component.parent || []}
             operatePipeline={operatePipeline}
             project={project}
-        ></UpstreamAnalysisOutput>
+        ></ScriptAnalysis>
     </>
 }
 

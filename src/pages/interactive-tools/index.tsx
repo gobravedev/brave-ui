@@ -10,7 +10,7 @@ const InteractiveTools: FC<any> = () => {
   
     const { ref: containerRef, top, isSticky } = useStickyTop(576);
 
-    return <div style={{ maxWidth: "1800px", margin: "1rem auto" }}>
+    return <div style={{ maxWidth: "1800px", margin: "1rem auto" , padding: `${isSticky ? '0 16px 0 16px' : '0'}` }}>
         <Row gutter={[isSticky?16:0, 16]}>
             {/* <Col xs={24} sm={12} md={12} lg={12} xl={12} >
 

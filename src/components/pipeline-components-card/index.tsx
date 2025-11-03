@@ -131,7 +131,7 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
     // }, [])
 
     // indivi
-    return <div style={{ maxWidth: "1800px", margin: "1rem auto" }}>
+    return <div style={{ maxWidth: "1800px", margin: "1rem auto", padding: `${isSticky ? '0 16px 0 16px' : '0'}` }}>
         {/* {JSON.stringify(sseData)} */}
 
         {/* <div style={{ marginBottom: "2rem" }}>

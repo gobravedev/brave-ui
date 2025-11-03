@@ -139,7 +139,7 @@ const AnalysisReport: FC<any> = () => {
     useEffect(() => {
         loadData()
     }, [project])
-    return <div style={{ maxWidth: "1800px", margin: "1rem auto" }}>
+    return <div style={{ maxWidth: "1800px", margin: "1rem auto" , padding: `${isSticky ? '0 16px 0 16px' : '0'}`}}>
 
         {/* <div style={{ marginBottom: "1rem" }}></div> */}
         {/* {JSON.stringify(projectObj)} */}
