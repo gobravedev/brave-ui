@@ -1,19 +1,12 @@
 import { Breadcrumb, Button, Card, message, Empty, Flex, Modal, Popconfirm, Skeleton, Switch, Tabs, Tag, Tooltip, Row, Col, Spin } from "antd"
-import { FC, useEffect, useRef, useState } from "react"
+import { FC, lazy, Suspense, useEffect, useRef, useState } from "react"
 
 import { useOutletContext } from "react-router"
 import AnalysisPanel, { UpstreamAnalysisInput, UpstreamAnalysisOutput } from '@/components/analysis-sotware-panel'
 
 import PipelineFlow from "@/components/pipeline-flow"
 
-interface PipelineComponentProps {
-    operatePipeline: any,
-    component: any,
-    tableRef: any,
-    componentLayout: string
-
-}
-const PipelineComponent = ({ operatePipeline, component, ...rest }: PipelineComponentProps) => {
+const PipelineComponent = ({ operatePipeline, component, setMenus, ...rest }: any) => {
     const [softwareList, setSoftwareList] = useState<any>([])
     const { project } = useOutletContext<any>()
 
@@ -60,46 +53,38 @@ const PipelineComponent = ({ operatePipeline, component, ...rest }: PipelineComp
             }
         })
     }
-    const getInitialNodes = (component: any) => {
-        const softwareList = component.software
-        if (!softwareList) return []
-        const position = JSON.parse(component.position) || []
-        const positionMap = position.reduce((acc: any, item: any) => {
-            acc[item.component_id] = item.position
-            return acc
-        }, {})
-        // console.log(positionMap) 
-        const initialNodes = softwareList.map((component: any, index: number) => {
-            // const id = `${index + 1}`;
-            const label = component.component_name;
-            const inputs = (component.inputFile || []).map((input: any) => input);
-            const outputs = (component.outputFile || []).map((output: any) => output);
-
-            return {
-                id: component.component_id,
-                type: 'custom',
-                position: positionMap[component.component_id] || {
-                    x: index * 300, // 你可以根据需要布局位置
-                    y: 100,
-                },
-                data: {
-                    label,
-                    color: '#' + ((1 << 24) * Math.random() | 0).toString(16), // 随机颜色
-                    inputs,
-                    outputs,
-                },
-            };
-        });
-        return initialNodes || []
-    }
-    const getInitialEdges = (component: any) => {
-        const edges = JSON.parse(component.edges)
-        return edges || []
-    }
+   
 
     useEffect(() => {
         if (component) {
             setSoftwareList(getPipline(component))
+            setMenus([
+                {
+                    key: 'Navigation_one',
+                    label: 'Navigation one',
+                },
+                {
+                    key: 'sub2',
+                    label: 'Navigation Two',
+                    children: [
+                        { key: '5', label: 'Option 5' },
+                        { key: '6', label: 'Option 6' },
+
+                    ],
+                },
+
+                {
+                    key: 'sub4',
+                    label: 'Navigation Three',
+                    children: [
+                        { key: '9', label: 'Option 9' },
+                        { key: '10', label: 'Option 10' },
+                        { key: '11', label: 'Option 11' },
+                        { key: '12', label: 'Option 12' },
+                    ],
+                }
+
+            ])
         }
     }, [JSON.stringify(component)])
 
@@ -107,7 +92,7 @@ const PipelineComponent = ({ operatePipeline, component, ...rest }: PipelineComp
     return <>
         {/* <AnalysisPanel>
         </AnalysisPanel> */}
-
+        
         {/* <pre>
             {JSON.stringify(component?.items[0]["inputFile"], null, 2)}
         </pre> */}
@@ -121,12 +106,12 @@ const PipelineComponent = ({ operatePipeline, component, ...rest }: PipelineComp
         */}
 
         {/* {JSON.stringify(getInitialNodes(component.software))} */}
-        <PipelineFlow
+        {/* <PipelineFlow
             initialEdges={getInitialEdges(component)}
             initialNodes={getInitialNodes(component)}
             component={component}
 
-        ></PipelineFlow>
+        ></PipelineFlow> */}
         <div style={{ marginTop: "1rem" }}></div>
         <UpstreamAnalysisInput
             {...component}
@@ -166,12 +151,6 @@ const PipelineComponent = ({ operatePipeline, component, ...rest }: PipelineComp
     </>
 }
 
-const PipelineComponentLayout = () => {
-    return (
-        <div>
-            <h2>Pipeline Component</h2>
-        </div>
-    );
-};
+
 
 export default PipelineComponent;

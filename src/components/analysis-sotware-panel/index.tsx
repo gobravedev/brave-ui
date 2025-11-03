@@ -123,30 +123,8 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
         // getAnalsyisFiles()
     }, [])
 
-    const tableRef = useRef<any>(null)
     const [record, setRecord] = useState<any>()
-    // inputAnalysisMethod = [
-    //     {
-    //         key: "ran_seq_reads",
-    //         name: "RNA测序",
-    //         value: ["V1_single_genome_NGS_RNA"],
-    //         mode:"multiple"
-    //     }, {
-    //         key: "assembly",
-    //         name: "组装基因组",
-    //         value: ["ngs-individual-assembly", "tgs_individual_assembly"],
-    //         mode:"single"
 
-    //     }
-    // ]
-    // analysisMethod = [
-    //     {
-    //         key: "abc",
-    //         name: "V1_single_genome_NGS_RNA_name",
-    //         value: ["V1_single_genome_NGS_RNA"],
-    //         mode:"multiple"
-    //     }
-    // ]
     const checkAvailable = (analysisMethod: any) => {
         return analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 0
     }
@@ -154,108 +132,9 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
 
         <Row>
             <Col lg={24} sm={24} xs={24}>
-                {/* <AnalysisForm form={form}></AnalysisForm>                 */}
-                {/* <Button onClick={getCompareAbundance}>提交</Button> */}
-                {/* <Abundance /> */}
-                {/* {analysisName && <SampleAnalysisResult analysisName={analysisName} shouldTrigger={true} setSampleResult={(data: any) => {
-                    setSampleResult(data)
-                }}></SampleAnalysisResult>} */}
-                {/* {JSON.stringify(pipeline)}
-
-                <hr />
-                {JSON.stringify(rest)} */}
 
 
 
-                {/* {JSON.stringify(inputFile)}
-                <hr />
-                {JSON.stringify(outputFile)} */}
-                {/* {import.meta.env.MODE == "development" && <>
-                    <ul>
-                        <li>pipeline:{pipeline?.component_id}</li>
-                        <li>software:{rest.component_id}</li>
-                    </ul>
-                </>} */}
-
-
-                <Card size="small" style={{ marginBottom: "1rem" }}>
-                    <Flex gap="small" style={{ marginBottom: "1rem", flexWrap: "wrap" }}>
-
-                        {pipeline &&
-                            <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                operatePipeline.openModal("modalC", {
-                                    data: undefined, structure: {
-                                        component_type: "software",
-                                        relation_type: "pipeline_software",
-                                        parent_component_id: pipeline.component_id,
-                                        // pipeline_id: pipeline.component_id
-                                    }
-                                })
-                            }}>New Software</Button>
-                        }
-                        <Button size="small" color="cyan" variant="solid" onClick={() => {
-                            operatePipeline.openModal("modalC", {
-                                data: rest, structure: {
-                                    component_type: "software",
-                                }
-                            })
-                        }}>Update Software</Button>
-
-                        {pipeline &&
-
-                            <>
-                                <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                    operatePipeline.openModal("modalA", {
-                                        data: undefined, pipelineStructure: {
-                                            relation_type: "pipeline_software",
-                                            parent_component_id: pipeline.component_id,
-                                            // pipeline_id: pipeline.component_id
-
-                                        }
-                                    })
-                                }}>Add Software</Button>
-                                <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                    operatePipeline.openModal("modalA", {
-                                        data: rest,
-                                        pipelineStructure: {
-                                            relation_type: "pipeline_software",
-                                            // pipeline_id: pipeline.component_id,
-
-                                        }
-                                    })
-                                }}>Replace Software</Button>
-                                <Popconfirm title="Whether to remove files?" onConfirm={() => {
-                                    operatePipeline.deletePipelineRelation(rest.relation_id)
-                                }}>
-                                    <Button size="small" color="red" variant="solid" >Remove File</Button>
-                                </Popconfirm>
-                            </>
-
-                        }
-                        <Button size="small" color="cyan" variant="solid" onClick={() => {
-                            operatePipeline.openModal("modalB", {
-                                module_type: "nextflow",
-                                file_type: "nf",
-                                module_name: analysisPipline,
-                                component_id: rest.component_id,
-                            })
-                        }}>Component Code</Button>
-                        {rest.databases &&
-                            <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                operatePipeline.openModal("modalE", rest.databases)
-                            }}>Configuration Database</Button>
-                        }
-
-                        <QuestionCircleOutlined onClick={() => {
-                            operatePipeline.openModal("descriptionModal", rest.description)
-                        }} style={{ cursor: "pointer" }} />
-                    </Flex>
-
-                    {/* {rest.description && <>
-                        <Markdown data={rest.description}></Markdown>
-                    </>} */}
-                    {/* {rest.description} */}
-                </Card>
 
                 {checkAvailable(inputFile) ? <>
                     <UpstreamAnalysisInput
@@ -510,7 +389,6 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
                                     shouldTrigger={true}
                                     analysisType={"sample"}
                                     analysisMethod={inputAnalysisMethod}
-                                    // setRecord={(record: any) => onClickItem(record)}
                                     setResultTableList={setResultTableList}></ResultList>
                                 }
 
@@ -617,7 +495,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
 
 
                                     {/* {markdown} */}
-                               
+
                                     {/* <Literature params={{
                                     obj_key: analysisPipline,
                                     obj_type: "analysis_img"
@@ -626,17 +504,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
 
                             </>
                         },
-                        // {
-                        //     key: "2",
-                        //     label: `分析记录 (${analysisPipline})`,
-                        //     children: <>
-                        //         <Spin spinning={loading}>
-                        //             {currentAnalysisMethod}
 
-                        //         </Spin>
-
-                        //     </>
-                        // }
                     ]}
                 >
                 </Collapse>
@@ -707,12 +575,8 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
     const [formDom, setFormDom] = useState<any>()
     const [formJson, setFormJson] = useState<any>()
 
-    const [sampleSelectComp, setSampleSelectComp] = useState<any>(false)
 
     // const [htmlUrl, setHtmlUrl_] = useState<any>()
-    const { Search } = Input;
-    const [messageApi, contextHolder] = message.useMessage();
-    const [moduleName, setModuleName] = useState<any>()
     const [params, setParams] = useState<any>()
     // const [tableDesc, setTableDesc] = useState<any>()
     const [downstreamData, setDownstreamData] = useState<any>()
@@ -752,16 +616,13 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
         setCollapseActiveKey("1")
         setDownstreamData(data)
         setFormDom(formDom)
-        setModuleName(moduleName)
         setParams(params)
         setSampleGroupApI(sampleGroupApI)
-        setFilePlot(undefined)
         setOrigin(origin)
         form.resetFields()
         form.setFieldValue("analysis_name", rest.component_name)
         // setBtnName(name)
         setFormJson(formJson)
-        setSampleSelectComp(sampleSelectComp)
         setSampleGroupJSON(sampleGroupJSON)
         // debugger
         // console.log(paramsFun)
@@ -771,26 +632,12 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
             console.log(params)
             setParams(params)
         }
-        // if (sampleGroupJSON) {
-        //     if (sampleGroupApI) {
-        //         getSampleGroup()
 
-        //     } else {
-        //         const resultTable = resultTableList[activeTabKey]
-        //         if (resultTable) {
-        //             setSampleGroup(resultTable)
-        //         }
-        //     }
-        // }
         if (saveAnalysisMethod) {
 
             setSaveAnalysisMethod(saveAnalysisMethod)
         }
-        // else {
-        //     setSaveAnalysisMethod("unknown")
-        // }
 
-        // console.log(sampleSelectComp)
         if (origin) {
             const resp: any = await axios.post(`/fast-api/file-parse-plot/${moduleName}`, {
                 ...params,
@@ -801,26 +648,13 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
             setFilePlot(resp.data)
             // await runPlot({ moduleName: moduleName, params: params })
         }
-        // if (url) {
-        //     setHtmlUrl_(url)
-        // } else {
-        //     if (!formDom && !sampleSelectComp && !sampleGroupJSON && !formJson) {
-        //         // await runPlot({ moduleName: moduleName, params: params })
-        //     }
-        // }
+
 
 
 
 
     }
-    // console.log(downstreamAnalysis)
-    // const setHtmlUrl = (url: any, tableDesc: any = undefined) => {
-    //     setHtmlUrl_(url)
-    //     setFormDom(undefined)
-    //     setTableDesc(tableDesc)
-    //     setFilePlot(undefined)
-    //     setOrigin(false)
-    // }
+
     const cleanDom = () => {
         setFormDom(undefined)
         setFilePlot(undefined)
@@ -859,31 +693,28 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
             // const componentIds = analysisMethod.map((item: any) => item.component_id)
             // setComponentIds(componentIds)
             setComponentIds([script.component_id])
-            // console.log(analysisMethod)
         }
     }, [script])
 
     // const []
-    const [scriptMap, setScriptMap] = useState<any>()
-    useEffect(() => {
-        if (script) {
-            setScriptMap({ [script["component_id"]]: script })
-        } else {
-            const script = analysisMethod.filter((item: any) => "downstreamAnalysis" in item)
-                .map((item: any) => item.downstreamAnalysis).flat(Infinity)
-            const scriptMap: any = script.reduce((acc: any, item: any) => {
-                acc[item.component_id] = item;
-                return acc;
-            }, {});
-            // console.log(script)
-            setScriptMap(scriptMap)
-        }
+    // const [scriptMap, setScriptMap] = useState<any>()
+    // useEffect(() => {
+    //     if (script) {
+    //         setScriptMap({ [script["component_id"]]: script })
+    //     } else {
+    //         const script = analysisMethod.filter((item: any) => "downstreamAnalysis" in item)
+    //             .map((item: any) => item.downstreamAnalysis).flat(Infinity)
+    //         const scriptMap: any = script.reduce((acc: any, item: any) => {
+    //             acc[item.component_id] = item;
+    //             return acc;
+    //         }, {});
+    //         setScriptMap(scriptMap)
+    //     }
 
-    }, [analysisMethod])
+    // }, [analysisMethod])
     const [analysisResultId, setAnalysisResultId] = useState<any>()
 
     return <>
-        {contextHolder}
         {/* {JSON.stringify(analysisMethod)} */}
 
         {analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 0 && <>
@@ -903,73 +734,59 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
                 cleanDom={cleanDom}
                 analysisType={"sample"}
                 analysisMethod={analysisMethod}
-                shouldTrigger={true}
-                form={form}
-                // setTableLoading={setLoading}
                 setResultTableList={setResultTableList}
                 setRecord={(data: any) => { setRecord(data) }}
-            // setTabletData={(data: any) => { setData(data) }}
-
             ></ResultList>
         </>}
-        <div style={{ marginBottom: "1rem" }}></div>
+        {(!script && currentAnalysisMethod) && <Flex gap={"small"} justify="center" style={{ margin: "2rem" }}>
+            {/* {JSON.stringify(currentAnalysisMethod)} */}
+            <Button size="small" color="cyan" variant="solid" onClick={() => {
+                operatePipeline.openModal("modalC", {
+                    data: undefined,
+                    structure: {
+                        relation_type: "file_script",
+                        // pipeline_id: pipeline.component_id,
+                        parent_component_id: currentAnalysisMethod?.component_id,
+                        component_type: "script"
+                    }
+                })
+            }}>New Script ({currentAnalysisMethod?.component_name})</Button>
+            <Button size="small" color="cyan" variant="solid" onClick={() => {
+                operatePipeline.openModal("modalA", {
+                    data: undefined,
+                    pipelineStructure: {
+                        relation_type: "file_script",
+                        // pipeline_id: pipeline.component_id,
+                        parent_component_id: currentAnalysisMethod?.component_id,
+                    }
+                })
+
+            }}>Add Script ({currentAnalysisMethod.component_name})</Button>
 
 
-        {/* {JSON.stringify(currentAnalysisMethod?.downstreamAnalysis)} */}
+        </Flex>}
 
         {componentLayout != "simple" && <>
+            <div style={{ marginBottom: "1rem" }}></div>
 
             <Flex wrap style={{ marginBottom: "1rem" }} gap={"small"}>
                 {currentAnalysisMethod?.downstreamAnalysis && currentAnalysisMethod?.downstreamAnalysis.map((item: any, index: any) => {
                     return <span key={index}>
-                        {/* {JSON.stringify(item)} */}
                         {getScript(item)}
 
                     </span>
                 })}
-                {script ? <>
-                    {/* {getScript(script)} */}
 
-                </> : <>
-
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        operatePipeline.openModal("modalC", {
-                            data: undefined,
-                            structure: {
-                                relation_type: "file_script",
-                                // pipeline_id: pipeline.component_id,
-                                parent_component_id: currentAnalysisMethod.component_id,
-                                component_type: "script"
-                            }
-                        })
-                    }}>New Script</Button>
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        operatePipeline.openModal("modalA", {
-                            data: undefined,
-                            pipelineStructure: {
-                                relation_type: "file_script",
-                                // pipeline_id: pipeline.component_id,
-                                parent_component_id: currentAnalysisMethod.component_id,
-                            }
-                        })
-
-                    }}>Add Script</Button>
-
-                    {downstreamData?.component_id && <CloseCircleOutlined onClick={() => {
-                        setDownstreamData(undefined)
-                        // setBtnName(undefined)
-                    }} />}
-                </>}
-
-
+                {/* 
+                {downstreamData?.component_id && <CloseCircleOutlined onClick={() => {
+                    setDownstreamData(undefined)
+                }} />} */}
             </Flex>
 
 
             <div>
                 {downstreamData && <>
-                    {/* {JSON.stringify(downstreamData)} */}
                     <Collapse
-                        // activeKey={collapseActiveKey}
                         style={{ marginTop: "1rem" }}
                         defaultActiveKey={['1']}
                         size="small"
@@ -984,16 +801,6 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
                                     </ul>
                                 </>}>Run  Analysis {downstreamData ? `(${downstreamData.component_name})` : ""}{analysis_id ? `(${analysis_id})` : ""}</Tooltip>,
                                 children: <>
-                                    {/* {import.meta.env.MODE == "development" && <>
-                                    <ul>
-                                        <li>software:{software.component_id}</li>
-                                        <li>file:{currentAnalysisMethod?.component_id}</li>
-                                        <li>script:{downstreamData?.component_id}</li>
-                                    </ul>
-                                </>} */}
-
-
-                                    {/* {JSON.stringify(downstreamData)} */}
 
 
                                     <Flex gap={"small"} wrap>
@@ -1054,8 +861,8 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
                                         }} style={{ cursor: "pointer" }} />
                                     </Flex>
                                     <div style={{ marginBottom: "1rem" }}></div>
-                                    {/* {JSON.stringify(resultTableList)} */}
-                                    {/* {} */}
+
+
                                     <AnalysisForm
                                         {...downstreamData}
                                         analysisResultId={analysisResultId}
@@ -1086,42 +893,11 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
                                                 tableRef.current.reload()
                                             }
                                         }}
-                                    // runPlot={runPlot}
-                                    // sampleGroup={sampleGroup}
-                                    // analysisMethod={analysisMethod} 
+
                                     ></AnalysisForm>
-
-
-
-
                                 </>
-
                             },
-                            // {
-                            //     key: '2', label: `保存分析结果(${saveAnalysisMethod})`, children: <>
-                            //         <Spin spinning={plotLoading}>
-                            //             {filePlot && <>
-                            //                 <hr />
-                            // <Form.Item label="分析名称" name={"analysis_name"} style={{ maxWidth: 600 }}>
-                            //     <Input></Input>
-                            // </Form.Item>
-                            // <Button type="primary" onClick={() => {
-                            //     savePlot({ moduleName: moduleName, params: params })
-                            // }}>{formId ? <>更新</> : <>保存</>}</Button>
-                            // {formId && <Button type="primary" onClick={() => form.setFieldValue("id", undefined)}>取消更新</Button>}
 
-
-
-                            //                 <hr />
-                            //             </>}
-
-
-
-
-                            //         </Spin>
-
-                            //     </>
-                            // }
                         ]}
                     />
                 </>}
@@ -1136,9 +912,6 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
             }
 
         </>}
-
-
-
     </>
 }
 

@@ -15,39 +15,36 @@ import Dragger from "antd/es/upload/Dragger"
 import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 import { useSelector } from "react-redux"
 import BigTable from '@/components/big-table';
-import { useGlobalNotification } from "@/hooks/useGlobalNotification"
 
 
-const ResultList = forwardRef<any, any>(({
-    pipeline,
-    software,
-    title,
-    form,
-    appendSampleColumns = [],
-    setResultTableList,
-    cleanDom,
-    analysisType,
-    setRecord,
-    setTableLoading,
-    setTabletData,
-    shouldTrigger,
-    analysisMethod,
-    columnsParamsALL,
-    activeTabKey,
-    setActiveTabKey,
-    cardExtra,
-    operatePipeline,
-    relationType,
-    onChangeAnalysisResultId,
-    currentAnalysisMethod,
-    setCurrentAnalysisMethod,
-    params,
-    ...rest
-}, ref) => {
+const ResultList = forwardRef<any, any>((params_, ref) => {
+    const {
+        pipeline,
+        software,
+        title,
+        appendSampleColumns = [],
+        setResultTableList,
+        cleanDom,
+        analysisType,
+        setRecord,
+        setTableLoading,
+        setTabletData,
+        analysisMethod,
+        columnsParamsALL,
+        activeTabKey,
+        setActiveTabKey,
+        cardExtra,
+        operatePipeline,
+        relationType,
+        onChangeAnalysisResultId,
+        currentAnalysisMethod,
+        setCurrentAnalysisMethod,
+        params,
+        ...rest
+    } = params_
     useImperativeHandle(ref, () => ({
         reload
     }))
-    const notify = useGlobalNotification();
 
     const { project, projectObj } = useOutletContext<any>()
     const message = useGlobalMessage()
@@ -489,80 +486,7 @@ const ResultList = forwardRef<any, any>(({
             ellipsis: true,
         },
         ...getMetadataColumns(),
-        //  {
-        //     title: '分析名称',
-        //     dataIndex: 'analysis_name',
-        //     key: 'analysis_name',
-        //     ellipsis: true,
-
-        // }, 
-        // {
-        //     title: '分析id',
-        //     dataIndex: 'analysis_id',
-        //     key: 'analysis_id',
-        //     ellipsis: true,
-
-        // },
-        // {
-        //     title: '分析版本',
-        //     dataIndex: 'analysis_version',
-        //     key: 'analysis_version',
-        //     ellipsis: true,
-        // },
-        // {
-        //     title: '样本名称',
-        //     dataIndex: 'sample_name',
-        //     key: 'sample_name',
-        //     ellipsis: true,
-
-        // },
-        // {
-        //     title: '样本名称',
-        //     dataIndex: 'sample_name',
-        //     key: 'sample_name',
-        //     ellipsis: true,
-
-        // },
-        // {
-        //     title: '样本分组',
-        //     dataIndex: 'sample_group',
-        //     key: 'sample_group',
-        //     ellipsis: true,
-
-        // }, 
-        // {
-        //     title: '样本分组名称',
-        //     dataIndex: 'sample_group_name',
-        //     key: 'sample_group_name',
-        //     ellipsis: true,
-        // },
-
-        //  {
-        //     title: '组件id',
-        //     dataIndex: 'component_id',
-        //     key: 'component_id',
-        //     ellipsis: true,
-        // },
-
-        // {
-        //     title: '样本来源',
-        //     dataIndex: 'sample_source',
-        //     key: 'sample_source',
-        //     ellipsis: true,
-
-        // }, {
-        //     title: '疾病',
-        //     dataIndex: 'host_disease',
-        //     key: 'host_disease',
-        //     ellipsis: true,
-
-        // },  {
-        //     title: "软件",
-        //     dataIndex: 'software',
-        //     key: 'software',
-        //     ellipsis: true,
-        // },
-
+      
         ...appendSampleColumns, {
             title: 'Action',
             key: 'action',
@@ -997,11 +921,11 @@ const ResultList = forwardRef<any, any>(({
             {/* {JSON.stringify(rest)} */}
             {/* {JSON.stringify(projectObj)} */}
             {/* {JSON.stringify(filteredData)} */}
-            {sseData.msgType === "analysis_result" &&<>
-                <Alert closable message={`${sseData?.analysis_name}: Add Analsyis: ${sseData?.add_num}; Update Analysis: ${sseData?.update_num}; Complete Analysis: ${sseData?.complete_num}`}/>
+            {sseData.msgType === "analysis_result" && <>
+                <Alert closable message={`${sseData?.analysis_name}: Add Analsyis: ${sseData?.add_num}; Update Analysis: ${sseData?.update_num}; Complete Analysis: ${sseData?.complete_num}`} />
                 {/* {JSON.stringify(sseData)} */}
             </>}
-           
+
             {/* {analysisResultId} */}
             {currentAnalysisMethod?.file_type == "collected" ? <>
                 {/* {data && <>

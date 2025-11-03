@@ -632,9 +632,10 @@ const AnalysisList = forwardRef<any, any>(({
                 scroll={{ x: 'max-content', y: 55 * 5 }}
                 columns={columns}
                 footer={() => <>
-                    {totalPage != 0 && <Flex style={{ marginTop: "1rem" }} align="center">
+                    {totalPage != 0 && <Flex style={{ marginTop: "1rem" }} justify="space-between" align="center">
                         A total of {totalPage} records  &nbsp;
                         <Pagination
+                            size="small"
                             current={pageNumber}
                             pageSize={pageSize}
                             total={totalPage}

@@ -20,7 +20,7 @@ const Project: FC<any> = () => {
     }
 
     return <div style={{ maxWidth: "1000px", margin: "1rem auto" }}>
-        <Row gutter={[16, 16]}>
+        <Row>
             <Col xs={24} sm={24} md={24} lg={24} xl={24} >
 
                 <Card >

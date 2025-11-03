@@ -109,7 +109,8 @@ if (appType == "index") {
         },
         {
             path: "/pipeline-card",
-            element: <PipelineComponentsCard params={{ component_type: "pipeline" }} />
+            element: <PipelineComponentsCard 
+            params={{ component_type: "pipeline" }} />
         },
         {
             path: "/tool-kit",
@@ -151,7 +152,7 @@ if (appType == "index") {
 
         {
             path: "/component/:component_type/:component_id",
-            element: <Pipeline />
+            element: <Pipeline             />
         }, {
             path: "/software/:softwareId",
             element: <AnalysisSoftware />

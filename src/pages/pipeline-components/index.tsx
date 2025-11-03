@@ -1,4 +1,4 @@
-import { Breadcrumb, Button, Card, message, Empty, Flex, Modal, Popconfirm, Skeleton, Switch, Tabs, Tag, Tooltip, Row, Col, Spin } from "antd"
+import { Breadcrumb, Button, Card, message, Empty, Flex, Modal, Popconfirm, Skeleton, Switch, Tabs, Tag, Tooltip, Row, Col, Spin, Menu, Dropdown, Space } from "antd"
 import { FC, lazy, Suspense, useEffect, useRef, useState } from "react"
 import AnalysisPanel, { UpstreamAnalysisInput, UpstreamAnalysisOutput } from '../../components/analysis-sotware-panel'
 import Meta from "antd/es/card/Meta"
@@ -29,7 +29,18 @@ import { useSelector } from "react-redux"
 import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 import { useStickyTop } from "@/hooks/useStickyTop"
 import Markdown from "@/components/markdown"
-const Pipeline: FC<any> = ({ }) => {
+import PipelineComponent from './pipeline'
+import ComponentsDetailsRender from "./components-details-render"
+import { AppstoreOutlined, DownOutlined } from '@ant-design/icons'
+import { el } from "@faker-js/faker"
+const Pipeline: FC<any> = ({ size: size_ }) => {
+
+    const location = useLocation()
+    const queryParams = new URLSearchParams(location.search);
+    const key = queryParams.get("key");
+
+
+
     console.log("Pipeline")
     const { component_type, component_id: name } = useParams()
     // console.log(pipelineId)
@@ -39,6 +50,8 @@ const Pipeline: FC<any> = ({ }) => {
 
     const [test, setTest] = useState<any>(true)
     const [messageApi, contextHolder] = message.useMessage();
+    const [component, setComponent] = useState<any>()
+    const [size, setSize] = useState<any>(size_ ? size_ : [4, 20])
     const tableRef = {
         inputFile: useRef<HTMLInputElement>(null),
         outputFile: useRef<HTMLInputElement>(null)
@@ -57,11 +70,43 @@ const Pipeline: FC<any> = ({ }) => {
     // const { project: { project_id } } = useSelector((state: any) => state.context)
     const { project: project_id, componentLayout } = useSelector((state: any) => state.user);
 
-    // const [createOpen, setCreateOpen] = useState<any>(false)
-    // const [record, setRecord] = useState<any>()
-    // const [pipelineStructure, setPipelineStructure] = useState<any>()
+    const [menus, setMenus] = useState<any[]>([])
+    const [menuKey, setMenuKey] = useState<string | null>(key)
+    const [view, setView] = useState<string | null>()
 
+    const [componentMap, setComponentMap] = useState<any>({})
 
+    const updateQueryParam = (paramName: string, newValue: string) => {
+        const { pathname, search, hash } = window.location;
+
+        // Parse current query string
+        const searchParams = new URLSearchParams(search || "");
+
+        // Update or add the parameter
+        searchParams.set(paramName, newValue);
+
+        // Determine if the app uses HashRouter
+        const isHashRouter = hash.startsWith("#/");
+
+        let newUrl = "";
+
+        if (isHashRouter) {
+            // Extract path and query part from the hash
+            const [hashPath, hashSearch = ""] = hash.replace(/^#/, "").split("?");
+
+            const hashParams = new URLSearchParams(hashSearch);
+            hashParams.set(paramName, newValue);
+
+            // Build new hash-based URL
+            newUrl = `#${hashPath}?${hashParams.toString()}`;
+        } else {
+            // Build new browser-based URL
+            newUrl = `${pathname}?${searchParams.toString()}`;
+        }
+
+        // Update browser URL without reloading the page
+        window.history.pushState({}, "", newUrl);
+    };
 
 
     const { ref: containerRef, top, isSticky } = useStickyTop(576);
@@ -102,27 +147,7 @@ const Pipeline: FC<any> = ({ }) => {
         })
     }
 
-
-    // [
-    //     {
-    //         name: "查看比对日志",
-    //         analysisType: "one", // multiple or one
-    //         sampleGroupJSON: false,
-    //         paramsFun: (record: any) => {
-    //             return {
-    //                 "text": record.content.log,
-    //             }
-    //         },
-    //         sampleGroupApI: false,
-    //         saveAnalysisMethod: "text",
-    //         moduleName: "text",
-    //         sampleSelectComp: false,
-    //         tableDesc: ` `,
-
-    //     }
-    // ]
-    const loadData = async () => {
-        setLoading(true)
+    const getData = async ({ name, component_type }: any) => {
         let api = `/get-pipeline-v2/${name}?component_type=${component_type}`
         if (component_type == "script") {
             api = `/get-component-parent/${name}?component_type=${component_type}`
@@ -137,44 +162,187 @@ const Pipeline: FC<any> = ({ }) => {
         if (pipeline["tags"]) {
             pipeline["tags"] = JSON.parse(pipeline["tags"])
         }
+        return pipeline
+    }
+    const loadData = async () => {
+        setLoading(true)
+        const pipeline = await getData({ name, component_type })
 
         setPipeline(pipeline)
         setLoading(false)
         console.log(pipeline)
-        // console.log(content)，
-        // const items = getPipline(data)
-        // setItems(items)
-        // if (resp.data.items && Array.isArray(resp.data.items) && resp.data.items.length > 1) {
-        //     const item = data.items[0]
-        //     const upstreamFormList = data.items
-        //         .filter((item: any) => item.upstreamFormJson && Array.isArray(item.upstreamFormJson))       // 确保 upstreamFormJson 存在并是数组
-        //         .flatMap((item: any) => item.upstreamFormJson);
-        //     const parseAnalysisResultModule = data.items
-        //         .filter((item: any) => item.parseAnalysisResultModule && Array.isArray(item.parseAnalysisResultModule))       // 确保 upstreamFormJson 存在并是数组
-        //         .flatMap((item: any) => item.parseAnalysisResultModule);
-        //     const wrapPipeline = {
-        //         key: 0,
-        //         label: "总流程",
-        //         children: <>
-        //             <AnalysisPanel
-        //                 wrapAnalysisPipeline={data.analysisPipline}
-        //                 inputAnalysisMethod={item.inputAnalysisMethod}
-        //                 analysisPipline={data.analysisPipline}
-        //                 upstreamFormJson={upstreamFormList}
-        //                 appendSampleColumns={loadColumnRender(item.appendSampleColumns)}
-        //                 parseAnalysisParams={{
-        //                     parse_analysis_module: data.parseAnalysisModule,
-        //                     parse_analysis_result_module: parseAnalysisResultModule
-        //                 }}
-        //                 analysisType={item.analysisType ? item.analysisType : "sample"}>
-        //             </AnalysisPanel>
-        //             {/* {data.analysisPipline} */}
-        //         </>
-        //     }
-        //     setItems([wrapPipeline, ...items])
+
+
+        let menus: any[] = []
+        let defaultMenuKey = ""
+        let componentMap: any = {}
+        let defalutView = null
+
+        if (component_type === "pipeline") {
+            menus = menus.concat([
+                {
+                    key: 'workflow',
+                    label: 'Workflow Overview',
+                }, {
+                    key: 'workflow-input',
+                    label: 'Workflow Input',
+                },
+            ])
+            if (pipeline?.software) {
+                // const software = pipeline?.software.map((item: any) => ({
+                //     key: item.component_id,
+                //     label: item.component_name || item.component_id,
+                // }))
+                // // menus = menus.concat(software)
+                // menus.push({
+                //     key: 'tools',
+                //     label: 'Tools',
+                //     children: software,
+                // })
+                const scripts = pipeline?.software.map((item: any) => {
+                    const children = item.outputFile?.flatMap((it: any) => ([
+                        //  {
+                        //     key: it.component_id,
+                        //     type: 'group',
+                        //     label: `${it.component_name || it.component_id}`,
+                        //     children: [...it.downstreamAnalysis?.map((it2: any) => ({
+                        //         key: it2.component_id,
+                        //         label: it2.component_name || it2.component_id,
+                        //     }))],
+                        // }
+
+                        ...it.downstreamAnalysis?.map((it2: any) => ({
+                            key: it2.component_id,
+                            label: it2.component_name || it2.component_id,
+                        }))
+                    ]))
+                    return {
+                        key: `${item.component_id}-title`,
+                        label: item.component_name || item.component_id,
+                        icon: <AppstoreOutlined />,
+                        children: [
+
+                            {
+                                key: item.component_id,
+                                label: "Tools Analysis",
+                            }, ...children || []
+                        ],
+                    }
+                })
+                menus = menus.concat(scripts)
+
+
+
+                componentMap = pipeline.software.reduce((acc: any, item: any) => {
+                    acc[item.component_id] = item
+                    return acc
+                }, {})
+
+
+                // visualize downstream scripts
+                const outputFileList = pipeline?.software.flatMap((item: any) => item.outputFile)
+                const downstreamScripts = outputFileList?.filter((it: any) => it?.downstreamAnalysis)?.flatMap((item: any) => {
+                    const { downstreamAnalysis, ...rest } = item
+                    return downstreamAnalysis.map((item2: any) => ({
+                        ...item2,
+                        parent: [rest],
+                    }))
+                })
+
+                const scriptComponentMap = downstreamScripts.reduce((acc: any, item: any) => {
+                    acc[item.component_id] = item
+                    return acc
+                }, {})
+                componentMap = { ...componentMap, ...scriptComponentMap }
+
+            }
+
+            defaultMenuKey = "workflow"
+            defalutView = "workflow"
+            // component = pipeline
+
+        } else if (component_type === "software") {
+            menus = menus.concat([
+                {
+                    key: 'software',
+                    label: 'Tools Analysis',
+                },
+            ])
+            defaultMenuKey = "software"
+            defalutView = "software"
+            // component = pipeline
+            if (pipeline?.outputFile) {
+                const scripts = pipeline?.outputFile.map((item: any) => (
+                    {
+                        key: item.component_id,
+                        label: item.component_name || item.component_id,
+                        type: 'group',
+                        children: [...item.downstreamAnalysis.map((it: any) => ({
+                            key: it.component_id,
+                            component_type: "script",
+                            label: it.component_name || it.component_id,
+                        }))]
+                    }
+
+                ))
+                menus = menus.concat(scripts)
+                const downstreamScripts = pipeline?.outputFile.flatMap((item: any) => {
+                    const { downstreamAnalysis, ...rest } = item
+                    return downstreamAnalysis.map((item2: any) => ({
+                        ...item2,
+                        parent: [rest],
+                    }))
+                })
+
+                componentMap = downstreamScripts.reduce((acc: any, item: any) => {
+                    acc[item.component_id] = item
+                    return acc
+                }, {})
+            }
+
+        } else if (component_type === "script") {
+            // component = pipeline
+            // setView("script")
+            defalutView = "script"
+        } else if (component_type === "file") {
+            // component = pipeline
+            // setView("file")
+            defalutView = "file"
+        }
+
+
+
+
+        if (!menuKey) {
+            setMenuKey(defaultMenuKey)
+            setView(defalutView)
+            setComponent(pipeline)
+            updateQueryParam("key", defaultMenuKey)
+        } else {
+            if (menuKey in componentMap) {
+                console.log("componentMap[key]: ", componentMap[menuKey])
+                const component = componentMap[menuKey]
+                console.log("component: ", component)
+                setComponent(component)
+                setView(component.component_type)
+            } else {
+                setView(menuKey)
+                setComponent(pipeline)
+            }
+        }
+
+        // if (!view) {
+        //     setView(defalutView)
+        //     setComponent(pipeline)
         // } else {
-        //     setItems(items)
+
+
         // }
+
+
+
+        setMenus(menus)
+        setComponentMap(componentMap)
 
 
 
@@ -215,8 +383,67 @@ const Pipeline: FC<any> = ({ }) => {
 
         <Spin spinning={loading}>
             {/* {JSON.stringify(pipeline)} */}
+            {/* {menuKey} */}
             <Row gutter={[isSticky ? 16 : 0, 16]}>
-                <Col lg={18} sm={18} xs={24}
+                {(component_type && ["software", "pipeline"].includes(component_type)) &&
+                    <Col lg={size[0]} sm={size[0]} xs={24}
+                        ref={containerRef} style={isSticky ? {
+                            overflow: "hidden",
+                            // marginTop: "1rem",
+                            position: "sticky",
+                            top: `${top}px`, // 吸顶距离
+                            alignSelf: "flex-start", // 避免被stretch
+                            height: `calc(100vh - ${top}px - 1rem )`, // 可选：固定高度，让内部滚动
+                        } : {}}
+
+                    >
+                        <Card
+                            title={pipeline?.component_name}
+                            extra={<>
+                            </>}
+                            style={{
+                                flex: 1,
+                                display: "flex",
+                                flexDirection: "column",
+                                height: " 100%"
+                            }}
+                            styles={{
+                                body: {
+                                    // height: "90%",
+                                    flex: 1,
+                                    overflowY: "auto"
+                                }
+                            }}
+                            size="small" >
+
+                            <Menu
+                                selectedKeys={[menuKey || ""]}
+                                onSelect={(k: any) => {
+                                    const key = k.key
+                                    console.log("k: ", k)
+                                    setMenuKey(key)
+                                    updateQueryParam("key", key)
+                                    if (key in componentMap) {
+                                        console.log("componentMap[key]: ", componentMap[key])
+                                        const component = componentMap[k.key]
+                                        console.log("component: ", component)
+                                        setComponent(component)
+                                        setView(component.component_type)
+                                    } else {
+                                        setView(key)
+                                        setComponent(pipeline)
+                                    }
+
+                                }}
+                                // onClick={() => { }}
+                                mode="inline"
+                                style={{ flex: 1, minWidth: 0, background: 'transparent', border: 0 }}
+                                // selectedKeys={[]}
+                                items={menus} />
+
+                        </Card>
+                    </Col>}
+                <Col lg={size[1]} sm={size[1]} xs={24}
                     style={{
 
                         display: "flex",
@@ -243,19 +470,41 @@ const Pipeline: FC<any> = ({ }) => {
                             {pipeline?.component_name}
                             {pipeline?.category &&
                                 <Tag style={{ marginLeft: "0.5rem" }} color="blue">{pipeline?.category}</Tag>
-
                             }
-
 
                         </>}
                         extra={<Flex justify={"space-between"} align={"center"} gap="small">
 
                             <Flex gap="small" wrap>
                                 {component_type == "pipeline" && <>
-                                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                                         openModal("sortSoftware", { software: pipeline.software })
-                                    }}>Update Sorting</Button>
-                                </>}
+                                    }}>Update Sorting</Button> */}
+
+
+                                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                        operatePipeline.openModal("modalA", {
+                                            data: undefined, pipelineStructure: {
+                                                relation_type: "pipeline_software",
+                                                parent_component_id: component.component_id,
+                                                pipeline_id: component.component_id
+
+                                            }
+                                        })
+                                    }}>Add Tools</Button> */}
+
+                                </>
+                                }
+                                {/* {
+                                    component?.component_type == "software" && <>
+
+                                        <Popconfirm title="Whether to remove Tools?" onConfirm={() => {
+                                            operatePipeline.deletePipelineRelation(component.relation_id)
+                                        }}>
+                                            <Button size="small" color="red" variant="solid" >Remove Tools</Button>
+                                        </Popconfirm>
+                                    </>
+                                } */}
                                 <Button size="small" color="cyan" variant="solid" onClick={() => {
                                     openModal("publishModal", { ...pipeline, component_type: component_type })
                                 }}>Publish</Button>
@@ -279,6 +528,85 @@ const Pipeline: FC<any> = ({ }) => {
                                     })
                                 }}>Edit {component_type}</Button>
 
+
+                                {component?.databases && <>
+                                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                        operatePipeline.openModal("modalE", component.databases)
+                                    }}>Database</Button>
+                                </>}
+                                {["pipeline", "software", "script"].includes(component?.component_type || "") && <>
+                                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                        operatePipeline.openModal("modalB", {
+                                            component_id: component?.component_id,
+                                        })
+                                    }}>Component Code</Button>
+
+                                </>}
+
+
+                                {component_type == "pipeline" && <>
+                                    <Dropdown menu={{
+                                        onClick: (val: any) => {
+                                            const key = val.key
+                                            switch (key) {
+                                                case "new-tool":
+                                                    operatePipeline.openModal("modalC", {
+                                                        data: undefined, structure: {
+                                                            component_type: "software",
+                                                            relation_type: "pipeline_software",
+                                                            parent_component_id: component.component_id,
+                                                            pipeline_id: component.component_id
+                                                        }
+                                                    })
+                                                    break;
+                                                case "add-tool":
+                                                    operatePipeline.openModal("modalA", {
+                                                        data: undefined, pipelineStructure: {
+                                                            relation_type: "pipeline_software",
+                                                            parent_component_id: component.component_id,
+                                                            pipeline_id: component.component_id
+
+                                                        }
+                                                    })
+                                                    break;
+                                                case "sort-tool":
+                                                    openModal("sortSoftware", { software: pipeline.software })
+
+                                            }
+
+                                        },
+                                        items: [
+                                            {
+                                                key: 'new-tool',
+                                                label: "New Tool"
+                                            },
+                                            {
+                                                label: 'Add Tool',
+                                                key: 'add-tool',
+                                            }, {
+                                                label: 'Sort Tool',
+                                                key: 'sort-tool',
+                                            }, {
+                                                label: <Popconfirm title="Whether to remove Tools?" onConfirm={() => {
+                                                    operatePipeline.deletePipelineRelation(component.relation_id)
+                                                }}>
+                                                    <Button disabled={component?.component_type != "software"} size="small" color="red" variant="solid" >Remove Tools</Button>
+                                                </Popconfirm>,
+                                                key: 'remove-tool',
+                                                disabled: component?.component_type != "software"
+                                            },
+
+                                        ]
+                                    }}>
+                                        <Button size="small" color="cyan" variant="solid">
+                                            <Space>
+                                                Tools
+                                                <DownOutlined />
+                                            </Space>
+                                        </Button>
+                                    </Dropdown>
+                                </>}
+
                                 <Button size="small" color="cyan" variant="solid" onClick={loadData}>Refresh</Button>
 
                                 <Button size="small" color="primary" variant="solid" onClick={() => navigate(`/${component_type}-card`)}>Back</Button>
@@ -286,64 +614,72 @@ const Pipeline: FC<any> = ({ }) => {
 
                         </Flex>}
                     >
+                        {/* {JSON.stringify(component)} */}
+                        {(view && component) ? <>
+                            <ComponentsDetailsRender
+                                component={component}
+                                operatePipeline={operatePipeline}
+                                componentLayout={componentLayout}
+                                view={view} />
+                        </> : <Skeleton active></Skeleton>}
 
 
-                        <MemoizedComponentsRender
+                        {/* <MemoizedComponentsRender
+                            setMenus={setMenus}
                             componentLayout={componentLayout}
                             component_type={component_type || ""}
                             component={pipeline}
                             tableRef={tableRef}
-                            operatePipeline={operatePipeline} />
+                            operatePipeline={operatePipeline} /> */}
                     </Card>
 
                 </Col>
-                <Col lg={6} sm={6} xs={24}
-                    ref={containerRef} style={isSticky ? {
-                        overflow: "hidden",
-                        // marginTop: "1rem",
-                        position: "sticky",
-                        top: `${top}px`, // 吸顶距离
-                        alignSelf: "flex-start", // 避免被stretch
-                        height: `calc(100vh - ${top}px - 1rem )`, // 可选：固定高度，让内部滚动
-                    } : {}}
-                // style={{
 
-                //     display: "flex",
-                //     flexDirection: "column", // 让 Card 撑满高度
-                //     height: "100%",          // 关键：继承 Row 的高度
-                // }}
-                >
-                    <Card
-                        title="Description"
-                        extra={<>
-                        </>}
-                        style={{
-                            flex: 1,
-                            display: "flex",
-                            flexDirection: "column",
-                            height: " 100%"
-                        }}
-                        styles={{
-                            body: {
-                                // height: "90%",
+                {(component_type && ["script", "file"].includes(component_type)) &&
+                    <Col lg={size[0]} sm={size[0]} xs={24}
+                        ref={containerRef} style={isSticky ? {
+                            overflow: "hidden",
+                            // marginTop: "1rem",
+                            position: "sticky",
+                            top: `${top}px`, // 吸顶距离
+                            alignSelf: "flex-start", // 避免被stretch
+                            height: `calc(100vh - ${top}px - 1rem )`, // 可选：固定高度，让内部滚动
+                        } : {}}
+
+                    >
+                        <Card
+                            title="Description"
+                            extra={<>
+                            </>}
+                            style={{
                                 flex: 1,
-                                overflowY: "auto"
-                            }
-                        }}
-                        size="small" >
+                                display: "flex",
+                                flexDirection: "column",
+                                height: " 100%"
+                            }}
+                            styles={{
+                                body: {
+                                    // height: "90%",
+                                    flex: 1,
+                                    overflowY: "auto"
+                                }
+                            }}
+                            size="small" >
 
-                        {pipeline?.tags && Array.isArray(pipeline.tags) && pipeline.tags.map((tag: any, index: any) => (
-                            <Tag style={{ marginTop: "0.5rem" }} key={index} color={colors[index]}>{tag}</Tag>
-                        ))}
+                            {pipeline?.tags && Array.isArray(pipeline.tags) && pipeline.tags.map((tag: any, index: any) => (
+                                <Tag style={{ marginTop: "0.5rem" }} key={index} color={colors[index]}>{tag}</Tag>
+                            ))}
 
-                        {/* {JSON.stringify(pipeline.description)} */}
-                        {pipeline?.description && <>
+                            {/* {JSON.stringify(pipeline.description)} */}
+                            {pipeline?.description && <>
 
-                            <Markdown data={pipeline?.description}></Markdown>
-                        </>}
+                                <Markdown data={pipeline?.description}></Markdown>
+                            </>}
 
-                    </Card>
-                </Col>
+                        </Card>
+                    </Col>
+
+                }
             </Row>
         </Spin>
 
@@ -538,91 +874,37 @@ const PublishModal: FC<any> = ({ visible, onClose, params }) => {
 
     </Modal>
 }
-interface PipelineComponentProps {
-    operatePipeline: any,
-    component: any,
-    tableRef: any,
-    componentLayout: string
+// interface PipelineComponentProps {
+//     operatePipeline: any,
+//     component: any,
+//     tableRef: any,
+//     componentLayout: string
 
-}
-interface PipelineComponentRenderProps extends PipelineComponentProps {
-    component_type: string
-}
+// }
+// interface PipelineComponentRenderProps extends PipelineComponentProps {
+//     component_type: string,
+//     setMenus?: any,
+// }
 
-const PipelineComponent = lazy(() => import('./pipeline'))
-const ComponentsRender = ({ component_type, operatePipeline, component, ...rest }: PipelineComponentRenderProps) => {
-    if (!component_type || !component) return null
+// const PipelineComponent = lazy(() => import('./pipeline'))
+// const ComponentsRender = ({ component_type, operatePipeline, component, ...rest }: PipelineComponentRenderProps) => {
+//     if (!component_type || !component) return null
 
-    const componentMap = {
-        "pipeline": PipelineComponent,
-        "software": SoftwareComponent,
-        "file": FileComponent,
-        "script": ScriptComponent,
-        "module": "module-card",
-    }
-    const Component = componentMap[component_type as keyof typeof componentMap]
-    if (!Component) return null
-    return <Suspense fallback={<Skeleton active></Skeleton>}>
-        <Component operatePipeline={operatePipeline} component={component} {...rest} />
-    </Suspense>
-}
-const MemoizedComponentsRender = React.memo(ComponentsRender, (prevProps, nextProps) => {
-    return JSON.stringify(prevProps) === JSON.stringify(nextProps)
-});
-
-const SoftwareComponent = ({ operatePipeline, component, componentLayout, ...rest }: PipelineComponentProps) => {
-
-    // 
-    return <>
+//     const componentMap = {
+//         "pipeline": PipelineComponent,
+//         // "software": SoftwareComponent,
+//         // "file": FileComponent,
+//         // "script": ScriptComponent,
+//         "module": "module-card",
+//     }
+//     const Component = componentMap[component_type as keyof typeof componentMap]
+//     if (!Component) return null
+//     return <Suspense fallback={<Skeleton active></Skeleton>}>
+//         <Component operatePipeline={operatePipeline} component={component} {...rest} />
+//     </Suspense>
+// }
+// const MemoizedComponentsRender = React.memo(ComponentsRender, (prevProps, nextProps) => {
+//     return JSON.stringify(prevProps) === JSON.stringify(nextProps)
+// });
 
 
-        <AnalysisPanel
-            componentLayout={componentLayout}
-            // inputAnalysisMethod={item.inputAnalysisMethod}
-            // analysisPipline={item.analysisPipline}
-            // analysisMethod={item.analysisMethod}
-            // upstreamFormJson={item.upstreamFormJson}
-            {...component}
-            // pipeline={{
-            //     component_id: component.component_id
-
-            // }}
-            // editor={editor}
-            // updateEditor={updateEditor}
-            operatePipeline={operatePipeline}
-
-        >
-        </AnalysisPanel>
-    </>
-
-}
-
-const FileComponent = ({ operatePipeline, component, ...rest }: PipelineComponentProps) => {
-    const { project } = useOutletContext<any>()
-    return <>
-        <UpstreamAnalysisOutput
-            {...component}
-            analysisMethod={[component]}
-            operatePipeline={operatePipeline}
-            project={project}
-        ></UpstreamAnalysisOutput>
-
-
-    </>
-
-}
-
-const ScriptComponent = ({ operatePipeline, component, ...rest }: PipelineComponentProps) => {
-    const { project } = useOutletContext<any>()
-
-    return <>
-        {/* {JSON.stringify(component)} */}
-        <UpstreamAnalysisOutput
-            component_type={component.component_type}
-            script={component}
-            analysisMethod={component.parent || []}
-            operatePipeline={operatePipeline}
-            project={project}
-        ></UpstreamAnalysisOutput>
-    </>
-}

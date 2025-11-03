@@ -1,34 +1,19 @@
-import axios from "axios"
-import { useEffect, useState } from "react"
-import { useParams } from "react-router"
-import { Button } from "antd"
+import { UpstreamAnalysisOutput } from "@/components/analysis-sotware-panel"
+import { useOutletContext } from "react-router"
 
-const AnalysisFile = () => {
-    const { fileId } = useParams()
-    const [file, setFile] = useState<any>(null)
-    const loadData = async () => {
-        const resp = await axios.get(`/get-pipeline-v2/${fileId}?component_type=file`)
-        // const data = resp.data
-        // const content = JSON.parse(data['content'])
-        // const software = { ...data, ...content }
-        setFile(resp.data)
-       
-    }
-    useEffect(() => {
-        loadData()
-    }, [])
-    return (    
-        <div>
-            <Button onClick={() => {
-                loadData()
-            }}>
-                刷新
-            </Button>
-            {fileId}
-            <h1>File Page</h1>
-            {JSON.stringify(file)}
-        </div>
-    )
+const FileComponent = ({ operatePipeline, component, ...rest }: any) => {
+    const { project } = useOutletContext<any>()
+    return <>
+        <UpstreamAnalysisOutput
+            {...component}
+            analysisMethod={[component]}
+            operatePipeline={operatePipeline}
+            project={project}
+        ></UpstreamAnalysisOutput>
+
+
+    </>
+
 }
 
-export default AnalysisFile;
+export default FileComponent;

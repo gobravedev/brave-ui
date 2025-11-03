@@ -174,8 +174,8 @@ export default function App({ initialNodes,initialEdges,component }: { initialNo
   }
 
   return (
-    <Card title="流程图" extra={<Button size="small" color="cyan" variant="solid" onClick={save}>保存</Button>} bodyStyle={{ padding: 0 }}>
-      <div style={{ height: '40vh' }}>
+    <Card size='small' title="Workflow" extra={<Button size="small" color="cyan" variant="solid" onClick={save}>保存</Button>} bodyStyle={{ padding: 0 }}>
+      <div style={{ height: '60vh' }}>
         {/* <Button onClick={loadData}>loadData</Button> */}
         {/* {JSON.stringify(edges)} */}
 
