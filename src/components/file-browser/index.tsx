@@ -181,10 +181,10 @@ const FileBrowserV2: FC<any> = ({ path, onSelectFile,onClose }) => {
         extra={
           <Space>
             {onClose &&<Button size="small" color="blue" variant="solid" onClick={onClose}>Close</Button>}
-            <Button   size="small" color={"cyan"} variant="solid" icon={<ReloadOutlined />} onClick={() => loadFiles(path)} size="small">
+            <Button   size="small" color={"cyan"} variant="solid" icon={<ReloadOutlined />} onClick={() => loadFiles(path)} >
               Reset
             </Button>
-            <Button size="small" color={"cyan"} variant="solid"  icon={<ReloadOutlined />} onClick={() => loadFiles(currentPath)} size="small">
+            <Button size="small" color={"cyan"} variant="solid"  icon={<ReloadOutlined />} onClick={() => loadFiles(currentPath)} >
               Refresh
             </Button>
           </Space>
