@@ -117,7 +117,7 @@ const FileBrowser: FC<any> = ({ output_dir: dir }) => {
 
 
 
-const FileBrowserV2: FC<any> = ({ path, onSelectFile }) => {
+const FileBrowserV2: FC<any> = ({ path, onSelectFile,onClose }) => {
     const [files, setFiles] = useState<FileItem[]>([])
     const [currentPath, setCurrentPath] = useState(path)
     const [keyword, setKeyword] = useState("")
@@ -174,13 +174,18 @@ const FileBrowserV2: FC<any> = ({ path, onSelectFile }) => {
     return (
       <Card
         title="文件浏览器"
+        size="small"
+        styles={{body:{
+  
+        }}}
         extra={
           <Space>
-            <Button icon={<ReloadOutlined />} onClick={() => loadFiles(path)} size="small">
-              重置
+            {onClose &&<Button size="small" color="blue" variant="solid" onClick={onClose}>Close</Button>}
+            <Button   size="small" color={"cyan"} variant="solid" icon={<ReloadOutlined />} onClick={() => loadFiles(path)} size="small">
+              Reset
             </Button>
-            <Button icon={<ReloadOutlined />} onClick={() => loadFiles(currentPath)} size="small">
-              刷新
+            <Button size="small" color={"cyan"} variant="solid"  icon={<ReloadOutlined />} onClick={() => loadFiles(currentPath)} size="small">
+              Refresh
             </Button>
           </Space>
         }
@@ -214,6 +219,10 @@ const FileBrowserV2: FC<any> = ({ path, onSelectFile }) => {
   
         <List
           size="small"
+          style={{
+                    height:"50vh",
+          overflowY:"auto"
+          }}
           bordered
           dataSource={files}
           locale={{ emptyText: "暂无文件" }}

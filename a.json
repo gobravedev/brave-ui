@@ -1,0 +1,14 @@
+[
+    {'source': '26839459-6d65-4457-810c-dc3fd43c07f9',
+     'sourceHandle': '147f28c3-23d8-4639-8cf0-b7d263e3a5fa', 
+     'target': 'fd4b5653-dda5-4ad2-af67-4bbd3a05f36f', 
+     'targetHandle': '147f28c3-23d8-4639-8cf0-b7d263e3a5fa', 'id': 'xy-edge__26839459-6d65-4457-810c-dc3fd43c07f9147f28c3-23d8-4639-8cf0-b7d263e3a5fa-fd4b5653-dda5-4ad2-af67-4bbd3a05f36f147f28c3-23d8-4639-8cf0-b7d263e3a5fa'
+    },
+    {'source': 
+    'f7a883e8-efb5-499b-92a4-93f32acf820e',
+     'sourceHandle': '522b5ea3-ab1b-41e3-93dd-be7aa4d993c2',
+      'target': 'fd4b5653-dda5-4ad2-af67-4bbd3a05f36f',
+       'targetHandle': '522b5ea3-ab1b-41e3-93dd-be7aa4d993c2',
+        'id': 'xy-edge__f7a883e8-efb5-499b-92a4-93f32acf820e522b5ea3-ab1b-41e3-93dd-be7aa4d993c2-fd4b5653-dda5-4ad2-af67-4bbd3a05f36f522b5ea3-ab1b-41e3-93dd-be7aa4d993c2'
+    }
+]

@@ -299,6 +299,9 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
         if (typeof params['tags'] != 'string') {
             params['tags'] = JSON.stringify(params['tags'])
         }
+        if(! params['content']){
+            params['content'] = "{}"
+        }
 
         console.log(params)
         try {
@@ -361,7 +364,7 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
                                 <Input disabled></Input>
                             </Form.Item> */}
 
-                            <Form.Item name={"component_name"} label="Component Name">
+                            <Form.Item name={"component_name"} label="Component Name" rules={[{ required: true, message: 'Please input component name!' }]}>
                                 <Input ></Input>
                             </Form.Item>
 
@@ -497,13 +500,20 @@ const SoftwareContent: FC<any> = ({ data, form }) => {
         }
     }, [])
     return <>
-        <Form.Item name={"container_id"} label="Container">
+        <Form.Item name={"container_id"} label="Container" rules={[{ required: true, message: 'Please select container!' }]}>
             <SelectContainer container={data?.container}></SelectContainer>
         </Form.Item>
         {/* <Form.Item name={"sub_container_id"} label="Sub Container">
             <SelectContainer container={data?.sub_container}></SelectContainer>
         </Form.Item> */}
-        <Form.Item name={"content"} label="content">
+        <Form.Item name={"script_type"} label="Script Type" rules={[{ required: true, message: 'Please select script type!' }]}>
+            <Select options={
+                [{ label: "python", value: "python" },
+                { label: "nextflow", value: "nextflow" },
+                { label: "shell", value: "shell" },
+                { label: "R", value: "r" }]}></Select>
+        </Form.Item>
+        <Form.Item name={"content"} label="content" rules={[{ required: true, message: 'Please input content!' }]}>
             <TextAreaComp templete={templete}></TextAreaComp>
         </Form.Item>
         {/* <Form.Item name={"component_id"} label="component_id">
@@ -522,12 +532,20 @@ const ScriptContent: FC<any> = ({ data, form }) => {
         }
     }, [])
     return <>
-        <Form.Item name={"container_id"} label="Container">
+        <Form.Item name={"container_id"} label="Container" rules={[{ required: true, message: 'Please select container!' }]}>
             <SelectContainer container={data?.container}></SelectContainer>
         </Form.Item>
-        <Form.Item name={"content"} label="content">
+        <Form.Item name={"script_type"} label="Script Type" rules={[{ required: true, message: 'Please select script type!' }]}>
+            <Select options={
+                [{ label: "python", value: "python" },
+                { label: "nextflow", value: "nextflow" },
+                { label: "shell", value: "shell" },
+                { label: "R", value: "r" }]}></Select>
+        </Form.Item>
+        <Form.Item name={"content"} label="content" rules={[{ required: true, message: 'Please input content!' }]}>
             <TextAreaComp templete={templete}></TextAreaComp>
         </Form.Item>
+
         {/* <Form.Item name={"component_id"} label="component_id">
             <Input></Input>
         </Form.Item> */}
@@ -547,12 +565,12 @@ const FileContent: FC<any> = ({ data, form, structure }) => {
                 <pre>{JSON.stringify(structure?.files, null, 2)}</pre>
             </Typography>
         </Card>}
-        <Form.Item name={"file_type"} label="File Type">
+        <Form.Item name={"file_type"} label="File Type" rules={[{ required: true, message: 'Please select file type!' }]}>
             <Select options={
                 [{ label: "collected", value: "collected" },
                 { label: "individual", value: "individual" }]}></Select>
         </Form.Item>
-        <Form.Item name={"content"} label="content">
+        <Form.Item name={"content"} label="content" rules={[{ required: true, message: 'Please input content!' }]}>
             <TextAreaComp templete={templete}></TextAreaComp>
         </Form.Item>
         {/* <Form.Item name={"component_id"} label="component_id">
@@ -653,18 +671,21 @@ const WrapPipeline: FC<any> = ({ data, form }) => {
         {/* <Form.Item name={"namespace"} label="namespace">
             <NamespaceSelect />
         </Form.Item> */}
-        <Form.Item name={["content", "name"]} label="name">
+        {/* <Form.Item name={["content", "name"]} label="name">
             <Input></Input>
-        </Form.Item>
-        <Form.Item name={["content", "script_type"]} label="Script Type">
+        </Form.Item> */}
+        <Form.Item name={"script_type"} label="Script Type">
             <Select options={
                 [{ label: "python", value: "python" },
                 { label: "nextflow", value: "nextflow" },
                 { label: "shell", value: "shell" },
                 { label: "R", value: "R" }]}></Select>
         </Form.Item>
-        <Form.Item name={["content", "image"]} label="Image">
+        {/* <Form.Item name={["content", "image"]} label="Image">
             <Input></Input>
+        </Form.Item> */}
+        <Form.Item name={"container_id"} label="Container">
+            <SelectContainer container={data?.container}></SelectContainer>
         </Form.Item>
         {/* <Form.Item name={["content", "analysisPipline"]} label="analysisPipline">
             <Input></Input>
@@ -672,21 +693,21 @@ const WrapPipeline: FC<any> = ({ data, form }) => {
         {/* <Form.Item name={["content", "parseAnalysisModule"]} label="parseAnalysisModule">
             <Input></Input>
         </Form.Item> */}
-        <Form.Item name={["content", "img"]} label="img">
+        {/* <Form.Item name={["content", "img"]} label="img">
             <Input></Input>
-        </Form.Item>
-        <Form.Item name={["content", "category"]} label="category">
+        </Form.Item> */}
+        {/* <Form.Item name={["content", "category"]} label="category">
             <Input></Input>
-        </Form.Item>
+        </Form.Item> */}
         {/* <Form.Item name={["content", "tags"]} label="tags">
             <Select
                 mode="tags"
                 style={{ width: '100%' }}
             />
         </Form.Item> */}
-        <Form.Item name={["content", "description"]} label="description">
+        {/* <Form.Item name={["content", "description"]} label="description">
             <TextArea></TextArea>
-        </Form.Item>
+        </Form.Item> */}
         {/* <Typography>
             <pre>{JSON.stringify(data, null, 2)}</pre>
         </Typography> */}

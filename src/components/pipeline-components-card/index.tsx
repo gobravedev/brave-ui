@@ -44,7 +44,7 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
         return {
             id: item.id,
             component_id: item.component_id,
-            name: item.name,
+            name: item.component_name,
             category: item.category,
             img: item.img,
             tags: item.tags,

@@ -31,7 +31,7 @@ import { useStickyTop } from "@/hooks/useStickyTop"
 import Markdown from "@/components/markdown"
 import PipelineComponent from './pipeline'
 import ComponentsDetailsRender from "./components-details-render"
-import { AppstoreOutlined, DownOutlined } from '@ant-design/icons'
+import { AppstoreOutlined, DeleteColumnOutlined, DeleteOutlined, DownOutlined } from '@ant-design/icons'
 import { el } from "@faker-js/faker"
 const Pipeline: FC<any> = ({ size: size_ }) => {
 
@@ -417,6 +417,7 @@ const Pipeline: FC<any> = ({ size: size_ }) => {
                             size="small" >
 
                             <Menu
+                                
                                 selectedKeys={[menuKey || ""]}
                                 onSelect={(k: any) => {
                                     const key = k.key
@@ -467,15 +468,27 @@ const Pipeline: FC<any> = ({ size: size_ }) => {
                             }
                         }}
                         title={<>
-                            {pipeline?.component_name}
-                            {pipeline?.category &&
-                                <Tag style={{ marginLeft: "0.5rem" }} color="blue">{pipeline?.category}</Tag>
+                            {component?.component_name} <Tag color="blue">{component?.script_type}</Tag>
+                            {component?.category &&
+                                <Tag style={{ marginLeft: "0.5rem" }} color="blue">{component?.category}</Tag>
                             }
 
                         </>}
                         extra={<Flex justify={"space-between"} align={"center"} gap="small">
 
                             <Flex gap="small" wrap>
+                                {component?.component_type != "pipeline" && <>
+
+                                    <Popconfirm title="Whether to remove?" onConfirm={() => {
+                                        operatePipeline.deletePipelineRelation(component.relation_id)
+                                    }}>
+                                        <Tooltip title={`Remove ${component?.component_type}`}>
+                                            <DeleteOutlined style={{ color: "red" }} />
+                                        </Tooltip>
+                                    </Popconfirm>
+                                </>}
+
+
                                 {component_type == "pipeline" && <>
                                     {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                                         openModal("sortSoftware", { software: pipeline.software })
@@ -522,11 +535,12 @@ const Pipeline: FC<any> = ({ size: size_ }) => {
 
                                 <Button size="small" color="cyan" variant="solid" onClick={() => {
                                     openModal("modalC", {
-                                        data: pipeline, structure: {
-                                            component_type: component_type,
+                                        data: component, structure: {
+                                            component_type: component?.component_type,
                                         }
                                     })
-                                }}>Edit {component_type}</Button>
+                                }}>Edit {component?.component_type}</Button>
+
 
 
                                 {component?.databases && <>
@@ -586,15 +600,12 @@ const Pipeline: FC<any> = ({ size: size_ }) => {
                                             }, {
                                                 label: 'Sort Tool',
                                                 key: 'sort-tool',
-                                            }, {
-                                                label: <Popconfirm title="Whether to remove Tools?" onConfirm={() => {
-                                                    operatePipeline.deletePipelineRelation(component.relation_id)
-                                                }}>
-                                                    <Button disabled={component?.component_type != "software"} size="small" color="red" variant="solid" >Remove Tools</Button>
-                                                </Popconfirm>,
-                                                key: 'remove-tool',
-                                                disabled: component?.component_type != "software"
-                                            },
+                                            }
+                                            // , {
+                                            //     label: ,
+                                            //     key: 'remove-tool',
+                                            //     disabled: component?.component_type != "software"
+                                            // },
 
                                         ]
                                     }}>
@@ -619,6 +630,7 @@ const Pipeline: FC<any> = ({ size: size_ }) => {
                             <ComponentsDetailsRender
                                 component={component}
                                 operatePipeline={operatePipeline}
+                                project={project_id}
                                 componentLayout={componentLayout}
                                 view={view} />
                         </> : <Skeleton active></Skeleton>}
@@ -632,7 +644,7 @@ const Pipeline: FC<any> = ({ size: size_ }) => {
                             tableRef={tableRef}
                             operatePipeline={operatePipeline} /> */}
                     </Card>
-                    <Card style={{marginTop: "1rem"}} size="small" >
+                    <Card style={{ marginTop: "1rem" }} size="small" >
                         {pipeline?.description && <>
 
                             <Markdown data={pipeline?.description}></Markdown>

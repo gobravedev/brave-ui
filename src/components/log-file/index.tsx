@@ -1,19 +1,19 @@
 import { FC, useEffect, useRef, useState } from "react"
 import { useOutletContext } from "react-router"
-import {  readLogFileApi } from "@/api/file-operation";
+import { readLogFileApi } from "@/api/file-operation";
 import { useVirtualizer } from "@tanstack/react-virtual"
-import { Button, Card, Flex, Tag, Typography } from "antd"
+import { Button, Card, Flex, Space, Tag, Typography } from "antd"
 
 const { Text } = Typography
-const LogFile: FC<any> = ({ file_path }) => {
+const LogFile: FC<any> = ({ file_path, onClose }) => {
 
     useEffect(() => {
         console.log('fileKey', file_path)
-        if(file_path){
+        if (file_path) {
             readFile(file_path)
         }
     }, [file_path])
-    
+
     const { messageApi } = useOutletContext<any>()
     const offsetRef = useRef(0)
     const [content, setContent] = useState<any>([])
@@ -50,23 +50,27 @@ const LogFile: FC<any> = ({ file_path }) => {
         <Card
             size="small"
             extra={
-            <Button size="small" type="primary" onClick={() => {
-                readFile(file_path)
-            }}>Refresh Log</Button>
+                <Space>
+                    {onClose && <Button size="small" color="blue" variant="solid" onClick={onClose}>Close</Button>}
+                    <Button size="small" type="primary" onClick={() => {
+                        readFile(file_path)
+                    }}>Refresh Log</Button>
+                </Space>
+
             }
             title={
-            <Flex gap="small" wrap="wrap">
-                <Tag color="blue">File: {file_path}</Tag>
-                <Tag color="purple">Offset: {offsetRef.current}</Tag>
-                {/* <Tag color="green">Analysis ID: {analysis_id}</Tag> */}
-            </Flex>
+                <Flex gap="small" wrap="wrap">
+                    <Tag color="blue">File: {file_path}</Tag>
+                    <Tag color="purple">Offset: {offsetRef.current}</Tag>
+                    {/* <Tag color="green">Analysis ID: {analysis_id}</Tag> */}
+                </Flex>
             }
             bodyStyle={{ padding: 0 }}
         >
             <div
                 ref={parentRef}
                 style={{
-                    height: 400,
+                    height: "50vh",
                     overflowY: "auto",
                     fontFamily: "monospace",
                     backgroundColor: "#1e1e1e",

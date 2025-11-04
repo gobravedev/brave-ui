@@ -281,7 +281,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
         const requestParams = {
             ...values,
             project: project,
-            inputFormJson: inputAnalysisMethod,
+            // inputFormJson: inputAnalysisMethod,
             // analysis_pipline: analysisPipline,
             // parse_analysis_module: rest.parse_analysis_module,
             component_id: rest.component_id,

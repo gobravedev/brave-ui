@@ -200,14 +200,14 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
         {/* {JSON.stringify(dataMap)} */}
         <Row gutter={[8, 0]}>
             {/* {JSON.stringify(projectObj?.parameter)} */}
-            {formJson.map((it: any, index: any) => (<>
-                <Col span={it?.col ? it?.col : 12} >
+            {formJson.map((it: any, index: any) => (
+                <Col span={it?.col ? it?.col : 12}  key={index}>
                     {/* {JSON.stringify(it)} */}
 
                     <ComponentsRender projParameter={parameter} analysisResultId={analysisResultId} key={index} {...it} dataMap={dataMap} componentMap={componentMap} constDataMap={constDataMap}></ComponentsRender>
                 </Col>
 
-            </>
+            
 
             ))}
         </Row>

@@ -225,7 +225,7 @@ export function CustomNode({ data }: any) {
 
       {/* 输入口 */}
       {inputs.map((input: any, index: number) => (
-        <Popover content={<div>{input.component_name}</div>}>
+        <Popover content={<div>{input.component_name} ({input.component_id})</div>}>
           <Handle
             key={input.component_id}
             type="target"
@@ -237,7 +237,7 @@ export function CustomNode({ data }: any) {
 
       {/* 输出口 */}
       {outputs.map((output: any, index: number) => (
-        <Popover content={<div>{output.component_name}</div>}>
+        <Popover content={<div>{output.component_name} ({output.component_id})</div>}>
           <Handle
             key={output.component_id}
             type="source"

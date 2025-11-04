@@ -3,9 +3,9 @@ import axios from "axios"
 import { FC, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { useLocation, useNavigate, useOutletContext, useParams } from "react-router"
 import { useModal, useModals } from "@/hooks/useModal"
-import PipelineInfo from "../pipeline-monitor"
+import PipelineInfo, { ParamsFile } from "../pipeline-monitor"
 import { runAnalysisApi, stopAnalysisApi } from "@/api/analysis"
-import { DownOutlined, LineChartOutlined, RedoOutlined } from '@ant-design/icons'
+import { DownOutlined, ExportOutlined, LineChartOutlined, RedoOutlined } from '@ant-design/icons'
 export const readHdfsAPi = (contentPath: any) => axios.get(`/api/read-hdfs?path=${contentPath}`)
 export const readJsonAPi = (contentPath: any) => axios.get(`/fast-api/read-json?path=${contentPath}`)
 import EditParams from '../edit-params'
@@ -15,6 +15,7 @@ import ResultParsePanel from "../result-parse/panel"
 import { usePagination } from "@/hooks/usePagination"
 import AnalysisTaskPanel from "../analysis-task/panel"
 import AnalysisResultPanel from "../analysis-result-view/panel"
+import ComponentsRender from "./components"
 
 const AnalysisList = forwardRef<any, any>(({
     project,
@@ -316,9 +317,7 @@ const AnalysisList = forwardRef<any, any>(({
                 <Space size="small">
 
                     {/* /analysis/stop-analysis/{analysis_id} */}
-                    <Button size="small" color="primary" variant="solid" onClick={() =>
-                        navigate(`/analysis-report?key=${record?.analysis_id}&project=${project}`)
-                    }>Go Report</Button>
+
                     {record.image_status == "exist" ? <>
                         {record.job_status == "running" ?
                             <>
@@ -369,9 +368,44 @@ const AnalysisList = forwardRef<any, any>(({
 
 
 
+                    {record.image_status == "exist" && <>
+                        {record.server_status == "running" ?
+                            <>
+
+
+                                <Popconfirm title={"Whether or not to stop?"} onConfirm={() => {
+                                    stopAnalysis(record, "server")
+
+                                }}>
+                                    <Button size="small" color="red" variant="solid" >
+                                        Stop Server
+                                    </Button>
+                                </Popconfirm>
+                                <Tooltip title={<>
+                                    {`${containerURL}/container/${record.analysis_id}/`}
+                                </>}>
+                                    <ExportOutlined style={{ cursor: "pointer" }} onClick={() => {
+
+                                        window.open(`${containerURL}/container/${record.analysis_id}/`, "_blank")
+                                    }} />
+                                </Tooltip>
+
+
+
+                            </> : <>
+                                <Popconfirm title="Whether to start the server?" onConfirm={() => {
+
+                                    runAnalysis(record, "server")
+                                }}>
+                                    <Button size="small" color="cyan" variant="solid">Run Server</Button>
+                                </Popconfirm>
+
+                            </>
+                        }
+
+                    </>}
 
                     {/* {editParams && <Button size="small" color="cyan" variant="solid" onClick={() => editParams(record)}>编辑参数</Button>} */}
-                    <Button size="small" color="cyan" variant="solid" onClick={() => openModal("editParams", record.analysis_id)}>Edit Parameters</Button>
                     {
                         isSelected(record, ["modalA", "resultParsePanel"]) ?
                             <Button size="small" color={"red"} variant="solid" onClick={() => {
@@ -389,7 +423,7 @@ const AnalysisList = forwardRef<any, any>(({
                                     //
 
                                     // setRecord(record)
-                                }}>View Results</Button>
+                                }}>Results</Button>
                             </Tooltip>
 
                     }
@@ -398,55 +432,44 @@ const AnalysisList = forwardRef<any, any>(({
                     <Dropdown menu={{
                         items: [
                             {
-                                key: 'server',
+                                key: "paramsFile",
+                                label: (<a onClick={() => {
+                                    openModal("paramsFile", { file_path: record.params_path })
+                                    // setRecord(record)
+                                }}>Parameters</a>)
+                            }, {
+                                key: "command_path",
+                                label: (<a onClick={() => {
+                                    openModal("paramsFile", { file_path: record.command_path })
+                                    // setRecord(record)
+                                }}>Command</a>)
+                            }, {
+                                key: "output_file",
+                                label: (<a onClick={() => {
+                                    openModal("componentsRender", { view:"fileBrowser", path: record.output_dir })
+                                    // setRecord(record)
+                                }}>Output File</a>)
+                            },{
+                                key: "log_file",
+                                label: (<a onClick={() => {
+                                    openModal("componentsRender", { view:"logFile", file_path: record.command_log_path })
+                                    // setRecord(record)
+                                }}>Log File</a>)
+                            },{
+                                key: "GoReport",
                                 label: (<>
-                                    {record.image_status == "exist" && <>
-                                        {record.server_status == "running" ?
-                                            <>
-
-
-                                                <Popconfirm title={"Whether or not to stop?"} onConfirm={() => {
-                                                    stopAnalysis(record, "server")
-
-                                                }}>
-                                                    <a style={{ color: "red" }}>
-                                                        Stop Server
-                                                    </a>
-                                                </Popconfirm>
-
-
-                                            </> : <>
-                                                <Popconfirm title="Whether to start the server?" onConfirm={() => {
-
-                                                    runAnalysis(record, "server")
-                                                }}>
-                                                    <a >Run Server</a>
-                                                </Popconfirm>
-
-                                            </>
-                                        }
-
-                                    </>}
-
+                                    <Button size="small" color="primary" variant="solid" onClick={() =>
+                                        navigate(`/analysis-report?key=${record?.analysis_id}&project=${project}`)
+                                    }>Go Report</Button>
                                 </>)
                             }, {
-                                key: 'open_url',
-                                disabled: record.server_status != "running",
+                                key: "edit_params",
                                 label: (<>
-
-                                    <Tooltip title={<>
-                                        {`${containerURL}/container/${record.analysis_id}/`}
-                                    </>}>
-                                        <a onClick={() => {
-                                            //  console.log("record", record)
-
-                                            window.open(`${containerURL}/container/${record.analysis_id}/`, "_blank")
-                                        }}>Open URL</a>
-                                    </Tooltip>
-
+                                    <Button size="small" color="cyan" variant="solid" onClick={() => openModal("editParams", record.analysis_id)}>Edit Parameters</Button>
 
                                 </>)
                             },
+
                             {
                                 key: "1",
                                 label: (<>
@@ -673,6 +696,12 @@ const AnalysisList = forwardRef<any, any>(({
             params={modal.params}
             onClose={closeModal}
             callback={loadData}></PipelineInfo>
+        <ParamsFile
+            visible={modal.key == "paramsFile" && modal.visible}
+            params={modal.params}
+            onClose={closeModal}
+            callback={loadData}
+        ></ParamsFile>
         <EditParams
             callback={loadData}
             visible={modal.key == "editParams" && modal.visible}
@@ -692,6 +721,13 @@ const AnalysisList = forwardRef<any, any>(({
             params={modals.inspectPanel.params}
             onClose={() => closeModals("inspectPanel")}
         ></InspectPanel>
+        
+        <ComponentsRender
+            visible={modal.key == "componentsRender" && modal.visible}
+            params={modal.params}
+            onClose={closeModal}
+            callback={loadData}
+        ></ComponentsRender>
 
 
 

@@ -1,7 +1,5 @@
 
 export const softwareTemplete = {
-  "script_type": "nextflow",
-  "image": "registry.cn-hangzhou.aliyuncs.com/wybioinfo/nextflow:25.06.0",
   "databases": [
     {
       "name": "metaphlan_database",
@@ -10,7 +8,7 @@ export const softwareTemplete = {
       "rules": [
         {
           "required": true,
-          "message": "该字段不能为空!"
+          "message": "This field cannot be empty!"
         }
       ],
       "type": "BaseSelect"
@@ -30,11 +28,11 @@ export const softwareTemplete = {
         }
       ],
       "initialValue": 0.2,
-      "label": " Quantile value for the robust average(--stat_q)",
+      "label": "Quantile value for the robust average(--stat_q)",
       "rules": [
         {
           "required": true,
-          "message": "该字段不能为空!"
+          "message": "This field cannot be empty!"
         }
       ],
       "type": "BaseSelect"
@@ -79,14 +77,14 @@ export const scriptTemplete = {
 
 export const fileTemplete = {
   "name": "raw_reads",
-  "label": "下机原始reads",
   "mode": "multiple",
   "type": "GroupSelectSampleButton",
+  "label": "Raw Reads",
   "group": "group_field",
   "rules": [
     {
       "required": true,
-      "message": "该字段不能为空!"
+      "message": "This field cannot be empty!"
     }
   ],
   "dir": "metaphlan",
@@ -105,7 +103,7 @@ export const fileTemplete = {
       "rules": [
         {
           "required": true,
-          "message": "该字段不能为空!"
+          "message": "This field cannot be empty!"
         }
       ]
     },
@@ -120,7 +118,7 @@ export const fileTemplete = {
       "rules": [
         {
           "required": true,
-          "message": "该字段不能为空!"
+          "message": "This field cannot be empty!"
         }
       ]
     }

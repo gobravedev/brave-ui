@@ -82,8 +82,18 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
         const data = sseData
         if (data.msgType === "analysis_result") {
             // notify.info({ message: "qqqqqqqqqq" })
+
+            let isReload = false
             const componentIdList = analysisMethod.map((it: any) => it.component_id)
-            if (componentIdList.includes(data.component_id)) {
+            for (const component_id of data.component_ids) {
+                console.log(component_id)
+                if (componentIdList.includes(component_id)) {
+                    isReload = true
+                    break
+                }
+            }
+
+            if (isReload) {
                 reload()
             }
         }
@@ -486,7 +496,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
             ellipsis: true,
         },
         ...getMetadataColumns(),
-      
+
         ...appendSampleColumns, {
             title: 'Action',
             key: 'action',
@@ -821,7 +831,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                                                         component_type: "file"
                                                     }
                                                 })
-                                            }}>Add File</a>
+                                            }}>New File</a>
                                         </Tooltip>
                                         )
                                     }, {
@@ -850,7 +860,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                                                             // pipeline_id: pipeline.component_id
                                                         }
                                                     })
-                                                }}>New File</a>
+                                                }}>Add File</a>
                                             </Tooltip>
 
                                         )
@@ -913,6 +923,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                 })) : undefined}
             activeTabKey={activeTabKey}
             onTabChange={onTabChange}
+
         >
             {/* <pre>
                 {JSON.stringify(analysisMethod,null,2)}
@@ -959,6 +970,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                         <>
 
                             <Tabs
+
                                 activeKey={analysisResultId}
                                 onChange={(key) => {
                                     // debugger

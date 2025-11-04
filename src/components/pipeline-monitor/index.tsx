@@ -18,6 +18,7 @@ import LogFile from "../log-file";
 import { ComponentsRender as FileComponentRender } from '../analysis-result-view'
 import { Bar, Column } from "@ant-design/plots";
 import OpenFile from "../open-file";
+import { on } from "events";
 const PipelineMonitor: FC<any> = ({ data, ...rest }) => {
 
     return <>
@@ -131,12 +132,14 @@ const PipelineParams: FC<any> = ({ data, type }) => {
 
 }
 
-const ParamsFile: FC<any> = ({ file_path }) => {
+export const ParamsFile: FC<any> = ({ visible, params, onClose, callback }) => {
     useEffect(() => {
-        if (file_path) {
-            readFile(file_path)
+        if (params?.file_path) {
+            readFile(params?.file_path)
         }
-    }, [file_path])
+    }, [params?.file_path])
+
+
     // const { messageApi } = useOutletContext<any>()
     const [content, setContent] = useState<any>([])
     const readFile = async (file_path: string, showMessage: boolean = false) => {
@@ -150,15 +153,22 @@ const ParamsFile: FC<any> = ({ file_path }) => {
         // }
 
     }
+    if (!visible) return null
     return <>
         <Card
-            title={<Tag color="blue">文件: {file_path}</Tag>}
-            extra={
+            size="small"
+            title={<Tag color="blue">Path: {params?.file_path}</Tag>}
+            extra={<Flex gap={"small"} >
+                { onClose && <Button size="small" onClick={onClose} color="blue" variant="solid">Close</Button>}
                 <Button size="small" color="cyan" variant="solid" onClick={() => {
-                    readFile(file_path)
-                }}>刷新日志</Button>
+                    readFile(params?.file_path)
+                }}>Refresh</Button>
+            </Flex>
+
             }
-            bodyStyle={{ padding: 0 }}
+            styles={{
+                body: { padding: 0 }
+            }}
         >
             <FileComponentRender {...content}></FileComponentRender>
             {/* <Typography>
@@ -201,13 +211,13 @@ const ColumnChart: FC<any> = ({ data }) => {
 
 
 const componentMap: any = {
-    "output_dir": FileBrowserOutputDir,
+    // "output_dir": FileBrowserOutputDir,
     "workflow_log_file": LogFile,
     "executor_log_file": LogFile,
     "trace_file": LogFile,
     "command_log_path": LogFile,
-    "params_path": ParamsFile,
-    "command_path": ParamsFile,
+    // "params_path": ParamsFile,
+    // "command_path": ParamsFile,
     // "result_parse": ResultParse,
     // "analysis_progress": AnalysisProgress
 }
@@ -316,36 +326,36 @@ export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
                 Executor Log
             </Tooltip>
         },
-        {
-            key: "params_path",
-            label: <Tooltip title={
-                <ul>
-                    <li>{analysis?.params_path}</li>
-                </ul>
-            }>
-                Parameters
-            </Tooltip>
-        },
-        {
-            key: "command_path",
-            label: <Tooltip title={
-                <ul>
-                    <li>{analysis?.command_path}</li>
-                </ul>
-            }>
-                Command
-            </Tooltip>
-        },
-        {
-            key: "output_dir",
-            label: <Tooltip title={
-                <ul>
-                    <li>{analysis?.output_dir}</li>
-                </ul>
-            }>
-                Output File
-            </Tooltip>
-        }, 
+        // {
+        //     key: "params_path",
+        //     label: <Tooltip title={
+        //         <ul>
+        //             <li>{analysis?.params_path}</li>
+        //         </ul>
+        //     }>
+        //         Parameters
+        //     </Tooltip>
+        // },
+        // {
+        //     key: "command_path",
+        //     label: <Tooltip title={
+        //         <ul>
+        //             <li>{analysis?.command_path}</li>
+        //         </ul>
+        //     }>
+        //         Command
+        //     </Tooltip>
+        // },
+        // {
+        //     key: "output_dir",
+        //     label: <Tooltip title={
+        //         <ul>
+        //             <li>{analysis?.output_dir}</li>
+        //         </ul>
+        //     }>
+        //         Output File
+        //     </Tooltip>
+        // },
         // {
         //     key: "analysis_progress",
         //     label: <Tooltip title={
@@ -400,7 +410,7 @@ export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
                     </>
                 }
 
-           
+
             </Flex>
 
         } activeKey={fileTabKey} onChange={(key) => {
@@ -427,18 +437,14 @@ const PipelineInfo: FC<any> = forwardRef<any, any>(({ visible, params, onClose, 
             callback()
         }
     }
-    
-    const { analysis_id: analysisId, ...rest } = params || {}
 
+    const { analysis_id: analysisId, ...rest } = params || {}
     const loadAnalysis = async () => {
-        // console.log('11111111111111111params',params)
         if (analysisId) {
             const res = await findAnalysisById(analysisId)
             const analysis = res.data
             setAnalysis(analysis)
         }
-
-
     }
     const [analysis, setAnalysis] = useState<any>()
     useImperativeHandle(ref, () => ({
@@ -450,7 +456,7 @@ const PipelineInfo: FC<any> = forwardRef<any, any>(({ visible, params, onClose, 
         }
     }, [visible && params?.analysis_id])
     if (!visible) return <>
-        
+
     </>
 
 
@@ -461,8 +467,6 @@ const PipelineInfo: FC<any> = forwardRef<any, any>(({ visible, params, onClose, 
         <Card
             size="small"
             title={`Process Monitoring ${analysisId}`}
-
-            // activeTabKey={activeTabKey}
             extra={<>
                 <Button size="small" onClick={onClose} color="cyan" variant="solid">关闭</Button>
             </>}>

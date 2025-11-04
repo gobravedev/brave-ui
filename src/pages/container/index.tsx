@@ -148,7 +148,7 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
             rowSelection={rowSelection}
             pagination={false}
             loading={loading}
-            // scroll={{ x: 'max-content', y: 55 * 5 }}
+            scroll={{ x: 'max-content'}}
             columns={columns}
             dataSource={data} />
         {totalPage != 0 && <Flex style={{ marginTop: "1rem" }} align="center">

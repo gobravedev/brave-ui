@@ -32,19 +32,19 @@ const ModuleEdit: FC<any> = ({ visible, onClose, params, callback }) => {
             extra={
 
                 <Flex justify="flex-end" gap={"small"}>
-                    <Popconfirm title="是否生成脚本" onConfirm={async () => {
+                    <Popconfirm title="Whether to generate scripts?" onConfirm={async () => {
                         await axios.post(`/component/convert-ipynb/${params.component_id}`)
-                        messageApi.success("是否生成脚本成功!")
+                        messageApi.success("Generate Script Successful!")
                         getModuleContent(params)
                     }}>
-                        <Button size="small" color="cyan" variant="solid">生成脚本</Button>
+                        <Button size="small" color="cyan" variant="solid">Generate scripts</Button>
                     </Popconfirm>
                     <Button size="small" color="cyan" variant="solid" onClick={() => {
                         getModuleContent(params)
-                    }}>刷新</Button>
+                    }}>Refresh</Button>
                     <Button size="small" color="cyan" variant="solid" onClick={() => {
                         editorRef.current.setValue(data?.content)
-                    }}>保存</Button>
+                    }}>Save</Button>
                 </Flex>
             }
             title="View File"
