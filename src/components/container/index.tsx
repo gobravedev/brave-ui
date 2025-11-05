@@ -216,6 +216,9 @@ const ContainerTable: React.FC<Props> = ({ data, loading, openModal }) => {
             pagination={false}
             bordered
             size="small"
+            footer={()=><>
+            A total of {data.length} running container{data.length>1?"s":""}
+            </>}
         />
     );
 };
