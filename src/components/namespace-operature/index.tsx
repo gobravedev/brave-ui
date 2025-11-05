@@ -1,4 +1,4 @@
-import { Button, Input, Flex, Modal, Popconfirm, Form, message } from "antd";
+import { Button, Input, Flex, Modal, Popconfirm, Form, message, InputNumber } from "antd";
 import axios from "axios";
 import { FC, useEffect } from "react";
 import { useState } from "react";
@@ -70,6 +70,9 @@ export const CreateOrUpdateNamespace: FC<any> = ({ visible, onClose, params, cal
                     "memory": "10.GB",
                     "cache": "lenient"
                 })} />
+            </Form.Item>
+            <Form.Item name="queue_size" label="Queue Size" rules={[{ required: true, message: "This field cannot be empty!" }]}>
+                <InputNumber min={1} />
             </Form.Item>
             <Form.Item>
                 <Button size="small" color="cyan" variant="solid" htmlType="submit">
