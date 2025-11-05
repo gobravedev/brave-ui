@@ -174,11 +174,11 @@ export const AnalysisForm: FC<any> = ({
 
         ...params,
         project: project,
-        analysis_result_id: analysisResultId,
-        analysis_method: saveAnalysisMethod,
-        table_type: tableType,
-        imgType: imgType,
-        software: "python",
+        // analysis_result_id: analysisResultId,
+        // analysis_method: saveAnalysisMethod,
+        // table_type: tableType,
+        // imgType: imgType,
+        // software: "python",
         component_id: rest.component_id,
         data_component_ids: JSON.stringify(dataComponentIds)
 

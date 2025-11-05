@@ -21,7 +21,7 @@ import ModuleEdit from "../module-edit";
 import { useGlobalMessage } from "@/hooks/useGlobalMessage";
 import { CreateOrUpdatePipelineComponent } from "../create-pipeline";
 import BigTable from '@/components/big-table';
-import {componentMap, ImgView, UrlComp} from './components'
+import { componentMap, ImgView, UrlComp } from './components'
 import MicrobiomeSummaryCard from "./components/diff-summary-card";
 
 
@@ -108,7 +108,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
         }
     }, [sseData])
 
-   
+
 
     return <>
 
@@ -444,11 +444,14 @@ const AnalysisResultDisplay: FC<any> = ({ analsyisResult, loading }) => {
 
             {analsyisResult.images && <div style={{ padding: "1rem" }}>
                 {
-                    Array.isArray(analsyisResult.images) ? <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
-                        {analsyisResult.images.map((it: any, index: any) => (<Col key={index} span={4}>
-                            <ImgView {...it} baseURL={baseURL}></ImgView>
-                        </Col>))}
-                    </Row> :
+                    Array.isArray(analsyisResult.images) ?
+
+                        <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
+                            {analsyisResult.images.map((it: any, index: any) => (
+                                <Col lg={8} sm={8} xs={24}  key={index} span={4}>
+                                    <ImgView {...it} baseURL={baseURL}></ImgView>
+                                </Col>))}
+                        </Row> :
                         <>
                             <ImgView {...analsyisResult.images} baseURL={baseURL}></ImgView>
                         </>
@@ -473,7 +476,7 @@ const AnalysisResultDisplay: FC<any> = ({ analsyisResult, loading }) => {
                 </>}
             </div>
 
-                        {/* <MicrobiomeSummaryCard></MicrobiomeSummaryCard> */}
+            {/* <MicrobiomeSummaryCard></MicrobiomeSummaryCard> */}
             <div style={{ padding: "1rem" }}>
                 {analsyisResult.tables && Array.isArray(analsyisResult.tables) && <>
                     {analsyisResult.tables.map((item: any, index: any) => (

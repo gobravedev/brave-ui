@@ -197,17 +197,24 @@ export const TableView: FC<any> = ({ data, url, filename, columns, baseURL, proj
 
 export const ImgView: FC<any> = ({ data, url, filename, baseURL }) => {
     return <div >
-        <div style={{ textAlign: "center" }}>
+        <Card size="small" title={""}
+            styles={{
+                body:{
+                    padding:"0.2rem"
+                }
+            }}
+            extra={<UrlComp url={url} filename={filename} baseURL={baseURL}></UrlComp>}
+        >
 
-            <Image src={filename?.endsWith("pdf") ? data : `${data}?t=${Date.now()}`} style={{ maxWidth: "20rem", marginRight: "0.5rem" }}></Image>
-            <UrlComp url={url} filename={filename} baseURL={baseURL}></UrlComp>
+            <Image src={filename?.endsWith("pdf") ? data : `${baseURL}${data}?t=${Date.now()}`} style={{ maxWidth: "20rem", marginRight: "0.5rem" }}></Image>
+            {/* <UrlComp url={url} filename={filename} baseURL={baseURL}></UrlComp> */}
 
             {/* {url && <Popover title={`${window.location.origin}${url}`}>
                 <Tag color="success" style={{ cursor: "pointer" }} onClick={() => {
                     window.open(`${url}?t=${Date.now()}`, "_blank")
                 }}>{filename} <DownloadOutlined /></Tag></Popover>} */}
 
-        </div>
+        </Card>
 
 
     </div>
@@ -446,6 +453,6 @@ export const componentMap: any = {
     kegg_map: KeggMap,
     download: Download,
     feature_list: FeatureList,
-    diff:DiffSummaryCard
+    diff: DiffSummaryCard
 };
 

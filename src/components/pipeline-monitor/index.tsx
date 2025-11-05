@@ -185,28 +185,6 @@ const FileBrowserOutputDir: FC<any> = ({ output_dir, ...rest }) => {
     return <FileBrowser path={output_dir}></FileBrowser>
 }
 
-const ColumnChart: FC<any> = ({ data }) => {
-    const config = {
-        data: data,
-        xField: 'task',          // 横轴是任务 ID
-        yField: 'realtime',      // 纵轴是运行时间（秒）
-        colorField: 'process',   // 按 process 分组
-        // isGroup: true,
-        // style: {
-        //     maxWidth: 50,
-        // },
-        group: { padding: 0 },
-        label: {
-            text: (d: any) => d.label,
-            textBaseline: 'bottom',
-        },
-    };
-
-    return <>
-        {/* {JSON.stringify(data)} */}
-        <Column {...config} />
-    </>
-};
 
 
 

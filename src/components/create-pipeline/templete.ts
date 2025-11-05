@@ -41,38 +41,32 @@ export const softwareTemplete = {
 }
 
 export const scriptTemplete = {
-  "name": "丰度矩阵",
-  "script_type": "python",
-  "image": "registry.cn-hangzhou.aliyuncs.com/wybioinfo/datascience-notebook:x86_64-ubuntu-22.04",
-  "sampleGroupJSON": true,
-  "saveAnalysisMethod": "metaphlan_sam_abundance_matrix",
-  "moduleName": "abundance_matrix",
   "formJson": [
     {
       "name": "group_field",
-      "label": "分组列",
+      "label": "Group Field",
       "rules": [
         {
           "required": true,
-          "message": "该字段不能为空!"
+          "message": "This field cannot be empty!"
         }
       ],
       "type": "GroupFieldSelect"
     },
     {
       "name": "metaphlan_sam_abundance",
-      "label": "丰度文件",
+      "label": "Abundance",
+      "db":true,
       "rules": [
         {
           "required": true,
-          "message": "该字段不能为空!"
+          "message": "This field cannot be empty!"
         }
       ],
       "type": "GroupSelectSampleButton",
       "group": "group_field"
     }
-  ],
-  "tableDesc": ""
+  ]
 }
 
 export const fileTemplete = {

@@ -2,8 +2,7 @@ import { Button, Flex, Input, Table, Tabs, Tooltip } from "antd";
 import { FC, useEffect, useMemo, useState } from "react";
 import OpenFile from "../open-file";
 import { useModal } from "@/hooks/useModal";
-import ColumnChart from "@ant-design/plots/es/components/column";
-import { Bar } from "@ant-design/plots";
+import { Bar, Column } from "@ant-design/plots";
 import axios from "axios";
 
 const AnalysisTask: FC<any> = ({ analysis_id, onClose }) => {
@@ -55,7 +54,7 @@ const AnalysisTask: FC<any> = ({ analysis_id, onClose }) => {
     }, [])
     return <div>
 
-        {/* {JSON.stringify(data)} */}
+        {/* {JSON.stringify(chartData?.timeData)}  */}
 
         {chartData &&
             <Tabs
@@ -90,9 +89,32 @@ const AnalysisTask: FC<any> = ({ analysis_id, onClose }) => {
 
     </div>
 }
+const ColumnChart: FC<any> = ({ data }) => {
+    const config = {
+        data: data,
+        xField: 'task',          // 横轴是任务 ID
+        yField: 'realtime',      // 纵轴是运行时间（秒）
+        colorField: 'process',   // 按 process 分组
+        // isGroup: true,
+        // style: {
+        //     maxWidth: 50,
+        // },
+        group: { padding: 0 },
+        label: {
+            text: (d: any) => d.label,
+            textBaseline: 'bottom',
+        },
+    };
+
+    return <>
+        {/* {JSON.stringify(data)} */}
+        <Column {...config} />
+    </>
+};
 
 
 const ProcessChart: FC<any> = ({ data }) => {
+    if (!data || (Array.isArray(data) && data.length === 0)) return null;
     const processes = Array.from(new Set(data.map((d: any) => d.process)));
     const [selectedProcess, setSelectedProcess] = useState(processes[0]);
 
@@ -101,6 +123,7 @@ const ProcessChart: FC<any> = ({ data }) => {
 
     return (
         <div>
+            {/* {JSON.stringify(filteredData)} */}
             <div style={{ marginBottom: 16 }}>
                 {processes.map((p: any) => (
                     <Button
@@ -121,6 +144,8 @@ const ProcessChart: FC<any> = ({ data }) => {
 }
 
 const BarChart: FC<any> = ({ data }) => {
+    if (!data || (Array.isArray(data) && data.length === 0)) return null;
+
     // };
     const config = {
         data: data,

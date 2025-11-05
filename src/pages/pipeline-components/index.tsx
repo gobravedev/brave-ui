@@ -568,8 +568,9 @@ const Pipeline: FC<any> = ({ size: size_ }) => {
                                                         data: undefined, structure: {
                                                             component_type: "software",
                                                             relation_type: "pipeline_software",
-                                                            parent_component_id: component.component_id,
-                                                            pipeline_id: component.component_id
+                                                            parent_component_id: pipeline
+                                                            .component_id,
+                                                            pipeline_id: pipeline.component_id
                                                         }
                                                     })
                                                     break;
@@ -577,8 +578,8 @@ const Pipeline: FC<any> = ({ size: size_ }) => {
                                                     operatePipeline.openModal("modalA", {
                                                         data: undefined, pipelineStructure: {
                                                             relation_type: "pipeline_software",
-                                                            parent_component_id: component.component_id,
-                                                            pipeline_id: component.component_id
+                                                            parent_component_id: pipeline.component_id,
+                                                            pipeline_id: pipeline.component_id
 
                                                         }
                                                     })
