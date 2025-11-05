@@ -19,6 +19,7 @@ const App: FC<any> = () => {
   const messageHolder = setupGlobalMessage();
   const notificationHolder = setupGlobalNotification()
 
+  const message = useGlobalMessage();
 
   const baseURL = localStorage.getItem('baseURL') || ""
   axios.defaults.baseURL = `${baseURL}/brave-api`;
@@ -33,7 +34,6 @@ const App: FC<any> = () => {
     (response) => response,
     (error) => {
       // console.log(error)
-      const message = useGlobalMessage();
 
       if (error.response) {
 
@@ -44,9 +44,9 @@ const App: FC<any> = () => {
           //   break;
           default:
             if (network == "CONNECT") {
-
-              console.error("HTTP Error:", status);
-              console.error(data?.detail)
+              // debugger
+              // console.error("HTTP Error:", status);
+              // console.error(data?.detail)
               message.error(data?.detail)
             } else if (network == "NOT_CONNECT") {
               // message.error("NOT_CONNECT")

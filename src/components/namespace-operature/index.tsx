@@ -64,6 +64,13 @@ export const CreateOrUpdateNamespace: FC<any> = ({ visible, onClose, params, cal
             <Form.Item name="volumes" label="Volumes" rules={[{ required: true, message: "This field cannot be empty!" }]}>
                 <TextArea />
             </Form.Item>
+            <Form.Item name="resources" label="Resource" rules={[{ required: true, message: "This field cannot be empty!" }]}>
+                <TextArea placeholder={JSON.stringify({
+                    "cpus": "10",
+                    "memory": "10.GB",
+                    "cache": "lenient"
+                })} />
+            </Form.Item>
             <Form.Item>
                 <Button size="small" color="cyan" variant="solid" htmlType="submit">
                     Submit
@@ -106,7 +113,7 @@ export const CreateOrUpdateNamespace: FC<any> = ({ visible, onClose, params, cal
 
 
 
-export const InstallNamespace: FC<any> = ({ visible, onClose, params,callback}) => {
+export const InstallNamespace: FC<any> = ({ visible, onClose, params, callback }) => {
     if (!visible) return null;
     // const [messageApi, contextHolder] = message.useMessage();
     const mesage = useGlobalMessage()
@@ -126,7 +133,7 @@ export const InstallNamespace: FC<any> = ({ visible, onClose, params,callback}) 
             loadNamespace()
             mesage.success("install successfully!")
             onClose()
-            if(callback){
+            if (callback) {
                 callback()
             }
         } catch (error: any) {

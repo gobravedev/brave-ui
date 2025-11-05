@@ -78,9 +78,9 @@ const AnalysisList = forwardRef<any, any>(({
                 // if (analysisResultRef.current) {
                 //     analysisResultRef.current?.relaod()
                 // }
-                if (pipelineInfoRef.current) {
-                    pipelineInfoRef.current?.relaod()
-                }
+                // if (pipelineInfoRef.current) {
+                //     pipelineInfoRef.current?.relaod()
+                // }
             }
 
         } else if (data.run_type == "retry") {
@@ -319,14 +319,14 @@ const AnalysisList = forwardRef<any, any>(({
                     {/* /analysis/stop-analysis/{analysis_id} */}
 
                     {record.image_status == "exist" ? <>
-                        {record.job_status == "running" ?
+                        {(record.job_status == "running"  || record.job_status == "stopping" )?
                             <>
                                 <Popconfirm title={"Whether or not to stop?"} onConfirm={() => {
                                     stopAnalysis(record, "job")
 
                                 }}>
-                                    <Button size="small" color="red" variant="solid">
-                                        Stop Job
+                                    <Button size="small" color="red" variant="solid" disabled={record.job_status == "stopping"}>
+                                        {record.job_status == "stopping" ? `${record.job_status}` : ` Stop Job`}
                                     </Button>
                                 </Popconfirm>
 
@@ -334,9 +334,11 @@ const AnalysisList = forwardRef<any, any>(({
                                 <Popconfirm title={"Whether or not to run?"} onConfirm={() => {
                                     runAnalysis(record, "job")
                                     if (record.component_type == "software") {
-                                        openModal("resultParsePanel", {
-                                            analysis_id: record.analysis_id,
-                                        })
+                                        // openModal("resultParsePanel", {
+                                        //     analysis_id: record.analysis_id,
+                                        // })
+                                        openModal("componentsRender", { view: "runningContainer", analysis_id: record.analysis_id })
+
                                     } else if (record.component_type == "script") {
                                         openModal("modalA", record)
                                     }
@@ -369,16 +371,18 @@ const AnalysisList = forwardRef<any, any>(({
 
 
                     {record.image_status == "exist" && <>
-                        {record.server_status == "running" ?
+                        {(record.server_status == "running" || record.server_status == "stopping" ) ?
                             <>
 
 
                                 <Popconfirm title={"Whether or not to stop?"} onConfirm={() => {
                                     stopAnalysis(record, "server")
 
+
                                 }}>
-                                    <Button size="small" color="red" variant="solid" >
-                                        Stop Server
+                                    
+                                    <Button size="small" color="red" variant="solid" disabled={record.server_status == "stopping"}>
+                                        {record.server_status == "stopping" ? `${record.server_status}` : ` Stop Server`}
                                     </Button>
                                 </Popconfirm>
                                 <Tooltip title={<>
@@ -408,7 +412,7 @@ const AnalysisList = forwardRef<any, any>(({
                     {/* {editParams && <Button size="small" color="cyan" variant="solid" onClick={() => editParams(record)}>编辑参数</Button>} */}
                     {
                         isSelected(record, ["modalA", "resultParsePanel"]) ?
-                            <Button size="small" color={"red"} variant="solid" onClick={() => {
+                            <Button size="small" color={"blue"} variant="solid" onClick={() => {
                                 closeModal()
                             }}>Close</Button> :
                             <Tooltip title={record.component_type}>
@@ -432,6 +436,12 @@ const AnalysisList = forwardRef<any, any>(({
                     <Dropdown menu={{
                         items: [
                             {
+                                key: "runningContainer",
+                                label: (<a onClick={() => {
+                                    openModal("componentsRender", { view: "runningContainer", analysis_id: record.analysis_id })
+                                    // setRecord(record)
+                                }}>Running Container</a>)
+                            }, {
                                 key: "paramsFile",
                                 label: (<a onClick={() => {
                                     openModal("paramsFile", { file_path: record.params_path })
@@ -446,16 +456,16 @@ const AnalysisList = forwardRef<any, any>(({
                             }, {
                                 key: "output_file",
                                 label: (<a onClick={() => {
-                                    openModal("componentsRender", { view:"fileBrowser", path: record.output_dir })
+                                    openModal("componentsRender", { view: "fileBrowser", path: record.output_dir })
                                     // setRecord(record)
                                 }}>Output File</a>)
-                            },{
+                            }, {
                                 key: "log_file",
                                 label: (<a onClick={() => {
-                                    openModal("componentsRender", { view:"logFile", file_path: record.command_log_path })
+                                    openModal("componentsRender", { view: "logFile", file_path: record.command_log_path })
                                     // setRecord(record)
                                 }}>Log File</a>)
-                            },{
+                            }, {
                                 key: "GoReport",
                                 label: (<>
                                     <Button size="small" color="primary" variant="solid" onClick={() =>
@@ -721,7 +731,7 @@ const AnalysisList = forwardRef<any, any>(({
             params={modals.inspectPanel.params}
             onClose={() => closeModals("inspectPanel")}
         ></InspectPanel>
-        
+
         <ComponentsRender
             visible={modal.key == "componentsRender" && modal.visible}
             params={modal.params}
