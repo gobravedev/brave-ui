@@ -299,7 +299,7 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
         if (typeof params['tags'] != 'string') {
             params['tags'] = JSON.stringify(params['tags'])
         }
-        if(! params['content']){
+        if (!params['content']) {
             params['content'] = "{}"
         }
 
@@ -565,6 +565,9 @@ const FileContent: FC<any> = ({ data, form, structure }) => {
                 <pre>{JSON.stringify(structure?.files, null, 2)}</pre>
             </Typography>
         </Card>}
+        {/* <Form.Item name={"container_id"} label="Container">
+            <SelectContainer container={data?.container}></SelectContainer>
+        </Form.Item> */}
         <Form.Item name={"file_type"} label="File Type" rules={[{ required: true, message: 'Please select file type!' }]}>
             <Select options={
                 [{ label: "collected", value: "collected" },

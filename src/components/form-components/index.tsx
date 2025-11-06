@@ -529,7 +529,7 @@ export const CollectedGroupSelectSampleButton2: FC<any> = ({ label, name, rules,
     </>
 }
 
-export const CollectedGroupSelectSampleButton: FC<any> = ({ label, projParameter, name, rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
+export const CollectedGroupSelectSampleButton: FC<any> = ({ label, projParameter, columns, name, rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
     const [sampleGrouped, setSampleGrouped] = useState<any>()
     const [options, setOptions] = useState<any>([])
     const [collectFiles, setCollectFiles] = useState<any>([])
@@ -630,30 +630,33 @@ export const CollectedGroupSelectSampleButton: FC<any> = ({ label, projParameter
     //     }
     // }, [selectCollectFile])
     return <>
-        {/* <pre>
-            {JSON.stringify(data, null, 2)}
-        </pre> */}
-        {/* {JSON.stringify(data)} */}
-        {/* {JSON.stringify(requestParam)} */}
-        {/* {analysisResultId} */}
+
         <Form.Item label={`${label} File`} name={[name, "file"]} rules={rules}>
             <Select options={collectFiles} ></Select>
         </Form.Item>
 
-        <Form.Item label={`${label} Columns`} name={[name, "columns"]} rules={rules}>
-            <GroupSelectSample sampleGrouped={sampleGrouped} sampleGroup={options} watch={[name, "group"]}></GroupSelectSample>
-        </Form.Item>
-        <Flex gap="small">
-            <Form.Item label={label} name={[name, "group"]} noStyle >
-                <GroupSelectButton sampleGrouped={sampleGrouped}></GroupSelectButton>
-            </Form.Item>
-            <Form.Item name={[name, "group_name"]} >
-                <Input size="small" placeholder="Optional group name"></Input>
-            </Form.Item>
-            <Form.Item name={[name, "color"]} >
-                <ColorPickerComp projParameter={projParameter} />
-            </Form.Item>
-        </Flex>
+
+        {(columns && Array.isArray(columns)) && columns.map((item: any, index: any) => (
+            <div key={index}>
+                <Form.Item label={`${item} Columns`} name={[name, item]} rules={rules}>
+                    <GroupSelectSample sampleGrouped={sampleGrouped} sampleGroup={options} ></GroupSelectSample>
+                </Form.Item>
+                <Flex gap="small">
+                    {item}
+                    <Form.Item label={item} name={[name, "group",`${item}`]} noStyle >
+                        <GroupSelectButton sampleGrouped={sampleGrouped}  field={[name, item]}></GroupSelectButton>
+                    </Form.Item>
+                    <Form.Item name={[name,"group_name", `${item}`]} >
+                        <Input size="small" placeholder="Optional group name"></Input>
+                    </Form.Item>
+                    <Form.Item name={[name, "color",`${item}`]} >
+                        <ColorPickerComp projParameter={projParameter} />
+                    </Form.Item>
+                </Flex>
+            </div>
+        ))}
+
+
 
     </>
 }
@@ -932,7 +935,7 @@ const GroupSelectSample: FC<any> = ({ value, onChange, sampleGroup, watch, sampl
 
     </>
 }
-const GroupSelectButton: FC<any> = ({ value, onChange,field, sampleGrouped }) => {
+const GroupSelectButton: FC<any> = ({ value, onChange, field, sampleGrouped }) => {
     // const [options, setOptions] = useState<any>([])
     // const [groupedLabel,setGroupedLabel] = useState<any>([])
     // const [grouped, setGrouped] = useState<any>({})

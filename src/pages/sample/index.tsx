@@ -334,7 +334,7 @@ const Sample: FC<any> = ({ operatePipeline, rowSelection }) => {
             pagination={false}
             loading={loading}
             virtual
-            scroll={{ x: 'max-content', y: 55 * 5 }}
+            scroll={{ x: 'max-content', y: 100 * 5 }}
             columns={columns}
             footer={() => `A total of ${sampleData.length} records`}
             dataSource={sampleData} />

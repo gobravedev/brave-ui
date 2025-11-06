@@ -85,7 +85,7 @@ function RowComponent({
                 e.currentTarget.style.backgroundColor = index % 2 ? token.colorBgContainer : token.colorFillQuaternary;
             }}
         >
-            {row.map((value: any, j: number) => (
+            {(row && Array.isArray(row) ) && row.map((value: any, j: number) => (
                 <div
                     key={j}
                     style={{

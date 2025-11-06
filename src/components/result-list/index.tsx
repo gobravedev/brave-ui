@@ -502,7 +502,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
             key: 'action',
             fixed: "right",
             ellipsis: true,
-            width: 200,
+            width: 100,
 
             render: (_: any, record: any) => (
                 <Space size="middle">
@@ -533,46 +533,67 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                             // readHdfs(record.content)
                         }}>Open</Button>
                     </Popover>
-                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        operatePipeline.openModal("analysisResultEdit", {
-                            ...record,
-                            callback: reload
-                        })
-                    }}>编辑</Button> */}
-                    {/* <a onClick={() => { downloadHdfs(record.content) }}>下载</a> */}
 
-                    {
-                        record.sample_name ?
-                            <>
-                                <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                    operatePipeline.openModal("metadataForm", {
-                                        analysis_result_id: record.analysis_result_id,
-                                        sample_id: record.sample_id,
-                                        callback: reload
-                                    })
-                                }}>metadata</Button>
-                            </> :
-                            <>
-                                <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                    operatePipeline.openModal("metadataForm", {
-                                        analysis_result_id: record.analysis_result_id,
-                                        callback: reload
-                                    })
-                                }}>Add Metadata</Button>
-                            </>
-                    }
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        console.log(operatePipeline)
-                        operatePipeline.openModals("bindSample", {
-                            analysis_result_id: record.analysis_result_id,
-                            callback: reload
-                        })
-                    }}>Bind Sample </Button>
-                    <Popconfirm title="Are you sure you want to delete it?" onConfirm={async () => {
-                        await deleteById(record.analysis_result_id)
+                    <Dropdown menu={{
+                        items: [
+                            {
+                                key: 'metadata',
+                                label: <>
+                                    {
+                                        record.sample_name ?
+                                            <>
+                                                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                                    operatePipeline.openModal("metadataForm", {
+                                                        analysis_result_id: record.analysis_result_id,
+                                                        sample_id: record.sample_id,
+                                                        callback: reload
+                                                    })
+                                                }}>metadata</Button>
+                                            </> :
+                                            <>
+                                                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                                    operatePipeline.openModal("metadataForm", {
+                                                        analysis_result_id: record.analysis_result_id,
+                                                        callback: reload
+                                                    })
+                                                }}>Add Metadata</Button>
+                                            </>
+                                    }
+                                </>
+                            }, {
+                                key: 'bind-sample',
+                                label: <>
+                                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                        console.log(operatePipeline)
+                                        operatePipeline.openModals("bindSample", {
+                                            analysis_result_id: record.analysis_result_id,
+                                            callback: reload
+                                        })
+                                    }}>Bind Sample </Button>
+                                </>
+                            }, {
+                                key: 'delete',
+                                label: <>
+
+                                    <Popconfirm title="Are you sure you want to delete it?" onConfirm={async () => {
+                                        await deleteById(record.analysis_result_id)
+                                    }}>
+                                        <Button size="small" color="danger" variant="solid">Delete</Button>
+                                    </Popconfirm>
+                                </>
+                            }
+                        ]
                     }}>
-                        <Button size="small" color="danger" variant="solid">Delete</Button>
-                    </Popconfirm>
+                        <a onClick={(e) => e.preventDefault()}>
+                            <Space>
+                                More
+                                <DownOutlined />
+                            </Space>
+                        </a>
+                    </Dropdown>
+
+
+
                 </Space>
             ),
         },
