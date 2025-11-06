@@ -177,6 +177,8 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
             // dataKey: "sample_group_list"
         }, SimplpeGroupSelect: {
             Component: SimplpeGroupSelect,
+        }, CollectedSimplpeGroupSelect: {
+            Component: CollectedSimplpeGroupSelect,
         }, CollectedGroupSelectSampleButton: {
             Component: CollectedGroupSelectSampleButton,
             // dataKey: "sample_group_list"
@@ -643,13 +645,13 @@ export const CollectedGroupSelectSampleButton: FC<any> = ({ label, projParameter
                 </Form.Item>
                 <Flex gap="small">
                     {item}
-                    <Form.Item label={item} name={[name, "group",`${item}`]} noStyle >
-                        <GroupSelectButton sampleGrouped={sampleGrouped}  field={[name, item]}></GroupSelectButton>
+                    <Form.Item label={item} name={[name, "group", `${item}`]} noStyle >
+                        <GroupSelectButton sampleGrouped={sampleGrouped} field={[name, item]}></GroupSelectButton>
                     </Form.Item>
-                    <Form.Item name={[name,"group_name", `${item}`]} >
+                    <Form.Item name={[name, "group_name", `${item}`]} >
                         <Input size="small" placeholder="Optional group name"></Input>
                     </Form.Item>
-                    <Form.Item name={[name, "color",`${item}`]} >
+                    <Form.Item name={[name, "color", `${item}`]} >
                         <ColorPickerComp projParameter={projParameter} />
                     </Form.Item>
                 </Flex>
@@ -662,6 +664,27 @@ export const CollectedGroupSelectSampleButton: FC<any> = ({ label, projParameter
 }
 
 
+export const CollectedSimplpeGroupSelect: FC<any> = ({ label, projParameter, name, columns, rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
+
+    return <>
+
+        {(columns && Array.isArray(columns)) && columns.map((item: any, index: any) => (
+            <div key={index}>
+                <div>
+                    {label} {item}:
+                </div>
+                <Flex gap="small">
+                    <Form.Item name={[name, "group_name", `${item}`]} >
+                        <Input size="small" placeholder="Optional group name"></Input>
+                    </Form.Item>
+                    <Form.Item name={[name, "color", `${item}`]} >
+                        <ColorPickerComp projParameter={projParameter} />
+                    </Form.Item>
+                </Flex>
+            </div>
+        ))}
+    </>
+}
 
 
 export const SimplpeGroupSelect: FC<any> = ({ label, projParameter, name, rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
@@ -848,11 +871,12 @@ const ColorPickerComp: FC<any> = ({ projParameter, value, onChange, ...rest }) =
             presets={presets}
            
         /> */}
-        <ColorPicker styles={{ popupOverlayInner: { width: 480 } }} panelRender={customPanelRender} presets={(projParameter?.colors) ? projParameter?.colors : []} allowClear {...rest} value={value} onChange={(color) => {
-            const hexColor = color.toHexString();
-            onChange(hexColor)
-            // console.log(hexColor)
-        }}  ></ColorPicker>
+        {/* {JSON.stringify(value)} */}
+        <ColorPicker styles={{ popupOverlayInner: { width: 480 } }}
+            panelRender={customPanelRender} presets={(projParameter?.colors) ? projParameter?.colors : []} allowClear value={value} onChange={(color) => {
+                const hexColor = color.toHexString();
+                onChange(hexColor)
+            }}  ></ColorPicker>
     </>
 }
 export const SelectAll: FC<any> = ({ label, name, data, initialValue, rules, ...rest }) => {
