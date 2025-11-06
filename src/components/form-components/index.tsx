@@ -201,13 +201,13 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
         <Row gutter={[8, 0]}>
             {/* {JSON.stringify(projectObj?.parameter)} */}
             {formJson.map((it: any, index: any) => (
-                <Col span={it?.col ? it?.col : 12}  key={index}>
+                <Col span={it?.col ? it?.col : 12} key={index}>
                     {/* {JSON.stringify(it)} */}
 
                     <ComponentsRender projParameter={parameter} analysisResultId={analysisResultId} key={index} {...it} dataMap={dataMap} componentMap={componentMap} constDataMap={constDataMap}></ComponentsRender>
                 </Col>
 
-            
+
 
             ))}
         </Row>
@@ -764,7 +764,7 @@ export const GroupSelectSampleButton: FC<any> = ({ label, projParameter, name, r
         </Form.Item>
         <Flex gap="small">
             <Form.Item label={label} name={[name, "group"]} noStyle >
-                <GroupSelectButton sampleGrouped={sampleGrouped}></GroupSelectButton>
+                <GroupSelectButton sampleGrouped={sampleGrouped} field={[name, "sample"]}></GroupSelectButton>
             </Form.Item>
             <Form.Item name={[name, "group_name"]} >
                 <Input size="small" placeholder="Optional group name"></Input>
@@ -777,13 +777,13 @@ export const GroupSelectSampleButton: FC<any> = ({ label, projParameter, name, r
 
     </>
 }
-const ThreeColorPicker: FC<any> = ({ label, name, data, initialValue:initialValue_, rules, ...rest }) => {
-    const [initialValue,setInitialValue] = useState<any>([null,null,null])
-    useEffect(()=>{
-        if(initialValue_ && Array.isArray(initialValue_) && initialValue_.length==3){
+const ThreeColorPicker: FC<any> = ({ label, name, data, initialValue: initialValue_, rules, ...rest }) => {
+    const [initialValue, setInitialValue] = useState<any>([null, null, null])
+    useEffect(() => {
+        if (initialValue_ && Array.isArray(initialValue_) && initialValue_.length == 3) {
             setInitialValue(initialValue_)
         }
-    },[initialValue_])
+    }, [initialValue_])
 
     return <>
         <Flex gap={"small"}>
@@ -892,44 +892,47 @@ const GroupSelectSample: FC<any> = ({ value, onChange, sampleGroup, watch, sampl
     // const [groupedKey, setGroupedKey] = useState<any>({})
     // const [group, setGroup] = useState<any>()
 
-    const form = Form.useFormInstance();
-    const group_ = Form.useWatch(watch, form);
-    useEffect(() => {
-        // setGroup(group_)
-        if (group_ && (Array.isArray(group_) && group_.length > 0)) {
-            // console.log("group_", group_)
+    // const form = Form.useFormInstance();
+    // const group_ = Form.useWatch(watch, form);
+    // useEffect(() => {
+    //     // setGroup(group_)
+    //     if (group_ && (Array.isArray(group_) && group_.length > 0)) {
+    //         // console.log("group_", group_)
 
-            // console.log(group)
-            onSelectGroup(group_)
-        }
-    }, [group_, sampleGrouped])
+    //         // console.log(group)
+    //         onSelectGroup(group_)
+    //     }
+    // }, [group_, sampleGrouped])
     // useEffect(() => {
 
     //     // onSelectGroup(group)
     // }, [group])
 
-    const onSelectGroup = (keys: any) => {
-        const merged = Object.entries(sampleGrouped ? sampleGrouped : {})
-            .filter(([key]) => keys.includes(key)) // 只保留特定 key
-            .flatMap(([, value]) => value);
-        // console.log(merged)
-        // const value = grouped[key]
-        // console.log(value)
-        onChange(merged)
-        // setGroupedKey(key)
-    }
+    // const onSelectGroup = (keys: any) => {
+    //     const merged = Object.entries(sampleGrouped ? sampleGrouped : {})
+    //         .filter(([key]) => keys.includes(key)) // 只保留特定 key
+    //         .flatMap(([, value]) => value);
+    //     // console.log(merged)
+    //     // const value = grouped[key]
+    //     // console.log(value)
+    //     onChange(merged)
+    //     // setGroupedKey(key)
+    // }
 
 
     return <>
         {/* {watch}{group} */}
-        {/* {JSON.stringify(sampleGrouped)} */}
-        <Select showSearch filterOption={(input: any, option: any) =>
-            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())} mode={"multiple"} value={value} onChange={onChange} options={sampleGroup}></Select>
+        {/* {JSON.stringify(value)} */}
+        <Select showSearch
+            filterOption={(input: any, option: any) =>
+                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+            mode={"multiple"}
+            value={value} onChange={onChange} options={sampleGroup}></Select>
         {value && <>A total of {value.length} samples were selected</>}
 
     </>
 }
-const GroupSelectButton: FC<any> = ({ value, onChange, sampleGrouped }) => {
+const GroupSelectButton: FC<any> = ({ value, onChange,field, sampleGrouped }) => {
     // const [options, setOptions] = useState<any>([])
     // const [groupedLabel,setGroupedLabel] = useState<any>([])
     // const [grouped, setGrouped] = useState<any>({})
@@ -949,19 +952,31 @@ const GroupSelectButton: FC<any> = ({ value, onChange, sampleGrouped }) => {
     //     setGrouped(grouped)
 
     // }, [sampleGroup, group_field])
-
+    const form = Form.useFormInstance();
+    const onSelectSample = (keys: any) => {
+        const merged = Object.entries(sampleGrouped ? sampleGrouped : {})
+            .filter(([key]) => keys.includes(key)) // 只保留特定 key
+            .flatMap(([, value]) => value);
+        console.log(merged)
+        form.setFieldValue(field, merged)
+        // const value = grouped[key]
+        // console.log(value)
+        // onChange(merged)
+        // setGroupedKey(key)
+    }
     const onSelectGroup = (key: any) => {
-
+        let currentKey: any = []
         if ((value ? value : []).includes(key)) {
-            const currentKey = (value ? value : []).filter((it: any) => !it.includes(key))
+            currentKey = (value ? value : []).filter((it: any) => !it.includes(key))
             // setGroupedKey(currentKey)
             onChange(currentKey)
         } else {
-            const currentKey = [...(value ? value : []), key]
+            currentKey = [...(value ? value : []), key]
             // setGroupedKey(currentKey)
             onChange(currentKey)
         }
         // console.log(currentKey)
+        onSelectSample(currentKey)
         // setGroupedKey([key])
 
     }
