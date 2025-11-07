@@ -32,7 +32,10 @@ const AnalysisList = forwardRef<any, any>(({
         },
         initialPageSize: 10
     })
-
+    useEffect(() => {
+        // console.log("component_id changed:", component_ids)
+        closeModal()
+    }, [component_ids])
     useImperativeHandle(ref, () => ({
         reload: loadData
     }))
@@ -46,6 +49,12 @@ const AnalysisList = forwardRef<any, any>(({
     const [openMonitor, setOpenMonitor] = useState<any>(false)
     const navigate = useNavigate()
     const location = useLocation()
+    // const queryParams = new URLSearchParams(location.search);
+    // const key = queryParams.get("key");
+    // useEffect(() => {
+    //     console.log("key changed:", key)
+    //     closeModal()
+    // }, [key])
     // const { eventSourceRef, status, reconnect } = useSSEContext();
     // const [data, setData] = useState<any>([])
     const analysisIdRef = useRef<any>([])
