@@ -196,28 +196,30 @@ export const TableView: FC<any> = ({ data, url, filename, columns, baseURL, proj
 
 
 export const ImgView: FC<any> = ({ data, url, filename, baseURL }) => {
-    return <div >
-        <Card size="small" title={""}
+    return <>
+        <Card style={{ height: "100%" }} size="small" title={""}
             styles={{
-                body:{
-                    padding:"0.2rem"
+                body: {
+                    padding: "1rem 0.5rem 2rem 0.5rem",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "100%",
+                    objectFit: "cover"
                 }
             }}
             extra={<UrlComp url={url} filename={filename} baseURL={baseURL}></UrlComp>}
         >
 
-            <Image src={filename?.endsWith("pdf") ? data : `${baseURL}${data}?t=${Date.now()}`} style={{ maxWidth: "20rem", marginRight: "0.5rem" }}></Image>
-            {/* <UrlComp url={url} filename={filename} baseURL={baseURL}></UrlComp> */}
+            <div>
+                <Image src={filename?.endsWith("pdf") ? data : `${baseURL}${data}?t=${Date.now()}`} style={{ width: "100%", marginRight: "0.5rem" }}></Image>
 
-            {/* {url && <Popover title={`${window.location.origin}${url}`}>
-                <Tag color="success" style={{ cursor: "pointer" }} onClick={() => {
-                    window.open(`${url}?t=${Date.now()}`, "_blank")
-                }}>{filename} <DownloadOutlined /></Tag></Popover>} */}
-
+            </div>
+    
         </Card>
 
 
-    </div>
+    </>
 }
 const { Paragraph } = Typography;
 

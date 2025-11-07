@@ -1,4 +1,4 @@
-import { Breadcrumb, Button, Card, message, Empty, Flex, Modal, Popconfirm, Skeleton, Switch, Tabs, Tag, Tooltip, Row, Col, Spin, Menu, Dropdown, Space } from "antd"
+import { Breadcrumb, Button, Card, message, Empty, Flex, Modal, Popconfirm, Skeleton, Switch, Tabs, Tag, Tooltip, Row, Col, Spin, Menu, Dropdown, Space, Collapse, Typography } from "antd"
 import { FC, lazy, Suspense, useEffect, useRef, useState } from "react"
 import AnalysisPanel, { UpstreamAnalysisInput, UpstreamAnalysisOutput } from '../../components/analysis-sotware-panel'
 import Meta from "antd/es/card/Meta"
@@ -31,9 +31,9 @@ import { useStickyTop } from "@/hooks/useStickyTop"
 import Markdown from "@/components/markdown"
 import PipelineComponent from './pipeline'
 import ComponentsDetailsRender from "./components-details-render"
-import { AppstoreOutlined, DeleteColumnOutlined, DeleteOutlined, DownOutlined } from '@ant-design/icons'
+import { AppstoreOutlined, CloseOutlined, DeleteColumnOutlined, DeleteOutlined, DownOutlined, QuestionCircleOutlined } from '@ant-design/icons'
 import { el } from "@faker-js/faker"
-const Pipeline: FC<any> = ({ size: size_ }) => {
+const Pipeline: FC<any> = () => {
 
     const location = useLocation()
     const queryParams = new URLSearchParams(location.search);
@@ -51,11 +51,13 @@ const Pipeline: FC<any> = ({ size: size_ }) => {
     const [test, setTest] = useState<any>(true)
     const [messageApi, contextHolder] = message.useMessage();
     const [component, setComponent] = useState<any>()
-    const [size, setSize] = useState<any>(size_ ? size_ : [4, 20])
+    const [size, setSize] = useState<any>((component_type && ["script", "file"].includes(component_type)) ? [18, 6] : [20, 0])
     const tableRef = {
         inputFile: useRef<HTMLInputElement>(null),
         outputFile: useRef<HTMLInputElement>(null)
     };
+
+
     // const [editor, setEditor] = useState<any>({
     //     open: false,
     // })
@@ -386,7 +388,7 @@ const Pipeline: FC<any> = ({ size: size_ }) => {
             {/* {menuKey} */}
             <Row gutter={[isSticky ? 16 : 0, 16]} style={{}}>
                 {(component_type && ["software", "pipeline"].includes(component_type)) &&
-                    <Col lg={size[0]} sm={size[0]} xs={24}
+                    <Col lg={4} sm={4} xs={24}
                         ref={containerRef} style={isSticky ? {
                             overflow: "hidden",
                             // marginTop: "1rem",
@@ -417,7 +419,7 @@ const Pipeline: FC<any> = ({ size: size_ }) => {
                             size="small" >
 
                             <Menu
-                                
+                                inlineCollapsed={false}
                                 selectedKeys={[menuKey || ""]}
                                 onSelect={(k: any) => {
                                     const key = k.key
@@ -444,7 +446,7 @@ const Pipeline: FC<any> = ({ size: size_ }) => {
 
                         </Card>
                     </Col>}
-                <Col lg={size[1]} sm={size[1]} xs={24}
+                <Col lg={size[0]} sm={size[0]} xs={24}
                     style={{
 
                         display: "flex",
@@ -477,6 +479,12 @@ const Pipeline: FC<any> = ({ size: size_ }) => {
                         extra={<Flex justify={"space-between"} align={"center"} gap="small">
 
                             <Flex gap="small" wrap>
+                                <QuestionCircleOutlined
+                                    onClick={() => {
+                                        setSize([14, 6])
+                                    }}
+                                    style={{ color: "#1890ff" }} />
+
                                 {component?.component_type != "pipeline" && <>
 
                                     <Popconfirm title="Whether to remove?" onConfirm={() => {
@@ -569,7 +577,7 @@ const Pipeline: FC<any> = ({ size: size_ }) => {
                                                             component_type: "software",
                                                             relation_type: "pipeline_software",
                                                             parent_component_id: pipeline
-                                                            .component_id,
+                                                                .component_id,
                                                             pipeline_id: pipeline.component_id
                                                         }
                                                     })
@@ -645,60 +653,79 @@ const Pipeline: FC<any> = ({ size: size_ }) => {
                             tableRef={tableRef}
                             operatePipeline={operatePipeline} /> */}
                     </Card>
-                    <Card style={{ marginTop: "1rem" }} size="small" >
+                    {/* <Card style={{ marginTop: "1rem" }} size="small" >
                         {pipeline?.description && <>
 
                             <Markdown data={pipeline?.description}></Markdown>
                         </>}
-                    </Card>
+                    </Card> */}
 
                 </Col>
+                <Col lg={size[1]} sm={size[1]} xs={24}
+                    ref={containerRef} style={isSticky ? {
+                        overflow: "hidden",
+                        // marginTop: "1rem",
+                        position: "sticky",
+                        top: `${top}px`, // 吸顶距离
+                        alignSelf: "flex-start", // 避免被stretch
+                        height: `calc(100vh - ${top}px - 1rem )`, // 可选：固定高度，让内部滚动
+                    } : {}}
 
-                {(component_type && ["script", "file"].includes(component_type)) &&
-                    <Col lg={size[0]} sm={size[0]} xs={24}
-                        ref={containerRef} style={isSticky ? {
-                            overflow: "hidden",
-                            // marginTop: "1rem",
-                            position: "sticky",
-                            top: `${top}px`, // 吸顶距离
-                            alignSelf: "flex-start", // 避免被stretch
-                            height: `calc(100vh - ${top}px - 1rem )`, // 可选：固定高度，让内部滚动
-                        } : {}}
-
-                    >
-                        <Card
-                            title="More Info"
-                            extra={<>
+                >
+                    <Card
+                        title={`More Info (${component?.component_name})`}
+                        extra={<>
+                            {!(component_type && ["script", "file"].includes(component_type)) && <>
+                                <CloseOutlined onClick={() => {
+                                    setSize([20, 0])
+                                }}></CloseOutlined>
                             </>}
-                            style={{
+                        </>}
+                        style={{
+                            flex: 1,
+                            display: "flex",
+                            flexDirection: "column",
+                            height: " 100%"
+                        }}
+                        styles={{
+                            body: {
+                                // height: "90%",
                                 flex: 1,
-                                display: "flex",
-                                flexDirection: "column",
-                                height: " 100%"
-                            }}
-                            styles={{
-                                body: {
-                                    // height: "90%",
-                                    flex: 1,
-                                    overflowY: "auto"
-                                }
-                            }}
-                            size="small" >
+                                overflowY: "auto"
+                            }
+                        }}
 
-                            {pipeline?.tags && Array.isArray(pipeline.tags) && pipeline.tags.map((tag: any, index: any) => (
-                                <Tag style={{ marginTop: "0.5rem" }} key={index} color={colors[index]}>{tag}</Tag>
-                            ))}
+                        size="small" >
 
-                            {/* {JSON.stringify(pipeline.description)} */}
-                            {/* {pipeline?.description && <>
+                        {pipeline?.tags && Array.isArray(pipeline.tags) && pipeline.tags.map((tag: any, index: any) => (
+                            <Tag style={{ marginTop: "0.5rem" }} key={index} color={colors[index]}>{tag}</Tag>
+                        ))}
+                        {/* {JSON.stringify(component)} */}
+                        <Markdown data={component?.description}></Markdown>
+
+                        <Collapse ghost items={[
+                            {
+                                key: "1",
+                                label: "More",
+                                children: <>
+                                    <Typography>
+                                        <pre>{JSON.stringify(component, null, 2)}   </pre>
+                                    </Typography>
+                                </>
+                            }
+                        ]} />
+                        {/* {JSON.stringify(pipeline.description)} */}
+                        {/* {pipeline?.description && <>
 
                                 <Markdown data={pipeline?.description}></Markdown>
                             </>} */}
 
-                        </Card>
-                    </Col>
+                    </Card>
+                </Col>
+                {/* {(component_type && ["script", "file"].includes(component_type)) && */}
 
-                }
+
+                {/* } */}
             </Row>
         </Spin>
 

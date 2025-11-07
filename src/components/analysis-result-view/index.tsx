@@ -4,7 +4,7 @@ import { FC, forwardRef, use, useEffect, useImperativeHandle, useMemo, useRef, u
 import Markdown from '../markdown'
 import axios from "axios";
 import LogFile from "../log-file";
-import { DeleteOutlined, DownloadOutlined, QuestionCircleOutlined, RedoOutlined } from "@ant-design/icons"
+import { DeleteOutlined, DownloadOutlined, ExportOutlined, QuestionCircleOutlined, RedoOutlined } from "@ant-design/icons"
 import { MonacoEditor } from "../react-monaco-editor";
 import { useNavigate, useOutletContext } from "react-router";
 import { useSSEContext } from "@/context/sse/useSSEContext";
@@ -155,7 +155,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
             extra={
                 <Flex gap={"small"} wrap>
                     {onClose && <>
-                        <Button size="small" color="red" variant="solid" onClick={() => onClose()}>Close</Button>
+                        <Button size="small" color="blue" variant="solid" onClick={() => onClose()}>Close</Button>
                     </>}
                     {openPanel && <>
                         {analsyisResult && <Button size="small" color="primary" variant="solid" onClick={() =>
@@ -221,7 +221,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
                         }
                         {analsyisResult?.server_status == "running" ?
                             <>
-
+{/* 
                                 <Tooltip title={<>
                                     {`${containerURL}/container/${analsyisResult.analysis_id}/`}
                                 </>}>
@@ -230,7 +230,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
 
                                         window.open(`${containerURL}/container/${analsyisResult.analysis_id}/`, "_blank")
                                     }}>Open URL</Button>
-                                </Tooltip>
+                                </Tooltip> */}
                                 <Popconfirm title={"Whether or not to stop?"} onConfirm={async () => {
                                     // stopAnalysis(record, "server")
                                     await stopAnalysisApi(analsyisResult.analysis_id, "server")
@@ -239,6 +239,14 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
                                         Stop Server
                                     </Button>
                                 </Popconfirm>
+                                <Tooltip title={<>
+                                    {`${containerURL}/container/${analsyisResult.analysis_id}/`}
+                                </>}>
+                                    <ExportOutlined style={{ cursor: "pointer" }} onClick={() => {
+
+                                        window.open(`${containerURL}/container/${analsyisResult.analysis_id}/`, "_blank")
+                                    }} />
+                                </Tooltip>
 
 
                             </> : <>
@@ -446,9 +454,9 @@ const AnalysisResultDisplay: FC<any> = ({ analsyisResult, loading }) => {
                 {
                     Array.isArray(analsyisResult.images) ?
 
-                        <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
+                        <Row gutter={[8,8]}>
                             {analsyisResult.images.map((it: any, index: any) => (
-                                <Col lg={8} sm={8} xs={24}  key={index} span={4}>
+                                <Col lg={8} sm={8} xs={24} key={index} span={4}>
                                     <ImgView {...it} baseURL={baseURL}></ImgView>
                                 </Col>))}
                         </Row> :
