@@ -1,5 +1,5 @@
 import { Skeleton } from 'antd';
-import { FC, lazy, Suspense } from 'react';
+import { FC, lazy, memo, Suspense } from 'react';
 
 const PipelineFlowComponent = lazy(() => import('./pipeline/components/pipeline-flow'))
 const SoftwareComponent = lazy(() => import('./software'))
@@ -31,4 +31,4 @@ const ComponentsDetailsRender:FC<any> = ({ view, ...rest }) => {
     </Suspense>
 }
 
-export default ComponentsDetailsRender;
+export default memo(ComponentsDetailsRender);

@@ -75,8 +75,30 @@ const Pipeline: FC<any> = () => {
     const [menus, setMenus] = useState<any[]>([])
     const [menuKey, setMenuKey] = useState<string | null>(key)
     const [view, setView] = useState<string | null>()
+    const [openKeys, setOpenKeys] = useState<string[]>([]);
 
     const [componentMap, setComponentMap] = useState<any>({})
+    // 🔍 递归查找 key 的父级路径
+    const findParentKeys = (items: any, targetKey: string, path: string[] = []): string[] | null => {
+        for (const item of items) {
+            if (item.key === targetKey) {
+                return path; // 当前路径即为父级 keys
+            }
+            if (item.children) {
+                const found = findParentKeys(item.children, targetKey, [...path, item.key]);
+                if (found) return found;
+            }
+        }
+        return null;
+    };
+
+    //  当 menuKey 改变时，自动展开它的父菜单
+    useEffect(() => {
+        if (menuKey) {
+            const parents = findParentKeys(menus, menuKey);
+            if (parents) setOpenKeys(parents);
+        }
+    }, [menuKey, menus]);
 
     const updateQueryParam = (paramName: string, newValue: string) => {
         const { pathname, search, hash } = window.location;
@@ -377,7 +399,18 @@ const Pipeline: FC<any> = () => {
         openModal: openModal,
         openModals: openModals
     }
-
+    const onOpenChange = (keys: string[]) => {
+        setOpenKeys(keys); // 允许多层展开
+    };
+    // const onOpenChange = (keys: string[]) => {
+    //     // 只保持一个父级 SubMenu 展开
+    //     const latestOpenKey = keys.find((key) => !openKeys.includes(key));
+    //     if (latestOpenKey) {
+    //         setOpenKeys([latestOpenKey]);
+    //     } else {
+    //         setOpenKeys([]);
+    //     }
+    // };
     useEffect(() => {
         loadData()
     }, [])
@@ -395,7 +428,7 @@ const Pipeline: FC<any> = () => {
                             position: "sticky",
                             top: `${top}px`, // 吸顶距离
                             alignSelf: "flex-start", // 避免被stretch
-                            height: `calc(100vh - ${top}px - 1rem )`, // 可选：固定高度，让内部滚动
+                            height: `88vh`, // 可选：固定高度，让内部滚动
                         } : {}}
 
                     >
@@ -419,7 +452,10 @@ const Pipeline: FC<any> = () => {
                             size="small" >
 
                             <Menu
+                                onOpenChange={onOpenChange}
+
                                 inlineCollapsed={false}
+                                openKeys={openKeys}
                                 selectedKeys={[menuKey || ""]}
                                 onSelect={(k: any) => {
                                     const key = k.key

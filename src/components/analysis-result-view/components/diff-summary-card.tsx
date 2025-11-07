@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import { Card, Row, Col, Statistic, Button, Table, Divider, Tooltip, Tag } from 'antd';
+import { Card, Row, Col, Statistic, Button, Table, Divider, Tooltip, Tag, Collapse, Typography } from 'antd';
 import { CopyOutlined } from '@ant-design/icons';
 import { Pie } from '@ant-design/plots';
 import { title } from 'process';
@@ -14,12 +14,12 @@ import { title } from 'process';
 //   down: 22,
 //   ns: 78
 // };
-const DiffSummaryCard: FC<any> = ({ data:summaryJson }) => {
+const DiffSummaryCard: FC<any> = ({ data: summaryJson }) => {
   return (
     <Card size='small' title={<>
       {summaryJson.title} <Tag color='success'>{summaryJson.criteria}</Tag>
     </>} style={{}}>
-    {/* {JSON.stringify(data)} */}
+      {/* {JSON.stringify(data)} */}
       <Row gutter={[8, 8]} align="middle">
         <Col xs={24} sm={6} md={6}>
           <Statistic title="Total features" value={summaryJson.total} />
@@ -36,6 +36,21 @@ const DiffSummaryCard: FC<any> = ({ data:summaryJson }) => {
         <Col xs={24} sm={6} md={6}>
           <Statistic title="Not significant" value={summaryJson.ns} valueStyle={{ color: '#9E9E9E' }} />
         </Col>
+        <Col>
+          <Collapse ghost items={[
+            {
+              key: "1",
+              label: "More",
+              children: <>
+                <Typography>
+                  {summaryJson?.feature}
+                </Typography>
+              </>
+            }
+          ]} />
+
+        </Col>
+
       </Row>
     </Card>
   );

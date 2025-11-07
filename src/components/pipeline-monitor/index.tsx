@@ -408,7 +408,7 @@ export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
 
 
 const PipelineInfo: FC<any> = forwardRef<any, any>(({ visible, params, onClose, callback }, ref) => {
-    console.log("loading PipelineInfo...")
+    console.log("PipelineInfo Render")
     const submitCallback = async () => {
         loadAnalysis()
         if (callback) {
@@ -457,4 +457,4 @@ const PipelineInfo: FC<any> = forwardRef<any, any>(({ visible, params, onClose, 
 
 
 
-export default PipelineInfo
+export default memo(PipelineInfo);

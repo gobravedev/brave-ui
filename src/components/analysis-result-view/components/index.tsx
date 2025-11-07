@@ -1,7 +1,7 @@
 
 import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Alert, Modal, Tooltip, Divider } from "antd";
 import TextArea from "antd/es/input/TextArea";
-import { FC, forwardRef, use, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { FC, forwardRef, memo, use, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import Markdown from '../../markdown'
 import axios from "axios";
 import LogFile from "../../log-file";
@@ -147,6 +147,7 @@ export const TableView2: FC<any> = ({ data, url, filename, columns, baseURL, pro
     </>
 }
 export const TableView: FC<any> = ({ data, url, filename, columns, baseURL, projectObj }) => {
+    console.log("TableView data Render")
     const [tableRowsInfo, setTableRowsInfo] = useState<any>({
 
     })
@@ -194,10 +195,9 @@ export const TableView: FC<any> = ({ data, url, filename, columns, baseURL, proj
 }
 
 
-
-export const ImgView: FC<any> = ({ data, url, filename, baseURL }) => {
+const ImgView0: FC<any> = ({ data, url, urls, filename, baseURL }) => {
     return <>
-        <Card style={{ height: "100%" }} size="small" title={""}
+        <Card style={{ height: "100%" }} size="small" title={filename}
             styles={{
                 body: {
                     padding: "1rem 0.5rem 2rem 0.5rem",
@@ -208,19 +208,29 @@ export const ImgView: FC<any> = ({ data, url, filename, baseURL }) => {
                     objectFit: "cover"
                 }
             }}
-            extra={<UrlComp url={url} filename={filename} baseURL={baseURL}></UrlComp>}
+
+        // extra={<UrlComp url={url} filename={filename} baseURL={baseURL}></UrlComp>}
         >
 
             <div>
-                <Image src={filename?.endsWith("pdf") ? data : `${baseURL}${data}?t=${Date.now()}`} style={{ width: "100%", marginRight: "0.5rem" }}></Image>
 
+                <Image src={data?.startsWith("data:image/png") ? data : `${baseURL}${data}?t=${Date.now()}`} style={{ width: "100%", marginRight: "0.5rem" }}></Image>
+                {(urls && Array.isArray(urls)) && <>
+
+                    {urls.map((item: any, index: any) => (
+                        <UrlComp key={index} url={item.url} filename={item.format} baseURL={baseURL}></UrlComp>
+
+                    ))}
+                </>}
             </div>
-    
+
         </Card>
 
 
     </>
 }
+export const ImgView = memo(ImgView0)
+
 const { Paragraph } = Typography;
 
 const StringView: FC<any> = ({ data }) => {

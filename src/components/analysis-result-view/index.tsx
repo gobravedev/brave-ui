@@ -1,6 +1,6 @@
 import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Alert, Modal, Tooltip, Divider } from "antd";
 import TextArea from "antd/es/input/TextArea";
-import { FC, forwardRef, use, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { FC, forwardRef, memo, use, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import Markdown from '../markdown'
 import axios from "axios";
 import LogFile from "../log-file";
@@ -27,13 +27,13 @@ import MicrobiomeSummaryCard from "./components/diff-summary-card";
 
 
 
-export const ComponentsRender = ({ type, ...rest }: any) => {
+export const ComponentsRender0 = ({ type, ...rest }: any) => {
     const Component = componentMap[type] || (() => <div>未知类型 {type}</div>)
     return <div style={{ marginBottom: "1rem" }}>
         <Component {...rest} />
     </div>;
 }
-
+export const ComponentsRender =  memo(ComponentsRender0)
 
 export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree, openPanel, overflowY = "hidden" }) => {
     const [loading, setLoading] = useState<boolean>(false)

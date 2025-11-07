@@ -1,9 +1,9 @@
 import { useSSEContext } from "@/context/sse/useSSEContext"
 import { SSEContextType } from "@/type/sse"
 import { Venn } from "@ant-design/plots"
-import { Alert, Button, Card, Dropdown, Empty, Flex, GetProp, Input, InputNumber, Modal, Popconfirm, Popover, Space, Spin, Table, Tabs, Tag, theme, Tooltip, Typography, Upload, UploadFile, UploadProps } from "antd"
+import { Alert, Button, Card, Dropdown, Empty, Flex, GetProp, Input, InputNumber, Modal, Popconfirm, Popover, Skeleton, Space, Spin, Table, Tabs, Tag, theme, Tooltip, Typography, Upload, UploadFile, UploadProps } from "antd"
 import axios from "axios"
-import { FC, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
+import { FC, forwardRef, memo, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { useNavigate, useOutletContext, useParams } from "react-router"
 import { DeleteFilled, DeleteOutlined, DownloadOutlined, DownOutlined, EditOutlined, FileOutlined, ImportOutlined, InboxOutlined, QuestionCircleOutlined, RedoOutlined, UploadOutlined } from "@ant-design/icons"
 import ImportData from "../import-data"
@@ -15,9 +15,11 @@ import Dragger from "antd/es/upload/Dragger"
 import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 import { useSelector } from "react-redux"
 import BigTable from '@/components/big-table';
+import { fa } from "@faker-js/faker"
 
 
 const ResultList = forwardRef<any, any>((params_, ref) => {
+    console.log("ResultList Render")
     const {
         pipeline,
         software,
@@ -48,7 +50,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
 
     const { project, projectObj } = useOutletContext<any>()
     const message = useGlobalMessage()
-    const [data, setData] = useState<any>([])
+    const [data, setData] = useState<any>()
     const [groupedData, setGroupedData] = useState<any>()
     // const [content,setContent] = useState<any>()
     const [loading, setLoading] = useState(true)
@@ -968,95 +970,100 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
 
                 </>} */}
 
+                {data ? <>
 
-                <Spin spinning={uploading} tip={"Uploading..."}>
+                    <Spin spinning={uploading} tip={"Uploading..."}>
 
-                    {(Array.isArray(data) && data.length == 0) ? <>
+                        {(Array.isArray(data) && data.length == 0) ? <>
 
 
-                        <Dragger {...props} maxCount={1} >
-                            <p className="ant-upload-drag-icon">
-                                <InboxOutlined />
-                            </p>
-                            <p className="ant-upload-text">Click or drag file to this area to upload</p>
-                            {/* <p className="ant-upload-hint">
+                            <Dragger {...props} maxCount={1} >
+                                <p className="ant-upload-drag-icon">
+                                    <InboxOutlined />
+                                </p>
+                                <p className="ant-upload-text">Click or drag file to this area to upload</p>
+                                {/* <p className="ant-upload-hint">
                                 Support for a single or bulk upload. Strictly prohibited from uploading company data or other
                                 banned files.
                             </p> */}
-                        </Dragger>
+                            </Dragger>
 
 
-                        {/* <Button onClick={handleUpload}>aa</Button> */}
-                    </> :
-                        <>
+                            {/* <Button onClick={handleUpload}>aa</Button> */}
+                        </>
+                            :
+                            <>
 
-                            <Tabs
+                                <Tabs
 
-                                activeKey={analysisResultId}
-                                onChange={(key) => {
-                                    // debugger
-                                    const currentData = data.filter((it: any) => it.analysis_result_id == key)
-                                    if (currentData.length > 0) {
-                                        setTableColumns(currentData[0].columns)
-                                    }
+                                    activeKey={analysisResultId}
+                                    onChange={(key) => {
+                                        // debugger
+                                        const currentData = data.filter((it: any) => it.analysis_result_id == key)
+                                        if (currentData.length > 0) {
+                                            setTableColumns(currentData[0].columns)
+                                        }
 
-                                    setAnalysisResultId(key)
-                                }}
-                                tabBarExtraContent={
-                                    <Flex gap={"small"}>
+                                        setAnalysisResultId(key)
+                                    }}
+                                    tabBarExtraContent={
+                                        <Flex gap={"small"}>
 
-                                        <InputNumber size="small" value={rowNum} onChange={(val: any) => setRowNum(val)} />
+                                            <InputNumber size="small" value={rowNum} onChange={(val: any) => setRowNum(val)} />
 
-                                        <Upload {...props}>
-                                            <Tooltip title="Upload new file">
-                                                <UploadOutlined style={{ cursor: "pointer" }} />
-                                            </Tooltip>
+                                            <Upload {...props}>
+                                                <Tooltip title="Upload new file">
+                                                    <UploadOutlined style={{ cursor: "pointer" }} />
+                                                </Tooltip>
 
-                                        </Upload>
+                                            </Upload>
 
-                                        <DownloadOutlined style={{ cursor: "pointer" }} onClick={() => {
-                                            const currentData = data.find((it: any) => it.analysis_result_id == analysisResultId)
-                                            console.log("currentData", currentData)
-                                            window.open(`${baseURL}${currentData.url}`, '_blank');
-                                            //  if(currentData.length){
+                                            <DownloadOutlined style={{ cursor: "pointer" }} onClick={() => {
+                                                const currentData = data.find((it: any) => it.analysis_result_id == analysisResultId)
+                                                console.log("currentData", currentData)
+                                                window.open(`${baseURL}${currentData.url}`, '_blank');
+                                                //  if(currentData.length){
 
-                                            //  }
+                                                //  }
 
-                                        }} />
-                                        <EditOutlined style={{ cursor: "pointer" }}
-                                            onClick={() => {
-                                                console.log("analysisResultId", analysisResultId)
-                                                openModal("analysisResultEdit", { analysis_result_id: analysisResultId })
                                             }} />
+                                            <EditOutlined style={{ cursor: "pointer" }}
+                                                onClick={() => {
+                                                    console.log("analysisResultId", analysisResultId)
+                                                    openModal("analysisResultEdit", { analysis_result_id: analysisResultId })
+                                                }} />
 
-                                        <Popconfirm title={`Are you sure you want to delete ${analysisResultId}?`} onConfirm={async () => {
-                                            await deleteById(analysisResultId)
-                                        }}>
-                                            <Tooltip title={`Delete current tab ${analysisResultId}`}>
-                                                <DeleteOutlined style={{ cursor: "pointer", color: "red" }} />
-                                            </Tooltip>
-                                        </Popconfirm>
-                                        <RedoOutlined style={{ cursor: "pointer" }} onClick={() => loadTable()} />
+                                            <Popconfirm title={`Are you sure you want to delete ${analysisResultId}?`} onConfirm={async () => {
+                                                await deleteById(analysisResultId)
+                                            }}>
+                                                <Tooltip title={`Delete current tab ${analysisResultId}`}>
+                                                    <DeleteOutlined style={{ cursor: "pointer", color: "red" }} />
+                                                </Tooltip>
+                                            </Popconfirm>
+                                            <RedoOutlined style={{ cursor: "pointer" }} onClick={() => loadTable()} />
 
-                                    </Flex>
-                                }
-                                items={data.map((item: any, index: any) => ({
-                                    key: item.analysis_result_id,
-                                    label: <Tooltip title={`${item?.content} ${item.analysis_result_id}`}>
-                                        {`${item?.file_name}`}
+                                        </Flex>
+                                    }
+                                    items={data.map((item: any, index: any) => ({
+                                        key: item.analysis_result_id,
+                                        label: <Tooltip title={`${item?.content} ${item.analysis_result_id}`}>
+                                            {`${item?.file_name}`}
 
-                                    </Tooltip>
-                                }))}></Tabs>
-                            <Spin spinning={tableRowLoading} tip={"Loading table data..."}>
+                                        </Tooltip>
+                                    }))}></Tabs>
+                                <Spin spinning={tableRowLoading} tip={"Loading table data..."}>
 
-                                <div style={{ height: '50vh' }}>
-                                    <BigTable shape={tableRowsInfo} rows={[tableColumns,
-                                        ...filteredData]} />
-                                </div>
-                            </Spin>
-                        </>}
+                                    <div style={{ height: '50vh' }}>
+                                        <BigTable shape={tableRowsInfo} rows={[tableColumns,
+                                            ...filteredData]} />
+                                    </div>
+                                </Spin>
+                            </>}
 
-                </Spin>
+                    </Spin>
+
+                </> : <Skeleton active />}
+
 
 
 
@@ -1123,9 +1130,12 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
 
 
 
+// const Test:FC<any> = ()=>{
+//     console.log("Test Component Render")
+//     return <div>Test Component</div>
+// }
 
-
-export default ResultList
+export default memo(ResultList);
 
 
 export const AnalysisResultModal: FC<any> = ({ visible, onClose, params }) => {

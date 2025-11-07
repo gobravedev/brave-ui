@@ -1,6 +1,6 @@
 import { Button, Card, Dropdown, Flex, Form, Input, message, Modal, Pagination, Popconfirm, Popover, Select, Space, Table, Tag, Tooltip } from "antd"
 import axios from "axios"
-import { FC, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
+import { FC, forwardRef, memo, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { useLocation, useNavigate, useOutletContext, useParams } from "react-router"
 import { useModal, useModals } from "@/hooks/useModal"
 import PipelineInfo, { ParamsFile } from "../pipeline-monitor"
@@ -36,6 +36,7 @@ const AnalysisList = forwardRef<any, any>(({
     useImperativeHandle(ref, () => ({
         reload: loadData
     }))
+    console.log("AnalysisList Render")
 
     const [record, setRecord0] = useState<any>()
     const [messageApi, contextHolder] = message.useMessage();
@@ -751,7 +752,7 @@ const AnalysisList = forwardRef<any, any>(({
     </>
 })
 
-export default AnalysisList
+export default memo(AnalysisList);
 
 
 const AddProject: FC<any> = ({ visible, params, onClose, callback }) => {
