@@ -956,7 +956,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
             {/* {JSON.stringify(projectObj)} */}
             {/* {JSON.stringify(filteredData)} */}
             {sseData.msgType === "analysis_result" && <>
-                <Alert closable message={`${sseData?.analysis_name}: Add Analsyis: ${sseData?.add_num}; Update Analysis: ${sseData?.update_num}; Complete Analysis: ${sseData?.complete_num}`} />
+                {/* <Alert closable message={`${sseData?.analysis_name}: Add Analsyis: ${sseData?.add_num}; Update Analysis: ${sseData?.update_num}; Complete Analysis: ${sseData?.complete_num}`} /> */}
                 {/* {JSON.stringify(sseData)} */}
             </>}
 

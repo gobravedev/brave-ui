@@ -419,10 +419,10 @@ const Pipeline: FC<any> = () => {
         <Spin spinning={loading}>
             {/* {JSON.stringify(pipeline)} */}
             {/* {menuKey} */}
-            <Row gutter={[isSticky ? 16 : 0, 16]} style={{}}>
+            <Row gutter={[isSticky ? 16 : 0, 16]} style={{}}    ref={containerRef} >
                 {(component_type && ["software", "pipeline"].includes(component_type)) &&
                     <Col lg={4} sm={4} xs={24}
-                        ref={containerRef} style={isSticky ? {
+                     style={isSticky ? {
                             overflow: "hidden",
                             // marginTop: "1rem",
                             position: "sticky",
@@ -432,6 +432,7 @@ const Pipeline: FC<any> = () => {
                         } : {}}
 
                     >
+                        {/* {top} */}
                         <Card
                             title={pipeline?.component_name}
                             extra={<>

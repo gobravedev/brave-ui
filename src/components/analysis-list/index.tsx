@@ -320,7 +320,7 @@ const AnalysisList = forwardRef<any, any>(({
                     {/* /analysis/stop-analysis/{analysis_id} */}
 
                     {record.image_status == "exist" ? <>
-                        {(record.job_status == "running"  || record.job_status == "stopping" )?
+                        {(record.job_status == "running" || record.job_status == "stopping") ?
                             <>
                                 <Popconfirm title={"Whether or not to stop?"} onConfirm={() => {
                                     stopAnalysis(record, "job")
@@ -372,7 +372,7 @@ const AnalysisList = forwardRef<any, any>(({
 
 
                     {record.image_status == "exist" && <>
-                        {(record.server_status == "running" || record.server_status == "stopping" ) ?
+                        {(record.server_status == "running" || record.server_status == "stopping") ?
                             <>
 
 
@@ -381,7 +381,7 @@ const AnalysisList = forwardRef<any, any>(({
 
 
                                 }}>
-                                    
+
                                     <Button size="small" color="red" variant="solid" disabled={record.server_status == "stopping"}>
                                         {record.server_status == "stopping" ? `${record.server_status}` : ` Stop Server`}
                                     </Button>
@@ -412,19 +412,18 @@ const AnalysisList = forwardRef<any, any>(({
 
                     {/* {editParams && <Button size="small" color="cyan" variant="solid" onClick={() => editParams(record)}>编辑参数</Button>} */}
                     {
-                        isSelected(record, ["modalA", "resultParsePanel"]) ?
+                        isSelected(record, ["modalA"]) ?
                             <Button size="small" color={"blue"} variant="solid" onClick={() => {
                                 closeModal()
                             }}>Close</Button> :
                             <Tooltip title={record.component_type}>
                                 <Button size="small" color={"cyan"} variant="solid" onClick={() => {
-                                    if (record.component_type == "software") {
-                                        openModal("resultParsePanel", {
-                                            analysis_id: record.analysis_id,
-                                        })
-                                    } else if (record.component_type == "script") {
-                                        openModal("modalA", record)
-                                    }
+                                    // if (record.component_type == "software") {
+
+                                    // } else if (record.component_type == "script") {
+
+                                    // }
+                                    openModal("modalA", record)
                                     //
 
                                     // setRecord(record)
@@ -479,6 +478,17 @@ const AnalysisList = forwardRef<any, any>(({
                                     <Button size="small" color="cyan" variant="solid" onClick={() => openModal("editParams", record.analysis_id)}>Edit Parameters</Button>
 
                                 </>)
+                            }, {
+                                key: "view_workflow",
+                                label: <>
+
+                                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                        openModal("resultParsePanel", {
+                                            analysis_id: record.analysis_id,
+                                        })
+                                    }}>Result Parse</Button>
+
+                                </>
                             },
 
                             {

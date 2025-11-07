@@ -389,7 +389,6 @@ const BaseInputNumber: FC<any> = ({ label, name, data, initialValue, rules, ...r
 }
 export const BaseSelect: FC<any> = ({ extra, tooltip, label, name, data, initialValue, rules, ...rest }) => {
     return <>
-        {/* {JSON.stringify(initialValue)} */}
         <Form.Item extra={extra} tooltip={tooltip} initialValue={initialValue ? initialValue : null} label={label} name={name} rules={rules}>
             <BasicSelect {...rest} options={data}></BasicSelect>
             {/* <Select showSearch filterOption={(input: any, option: any) =>
