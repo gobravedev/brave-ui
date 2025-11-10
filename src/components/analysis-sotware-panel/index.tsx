@@ -419,9 +419,11 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
                                     {/* <pre>
                                 {JSON.stringify(resultTableList,null,2)}
                                 </pre> */}
-                                    {/* {JSON.stringify(inputAnalysisMethod)} */}
-                                    {/* {JSON.stringify(inputAnalysisMethod)} */}
-                                    <FormJsonComp formJson={inputAnalysisMethod} dataMap={resultTableList}></FormJsonComp>
+                                    {/* {JSON.stringify(rest?.reInputFile)}
+                                    {JSON.stringify(inputAnalysisMethod)} */}
+                                    {rest?.reInputFile ? <FormJsonComp formJson={rest?.reInputFile} dataMap={resultTableList}></FormJsonComp> :
+                                        <FormJsonComp formJson={inputAnalysisMethod} dataMap={resultTableList}></FormJsonComp>}
+
                                     {/* {JSON.stringify(rest)} */}
                                     <BioDatabaseForm openModal={() => operatePipeline.openModal("modalE", rest.databases)} formJson={rest.databases}></BioDatabaseForm>
                                     {/* <FormJsonComp formJson={rest.databases} dataMap={resultTableList}></FormJsonComp> */}

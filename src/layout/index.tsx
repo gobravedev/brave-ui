@@ -238,8 +238,8 @@ const App: React.FC = () => {
         {
             key: `/software-card`,
             label: {
-                zh_CN: "工具",
-                en_US: "Tools"
+                zh_CN: "模块",
+                en_US: "Modules"
             },
             children: [
                 {
@@ -253,8 +253,8 @@ const App: React.FC = () => {
         {
             key: `/script-card`,
             label: {
-                zh_CN: "可视化",
-                en_US: "Visualizations"
+                zh_CN: "工具",
+                en_US: "Tools"
             },
             children: [
                 {
