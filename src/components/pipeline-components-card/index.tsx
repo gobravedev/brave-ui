@@ -490,7 +490,7 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
     const [tabKey, setTabkey] = useState<any>()
     const { baseURL } = useSelector((state: any) => state.user)
     const message = useGlobalMessage()
-    const [address, setAddress] = useState("github")
+    const [address, setAddress] = useState("local")
     // const [token, setToken] = useState()
     const { githubToken, storeRepos } = useSelector((state: any) => state.user)
     const [category, setCategory] = useState<any[]>([])
@@ -604,12 +604,12 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
                     <Segmented<string>
                         value={address}
                         options={[
-                            {
-                                label: "Github",
-                                value: "github"
-                            }, {
+                          {
                                 label: "Local",
                                 value: "local"
+                            },{
+                                label: "Github",
+                                value: "github"
                             }
                         ]}
                         onChange={(value) => {
