@@ -15,7 +15,7 @@ import Dragger from "antd/es/upload/Dragger"
 import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 import { useSelector } from "react-redux"
 import BigTable from '@/components/big-table';
-import { fa } from "@faker-js/faker"
+import { el, fa } from "@faker-js/faker"
 
 
 const ResultList = forwardRef<any, any>((params_, ref) => {
@@ -194,7 +194,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
     useEffect(() => {
         // const currentAnalysisMethod = analysisMethod[0]
         if (analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 0) {
-
+            // debugger
             if (setActiveTabKey) {
 
                 setActiveTabKey(analysisMethod[0]?.component_id)
@@ -202,12 +202,17 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                 // console.log("currentAnalysisMethod",currentAnalysisMethod)
 
                 setCurrentAnalysisMethod(currentAnalysisMethod)
+                const componentIdList = analysisMethod.flatMap((it: any) => it.component_id)
 
+                loadData({ componentIdList: componentIdList, activeTabKey: analysisMethod[0]?.component_id })
 
+            } else {
+                reload()
             }
+        } else {
+            reload()
         }
 
-        reload()
 
         // initData(currentAnalysisMethod)
     }, [JSON.stringify(params), JSON.stringify(analysisMethod), project, projectObj?.metadata_form])
@@ -273,7 +278,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
     }, [analysisResultId])
 
 
-    const loadData = async ({ analysisMethodValues, params, componentIdList }: any) => {
+    const loadData = async ({ activeTabKey, params, componentIdList }: any) => {
         setLoading(true)
 
 
@@ -289,6 +294,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
             })
             setLoading(false)
             const groupedData = resp.data;
+            // debugger
             // const groupedData = resp.data.reduce((acc: any, item: any) => {
             //     const key = item.component_id;
             //     // const key = keyMap[item.analysis_method]
@@ -1095,7 +1101,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
             </>}
 
 
-
+            {/* {JSON.stringify(data)} */}
 
 
             {currentAnalysisMethod?.parseFormat && currentAnalysisMethod?.relation_type == "software_output_file" && <Typography>
