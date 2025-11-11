@@ -8,7 +8,7 @@ const BioDatabases: FC<any> = ({ visible, onClose, params, callback }) => {
     const [data, setData] = useState<any>([])
     const [loading, setLoading] = useState<any>(false)
     const [form] = Form.useForm()
-    const [activeTabKey, setActiveTabKey] = useState<any>(params[0].dataKey)
+    const [activeTabKey, setActiveTabKey] = useState<any>(params[0]?.dataKey)
     const [record, setRecord] = useState<any>(null)
     const loadData = async (params: any) => {
         setLoading(true)
