@@ -35,7 +35,8 @@ const AnalysisList = forwardRef<any, any>(({
     useEffect(() => {
         // console.log("component_id changed:", component_ids)
         closeModal()
-    }, [component_ids])
+    }, [component_ids,component_id])
+
     useImperativeHandle(ref, () => ({
         reload: loadData
     }))

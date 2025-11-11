@@ -366,6 +366,18 @@ const KeggMap: FC<any> = ({ data, ...rest }) => {
                 ellipsis: true,
                 width: 150,
             }, {
+                title: "gene_name",
+                dataIndex: "gene_name",
+                key: "gene_name",
+                ellipsis: true,
+                width: 150,
+            },{
+                title: "KO",
+                dataIndex: "KO",
+                key: "KO",
+                ellipsis: true,
+                width: 150,
+            }, {
                 title: "Count",
                 dataIndex: "Count",
                 key: "Count",
@@ -401,7 +413,7 @@ const KeggMap: FC<any> = ({ data, ...rest }) => {
                 key: "pathwayId",
                 ellipsis: true,
                 width: 150,
-            }, {
+            },{
                 title: '操作',
                 key: 'action',
                 fixed: "right",
