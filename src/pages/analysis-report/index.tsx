@@ -139,7 +139,7 @@ const AnalysisReport: FC<any> = () => {
     useEffect(() => {
         loadData()
     }, [project])
-    return <div style={{ maxWidth: "1800px", margin: "1rem auto" , padding: `${isSticky ? '0 16px 0 16px' : '0'}`}}>
+    return <div style={{ maxWidth: "1800px", margin: "1rem auto", padding: `${isSticky ? '0 16px 0 16px' : '0'}` }}>
 
         {/* <div style={{ marginBottom: "1rem" }}></div> */}
         {/* {JSON.stringify(projectObj)} */}
@@ -168,18 +168,12 @@ const AnalysisReport: FC<any> = () => {
                     }}
                 >
                     {analysisKey ? <Suspense fallback={<Skeleton active></Skeleton>}>
-                        {componentType == "software" ? <>
-                            <ResultParse analysis_id={analysisKey}  ></ResultParse>
-
-                        </> : <>
-                            <AnalysisResultView
-                                overflowY="auto"
-                                openPanel={setPanel}
-                                loadTree={() => {
-                                    loadData()
-                                }} analysis_id={analysisKey}></AnalysisResultView>
-
-                        </>}
+                        <AnalysisResultView
+                            overflowY="auto"
+                            openPanel={setPanel}
+                            loadTree={() => {
+                                loadData()
+                            }} analysis_id={analysisKey}></AnalysisResultView>
                     </Suspense> : <>
                         <Card size="small" variant="borderless">
                             <Empty></Empty>

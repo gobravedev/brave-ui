@@ -51,6 +51,7 @@ type AnalysisSoftware = {
     component_type?: string
     description?: string
     componentLayout?: string
+    component_name?: string
 }
 
 const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
@@ -192,52 +193,71 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
                 {/* {JSON.stringify(rest)} */}
 
                 {/* <PipelineMonitor pipelineId={rest.pipeline_id} ></PipelineMonitor> */}
-                <div style={{ marginBottom: "1rem" }}></div>
 
-                {checkAvailable(outputFile) ? <UpstreamAnalysisOutput
-                    {...rest}
-                    pipeline={pipeline}
 
-                    software={{
-                        pipeline_id: rest.pipeline_id,
-                        component_id: rest.component_id
-                    }}
+                <Collapse
+                    // activeKey={collapseActiveKey}
+                    style={{ marginTop: "1rem" }}
+                    // defaultActiveKey={['1']}
+                    size="small"
+                    items={[
+                        {
+                            key: '1',
+                            label: `Output File  (${rest?.component_name})`,
+                            children: <>
+                                {checkAvailable(outputFile) ? <UpstreamAnalysisOutput
+                                    {...rest}
+                                    pipeline={pipeline}
 
-                    children={children}
-                    onClickItem={setRecord}
-                    downstreamAnalysis={downstreamAnalysis}
-                    operatePipeline={operatePipeline}
-                    project={project}
-                    analysisType={analysisType}
-                    analysisMethod={outputFile}
-                    appendSampleColumns={appendSampleColumns}></UpstreamAnalysisOutput>
-                    : <>
-                        {/* {wrapAnalysisPipeline != analysisPipline &&
+                                    software={{
+                                        pipeline_id: rest.pipeline_id,
+                                        component_id: rest.component_id
+                                    }}
+
+                                    children={children}
+                                    onClickItem={setRecord}
+                                    downstreamAnalysis={downstreamAnalysis}
+                                    operatePipeline={operatePipeline}
+                                    project={project}
+                                    analysisType={analysisType}
+                                    analysisMethod={outputFile}
+                                    appendSampleColumns={appendSampleColumns}></UpstreamAnalysisOutput>
+                                    : <>
+                                        {/* {wrapAnalysisPipeline != analysisPipline &&
                             */}
-                        <Flex justify="center" style={{ margin: "2rem" }} gap={"small"}>
-                            <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                operatePipeline.openModal("modalC", {
-                                    data: undefined,
-                                    structure: {
-                                        relation_type: "software_output_file", //"software_input_file",
-                                        parent_component_id: rest.component_id,
-                                        // pipeline_id: pipeline.component_id,
-                                        component_type: "file"
-                                    }
-                                })
-                            }}>New File</Button>
-                            <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                operatePipeline.openModal("modalA", {
-                                    data: undefined,
-                                    pipelineStructure: {
-                                        relation_type: "software_output_file", //"software_input_file",
-                                        parent_component_id: rest.component_id,
-                                        // pipeline_id: pipeline.component_id
-                                    }
-                                })
-                            }}>Add File</Button>
-                        </Flex>
-                    </>}
+                                        <Flex justify="center" style={{ margin: "2rem" }} gap={"small"}>
+                                            <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                                operatePipeline.openModal("modalC", {
+                                                    data: undefined,
+                                                    structure: {
+                                                        relation_type: "software_output_file", //"software_input_file",
+                                                        parent_component_id: rest.component_id,
+                                                        // pipeline_id: pipeline.component_id,
+                                                        component_type: "file"
+                                                    }
+                                                })
+                                            }}>New File</Button>
+                                            <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                                operatePipeline.openModal("modalA", {
+                                                    data: undefined,
+                                                    pipelineStructure: {
+                                                        relation_type: "software_output_file", //"software_input_file",
+                                                        parent_component_id: rest.component_id,
+                                                        // pipeline_id: pipeline.component_id
+                                                    }
+                                                })
+                                            }}>Add File</Button>
+                                        </Flex>
+                                    </>}
+                            </>
+                        },
+
+                    ]}
+                >
+                </Collapse>
+
+
+                <div style={{ marginBottom: "1rem" }}></div>
 
 
 
@@ -400,9 +420,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
                                     {/* <Form.Item name={"analysis_id"} label="分析ID" >
                                         <Input disabled></Input>
                                     </Form.Item> */}
-                                    <Form.Item initialValue={`${rest.component_name}`} name={"analysis_name"} label={"Analysis Name"} rules={[{ required: true, message: '该字段不能为空!' }]}>
-                                        <Input></Input>
-                                    </Form.Item>
+
                                     <FormJsonComp formJson={[{
                                         "name": "group_field",
                                         "label": "Group Field",
@@ -443,9 +461,18 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
 
 
                                     {/* </>))} */}
+                                    {/* {JSON.stringify(rest?.formJson)} */}
+
                                     {upstreamFormJson &&
                                         <FormJsonComp formJson={upstreamFormJson} dataMap={dataMap}></FormJsonComp>
                                     }
+                                    {rest?.formJson &&
+                                        <FormJsonComp formJson={rest?.formJson} dataMap={dataMap}></FormJsonComp>
+                                    }
+                                    <Form.Item initialValue={`${rest.component_name}`} name={"analysis_name"} label={"Analysis Name"} rules={[{ required: true, message: '该字段不能为空!' }]}>
+                                        <Input></Input>
+                                    </Form.Item>
+                                    
                                     <Flex gap={"small"}>
                                         <Button size="small" color="cyan" variant="solid" onClick={() => {
                                             saveUpstreamAnalysis(false)

@@ -341,7 +341,10 @@ const Pipeline: FC<any> = () => {
             setMenuKey(defaultMenuKey)
             setView(defalutView)
             setComponent(pipeline)
-            updateQueryParam("key", defaultMenuKey)
+            if (defaultMenuKey) {
+                updateQueryParam("key", defaultMenuKey)
+            }
+
         } else {
             if (menuKey in componentMap) {
                 console.log("componentMap[key]: ", componentMap[menuKey])
@@ -419,10 +422,10 @@ const Pipeline: FC<any> = () => {
         <Spin spinning={loading}>
             {/* {JSON.stringify(pipeline)} */}
             {/* {menuKey} */}
-            <Row gutter={[isSticky ? 16 : 0, 16]} style={{}}    ref={containerRef} >
+            <Row gutter={[isSticky ? 16 : 0, 16]} style={{}} ref={containerRef} >
                 {(component_type && ["software", "pipeline"].includes(component_type)) &&
                     <Col lg={4} sm={4} xs={24}
-                     style={isSticky ? {
+                        style={isSticky ? {
                             overflow: "hidden",
                             // marginTop: "1rem",
                             position: "sticky",

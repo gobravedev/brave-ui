@@ -55,7 +55,9 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
         // await loadAnalysisResult(JSON.parse(resp.data.request_param.data_component_ids))
         setResultData(resp.data.analysis_result)
         form.resetFields()
+        // console.log(resp.data.request_param)
         form.setFieldsValue(resp.data.request_param)
+        form.setFieldValue("anno", 6491)
         // console.log([...resp.data.content?.formJson || [],...resp.data?.inputFormJson || []])
         // console.log(resp.data.content?.formJson)
         // console.log(resp.data?.inputFormJson)
@@ -76,6 +78,38 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
         }
     }
 
+    const buildFormJson = () => {
+        if (data?.content?.reInputFile) {
+            return [ ...data?.content?.reInputFile || [],...data.content?.formJson || [], ...data.content?.upstreamFormJson || [],
+            data?.component_type == "software" ? {
+                "name": "group_field",
+                "label": "Group Field",
+                "rules": [
+                    {
+                        "required": true,
+                        "message": "该字段不能为空!"
+                    }
+                ],
+                "type": "GroupFieldSelect"
+            } : {}
+            ]
+        } else {
+            return [ ...data?.inputFormJson || [],...data.content?.formJson || [], ...data.content?.upstreamFormJson || [],
+            data?.component_type == "software" ? {
+                "name": "group_field",
+                "label": "Group Field",
+                "rules": [
+                    {
+                        "required": true,
+                        "message": "该字段不能为空!"
+                    }
+                ],
+                "type": "GroupFieldSelect"
+            } : {}
+            ]
+        }
+
+    }
 
     // useEffect(() => {
     //     if (data?.request_param) {
@@ -112,19 +146,7 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
                     form={form}
                     requestParam={{ ...data.request_param, analysis_id: data?.analysis_id }}
                     dataMap={{ ...resultData, first_data_key: getFirstKey(resultData) }}
-                    formJson={[...data.content?.formJson || [], ...data.content?.upstreamFormJson || [], ...data?.inputFormJson || [],
-                    data?.component_type == "software" ? {
-                        "name": "group_field",
-                        "label": "Group Field",
-                        "rules": [
-                            {
-                                "required": true,
-                                "message": "该字段不能为空!"
-                            }
-                        ],
-                        "type": "GroupFieldSelect"
-                    } : {}
-                    ]}
+                    formJson={buildFormJson()}
                     databases={data.content?.databases}
                     // inputFormJson={data?.inputFormJson}
                     // onChangeAddProject={(value:any)=>{
@@ -296,7 +318,12 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                 }
 
             </Flex>
-
+            {/* <Form.Item name={"anno1"}>
+                <Input></Input>
+            </Form.Item>
+        <Button onClick={()=>{
+                    form.setFieldValue("eggnog", 6491)
+                }}> aa</Button> */}
             <Collapse ghost items={[
                 {
                     key: "1",

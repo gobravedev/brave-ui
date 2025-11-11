@@ -389,7 +389,9 @@ const BaseInputNumber: FC<any> = ({ label, name, data, initialValue, rules, ...r
 }
 export const BaseSelect: FC<any> = ({ extra, tooltip, label, name, data, initialValue, rules, ...rest }) => {
     return <>
-        <Form.Item extra={extra} tooltip={tooltip} initialValue={initialValue ? initialValue : null} label={label} name={name} rules={rules}>
+        {/* {name} */}
+        <Form.Item extra={extra} name={name} tooltip={tooltip}
+            initialValue={initialValue ? initialValue : null} label={label} rules={rules}>
             <BasicSelect {...rest} options={data}></BasicSelect>
             {/* <Select showSearch filterOption={(input: any, option: any) =>
                 (option?.label ?? '').toLowerCase().includes(input.toLowerCase())} {...rest} options={data}></Select> */}
@@ -668,7 +670,7 @@ export const CollectedGroupSelectSampleButton: FC<any> = ({ label, projParameter
 export const CollectedSimplpeGroupSelect: FC<any> = ({ label, projParameter, name, columns, rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
 
     return <Row>
-    
+
         {(columns && Array.isArray(columns)) && columns.map((item: any, index: any) => (
             <Col span={12} key={index}>
                 <div>

@@ -343,15 +343,16 @@ const AnalysisList = forwardRef<any, any>(({
                             </> : <>
                                 <Popconfirm title={"Whether or not to run?"} onConfirm={() => {
                                     runAnalysis(record, "job")
-                                    if (record.component_type == "software") {
-                                        // openModal("resultParsePanel", {
-                                        //     analysis_id: record.analysis_id,
-                                        // })
-                                        openModal("componentsRender", { view: "runningContainer", analysis_id: record.analysis_id })
+                                    // if (record.component_type == "software") {
+                                    //     // openModal("resultParsePanel", {
+                                    //     //     analysis_id: record.analysis_id,
+                                    //     // })
+                                    //     openModal("componentsRender", { view: "runningContainer", analysis_id: record.analysis_id })
 
-                                    } else if (record.component_type == "script") {
-                                        openModal("modalA", record)
-                                    }
+                                    // } else if (record.component_type == "script") {
+                                    //     openModal("modalA", record)
+                                    // }
+                                    openModal("modalA", record)
                                     // openModal("modalA", record)
                                     setRecord(record)
                                 }}>
