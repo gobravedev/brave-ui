@@ -371,7 +371,7 @@ const KeggMap: FC<any> = ({ data, ...rest }) => {
                 key: "gene_name",
                 ellipsis: true,
                 width: 150,
-            },{
+            }, {
                 title: "KO",
                 dataIndex: "KO",
                 key: "KO",
@@ -413,7 +413,7 @@ const KeggMap: FC<any> = ({ data, ...rest }) => {
                 key: "pathwayId",
                 ellipsis: true,
                 width: 150,
-            },{
+            }, {
                 title: '操作',
                 key: 'action',
                 fixed: "right",
@@ -433,12 +433,18 @@ const KeggMap: FC<any> = ({ data, ...rest }) => {
 
         {modal.visible && <Modal
             width={"80%"}
-            title={`${modal.params?.Description}(${modal.params?.ID})`}
+            title={<>
+            <a 
+            target="_blank"
+            href={`https://www.kegg.jp/pathway/${modal.params?.organism}${modal.params?.pathwayId}`}>{modal.params?.Description} ({modal.params?.organism}{modal.params?.pathwayId})</a>
+            </>}
             footer={null}
             onCancel={closeModal}
             onClose={closeModal}
             open={modal.visible && modal.key == "KGMLMapSVG"}>
+            {/* {JSON.stringify(modal.params)} */}
             <KGMLMapSVG
+                KOList={modal.params?.KO.split("/")}
                 compound={data?.compound}
                 highlightKeys={modal.params?.geneID.split("/")}
                 pathwayId={modal.params?.pathwayId} organisms={modal.params?.organism}></KGMLMapSVG>
@@ -475,6 +481,7 @@ export const componentMap: any = {
     text: TextView,
     info: InfoView,
     kegg_map: KeggMap,
+    gsea_kegg_map:KeggMap,
     download: Download,
     feature_list: FeatureList,
     diff: DiffSummaryCard

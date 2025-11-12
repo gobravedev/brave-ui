@@ -171,10 +171,10 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
                             data: {
                                 component_id: analsyisResult?.component_id,
                             }, structure: {
-                                component_type: "script",
+                                component_type: analsyisResult?.component_type,
                             }
                         })
-                    }}>Edit Script</Button>}
+                    }}>Edit {analsyisResult?.component_type}</Button>}
 
 
 

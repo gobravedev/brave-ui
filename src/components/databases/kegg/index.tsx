@@ -1,6 +1,6 @@
 import React, { FC, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import axios from "axios";
-import { Card, Col, Drawer, Empty, Flex, Form, Input, Row, Select, Spin, Tooltip } from "antd";
+import { Card, Col, Drawer, Empty, Flex, Form, Input, Row, Select, Spin, Tag, Tooltip } from "antd";
 import { useForm } from "antd/es/form/Form";
 import { RedoOutlined } from '@ant-design/icons'
 import { useModal } from "@/hooks/useModal";
@@ -191,7 +191,7 @@ interface Entry {
 }
 const { Search } = Input
 
-export const KGMLMapSVG = forwardRef<any, any>(({ pathwayId, organisms, highlightKeys = [], compound }, ref) => {
+export const KGMLMapSVG = forwardRef<any, any>(({ pathwayId, organisms, highlightKeys = [], compound, KOList }, ref) => {
   const [image, setImage] = useState("");
   const [entries, setEntries] = useState<Entry[]>([]);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -199,6 +199,7 @@ export const KGMLMapSVG = forwardRef<any, any>(({ pathwayId, organisms, highligh
   const [loading, setLoading] = useState(false);
   const { messageApi } = useOutletContext<any>()
   const { baseURL } = useSelector((state: any) => state.user)
+  const [currentHighlightEntries, setCurrentHighlightEntries] = useState<Entry[]>([]);
 
   useImperativeHandle(ref, () => ({
     reload: reload
@@ -262,36 +263,49 @@ export const KGMLMapSVG = forwardRef<any, any>(({ pathwayId, organisms, highligh
     //     }
     //   }
     // });
-    return entries.map((item: any) => {
+    const highlightEntries = entries.map((item: any) => {
       // item.name.map((it:any)=> directionMap.get(item.name))
-      let direction: any=null;
-      
-      for(const it of item.name){
+      let direction: any = null;
+
+      for (const it of item.name) {
         direction = directionMap.get(it)
-        if(direction){
+        if (direction) {
           break
         }
         // if(it=="C00146"){
         //   console.log(it,"--",direction)
         // }
- 
+
       }
       // if(item.name.includes("C00146")){
       //   console.log("--",direction)
       // }
       if (direction) {
-        return {
-          isHighlight: true,
-          color: direction > 0 ? "#ff4d4f" : "#1890ff",
-          direction: direction,
-          ...item
+        if (item.type == "ortholog") {
+          return {
+            isHighlight: true,
+            color: direction > 0 ? "#ff0084ff" : "#0011feff",
+            direction: direction,
+            ...item
+          }
+        } else {
+          return {
+            isHighlight: true,
+            color: direction > 0 ? "#ff4d4f" : "#1890ff",
+            direction: direction,
+            ...item
+          }
         }
+
       } else {
         return {
           ...item
         }
       }
     });
+    const currentHighlightEntries = highlightEntries.filter((item: any) => item.isHighlight)
+    setCurrentHighlightEntries(currentHighlightEntries)
+    return highlightEntries
   }, [entries, compound]);
   const expand = 3
   // console.log(highlightEntries)
@@ -300,8 +314,20 @@ export const KGMLMapSVG = forwardRef<any, any>(({ pathwayId, organisms, highligh
 
 
     <Spin spinning={loading}>
+      {/* {JSON.stringify(currentHighlightEntries)} */}
+      {currentHighlightEntries && currentHighlightEntries.map((item: any, index: any) => (
+        <Tag key={index}
+          style={{ cursor: "pointer", marginBottom: 4 }}
+          onClick={() => window.open(item.link, "_blank")}
+          color={item.color} >{item.name.join(", ")} {item.direction > 0 ? "(Upregulated)" : "(Downregulated)"}</Tag>
+      ))}
+      {currentHighlightEntries && currentHighlightEntries.length > 0 && <>{currentHighlightEntries.length}</>}
+      <hr />
+      {KOList && KOList.length > 0 && KOList.map((item: any, index: any) => (<Tag key={index} color={"geekblue"}>{item}</Tag>))}
+      {KOList && KOList.length > 0 && <>{KOList.length}</>}
       <Flex justify="center" vertical>
-        {/* {JSON.stringify(direction)} */}
+        {/* {JSON.stringify(currentHighlightEntries)} */}
+
         <div
           style={{
             marginTop: 12,
@@ -312,6 +338,38 @@ export const KGMLMapSVG = forwardRef<any, any>(({ pathwayId, organisms, highligh
             justifyContent: "center",
           }}
         >
+
+          {/* 基因图例 */}
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span
+              style={{
+                display: "inline-block",
+                width: 14,
+                height: 14,
+                background: "#ff0084ff", // 红色代表上调
+                border: "1px solid #999",
+                borderRadius: 2,
+              }}
+            />
+            <span>Gene (Upregulated)</span>
+          </div>
+
+
+          {/* 基因图例 */}
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span
+              style={{
+                display: "inline-block",
+                width: 14,
+                height: 14,
+                background: "#0011feff", // 红色代表上调
+                border: "1px solid #999",
+                borderRadius: 2,
+              }}
+            />
+            <span>Gene (Downregulated)</span>
+          </div>
+
           {/* 基因图例 */}
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span
@@ -405,7 +463,7 @@ export const KGMLMapSVG = forwardRef<any, any>(({ pathwayId, organisms, highligh
                           )}
                         </rect>
 
-                        <title>{e.label}{e.direction ? `(${e.direction})` : ""}</title>
+                        <title>{e.name.join(", ")} {e.direction ? `(${e.direction})` : ""}</title>
                       </a>
                     );
                   })}
