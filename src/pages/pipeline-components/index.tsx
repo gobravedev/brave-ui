@@ -713,7 +713,7 @@ const Pipeline: FC<any> = () => {
 
                 >
                     <Card
-                        title={`More Info (${component?.component_name})`}
+                        title={`More Info (${pipeline?.component_name})`}
                         extra={<>
                             {!(component_type && ["script", "file"].includes(component_type)) && <>
                                 <CloseOutlined onClick={() => {
@@ -741,7 +741,7 @@ const Pipeline: FC<any> = () => {
                             <Tag style={{ marginTop: "0.5rem" }} key={index} color={colors[index]}>{tag}</Tag>
                         ))}
                         {/* {JSON.stringify(component)} */}
-                        <Markdown data={component?.description}></Markdown>
+                        <Markdown data={pipeline?.description}></Markdown>
 
                         <Collapse ghost items={[
                             {
