@@ -444,7 +444,7 @@ const KeggMap: FC<any> = ({ data, ...rest }) => {
             open={modal.visible && modal.key == "KGMLMapSVG"}>
             {/* {JSON.stringify(modal.params)} */}
             <KGMLMapSVG
-                KOList={modal.params?.KO.split("/")}
+                KOList={modal.params?.KO?modal.params?.KO.split("/"):[]}
                 compound={data?.compound}
                 highlightKeys={modal.params?.geneID.split("/")}
                 pathwayId={modal.params?.pathwayId} organisms={modal.params?.organism}></KGMLMapSVG>
