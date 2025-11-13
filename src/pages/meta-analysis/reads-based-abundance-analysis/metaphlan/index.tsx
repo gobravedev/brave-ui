@@ -1,6 +1,5 @@
 import { Button } from "antd"
 import { FC } from "react"
-import {SelectComp} from '../../../../components/analysis-sotware-panel'
 import FormItem from "antd/es/form/FormItem"
 export const Metaphlan: FC<any> = ({ record, resultTableList, plot }) => {
     const getLogs = () => {
