@@ -135,45 +135,35 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
             <Col lg={24} sm={24} xs={24}>
 
 
+                <UpstreamAnalysisInput
+                    {...rest}
+                    pipeline={pipeline}
+                    record={record}
+                    // software={{
+                    //     component_id: rest.component_id
+                    // }}
+                    onClickItem={setRecord}
+                    project={project}
+                    operatePipeline={operatePipeline}
+                    cardExtra={cardExtra}
+                    // wrapAnalysisPipeline={wrapAnalysisPipeline}
+                    upstreamFormJson={upstreamFormJson}
+                    analysisPipline={analysisPipline}
+                    analysisMethod={analysisMethod}
+                    inputAnalysisMethod={inputFile}></UpstreamAnalysisInput>
 
+                {/* {checkAvailable(inputFile) ? <>
 
-                {checkAvailable(inputFile) ? <>
-                    <UpstreamAnalysisInput
-                        {...rest}
-                        pipeline={pipeline}
-                        record={record}
-                        // software={{
-                        //     component_id: rest.component_id
-                        // }}
-                        onClickItem={setRecord}
-                        project={project}
-                        operatePipeline={operatePipeline}
-                        cardExtra={cardExtra}
-                        // wrapAnalysisPipeline={wrapAnalysisPipeline}
-                        upstreamFormJson={upstreamFormJson}
-                        analysisPipline={analysisPipline}
-                        analysisMethod={analysisMethod}
-                        inputAnalysisMethod={inputFile}></UpstreamAnalysisInput>
                 </> : <>
-                    {/* <Flex justify="center" style={{ margin: "2rem" }}>
-                        <Button color="cyan" variant="solid" onClick={() => {
-                            setPipelineRecord(undefined);
-                            setPipelineStructure({
-                                pipeline_type: "input_analysis_method",
-                                parent_pipeline_id: rest.pipeline_id
-                            })
-                            setOperateOpen(true)
-                        }}>添加管道输入</Button>
-                    </Flex> */}
+
 
                     <Flex justify="center" style={{ margin: "2rem" }} gap={"small"}>
                         <Button size="small" color="cyan" variant="solid" onClick={() => {
                             operatePipeline.openModal("modalC", {
                                 data: undefined,
                                 structure: {
-                                    relation_type: "software_input_file", //"software_input_file",
+                                    relation_type: "software_input_file", 
                                     parent_component_id: rest.component_id,
-                                    // pipeline_id: pipeline.component_id,
                                     component_type: "file"
                                 }
                             })
@@ -182,17 +172,14 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
                             operatePipeline.openModal("modalA", {
                                 data: undefined,
                                 pipelineStructure: {
-                                    relation_type: "software_input_file", //"software_input_file",
+                                    relation_type: "software_input_file", 
                                     parent_component_id: rest.component_id,
-                                    // pipeline_id: pipeline.component_id
                                 }
                             })
                         }}>Add File</Button>
                     </Flex>
-                </>}
-                {/* {JSON.stringify(rest)} */}
+                </>} */}
 
-                {/* <PipelineMonitor pipelineId={rest.pipeline_id} ></PipelineMonitor> */}
 
 
                 <Collapse
@@ -336,7 +323,6 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
             }
         }
         setLoading(false)
-        // /fast-api/save-analysis
     }
     const host_genome_index = [
         {
@@ -351,12 +337,13 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
     const dataMap: any = {
         "host_genome_index": host_genome_index
     }
-
+    const checkAvailable = (analysisMethod: any) => {
+        return analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 0
+    }
     return <>
         {/* {JSON.stringify(software)} */}
         {contextHolder}
         {modalContextHolder}
-        {/* {JSON.stringify(inputAnalysisMethod)} */}
 
 
         {!rest?.hiddenUpstreamAnalysis && <>
@@ -367,34 +354,16 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
             <Form form={upstreamForm}>
 
                 <Collapse
-                    // activeKey={collapseActiveKey}
                     style={{ marginTop: "1rem" }}
-                    // defaultActiveKey={['1']}
                     size="small"
                     items={[
                         {
                             key: '1',
                             label: `Run  Analysis (${rest.component_name})`,
                             children: <>
-                                {/* <Flex gap={"small"} style={{ marginBottom: "1rem" }}>
-                                <Button color="cyan" variant="solid" onClick={() => {
-                                    operatePipeline.openModal("modalB", {
-                                        module_type: "nextflow",
-                                        module_name: analysisPipline,
-                                        component_id: rest.component_id,
-                                    })
-                                }}>运行脚本</Button>
-                                <Button color="cyan" variant="solid" onClick={() => {
-                                    operatePipeline.openModal("modalB", {
-                                        module_type: "py_parse_analysis",
-                                        module_name: rest.parseAnalysisModule,
-                                        component_id: rest.component_id,
-                                    })
-                                }}>输入解析模块</Button>
-                            </Flex> */}
 
-
-                                {inputAnalysisMethod && <ResultList
+                                {/* {JSON.stringify(rest)} */}
+                                {checkAvailable(inputAnalysisMethod) ? <ResultList
                                     {...rest}
                                     pipeline={pipeline}
                                     software={rest}
@@ -409,59 +378,60 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
                                     shouldTrigger={true}
                                     analysisType={"sample"}
                                     analysisMethod={inputAnalysisMethod}
-                                    setResultTableList={setResultTableList}></ResultList>
+                                    setResultTableList={setResultTableList}></ResultList> : <>
+
+                                    {!rest?.disableInputFile && <>
+                                        <Flex justify="center" style={{ margin: "2rem" }} gap={"small"}>
+                                            <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                                operatePipeline.openModal("modalC", {
+                                                    data: undefined,
+                                                    structure: {
+                                                        relation_type: "software_input_file",
+                                                        parent_component_id: rest.component_id,
+                                                        component_type: "file"
+                                                    }
+                                                })
+                                            }}>New File</Button>
+                                            <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                                operatePipeline.openModal("modalA", {
+                                                    data: undefined,
+                                                    pipelineStructure: {
+                                                        relation_type: "software_input_file",
+                                                        parent_component_id: rest.component_id,
+                                                    }
+                                                })
+                                            }}>Add File</Button>
+                                        </Flex>
+                                    </>}
+
+                                </>
                                 }
 
 
 
                                 <Spin spinning={loading}>
 
-                                    {/* {JSON.stringify(rest.parseAnalysisResultModule)} */}
-                                    {/* <Form.Item name={"analysis_id"} label="分析ID" >
-                                        <Input disabled></Input>
-                                    </Form.Item> */}
+                                    {!rest?.disableGroupField && <>
+                                        <FormJsonComp formJson={[{
+                                            "name": "group_field",
+                                            "label": "Group Field",
+                                            "rules": [
+                                                {
+                                                    "required": true,
+                                                    "message": "This field cannot be empty!"
+                                                }
+                                            ],
+                                            "type": "GroupFieldSelect"
+                                        }]} dataMap={[]}></FormJsonComp>
 
-                                    <FormJsonComp formJson={[{
-                                        "name": "group_field",
-                                        "label": "Group Field",
-                                        "rules": [
-                                            {
-                                                "required": true,
-                                                "message": "This field cannot be empty!"
-                                            }
-                                        ],
-                                        "type": "GroupFieldSelect"
-                                    }]} dataMap={[]}></FormJsonComp>
+                                    </>}
 
-                                    {/* 查看datamap */}
-                                    {/* <pre>
-                                {JSON.stringify(resultTableList,null,2)}
-                                </pre> */}
-                                    {/* {JSON.stringify(rest?.reInputFile)}
-                                    {JSON.stringify(inputAnalysisMethod)} */}
+
                                     {rest?.reInputFile ? <FormJsonComp formJson={rest?.reInputFile} dataMap={resultTableList}></FormJsonComp> :
                                         <FormJsonComp formJson={inputAnalysisMethod} dataMap={resultTableList}></FormJsonComp>}
 
-                                    {/* {JSON.stringify(rest)} */}
                                     <BioDatabaseForm openModal={() => operatePipeline.openModal("modalE", rest.databases)} formJson={rest.databases}></BioDatabaseForm>
-                                    {/* <FormJsonComp formJson={rest.databases} dataMap={resultTableList}></FormJsonComp> */}
 
-                                    {/* {resultTableList && inputAnalysisMethod.map((it: any) => (<> */}
-                                    {/* <Form.Item key={it.key} label={it.name} name={it.key}>
-                                        <SelectComp it={it} resultTableList={resultTableList} ></SelectComp>
-                                    </Form.Item> */}
-                                    {/* 
-                                    {it.mode == "multiple" && <GroupSelectSampleButton
-                                        key={it.key}
-                                        label={it.name}
-                                        name={it.key}
-                                        rules={[{ required: true, message: '该字段不能为空!' }]}
-                                        data={resultTableList[it.key] ? resultTableList[it.key] : []}
-                                        groupField={"sample_group"} ></GroupSelectSampleButton>} */}
-
-
-                                    {/* </>))} */}
-                                    {/* {JSON.stringify(rest?.formJson)} */}
 
                                     {upstreamFormJson &&
                                         <FormJsonComp formJson={upstreamFormJson} dataMap={dataMap}></FormJsonComp>
@@ -472,7 +442,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
                                     <Form.Item initialValue={`${rest.component_name}`} name={"analysis_name"} label={"Analysis Name"} rules={[{ required: true, message: '该字段不能为空!' }]}>
                                         <Input></Input>
                                     </Form.Item>
-                                    
+
                                     <Flex gap={"small"}>
                                         <Button size="small" color="cyan" variant="solid" onClick={() => {
                                             saveUpstreamAnalysis(false)
@@ -502,33 +472,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
                                         }
                                     ]} />
 
-                                    {/* {JSON.stringify(rest)} */}
-                                    {/* <AnalysisList
-                                    project={project}
-                                    ref={tableRef}
-                                    shouldTrigger={true}
-                                    software={rest}
-                                    setRecord={(record: any) => {
-                                        const param = JSON.parse(record.request_param)
-                                        console.log(param)
-                                        upstreamForm.resetFields()
-                                        upstreamForm.setFieldsValue(param)
-                                        if (record?.id) {
-                                            upstreamForm.setFieldValue("id", record?.id)
-                                        }
-                                        record['dataType'] = "analysis"
-                                        onClickItem(record)
-                                    }}></AnalysisList> */}
 
-                                    {/* {record && record.dataType == 'analysis' && <PipelineMonitor analysisId={record.analysis_id} ></PipelineMonitor>} */}
-
-
-                                    {/* {markdown} */}
-
-                                    {/* <Literature params={{
-                                    obj_key: analysisPipline,
-                                    obj_type: "analysis_img"
-                                }}></Literature> */}
                                 </Spin>
 
                             </>
@@ -542,9 +486,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
             <div style={{ marginBottom: "1rem" }}></div>
 
 
-            {/* <Flex gap={"small"} style={{ marginBottom: "1rem" }}>
-           
-        </Flex> */}
+
 
             <AnalysisList
                 ref={tableRef}
@@ -557,36 +499,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
     </>
 }
 
-export const SelectComp: FC<any> = ({ it, resultTableList, value, onChange }) => {
-    const [selectedItems, setSelectedItems] = useState<any>(value);
-    const [options, setOptions] = useState<any>([]);
-    const onChangeSelct = (value: any) => {
-        console.log(value)
-        onChange(value)
-        setSelectedItems(value)
-    }
-    const getOptions = () => {
-        return resultTableList[it.name] && resultTableList[it.name].map((it: any) => {
-            return {
-                label: `${it.sample_name}`,
-                value: `${it.id}`
-            }
-        })
-    }
-    useEffect(() => {
-        const options = getOptions()
-        setOptions(options)
-    }, [resultTableList])
-    return <>
-        <Select value={selectedItems} onChange={onChangeSelct} mode={it.mode == "multiple" ? "multiple" : undefined} allowClear options={options}></Select>
-        {it.mode == "multiple" && <Button size="small" onClick={() => {
-            const values = options.map((it: any) => it.value)
-            // console.log(values)
-            setSelectedItems(values)
-            onChange(values)
-        }}>选择全部{selectedItems && <>({selectedItems.length})</>}</Button>}
-    </>
-}
+
 
 
 
@@ -716,31 +629,15 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
         }
         // }
     }, [])
-    useEffect(() => {
-        if (script) {
-            plot({ ...script, name: script.name })
-            // const componentIds = analysisMethod.map((item: any) => item.component_id)
-            // setComponentIds(componentIds)
-            setComponentIds([script.component_id])
-        }
-    }, [script])
-
-    // const []
-    // const [scriptMap, setScriptMap] = useState<any>()
     // useEffect(() => {
     //     if (script) {
-    //         setScriptMap({ [script["component_id"]]: script })
-    //     } else {
-    //         const script = analysisMethod.filter((item: any) => "downstreamAnalysis" in item)
-    //             .map((item: any) => item.downstreamAnalysis).flat(Infinity)
-    //         const scriptMap: any = script.reduce((acc: any, item: any) => {
-    //             acc[item.component_id] = item;
-    //             return acc;
-    //         }, {});
-    //         setScriptMap(scriptMap)
-    //     }
+    //         plot({ ...script, name: script.name })
 
-    // }, [analysisMethod])
+    //         setComponentIds([script.component_id])
+    //     }
+    // }, [script])
+
+
     const [analysisResultId, setAnalysisResultId] = useState<any>()
 
     return <>

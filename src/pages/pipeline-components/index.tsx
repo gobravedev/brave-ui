@@ -180,8 +180,9 @@ const Pipeline: FC<any> = () => {
         // console.log(resp.data)
         let pipeline = resp.data
         if ("content" in pipeline) {
-            const content = JSON.parse(pipeline['content'])
-            pipeline = { ...content, ...pipeline }
+            const contentJSON = JSON.parse(pipeline['content'])
+            const {  content,...pipelineRest} = { ...contentJSON, ...pipeline }
+            pipeline = pipelineRest
         }
         if (pipeline["tags"]) {
             pipeline["tags"] = JSON.parse(pipeline["tags"])
