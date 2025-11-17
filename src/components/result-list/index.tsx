@@ -428,6 +428,12 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                     <span style={{ cursor: "pointer" }}>{text}</span>
                 </Tooltip>
             }
+        },{
+            title: 'Analysis Name',
+            dataIndex: 'analysis_name',
+            key: 'analysis_name',
+            width: 100,
+            ellipsis: true,
         },
 
         {
@@ -475,6 +481,12 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                     <span style={{ cursor: "pointer" }}>{text}</span>
                 </Tooltip>
             }
+        },{
+            title: 'File Name',
+            dataIndex: 'file_name',
+            key: 'file_name',
+            width: 100,
+            ellipsis: true,
         },
         {
             title: 'Sample Name',

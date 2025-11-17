@@ -16,6 +16,7 @@ import { usePagination } from "@/hooks/usePagination"
 import AnalysisTaskPanel from "../analysis-task/panel"
 import AnalysisResultPanel from "../analysis-result-view/panel"
 import ComponentsRender from "./components"
+import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 
 const AnalysisList = forwardRef<any, any>(({
     project,
@@ -35,7 +36,7 @@ const AnalysisList = forwardRef<any, any>(({
     useEffect(() => {
         // console.log("component_id changed:", component_ids)
         closeModal()
-    }, [component_ids,component_id])
+    }, [component_ids, component_id])
 
     useImperativeHandle(ref, () => ({
         reload: loadData
@@ -43,11 +44,10 @@ const AnalysisList = forwardRef<any, any>(({
     console.log("AnalysisList Render")
 
     const [record, setRecord0] = useState<any>()
-    const [messageApi, contextHolder] = message.useMessage();
     const { modal, openModal, closeModal } = useModal();
     const { modals, openModals, closeModals } = useModals(["inspectPanel"]);
+    const message = useGlobalMessage()
 
-    const [openMonitor, setOpenMonitor] = useState<any>(false)
     const navigate = useNavigate()
     const location = useLocation()
     // const queryParams = new URLSearchParams(location.search);
@@ -297,6 +297,24 @@ const AnalysisList = forwardRef<any, any>(({
                         {text}
                     </Tag>
                 </Tooltip>
+            )
+        }, {
+            title: "Used",
+            dataIndex: "used",
+            key: "used",
+            ellipsis: true,
+            render: (text: any, record: any) => (
+                <Popconfirm title={text?"Whether to cancel the use?":"Whether to use?"} 
+                onConfirm={async () => {
+                        const resp: any = await axios.post(`/analysis/update_used/${record?.analysis_id}`)
+                        message.info("use successfully")
+                        loadData()
+                    }}
+                >
+                    <Tag color={`${text ? "green" : "red"}`} style={{ cursor: "pointer" }} >
+                        {text ? "Yes" : "No"}
+                    </Tag>
+                </Popconfirm>
             )
         }, {
             title: "Created At",
@@ -619,7 +637,6 @@ const AnalysisList = forwardRef<any, any>(({
         );
     }, [data, searchText]);
     return <>
-        {contextHolder}
         {/* {JSON.stringify(location.pathname)} */}
         <Card size="small"
             variant="borderless"
