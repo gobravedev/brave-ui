@@ -359,7 +359,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
                     items={[
                         {
                             key: '1',
-                            label: `Run  Analysis (${rest.component_name})`,
+                            label: `Input File (${rest.component_name})`,
                             children: <>
 
                                 {/* {JSON.stringify(rest)} */}
@@ -616,19 +616,17 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
         }
 
     }
-    const [componentIds, setComponentIds] = useState<any>()
-    useEffect(() => {
-        const downstreamAnalysisList = analysisMethod.filter((item: any) => item.downstreamAnalysis).map((item: any) => item.downstreamAnalysis).flat()
+    // const [componentIds, setComponentIds] = useState<any>()
+    // useEffect(() => {
+    //     const downstreamAnalysisList = analysisMethod.filter((item: any) => item.downstreamAnalysis).map((item: any) => item.downstreamAnalysis).flat()
 
-        console.log(downstreamAnalysisList)
-        // if (currentAnalysisMethod?.downstreamAnalysis) {
-        const componentIds = downstreamAnalysisList.map((item: any) => item.component_id)
-        if (componentIds.length > 0) {
-            setComponentIds(componentIds)
+    //     console.log(downstreamAnalysisList)
+    //     const componentIds = downstreamAnalysisList.map((item: any) => item.component_id)
+    //     if (componentIds.length > 0) {
+    //         setComponentIds(componentIds)
 
-        }
-        // }
-    }, [])
+    //     }
+    // }, [])
     // useEffect(() => {
     //     if (script) {
     //         plot({ ...script, name: script.name })
@@ -641,7 +639,6 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
     const [analysisResultId, setAnalysisResultId] = useState<any>()
 
     return <>
-        {/* {JSON.stringify(analysisMethod)} */}
 
         {analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 0 && <>
             <ResultList

@@ -959,8 +959,8 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
             </>}
             tabList={analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 1 ?
                 analysisMethod.map((it: any) => ({
-                    key: it.component_id, label:
-                        <Tooltip title={it.component_id}>{it.component_name ? it.component_name : "no_name"}</Tooltip>
+                    key: it?.component_id, label:
+                        <Tooltip title={it?.component_id}>{it?.component_name ? it?.component_name : "no_name"}</Tooltip>
                 })) : undefined}
             activeTabKey={activeTabKey}
             onTabChange={onTabChange}
