@@ -279,6 +279,24 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
     const [currentAnalysisMethod, setCurrentAnalysisMethod] = useState<any>()
     // const [analysisParams, setAnalysisParams] = useState<any>()
     const [modal, modalContextHolder] = Modal.useModal();
+    const [inputFileList, setInputFileList] = useState<any>([])
+
+    useEffect(() => {
+        if (inputAnalysisMethod) {
+            const inputFileList = inputAnalysisMethod.map((item: any) => {
+                if (item.component_id in rest) {
+                    const replaceData = rest[item.component_id]
+                    return {
+                        ...item,
+                        ...replaceData
+                    }
+                }
+                return item
+            })
+            setInputFileList(inputFileList)
+
+        }
+    }, [inputAnalysisMethod])
 
     // const {    setPipelineStructure,setOperateOpen,setPipelineRecord,datelePipeline} = operatePipeline
     const tableRef = useRef<any>(null)
@@ -428,8 +446,9 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
 
 
                                     {rest?.reInputFile ? <FormJsonComp formJson={rest?.reInputFile} dataMap={resultTableList}></FormJsonComp> :
-                                        <FormJsonComp formJson={inputAnalysisMethod} dataMap={resultTableList}></FormJsonComp>}
+                                        <FormJsonComp formJson={inputFileList} dataMap={resultTableList}></FormJsonComp>}
 
+                                    {/* {JSON.stringify(inputFileList)} */}
                                     <BioDatabaseForm openModal={() => operatePipeline.openModal("modalE", rest.databases)} formJson={rest.databases}></BioDatabaseForm>
 
 
