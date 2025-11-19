@@ -51,7 +51,7 @@ const Pipeline: FC<any> = () => {
     const [test, setTest] = useState<any>(true)
     const [messageApi, contextHolder] = message.useMessage();
     const [component, setComponent] = useState<any>()
-    const [size, setSize] = useState<any>((component_type && ["script", "file"].includes(component_type)) ? [18, 6] : [20, 0])
+    const [size, setSize] = useState<any>((component_type && ["script111"].includes(component_type)) ? [18, 6] : [20, 0])
     const tableRef = {
         inputFile: useRef<HTMLInputElement>(null),
         outputFile: useRef<HTMLInputElement>(null)
@@ -181,7 +181,7 @@ const Pipeline: FC<any> = () => {
         let pipeline = resp.data
         if ("content" in pipeline) {
             const contentJSON = JSON.parse(pipeline['content'])
-            const {  content,...pipelineRest} = { ...contentJSON, ...pipeline }
+            const { content, ...pipelineRest } = { ...contentJSON, ...pipeline }
             pipeline = pipelineRest
         }
         if (pipeline["tags"]) {
@@ -327,12 +327,53 @@ const Pipeline: FC<any> = () => {
 
         } else if (component_type === "script") {
             // component = pipeline
+            if (pipeline?.parent) {
+                const { parent, ...rest } = pipeline
+                const filesMenus = parent.map((item: any) => ({
+                    key: item.component_id,
+                    label: item.component_name || item.component_id,
+                }))
+                menus = menus.concat(filesMenus)
+                componentMap = parent.reduce((acc: any, item: any) => {
+                    acc[item.component_id] = {
+                        ...rest,
+                        parent: [item],
+                    }
+                    return acc
+                }, {})
+                defalutView = "script"
+
+                defaultMenuKey= parent[0]?.component_id || ""
+            } else {
+                defalutView = "script"
+            }
+
             // setView("script")
-            defalutView = "script"
         } else if (component_type === "file") {
+            menus = menus.concat([
+                {
+                    key: 'file',
+                    label: 'File',
+                },
+            ])
+            defalutView = "file"
+            defaultMenuKey = "file"
             // component = pipeline
             // setView("file")
-            defalutView = "file"
+            if (pipeline?.downstreamAnalysis) {
+                const scripts = pipeline?.downstreamAnalysis.map((item: any) => ({
+                    key: item.component_id,
+                    label: item.component_name || item.component_id,
+                }))
+                menus = menus.concat(scripts)
+                const { downstreamAnalysis, ...rest } = pipeline
+
+                componentMap = downstreamAnalysis.reduce((acc: any, item: any) => {
+                    acc[item.component_id] = { ...item, parent: [rest] }
+                    return acc
+                }, {})
+            }
+
         }
 
 
@@ -424,7 +465,7 @@ const Pipeline: FC<any> = () => {
             {/* {JSON.stringify(pipeline)} */}
             {/* {menuKey} */}
             <Row gutter={[isSticky ? 16 : 0, 16]} style={{}} ref={containerRef} >
-                {(component_type && ["software", "pipeline"].includes(component_type)) &&
+                {(component_type && ["software", "pipeline", "file", "script"].includes(component_type)) &&
                     <Col lg={4} sm={4} xs={24}
                         style={isSticky ? {
                             overflow: "hidden",
@@ -716,7 +757,7 @@ const Pipeline: FC<any> = () => {
                     <Card
                         title={`More Info (${pipeline?.component_name})`}
                         extra={<>
-                            {!(component_type && ["script", "file"].includes(component_type)) && <>
+                            {!(component_type && ["script11"].includes(component_type)) && <>
                                 <CloseOutlined onClick={() => {
                                     setSize([20, 0])
                                 }}></CloseOutlined>
