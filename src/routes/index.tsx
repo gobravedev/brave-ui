@@ -68,7 +68,7 @@ const MiningData = lazy(()=>import("@/pages/mining/components/mining-data"))
 const ToolKit = lazy(()=>import("@/pages/tool-kit"))
 const DigitalTwins = lazy(()=>import("@/pages/digital-twins"))
 const ContainerPage = lazy(() => import('@/pages/container'));
-
+const Files = lazy(() => import('@/pages/files'));
 const InteractiveTools = lazy(() => import('@/pages/interactive-tools'));
 import axios from "axios";
 import { Skeleton } from "antd";
@@ -97,7 +97,7 @@ if (appType == "index") {
             path: "/literature",
             element: <Literature />
         }, {
-            path: "/pipeline-monitor-panal",
+            path: "/tasks",
             element: <PielineMonitorPanal />
         }, {
             path: "/container-page",
@@ -115,6 +115,9 @@ if (appType == "index") {
         {
             path: "/tool-kit",
             element: <ToolKit />
+        },{
+            path: "/files",
+            element: <Files />
         },
         {
             path: "/software-card",
@@ -416,6 +419,7 @@ if (appType == "index") {
 }
 
 import { listPipeline } from '@/api/pipeline'
+import path from "path";
 const RenderRouter: FC = () => {
     // const [routes, setRoutes] = useState<RouteObject[] | null>([]);
     // const dispatch = useDispatch()

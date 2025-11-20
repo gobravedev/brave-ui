@@ -39,7 +39,7 @@ const RenderTable: FC<any> = ({ parseData, columns, importData }) => {
         pagination={false}
         footer={() => (
             <div style={{ textAlign: 'right' }}>
-                A total of{parseData.length} records &nbsp;&nbsp;
+                A total of {parseData.length} records &nbsp;&nbsp;
                 <Button size="small" color="cyan" variant="solid" onClick={importData}>Ok</Button>
             </div>
         )} columns={columns} dataSource={parseData} />;

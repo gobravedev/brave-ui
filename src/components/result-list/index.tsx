@@ -428,7 +428,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                     <span style={{ cursor: "pointer" }}>{text}</span>
                 </Tooltip>
             }
-        },{
+        }, {
             title: 'Analysis Name',
             dataIndex: 'analysis_name',
             key: 'analysis_name',
@@ -481,7 +481,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                     <span style={{ cursor: "pointer" }}>{text}</span>
                 </Tooltip>
             }
-        },{
+        }, {
             title: 'File Name',
             dataIndex: 'file_name',
             key: 'file_name',
@@ -749,6 +749,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                 }
             }}
             title={<Flex gap={"small"}><FileOutlined />
+
                 {currentAnalysisMethod?.component_name && <Tooltip title={<>
                     <ul>
                         {pipeline?.component_id && <li>pipeline: {pipeline?.component_id}</li>}
@@ -756,8 +757,6 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                         {currentAnalysisMethod?.component_id && <li>file: {currentAnalysisMethod?.component_id}</li>}
                         {currentAnalysisMethod?.name && <li>name: {currentAnalysisMethod?.name}</li>}
                     </ul>
-
-
                 </>}>
                     <span
                         onClick={() => {
@@ -767,7 +766,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
 
                 </Tooltip>}
 
-                <Tag color="success">{currentAnalysisMethod?.file_type}</Tag>
+                {currentAnalysisMethod?.file_type && <Tag color="success">{currentAnalysisMethod?.file_type}</Tag>}
             </Flex>}
 
             extra={<>{cardExtra}
@@ -809,55 +808,17 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                         <Tooltip title={`Delete ${currentAnalysisMethod?.component_name}`}>
                             <DeleteOutlined style={{ cursor: "pointer", color: "red" }} />
                         </Tooltip>
-                        {/* <Button size="small" color="danger" variant="solid" ></Button> */}
                     </Popconfirm>}
 
-                    {/* <Popconfirm title={`Are you sure you want to delete ${analysisResultId}?`} onConfirm={async () => {
-                        await deleteById(analysisResultId)
-                    }}>
-                        
-                    </Popconfirm> */}
-
+                    <ImportOutlined style={{ cursor: "pointer" }} onClick={() => {
+                        openModal("importFile", { ...currentAnalysisMethod, operatePipeline: operatePipeline })
+                    }} />
+                    
                     {operatePipeline?.openModal && <>
-                        {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        operatePipeline.openModal("modalA", {
-                            data: downstreamData,
-                            pipelineStructure: {
-                                relation_type: "file_script",
-                                // pipeline_id: downstreamData.component_id,
-
-                            }
-                        })
-
-                    }}>Replace {item?.component_name}</Button> */}
-                        {/* <Button size="small" color="cyan" variant="solid" >Import data </Button> */}
-                        <ImportOutlined style={{ cursor: "pointer" }} onClick={() => {
-                            // operatePipeline.openModals("modalD", { ...currentAnalysisMethod, operatePipeline: operatePipeline })
-                            openModal("importFile", { ...currentAnalysisMethod, operatePipeline: operatePipeline })
-                        }} />
-                        {/* <Popconfirm title="是否计算MD5?" onConfirm={() => {
-                                console.log(currentAnalysisMethod.component_id)
-                            }}>
-                            <Button size="small" color="cyan" variant="solid" >计算MD5</Button>
-                        </Popconfirm> */}
-                        {/* <Button size="small" color="cyan" variant="solid" onClick={reload}>Refresh</Button> */}
-
-
-                        <RedoOutlined style={{ cursor: "pointer" }} onClick={reload} />
-
-
                         {(rest.component_type == "software" || rest.component_type == "file" || rest.component_type == "script") && <>
                             <Dropdown menu={{
                                 items: [
-                                    // {
-                                    //     key: '5',
-                                    //     label: (<Popconfirm title="是否检查MD5?" onConfirm={() => {
-                                    //         console.log(currentAnalysisMethod.component_id)
-                                    //     }}>
-                                    //         <a >检查MD5</a>
-                                    //     </Popconfirm>
-                                    //     )
-                                    // }, 
+
                                     {
                                         key: '4',
                                         label: (<Tooltip title={currentAnalysisMethod?.component_name}>
@@ -950,6 +911,8 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                             </Dropdown>
                         </>}
                     </>}
+
+                    <RedoOutlined style={{ cursor: "pointer" }} onClick={reload} />
 
                     {/* <RedoOutlined style={{ cursor: "pointer"}}  onClick={reload}/> */}
                     <QuestionCircleOutlined onClick={() => {

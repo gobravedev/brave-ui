@@ -200,10 +200,16 @@ const App: React.FC = () => {
         {
             key: "/",
             label: {
-                zh_CN: "项目介绍",
-                en_US: "Introduction"
+                zh_CN: "仪表盘",
+                en_US: "Dashboard"
             }
 
+        },{
+            key: `/files`,
+            label: {
+                zh_CN: "文件",
+                en_US: "Files"
+            }
         },
         // {
         //     key: "/doc",
@@ -217,71 +223,74 @@ const App: React.FC = () => {
         //     key: `/sample`,
         //     label: "检测样本"
         // }, 
+        {
+            key: `/apps`,
+            label: {
+                zh_CN: "应用",
+                en_US: "Apps"
+            },
+            children: [
+                {
+                    key: `/pipeline-card`,
+                    label: {
+                        zh_CN: "分析流程",
+                        en_US: "Workflows"
+                    },
+                    children: [
+                        {
+                            key: `/component/pipeline`,
+                            // label: {
+                            //     zh_CN: "",
+                            //     en_US: "report"
+                            // },
+                            hidden: true
+                        }
+                    ]
+                },
+                {
+                    key: `/software-card`,
+                    label: {
+                        zh_CN: "工具",
+                        en_US: "Tools"
+                    },
+                    children: [
+                        {
+                            key: `/component/software`,
+                            // label: "分析报告",
+                            hidden: true
+                        }
+                    ]
+                },
 
-        {
-            key: `/pipeline-card`,
-            label: {
-                zh_CN: "分析流程",
-                en_US: "Workflows"
-            },
-            children: [
                 {
-                    key: `/component/pipeline`,
-                    // label: {
-                    //     zh_CN: "",
-                    //     en_US: "report"
-                    // },
-                    hidden: true
-                }
-            ]
-        },
-        {
-            key: `/software-card`,
-            label: {
-                zh_CN: "模块",
-                en_US: "Modules"
-            },
-            children: [
-                {
-                    key: `/component/software`,
-                    // label: "分析报告",
-                    hidden: true
-                }
-            ]
-        },
-
-        {
-            key: `/script-card`,
-            label: {
-                zh_CN: "工具",
-                en_US: "Tools"
-            },
-            children: [
-                {
-                    key: `/component/script`,
-                    // label: "分析报告",
-                    hidden: true
-                }
+                    key: `/script-card`,
+                    label: {
+                        zh_CN: "可视化",
+                        en_US: "Visualization"
+                    },
+                    children: [
+                        {
+                            key: `/component/script`,
+                            // label: "分析报告",
+                            hidden: true
+                        }
+                    ]
+                },
             ]
         }, {
-            key: `/interactive-tools`,
+            key: `/tasks`,
             label: {
-                zh_CN: "交互工具",
-                en_US: "Interactive Tools"
-            }
-        }, {
+                zh_CN: "任务",
+                en_US: "Tasks"
+            },
+        },
+        {
             key: `/analysis-report`,
             label: {
                 zh_CN: "分析报告",
                 en_US: "Report"
             }
 
-        }, {
-            key: `/tool-kit`,
-            label: {
-                zh_CN: "工具集",
-                en_US: "TookKit"
-            }
         },
         // {
         //     key: `/entity-page`,
@@ -300,6 +309,12 @@ const App: React.FC = () => {
             },
             children: [
                 {
+                    key: `/interactive-tools`,
+                    label: {
+                        zh_CN: "交互工具",
+                        en_US: "Interactive Tools"
+                    }
+                }, {
                     key: `/file-card`,
                     label: {
                         zh_CN: "分析文件",
@@ -313,11 +328,11 @@ const App: React.FC = () => {
                         }
                     ]
                 }, {
-                    key: `/pipeline-monitor-panal`,
+                    key: `/tool-kit`,
                     label: {
-                        zh_CN: "管道监控",
-                        en_US: "Monitor"
-                    },
+                        zh_CN: "工具集",
+                        en_US: "TookKit"
+                    }
                 },
                 //  {
                 //     key: `/psycmicrograph`,
@@ -326,13 +341,14 @@ const App: React.FC = () => {
                 //         en_US: "PsycMicroGraph"
                 //     }
                 // },
-                {
-                    key: `/analysis-result`,
-                    label: {
-                        zh_CN: "分析结果",
-                        en_US: "Analysis Result"
-                    },
-                }, {
+                // {
+                //     key: `/analysis-result`,
+                //     label: {
+                //         zh_CN: "分析结果",
+                //         en_US: "Analysis Result"
+                //     },
+                // },
+                 {
                     key: `/container-page`,
                     label: {
                         zh_CN: "容器管理",
