@@ -87,14 +87,17 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
             // notify.info({ message: "qqqqqqqqqq" })
 
             let isReload = false
-            const componentIdList = analysisMethod.map((it: any) => it.component_id)
-            for (const component_id of data.component_ids) {
-                console.log(component_id)
-                if (componentIdList.includes(component_id)) {
-                    isReload = true
-                    break
+            if (analysisMethod) {
+                const componentIdList = analysisMethod.map((it: any) => it.component_id)
+                for (const component_id of data.component_ids) {
+                    console.log(component_id)
+                    if (componentIdList.includes(component_id)) {
+                        isReload = true
+                        break
+                    }
                 }
             }
+
 
             if (isReload) {
                 reload()
@@ -901,6 +904,34 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                                             </Tooltip>
                                         ),
                                         key: '0',
+                                    },
+                                    {
+                                        label: (
+                                            <Tooltip title={currentAnalysisMethod?.component_name}>
+                                                <Popconfirm title="Whether bind metadata?" onConfirm={async () => {
+                                                    await axios.post(`/analysis-result/batch-bind-sample/${currentAnalysisMethod.component_id}?project_id=${project}`)
+                                                    message.success("Bind metadata successfully!")
+                                                    reload()
+                                                }}>
+                                                    <a>Bind metadata</a>
+                                                </Popconfirm>
+                                            </Tooltip>
+                                        ),
+                                        key: '9',
+                                    },
+                                    {
+                                        label: (
+                                            <Tooltip title={currentAnalysisMethod?.component_name}>
+                                                <Popconfirm title="Remove all?" onConfirm={async () => {
+                                                    await axios.post(`/analysis-result/batch-remove/${currentAnalysisMethod.component_id}?project_id=${project}`)
+                                                    message.success("Remove all successfully!")
+                                                    reload()
+                                                }}>
+                                                    <a>Remove all</a>
+                                                </Popconfirm>
+                                            </Tooltip>
+                                        ),
+                                        key: '10',
                                     }
                                 ]
                             }}>

@@ -9,6 +9,8 @@ import { useForm } from "antd/es/form/Form"
 import { MonacoEditor } from "../react-monaco-editor"
 import { es, tr } from "@faker-js/faker"
 import { PlusOutlined } from '@ant-design/icons'
+
+
 export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClose, params, callback }) => {
     if (!visible) return null;
 
@@ -368,7 +370,7 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
                                 <Input ></Input>
                             </Form.Item>
 
-
+                
 
                             <ComponentsRender {...structure} data={component} form={form}></ComponentsRender>
                         </>

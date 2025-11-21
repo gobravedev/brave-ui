@@ -32,7 +32,8 @@ import Markdown from "@/components/markdown"
 import PipelineComponent from './pipeline'
 import ComponentsDetailsRender from "./components-details-render"
 import { AppstoreOutlined, CloseOutlined, DeleteColumnOutlined, DeleteOutlined, DownOutlined, QuestionCircleOutlined } from '@ant-design/icons'
-import { el } from "@faker-js/faker"
+import { AI } from '@/components/chat'
+
 const Pipeline: FC<any> = () => {
 
     const location = useLocation()
@@ -755,7 +756,7 @@ const Pipeline: FC<any> = () => {
 
                 >
                     <Card
-                        title={`More Info (${pipeline?.component_name})`}
+                        title={`More Info (${component?.component_name})`}
                         extra={<>
                             {!(component_type && ["script11"].includes(component_type)) && <>
                                 <CloseOutlined onClick={() => {
@@ -779,12 +780,12 @@ const Pipeline: FC<any> = () => {
 
                         size="small" >
 
-                        {pipeline?.tags && Array.isArray(pipeline.tags) && pipeline.tags.map((tag: any, index: any) => (
+                        {component?.tags && Array.isArray(component.tags) && component.tags.map((tag: any, index: any) => (
                             <Tag style={{ marginTop: "0.5rem" }} key={index} color={colors[index]}>{tag}</Tag>
                         ))}
                         {/* {JSON.stringify(component)} */}
-                        <Markdown data={pipeline?.description}></Markdown>
-
+                        <Markdown data={component?.description}></Markdown>
+                        <AI></AI>
                         <Collapse ghost items={[
                             {
                                 key: "1",

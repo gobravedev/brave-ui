@@ -200,7 +200,7 @@ const Sample: FC<any> = ({ operatePipeline, rowSelection }) => {
             title: 'Action',
             key: 'action',
             fixed: "right",
-            width: 200,
+            width: 100,
             render: (_: any, record: any) => (
                 <Space size="middle">
                     <Button size="small" color="cyan" variant="solid" onClick={() => {

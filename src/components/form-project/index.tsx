@@ -81,7 +81,7 @@ const FormProject: FC<any> = ({ visible, onClose, params, callback, research = f
                 <Form.Item label="Project Name" name="project_name" rules={[{ required: true, message: 'This field cannot be empty!' }]}>
                     <Input />
                 </Form.Item>
-                <Form.Item initialValue={"[]"} label="Metadata" name="metadata_form" rules={[{ required: true, message: 'This field cannot be empty!' }]}>
+                <Form.Item initialValue={"[{\"name\":\"group\",\"label\":\"group\"}]"} label="Metadata" name="metadata_form" rules={[{ required: true, message: 'This field cannot be empty!' }]}>
                     <TextArea rows={6} />
                 </Form.Item>
                 <Form.Item label="Parameter" name="parameter">

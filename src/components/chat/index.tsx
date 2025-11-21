@@ -1,8 +1,8 @@
 import { AppstoreAddOutlined, CloudUploadOutlined, CopyOutlined, DislikeOutlined, LikeOutlined, OpenAIFilled, PaperClipOutlined, ProductOutlined, ReloadOutlined, ScheduleOutlined, UserOutlined } from '@ant-design/icons';
 import { Attachments, AttachmentsProps, Bubble, BubbleProps, Conversation, Prompts, Sender, Suggestion, useXAgent, useXChat, Welcome } from '@ant-design/x';
-import { Button, Flex, GetRef, Space, Spin, Typography, type GetProp } from 'antd';
+import { Button, Flex, GetRef, Skeleton, Space, Spin, Typography, type GetProp } from 'antd';
 import { createStyles } from 'antd-style';
-import React, { FC, useEffect, useRef, useState } from 'react';
+import React, { FC, lazy, Suspense, useEffect, useRef, useState } from 'react';
 import markdownit from 'markdown-it';
 import { useSelector } from 'react-redux';
 
@@ -445,79 +445,15 @@ const App2: FC<any> = ({ questions = MOCK_QUESTIONS }) => {
 
 
 
-const App = () => {
-  const [content, setContent] = React.useState('');
-
-  // Agent for request
-  const [agent] = useXAgent<string, { message: string }, string>({
-    request: async ({ message }, { onSuccess, onUpdate, onError }) => {
-      try {
-        const res = await fetch(
-          "https://10.110.1.11:5005/brave-api/llm/chat/stream",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message }),
-          }
-        );
-
-        if (!res.body) throw new Error("No response body");
-
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-        let reply = "";
-
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) break;
-          if (value) {
-            // 逐段解码
-            const chunk = decoder.decode(value, { stream: true });
-            reply += chunk;
-
-            // 可以在这里实时更新 UI，例如：
-            // 每次收到 chunk 就更新 Bubble 内容
-            onUpdate(reply);
-          }
-        }
-
-        // 最终完成
-        onSuccess([reply]);
-      } catch (err) {
-        console.error("Request failed:", err);
-        onError(err as Error);
-      }
-    },
-  });
-
-  // Chat messages
-  const { onRequest, messages } = useXChat({
-    agent,
-  });
-
-  return (
-    <Flex vertical gap="middle">
-      <Bubble.List
-        roles={roles}
-        style={{ maxHeight: 300 }}
-        items={messages.map(({ id, message, status }) => ({
-          key: id,
-          loading: status === 'loading',
-          role: status === 'local' ? 'local' : 'ai',
-          content: message,
-        }))}
-      />
-      <Sender
-        loading={agent.isRequesting()}
-        value={content}
-        onChange={setContent}
-        onSubmit={(nextContent) => {
-          onRequest(nextContent);
-          setContent('');
-        }}
-      />
-    </Flex>
-  );
-};
 
 export default App2;
+
+
+
+const AIComp = lazy(() => import('./ai'));
+export const AI:FC<any> = () => {
+
+  return <Suspense fallback={<Skeleton active></Skeleton>}>
+    <AIComp />
+  </Suspense>
+}
