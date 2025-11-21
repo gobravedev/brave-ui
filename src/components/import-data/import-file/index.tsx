@@ -238,10 +238,11 @@ const ImportFile: FC<{ component_type: any, component_id: any, component_name: a
 
             <Form form={form}>
                 {/* 同一个样本测序不同部位 */}
-                <Form.Item name={"sample_source"} label="Sample Source" rules={[{ required: true, message: 'This field cannot be empty!' }]}>
+                {/* <Form.Item name={"sample_source"} label="Sample Source" rules={[{ required: true, message: 'This field cannot be empty!' }]}>
                     <Input placeholder="gut,brain...">
                     </Input>
-                </Form.Item>
+                </Form.Item> */}
+                
                 {!isParseMode &&
                     <>
                         {(file_type && file_type == "collected") ?

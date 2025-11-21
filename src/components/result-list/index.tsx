@@ -5,7 +5,7 @@ import { Alert, Button, Card, Dropdown, Empty, Flex, GetProp, Input, InputNumber
 import axios from "axios"
 import { FC, forwardRef, memo, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { useNavigate, useOutletContext, useParams } from "react-router"
-import { DeleteFilled, DeleteOutlined, DownloadOutlined, DownOutlined, EditOutlined, FileOutlined, ImportOutlined, InboxOutlined, QuestionCircleOutlined, RedoOutlined, UploadOutlined } from "@ant-design/icons"
+import { DeleteFilled, DeleteOutlined, DownloadOutlined, DownOutlined, EditOutlined, FileOutlined, ImportOutlined, InboxOutlined, PlusCircleOutlined, QuestionCircleOutlined, RedoOutlined, UploadOutlined } from "@ant-design/icons"
 import ImportData from "../import-data"
 import { useModal } from "@/hooks/useModal"
 export const readHdfsAPi = (contentPath: any) => axios.get(`/api/read-hdfs?path=${contentPath}`)
@@ -16,6 +16,7 @@ import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 import { useSelector } from "react-redux"
 import BigTable from '@/components/big-table';
 import { el, fa } from "@faker-js/faker"
+import { EditResultTableModal } from "../edit-table"
 
 
 const ResultList = forwardRef<any, any>((params_, ref) => {
@@ -508,13 +509,14 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                 </Tooltip>
             }
 
-        }, {
-            title: 'Sample Source',
-            dataIndex: 'sample_source',
-            key: 'sample_source',
-            width: 100,
-            ellipsis: true,
         },
+        //  {
+        //     title: 'Sample Source',
+        //     dataIndex: 'sample_source',
+        //     key: 'sample_source',
+        //     width: 100,
+        //     ellipsis: true,
+        // },
         ...getMetadataColumns(),
 
         ...appendSampleColumns, {
@@ -813,7 +815,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                     <ImportOutlined style={{ cursor: "pointer" }} onClick={() => {
                         openModal("importFile", { ...currentAnalysisMethod, operatePipeline: operatePipeline })
                     }} />
-                    
+
                     {operatePipeline?.openModal && <>
                         {(rest.component_type == "software" || rest.component_type == "file" || rest.component_type == "script") && <>
                             <Dropdown menu={{
@@ -913,6 +915,17 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                     </>}
 
                     <RedoOutlined style={{ cursor: "pointer" }} onClick={reload} />
+                    <Popconfirm title="Create metadata?" onConfirm={async () => {
+                        await axios.post(`/analysis-result/create-metadata?project_id=${project}&component_id=${currentAnalysisMethod.component_id}`)
+                    }}>
+                        <PlusCircleOutlined style={{ cursor: "pointer" }} />
+                    </Popconfirm>
+
+                    {currentAnalysisMethod?.file_type != "collected" && <EditOutlined style={{ cursor: "pointer" }} onClick={() => {
+                        openModal("editTable", {
+                            data: data,
+                        })
+                    }} />}
 
                     {/* <RedoOutlined style={{ cursor: "pointer"}}  onClick={reload}/> */}
                     <QuestionCircleOutlined onClick={() => {
@@ -1102,6 +1115,14 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
             callback={reload}
             onClose={closeModal}
         ></AnalysisResultEdit>
+
+        <EditResultTableModal
+            visible={modal.visible && modal.key == "editTable"}
+            params={modal.params}
+            onClose={closeModal}
+            callback={reload}
+        ></EditResultTableModal>
+
 
 
 

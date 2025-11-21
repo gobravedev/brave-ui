@@ -269,12 +269,6 @@ const ResultList = forwardRef<any, any>(({
                 ellipsis: true,
 
             }, {
-                title: '样本来源',
-                dataIndex: 'sample_source',
-                key: 'sample_source',
-                ellipsis: true,
-
-            }, {
                 title: '疾病',
                 dataIndex: 'host_disease',
                 key: 'host_disease',

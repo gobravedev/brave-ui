@@ -39,9 +39,9 @@ const AnalysisResultEdit: FC<any> = ({ visible, onClose, params, callback }) => 
             <Form.Item label="File Name" name="file_name">
                 <Input />
             </Form.Item>
-            <Form.Item label="Sample Source" name="sample_source">
+            {/* <Form.Item label="Sample Source" name="sample_source">
                 <Input />
-            </Form.Item>
+            </Form.Item> */}
         </Form>
     </Modal>
 }

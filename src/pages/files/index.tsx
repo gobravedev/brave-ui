@@ -1,15 +1,17 @@
 import { pagePipelineComponents } from "@/api/pipeline";
 import { usePagination } from "@/hooks/usePagination";
 import { useStickyTop } from "@/hooks/useStickyTop";
-import { Card, Col, Divider, Empty, Flex, Input, Pagination, Row, Space, Table } from "antd";
+import { Card, Col, Divider, Empty, Flex, Input, Pagination, Row, Space, Table, Tabs } from "antd";
 import { FC, useMemo, useState } from "react"
 import { LineChartOutlined, RedoOutlined } from '@ant-design/icons'
 import Search from "antd/es/transfer/search";
 import { title } from "process";
 import ResultList from "@/components/result-list";
-import { useModal } from "@/hooks/useModal";
+import { useModal, useModals } from "@/hooks/useModal";
 import OpenFile from "@/components/open-file";
 import { CreateOrUpdatePipelineComponent } from "@/components/create-pipeline";
+import Sample, { BindSample } from "../sample";
+import MetadataForm from "@/components/metadata-form";
 
 const Files: FC<any> = () => {
     const { Search } = Input;
@@ -22,6 +24,7 @@ const Files: FC<any> = () => {
         initialPageSize: 10
     })
     const { modal, openModal, closeModal } = useModal();
+    const { modals, openModals, closeModals } = useModals(["modalD", "metadataModal", "bindSample"])
 
     // const [searchText, setSearchText] = useState("");
     // const filteredData = useMemo(() => {
@@ -65,9 +68,13 @@ const Files: FC<any> = () => {
             }
         }
     ]
+    const operatePipeline = {
+                                    openModal: openModal,
+                                    openModals: openModals
+                                }
     return <div style={{ maxWidth: "1800px", margin: "1rem auto", padding: `${isSticky ? '0 16px 0 16px' : '0'}` }}>
         <Row gutter={[isSticky ? 16 : 0, 16]} style={{}} ref={containerRef} >
-            <Col lg={10} sm={10} xs={24}
+            <Col lg={8} sm={8} xs={24}
 
 
             >
@@ -112,8 +119,36 @@ const Files: FC<any> = () => {
 
                 </Card>
             </Col>
-            <Col lg={14} sm={14} xs={24}>
-                {component?.component_id ? <>
+            <Col lg={16} sm={16} xs={24}>
+                <Card size="small">
+                    <Tabs
+                        size="small"
+                        items={[
+                            {
+                                key: "result",
+                                label: "Files",
+                                children: component?.component_id ? <>
+                                    <ResultList
+                                        title="Analysis Results"
+                                        // ref={tableRef}
+                                        currentAnalysisMethod={component}
+                                        params={{ component_id: component?.component_id }}
+                                        operatePipeline={{
+                                            openModal: openModal,
+                                            openModals: openModals
+                                        }}
+
+                                    ></ResultList>
+                                </> : <Card> <Empty description="Please select a file component to view files." /></Card>
+                            }, {
+                                key: "sample",
+                                label: "Metadata",
+                                children: <Sample operatePipeline={operatePipeline}></Sample>
+                            }
+                        ]}></Tabs>
+                </Card>
+
+                {/* {component?.component_id ? <>
                     <ResultList
                         title="分析结果"
                         // ref={tableRef}
@@ -125,6 +160,10 @@ const Files: FC<any> = () => {
 
                     ></ResultList>
                 </> : <Card> <Empty description="Please select a file component to view files." /></Card>}
+
+                <Sample operatePipeline={{
+                    openModal: openModal
+                }}></Sample> */}
 
             </Col>
         </Row>
@@ -141,6 +180,17 @@ const Files: FC<any> = () => {
             visible={modal.key == "createOrUpdatePipelineComponent" && modal.visible}
             onClose={closeModal}
             params={modal.params}></CreateOrUpdatePipelineComponent>
+        <MetadataForm
+            visible={modal.key == "metadataForm" && modal.visible}
+            onClose={closeModal}
+            params={modal.params}></MetadataForm>
+
+        <BindSample
+            visible={modals.bindSample.visible}
+            onClose={() => closeModals("bindSample")}
+            operatePipeline={operatePipeline}
+            params={modals.bindSample.params}></BindSample>
+
     </div>
 }
 

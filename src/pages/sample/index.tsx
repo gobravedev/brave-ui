@@ -7,10 +7,12 @@ import { useModal } from "@/hooks/useModal"
 import { deleteSampleBySampleIdApi } from "@/api/sample"
 import { bindSampleToAnalysisResultApi } from "@/api/analysis-result"
 import { updateSampleMetadataListApi } from "@/api/sample-metadata"
+import { EditMetadataTableModal } from "@/components/edit-table"
+import { EditOutlined, FileAddOutlined } from "@ant-design/icons"
 export const getSamples: any = (project: any) => axios.get(`/list-by-project?project=${project}`)
 const Sample: FC<any> = ({ operatePipeline, rowSelection }) => {
     const [sampleData, setSampleData] = useState([])
-    const [data, setData] = useState([])
+    // const [data, setData] = useState([])
     const [loading, setLoading] = useState(false)
     const { project, messageApi, projectObj } = useOutletContext<any>()
 
@@ -39,7 +41,7 @@ const Sample: FC<any> = ({ operatePipeline, rowSelection }) => {
 
         setSampleData(resp.data)
         tableRef.current = resp.data
-        setData(resp.data)
+        // setData(resp.data)
         setLoading(false)
     }
     const columns: TableProps<any>['columns'] = [
@@ -287,14 +289,14 @@ const Sample: FC<any> = ({ operatePipeline, rowSelection }) => {
                 }
             });
             let metadata = null
-            if (Object.keys(obj).length!= 0){
+            if (Object.keys(obj).length != 0) {
                 metadata = JSON.stringify(obj)
             }
-            return {sample_id:row.sample_id, metadata:metadata}
-        }).filter((item:any)=>item.metadata!=null)
-        if (saveData.length ==0){
+            return { sample_id: row.sample_id, metadata: metadata }
+        }).filter((item: any) => item.metadata != null)
+        if (saveData.length == 0) {
             messageApi.error("No Data!")
-            return 
+            return
         }
         console.log(saveData)
         await updateSampleMetadataListApi(saveData)
@@ -318,6 +320,14 @@ const Sample: FC<any> = ({ operatePipeline, rowSelection }) => {
                     callback: loadSample
                 })
             }}>Add Sample</Button>
+            <EditOutlined style={{ cursor: "pointer" }} onClick={() => {
+                openModal("editMetadataTable", {
+                    data: sampleData,
+                })
+            }} />
+            <FileAddOutlined style={{ cursor: "pointer" }} onClick={() => {
+                openModal("editMetadataTable")
+            }} />
             <Button size="small" color="primary" variant="solid" onClick={loadSample} >Refresh</Button>
 
         </Flex>
@@ -338,6 +348,13 @@ const Sample: FC<any> = ({ operatePipeline, rowSelection }) => {
             columns={columns}
             footer={() => `A total of ${sampleData.length} records`}
             dataSource={sampleData} />
+
+        <EditMetadataTableModal
+            visible={modal.visible && modal.key == "editMetadataTable"}
+            params={modal.params}
+            onClose={closeModal}
+            callback={loadSample}
+        ></EditMetadataTableModal>
 
         {/* <ImportFile
             visible={modal.key == "modalA" && modal.visible}
