@@ -225,7 +225,7 @@ const Pipeline: FC<any> = () => {
                 //     label: 'Tools',
                 //     children: software,
                 // })
-                const scripts = pipeline?.software.map((item: any) => {
+                const scripts = pipeline?.software.map((item: any, index: any) => {
                     const children = item.outputFile?.flatMap((it: any) => ([
                         //  {
                         //     key: it.component_id,
@@ -238,7 +238,7 @@ const Pipeline: FC<any> = () => {
                         // }
 
                         ...it.downstreamAnalysis?.map((it2: any) => ({
-                            key: it2.component_id,
+                            key: `${it2.component_id}_${index}`,
                             label: it2.component_name || it2.component_id,
                         }))
                     ]))
@@ -344,7 +344,7 @@ const Pipeline: FC<any> = () => {
                 }, {})
                 defalutView = "script"
 
-                defaultMenuKey= parent[0]?.component_id || ""
+                defaultMenuKey = parent[0]?.component_id || ""
             } else {
                 defalutView = "script"
             }
@@ -389,9 +389,14 @@ const Pipeline: FC<any> = () => {
             }
 
         } else {
-            if (menuKey in componentMap) {
-                console.log("componentMap[key]: ", componentMap[menuKey])
-                const component = componentMap[menuKey]
+            let key = menuKey
+            if (menuKey.includes("_")) {
+                key = menuKey.split("_")[0]
+            }
+            if (key in componentMap) {
+
+                console.log("componentMap[key]: ", componentMap[key])
+                const component = componentMap[key]
                 console.log("component: ", component)
                 setComponent(component)
                 setView(component.component_type)
@@ -505,13 +510,16 @@ const Pipeline: FC<any> = () => {
                                 openKeys={openKeys}
                                 selectedKeys={[menuKey || ""]}
                                 onSelect={(k: any) => {
-                                    const key = k.key
+                                    let key = k.key
                                     console.log("k: ", k)
                                     setMenuKey(key)
                                     updateQueryParam("key", key)
+                                    if (key.includes("_")) {
+                                        key = key.split("_")[0]
+                                    }
                                     if (key in componentMap) {
                                         console.log("componentMap[key]: ", componentMap[key])
-                                        const component = componentMap[k.key]
+                                        const component = componentMap[key]
                                         console.log("component: ", component)
                                         setComponent(component)
                                         setView(component.component_type)

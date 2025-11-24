@@ -302,19 +302,22 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
     const tableRef = useRef<any>(null)
 
     const getrRequestParams = (values: any) => {
-        const dataComponentIds = inputAnalysisMethod.map((item: any) => item.component_id)
-        const requestParams = {
-            ...values,
-            project: project,
-            // inputFormJson: inputAnalysisMethod,
-            // analysis_pipline: analysisPipline,
-            // parse_analysis_module: rest.parse_analysis_module,
-            component_id: rest.component_id,
-            data_component_ids: JSON.stringify(dataComponentIds)
-            // pipeline_id: pipeline.component_id
-            // parse_analysis_result_module: rest.parseAnalysisResultModule
+        if (inputAnalysisMethod) {
+            const dataComponentIds = inputAnalysisMethod.map((item: any) => item.component_id)
+            const requestParams = {
+                ...values,
+                project: project,
+                // inputFormJson: inputAnalysisMethod,
+                // analysis_pipline: analysisPipline,
+                // parse_analysis_module: rest.parse_analysis_module,
+                component_id: rest.component_id,
+                data_component_ids: JSON.stringify(dataComponentIds)
+                // pipeline_id: pipeline.component_id
+                // parse_analysis_result_module: rest.parseAnalysisResultModule
+            }
+            return requestParams
         }
-        return requestParams
+
     }
     const saveUpstreamAnalysis = async (save: any) => {
         const values = await upstreamForm.validateFields()

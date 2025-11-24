@@ -137,9 +137,9 @@ const ResultParse: FC<any> = memo(({ analysis_id: analysisId, callback, onClose 
                     })}
                 </>}
                 <Tag>{data?.job_status}</Tag>
-                <Popconfirm title="确定解析吗？" onConfirm={() => {
+                <Popconfirm title="Are you sure about the parsing?" onConfirm={() => {
                     loadData(true)
-                    messageApi.success("解析成功")
+                    messageApi.success("parsing success!")
                 }}>
                     <Button size="small" color="cyan" variant="solid" >
                         Parse
