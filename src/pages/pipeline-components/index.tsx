@@ -197,7 +197,7 @@ const Pipeline: FC<any> = () => {
         setPipeline(pipeline)
         setLoading(false)
         console.log(pipeline)
-
+        let components = pipeline;
 
         let menus: any[] = []
         let defaultMenuKey = ""
@@ -343,8 +343,9 @@ const Pipeline: FC<any> = () => {
                     return acc
                 }, {})
                 defalutView = "script"
-
+            
                 defaultMenuKey = parent[0]?.component_id || ""
+                components = componentMap[defaultMenuKey]
             } else {
                 defalutView = "script"
             }
@@ -383,7 +384,7 @@ const Pipeline: FC<any> = () => {
         if (!menuKey) {
             setMenuKey(defaultMenuKey)
             setView(defalutView)
-            setComponent(pipeline)
+            setComponent(components)
             if (defaultMenuKey) {
                 updateQueryParam("key", defaultMenuKey)
             }
