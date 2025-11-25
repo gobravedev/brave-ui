@@ -242,6 +242,9 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
         if (data['tags']) {
             data['tags'] = JSON.parse(data['tags'])
         }
+        if(data["component_ids"]){
+            data["component_ids"] = JSON.parse(data["component_ids"])
+        }
         setComponent(data)
         console.log(data)
         if (structure.component_type == "pipeline") {
@@ -303,6 +306,9 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
         }
         if (!params['content']) {
             params['content'] = "{}"
+        }
+        if(params["component_ids"]){
+            params["component_ids"] = JSON.stringify(params["component_ids"])
         }
 
         console.log(params)
@@ -370,7 +376,7 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
                                 <Input ></Input>
                             </Form.Item>
 
-                
+
 
                             <ComponentsRender {...structure} data={component} form={form}></ComponentsRender>
                         </>
@@ -555,8 +561,22 @@ const ScriptContent: FC<any> = ({ data, form }) => {
 }
 const FileContent: FC<any> = ({ data, form, structure }) => {
     const [templete, setTemplete] = useState<any>()
+    const [options, setOptions] = useState<any>([])
+    const loadData =async  () => {
+        const resp = await listPipelineComponentsApi({
+            component_type: "file",
+        })
+        const data = resp.data.map((item: any) => {
+            return {
+                label: `${item.component_name}(${item.component_id})`,
+                value: item.component_id
+            }
 
+        })
+        setOptions(data)
+    }
     useEffect(() => {
+        loadData()
         if (!data?.componemt_id) {
             setTemplete(JSON.stringify(fileTemplete, null, 2))
         }
@@ -575,6 +595,11 @@ const FileContent: FC<any> = ({ data, form, structure }) => {
                 [{ label: "collected", value: "collected" },
                 { label: "individual", value: "individual" }]}></Select>
         </Form.Item>
+
+        <Form.Item name={"component_ids"} label="Component Ids">
+            <Select options={options} mode="multiple"></Select>
+        </Form.Item>
+
         <Form.Item name={"content"} label="content" rules={[{ required: true, message: 'Please input content!' }]}>
             <TextAreaComp templete={templete}></TextAreaComp>
         </Form.Item>

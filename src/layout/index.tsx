@@ -275,7 +275,20 @@ const App: React.FC = () => {
                             hidden: true
                         }
                     ]
-                },
+                }, {
+                    key: `/file-card`,
+                    label: {
+                        zh_CN: "文件",
+                        en_US: "File"
+                    },
+                    children: [
+                        {
+                            key: `/component/file`,
+                            // label: "分析报告",
+                            hidden: true
+                        }
+                    ]
+                }
             ]
         }, {
             key: `/tasks`,
@@ -314,19 +327,6 @@ const App: React.FC = () => {
                         zh_CN: "交互工具",
                         en_US: "Interactive Tools"
                     }
-                }, {
-                    key: `/file-card`,
-                    label: {
-                        zh_CN: "分析文件",
-                        en_US: "File"
-                    },
-                    children: [
-                        {
-                            key: `/component/file`,
-                            // label: "分析报告",
-                            hidden: true
-                        }
-                    ]
                 }, {
                     key: `/tool-kit`,
                     label: {

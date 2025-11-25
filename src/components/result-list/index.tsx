@@ -64,7 +64,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
     const [tableColumns, setTableColumns_] = useState<any[]>([])
     const [tableRowLoading, setTableRowLoading] = useState<boolean>(true)
     const [analysisResultId, setAnalysisResultId_] = useState<any>()
-    const [rowNum, setRowNum] = useState<number>(200)
+    const [rowNum, setRowNum] = useState<number>(50)
     const { baseURL } = useSelector((state: any) => state.user)
     const navigate = useNavigate()
 
