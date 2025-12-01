@@ -311,7 +311,8 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
                 // analysis_pipline: analysisPipline,
                 // parse_analysis_module: rest.parse_analysis_module,
                 component_id: rest.component_id,
-                data_component_ids: JSON.stringify(dataComponentIds)
+                data_component_ids: JSON.stringify(dataComponentIds),
+                component_parent_ids_map: componentParentIdsMap
                 // pipeline_id: pipeline.component_id
                 // parse_analysis_result_module: rest.parseAnalysisResultModule
             }
@@ -361,6 +362,8 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
     const checkAvailable = (analysisMethod: any) => {
         return analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 0
     }
+
+    const [componentParentIdsMap, setComponentParentIdsMap] = useState<any>({})
     return <>
         {/* {JSON.stringify(software)} */}
         {contextHolder}
@@ -383,9 +386,12 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
                             label: `Input File (${rest.component_name})`,
                             children: <>
 
-                                {/* {JSON.stringify(rest)} */}
+                                {/* {JSON.stringify(componentParentIdsMap)} */}
+
                                 {checkAvailable(inputAnalysisMethod) ? <ResultList
                                     {...rest}
+                                    componentParentIdsMap={componentParentIdsMap}
+                                    setComponentParentIdsMap={setComponentParentIdsMap}
                                     pipeline={pipeline}
                                     software={rest}
                                     currentAnalysisMethod={currentAnalysisMethod}
@@ -852,6 +858,7 @@ export const ScriptAnalysis: FC<any> = (rest) => {
 
 
     const [analysisResultId, setAnalysisResultId] = useState<any>()
+    const [componentParentIdsMap, setComponentParentIdsMap] = useState<any>({})
 
     return <>
 
@@ -893,6 +900,8 @@ export const ScriptAnalysis: FC<any> = (rest) => {
                                 {analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 0 && <>
                                     <ResultList
                                         {...rest}
+                                        componentParentIdsMap={componentParentIdsMap}
+                                        setComponentParentIdsMap={setComponentParentIdsMap}
                                         onChangeAnalysisResultId={setAnalysisResultId}
                                         pipeline={pipeline}
                                         software={rest}
@@ -987,6 +996,7 @@ export const ScriptAnalysis: FC<any> = (rest) => {
                                     params={params}
                                     name={btnName}
                                     setPlotLoading={setPlotLoading}
+                                    componentParentIdsMap={componentParentIdsMap} // component_parent_ids_map
                                     dataComponentIds={analysisMethod.map((item: any) => item.component_id)}
                                     inputAnalysisMethod={currentAnalysisMethod}
                                     saveAnalysisMethod={saveAnalysisMethod}

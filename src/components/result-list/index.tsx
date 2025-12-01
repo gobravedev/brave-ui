@@ -1,7 +1,7 @@
 import { useSSEContext } from "@/context/sse/useSSEContext"
 import { SSEContextType } from "@/type/sse"
 import { Venn } from "@ant-design/plots"
-import { Alert, Button, Card, Dropdown, Empty, Flex, GetProp, Input, InputNumber, Modal, Popconfirm, Popover, Skeleton, Space, Spin, Table, Tabs, Tag, theme, Tooltip, Typography, Upload, UploadFile, UploadProps } from "antd"
+import { Alert, Button, Card, Dropdown, Empty, Flex, Form, GetProp, Input, InputNumber, Modal, Popconfirm, Popover, Select, Skeleton, Space, Spin, Table, Tabs, Tag, theme, Tooltip, Typography, Upload, UploadFile, UploadProps } from "antd"
 import axios from "axios"
 import { FC, forwardRef, memo, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { useNavigate, useOutletContext, useParams } from "react-router"
@@ -43,6 +43,8 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
         currentAnalysisMethod,
         setCurrentAnalysisMethod,
         params,
+        componentParentIdsMap,
+        setComponentParentIdsMap,
         ...rest
     } = params_
     useImperativeHandle(ref, () => ({
@@ -186,6 +188,10 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
 
     }
 
+    useEffect(()=>{
+        reload()
+    },[componentParentIdsMap])
+
     const getCurrentAnalysisMenthod = (activeTabKey: any) => {
         const analysisMethodDict: any = analysisMethod.reduce((acc: any, item: any) => {
             acc[item?.component_id] = item;
@@ -293,6 +299,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                 project: project,
                 // analysis_method: analysisMethodValues,
                 component_ids: componentIdList,
+                component_parent_ids_map: componentParentIdsMap,
                 // rows: -1,
                 ...params
             })
@@ -433,6 +440,12 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                 </Tooltip>
             }
         }, {
+            title: 'File Name',
+            dataIndex: 'file_name',
+            key: 'file_name',
+            width: 100,
+            ellipsis: true,
+        }, {
             title: 'Analysis Name',
             dataIndex: 'analysis_name',
             key: 'analysis_name',
@@ -485,12 +498,6 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                     <span style={{ cursor: "pointer" }}>{text}</span>
                 </Tooltip>
             }
-        }, {
-            title: 'File Name',
-            dataIndex: 'file_name',
-            key: 'file_name',
-            width: 100,
-            ellipsis: true,
         },
         {
             title: 'Sample Name',
@@ -546,7 +553,16 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                             // if (cleanDom) {
                             //     cleanDom(undefined)
                             // }
-                            operatePipeline.openModal("openFile", { content: record.content, fileType: record.file_type, description: currentAnalysisMethod.description })
+                            if (record.type == "folder") {
+                                setComponentParentIdsMap((prev: any) => ({
+                                    ...prev,
+                                    [currentAnalysisMethod.component_id]: record.analysis_result_id
+                                }))
+
+                            } else {
+                                operatePipeline.openModal("openFile", { content: record.content, fileType: record.file_type, description: currentAnalysisMethod.description })
+
+                            }
 
                             // const param = JSON.parse(record.request_param)
                             // console.log(param)
@@ -556,7 +572,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                             //     form.setFieldValue("id", record?.id)
                             // }
                             // readHdfs(record.content)
-                        }}>Open</Button>
+                        }}>{ record.type=="folder"?"Open Folder":"Open File" }</Button>
                     </Popover>
 
                     <Dropdown menu={{
@@ -742,6 +758,17 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
         //     });
     };
 
+    const getCurrectParent = () => {
+        if (!componentParentIdsMap || !currentAnalysisMethod) return null
+        return <a onClick={() => {
+            setComponentParentIdsMap((prev: any) => ({
+                ...prev,
+                [currentAnalysisMethod.component_id]: undefined
+            }))
+        }}>
+            {componentParentIdsMap[currentAnalysisMethod.component_id]}
+        </a>
+    }
     return <>
         <Card size="small"
             variant="borderless"
@@ -775,7 +802,10 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
             </Flex>}
 
             extra={<>{cardExtra}
+
                 <Flex gap={"small"} wrap>
+
+                    {getCurrectParent()}
                     <Input.Search
                         size="small"
                         placeholder="Search..."
@@ -816,8 +846,14 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                     </Popconfirm>}
 
                     <ImportOutlined style={{ cursor: "pointer" }} onClick={() => {
-                        openModal("importFile", { ...currentAnalysisMethod, operatePipeline: operatePipeline })
+                        openModal("importFile", { ...currentAnalysisMethod,
+                            analysisResultParentId: componentParentIdsMap ? componentParentIdsMap[currentAnalysisMethod.component_id] : undefined,
+                            operatePipeline: operatePipeline })
                     }} />
+
+                    <a onClick={() => {
+                        openModal("createFolder", { ...currentAnalysisMethod })
+                    }}>Create Folder</a>
 
                     {operatePipeline?.openModal && <>
                         {(rest.component_type == "software" || rest.component_type == "file" || rest.component_type == "script") && <>
@@ -973,6 +1009,8 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
             onTabChange={onTabChange}
 
         >
+
+            {/* {JSON.stringify(componentParentIdsMap)} */}
             {/* <pre>
                 {JSON.stringify(analysisMethod,null,2)}
             </pre> */}
@@ -1153,6 +1191,12 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
             onClose={closeModal}
             callback={reload}
         ></EditResultTableModal>
+        <CreateFolderModal
+            visible={modal.visible && modal.key == "createFolder"}
+            params={modal.params}
+            onClose={closeModal}
+            callback={reload}
+        ></CreateFolderModal>
 
 
 
@@ -1180,3 +1224,57 @@ export const AnalysisResultModal: FC<any> = ({ visible, onClose, params }) => {
         </Modal>
     </>
 }
+
+const CreateFolderModal: FC<any> = ({ visible, onClose, params, callback }) => {
+    // use form create a folder
+    const [form] = Form.useForm();
+    const { project } = useSelector((state: any) => state.user);
+
+    const message = useGlobalMessage();
+    const handleOk = async () => {
+        const values = await form.validateFields();
+        const reqParams = {
+            component_id: params.component_id,
+            project: project,
+            ...values
+
+        }
+        console.log("Create Folder Params:", reqParams);
+        // api post /analysis-result/create
+        const resp = await axios.post('/analysis-result/create', reqParams)
+        message.success("Folder created successfully!")
+        onClose()
+        if (callback) {
+            callback()
+        }
+    };
+
+    return <>
+        <Modal title="Create Folder" open={visible} onCancel={onClose} onOk={handleOk}>
+            {/* form with fields:
+            file_name: str
+            parent_id: Optional[str]=None
+            type: str  # 'folder','file'
+            component_id: str */}
+            <Form form={form} layout="vertical">
+                <Form.Item name="type" label="Type" initialValue="folder" rules={[{ required: true, message: 'Please select the type!' }]}>
+                    <Select>
+                        <Select.Option value="folder">Folder</Select.Option>
+                        <Select.Option value="file">File</Select.Option>
+                    </Select>
+                </Form.Item>
+                <Form.Item name="file_name" label="Folder Name" rules={[{ required: true, message: 'Please input the folder name!' }]}>
+                    <Input />
+                </Form.Item>
+                {/* <Form.Item name="parent_id" label="Parent ID">
+                    <Input />
+                </Form.Item> */}
+
+            </Form>
+        </Modal>
+    </>
+
+}
+
+
+

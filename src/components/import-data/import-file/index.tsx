@@ -46,8 +46,8 @@ const RenderTable: FC<any> = ({ parseData, columns, importData }) => {
 };
 
 
-const ImportFile: FC<{ component_type: any, component_id: any, component_name: any, inputForm: any, inputFormMap: any, operatePipeline: any, name: any, callback: any, file_type?: any }> = ({
-    component_type, component_id, component_name, inputForm, operatePipeline, name, file_type, callback }) => {
+const ImportFile: FC<{ component_type: any, analysisResultParentId: any, component_id: any, component_name: any, inputForm: any, inputFormMap: any, operatePipeline: any, name: any, callback: any, file_type?: any }> = ({
+    component_type, analysisResultParentId, component_id, component_name, inputForm, operatePipeline, name, file_type, callback }) => {
     // const { component_type,component_id,operatePipeline } = pipeline
     const [form] = Form.useForm();
     // const [components, setComponents] = useState<any>([])
@@ -119,6 +119,7 @@ const ImportFile: FC<{ component_type: any, component_id: any, component_name: a
                     project: project,
                     component_id: component_id,
                     file_type: file_type,
+                    parent_id: analysisResultParentId,
                     content: JSON.stringify(rest),
                     sample_name: sample_name,
                 }
@@ -127,6 +128,7 @@ const ImportFile: FC<{ component_type: any, component_id: any, component_name: a
             return [{
                 ...values,
                 project: project,
+                parent_id: analysisResultParentId,
                 component_id: component_id,
                 file_name: file_name,
                 file_type: file_type,
@@ -235,7 +237,7 @@ const ImportFile: FC<{ component_type: any, component_id: any, component_name: a
             {/* <pre>
                 {JSON.stringify(parseData, null, 2)}
             </pre> */}
-
+            {/* {analysisResultParentId} */}
             <Form form={form}>
                 {/* 同一个样本测序不同部位 */}
                 {/* <Form.Item name={"sample_source"} label="Sample Source" rules={[{ required: true, message: 'This field cannot be empty!' }]}>

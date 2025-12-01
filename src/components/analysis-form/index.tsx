@@ -25,6 +25,7 @@ export const AnalysisForm: FC<any> = ({
     plotReloadTable,
     callback,
     dataComponentIds,
+    componentParentIdsMap,
     name,
     analysisResultId,
     ...rest
@@ -180,7 +181,8 @@ export const AnalysisForm: FC<any> = ({
         // imgType: imgType,
         // software: "python",
         component_id: rest.component_id,
-        data_component_ids: JSON.stringify(dataComponentIds)
+        data_component_ids: JSON.stringify(dataComponentIds),
+        component_parent_ids_map: componentParentIdsMap,
 
     }
 
