@@ -176,7 +176,11 @@ const AnalysisReport: FC<any> = () => {
                             }} analysis_id={analysisKey}></AnalysisResultView>
                     </Suspense> : <>
                         <Card size="small" variant="borderless">
-                            <Empty></Empty>
+                            <Empty>
+                                <Button type="primary" onClick={() => {
+                                    setPanel("note")
+                                }}>Open Note</Button>
+                            </Empty>
 
                         </Card>
 
@@ -222,7 +226,7 @@ const AnalysisReport: FC<any> = () => {
 
                         }>
 
-                        {projectObj?.description ? <Markdown data={projectObj?.description}></Markdown> : <Skeleton active />}
+                        {projectObj?.description ? <Markdown data={projectObj?.description}></Markdown> : <Empty  />}
                     </Card>
                 </div>}
 

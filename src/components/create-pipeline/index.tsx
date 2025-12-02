@@ -1,7 +1,7 @@
 import { Button, Card, Collapse, Divider, Drawer, Flex, Form, Input, InputNumber, Modal, Popconfirm, Select, Space, Tabs, Typography, Upload, UploadFile, UploadProps } from "antd"
 import TextArea from "antd/es/input/TextArea"
 import axios from "axios"
-import { FC, use, useEffect, useRef, useState } from "react"
+import { FC, memo, use, useEffect, useRef, useState } from "react"
 import { listPipelineComponents as listPipelineComponentsApi } from '@/api/pipeline'
 import { useModal } from "@/hooks/useModal"
 import { data } from "react-router"
@@ -212,225 +212,6 @@ const PipelineSoftwareComponent: FC<any> = ({ components }) => {
     </>
 }
 
-export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, params, callback }) => {
-    if (!visible) return null;
-
-    const { data, structure } = params
-    const [form] = Form.useForm()
-    const [component, setComponent] = useState<any>()
-    const { namespace } = useSelector((state: any) => state.user);
-
-    const [loading, setLoaidng] = useState<any>(false)
-    const componentMap: any = {
-        pipeline: WrapPipeline,
-        // pipeline: WrapPipeline,
-        software: SoftwareContent,
-        file: FileContent,
-        script: ScriptContent,
-    }
-    const ComponentsRender = ({ component_type, data, form }: any) => {
-        const Component = componentMap[component_type] || (() => <div>未知类型 {JSON.stringify(data)}</div>);
-        return <Component data={data} form={form} structure={structure}></Component>
-    }
-
-
-    const getPipeleine = async (componentId: any) => {
-        const resp = await axios.post("/find-pipeline", { component_id: componentId })
-
-        const data = resp.data
-        // data['content'] = JSON.parse(data['content']) //JSON.stringify(JSON.parse(data['content']), null, 2)
-        if (data['tags']) {
-            data['tags'] = JSON.parse(data['tags'])
-        }
-        if(data["component_ids"]){
-            data["component_ids"] = JSON.parse(data["component_ids"])
-        }
-        setComponent(data)
-        console.log(data)
-        if (structure.component_type == "pipeline") {
-            data['content'] = JSON.parse(data['content'])
-            form.setFieldsValue(data)
-        } else {
-            form.setFieldsValue(data)
-        }
-
-    }
-
-
-
-    useEffect(() => {
-
-        if (visible) {
-            if (data) {
-                getPipeleine(data.component_id)
-            } else {
-                form.resetFields()
-            }
-        }
-
-    }, [visible])
-    const getParams = (values: any) => {
-        const params = {
-            ...values,
-            ...structure,
-
-        }
-        if (data) {
-            // params['relation_id'] = pipelineRelation.relation_id
-            // params['parent_component_id'] = pipelineRelation.parent_component_id
-            params['component_id'] = component.component_id
-
-
-        }
-
-
-        return params
-    }
-    const getParamsFormat = (values: any) => {
-        const params = getParams(values)
-        if (typeof params['content'] == 'string') {
-            params['content'] = JSON.parse(params['content'])
-        }
-
-        return params
-    }
-    const savePipeline = async () => {
-        setLoaidng(true)
-        const values = await form.validateFields()
-        const params = getParams(values)
-        if (typeof params['content'] != 'string') {
-            params['content'] = JSON.stringify(params['content'])
-        }
-        if (typeof params['tags'] != 'string') {
-            params['tags'] = JSON.stringify(params['tags'])
-        }
-        if (!params['content']) {
-            params['content'] = "{}"
-        }
-        if(params["component_ids"]){
-            params["component_ids"] = JSON.stringify(params["component_ids"])
-        }
-
-        console.log(params)
-        try {
-            const resp = await axios.post("/save-pipeline", params)
-            console.log(resp)
-            setLoaidng(false)
-            if (callback) {
-                callback()
-                // await axios.get("/get-pipeline-v2/d9830ebd-240e-4758-adab-dd3a9d17e414")
-            }
-            onClose()
-        } catch (error) {
-            setLoaidng(false)
-        }
-
-    }
-
-    useEffect(() => {
-        form.setFieldValue("namespace", namespace)
-    }, [namespace])
-    const normFile = (e: any) => {
-        console.log(e)
-        if (Array.isArray(e)) {
-            return e;
-        }
-        return [{
-            uid: '-4',
-            name: 'image.png',
-            status: 'done',
-            url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-        }];
-    };
-    return <>
-        <Drawer
-            loading={loading}
-            title={`${data ? "Update" : "Create"} Component(${structure?.component_type})`}
-            // okText={data ? "Update" : "Create"}
-            // onCancel={() => onClose()}
-            // onOk={savePipeline}
-            forceRender={true}
-
-            open={visible}
-            width={"80%"}
-            extra={<>
-                <Button size="small" color="cyan" variant="solid" onClick={savePipeline}>
-                    {data ? "Update" : "Create"}
-                </Button>
-            </>}
-            onClose={() => onClose()}
-        // onCancel={() => onClose()}
-        >
-            {/* {namespace} */}
-            <Form form={form}>
-                <Tabs items={[
-                    {
-                        label: "Component Info",
-                        key: "1",
-                        children: <>
-                            {/* <Form.Item name={"namespace"} label="Namespace"   >
-                                <Input disabled></Input>
-                            </Form.Item> */}
-
-                            <Form.Item name={"component_name"} label="Component Name" rules={[{ required: true, message: 'Please input component name!' }]}>
-                                <Input ></Input>
-                            </Form.Item>
-
-
-
-                            <ComponentsRender {...structure} data={component} form={form}></ComponentsRender>
-                        </>
-                    }, {
-                        label: "Component Description",
-                        key: "2",
-                        children: <>
-                            <Form.Item name={"tags"} label="Tags">
-                                <Select
-                                    mode="tags"
-                                    style={{ width: '100%' }}
-                                />
-                            </Form.Item>
-                            <Form.Item name={"category"} label="Category">
-                                <Input ></Input>
-                            </Form.Item>
-                            {/* valuePropName="fileList"  getValueFromEvent={normFile}*/}
-                            {data?.component_id && <Form.Item label="Upload" name={"img"}  >
-                                <UploadComp component_id={data?.component_id}></UploadComp>
-                            </Form.Item>}
-                            <Form.Item label="Order" name={"order_index"} initialValue={0}>
-                                <InputNumber ></InputNumber >
-                            </Form.Item>
-
-                            <Form.Item name={"description"} label="Description">
-                                <TextAreaComp templete={""}></TextAreaComp>
-
-                            </Form.Item>
-                        </>
-                    }
-                ]}>
-                </Tabs>
-
-                <Collapse ghost items={[
-                    {
-                        key: "1",
-                        label: "More",
-                        children: <>
-                            <Form.Item noStyle shouldUpdate>
-                                {() => (
-                                    <Typography>
-                                        <pre>{JSON.stringify(getParamsFormat(form.getFieldsValue()), null, 2)}</pre>
-                                    </Typography>
-                                )}
-                            </Form.Item>
-                        </>
-                    }
-                ]} />
-
-            </Form>
-
-        </Drawer>
-    </>
-}
 export default CreateORUpdatePipelineCompnentRelation
 
 
@@ -501,15 +282,25 @@ import ContainerPage from "@/pages/container"
 import { useSelector } from "react-redux"
 const SoftwareContent: FC<any> = ({ data, form }) => {
     const [templete, setTemplete] = useState<any>()
+    const [containers, setContainers] = useState<any>([])
 
+    const loadData = async () => {
+        const resp = await axios.get(`/container/list-all`)
+        const opentions = resp.data.map((item: any) => ({ label: `${item.name}`, value: item.container_id }))
+        setContainers(opentions)
+    }
     useEffect(() => {
+        loadData()
         if (!data?.componemt_id) {
             setTemplete(JSON.stringify(softwareTemplete, null, 2))
         }
     }, [])
     return <>
         <Form.Item name={"container_id"} label="Container" rules={[{ required: true, message: 'Please select container!' }]}>
-            <SelectContainer container={data?.container}></SelectContainer>
+            <SelectContainer mode="none" containers={containers}></SelectContainer>
+        </Form.Item>
+        <Form.Item name={"tools_container_id"} label="Tools Container Id" rules={[{ required: true, message: 'Please select container!' }]}>
+            <SelectContainer mode="multiple" containers={containers}></SelectContainer>
         </Form.Item>
         {/* <Form.Item name={"sub_container_id"} label="Sub Container">
             <SelectContainer container={data?.sub_container}></SelectContainer>
@@ -531,9 +322,18 @@ const SoftwareContent: FC<any> = ({ data, form }) => {
 }
 const ScriptContent: FC<any> = ({ data, form }) => {
     const [templete, setTemplete] = useState<any>()
+    const [containers, setContainers] = useState<any>([])
+
+    const loadData = async () => {
+        const resp = await axios.get(`/container/list-all`)
+        const opentions = resp.data.map((item: any) => ({ label: `${item.name}`, value: item.container_id }))
+        setContainers(opentions)
+
+    }
+
 
     useEffect(() => {
-
+        loadData()
         if (!data?.componemt_id) {
             // console.log(scriptTemplete)
             setTemplete(JSON.stringify(scriptTemplete, null, 2))
@@ -541,7 +341,10 @@ const ScriptContent: FC<any> = ({ data, form }) => {
     }, [])
     return <>
         <Form.Item name={"container_id"} label="Container" rules={[{ required: true, message: 'Please select container!' }]}>
-            <SelectContainer container={data?.container}></SelectContainer>
+            <SelectContainer mode="none" containers={containers}></SelectContainer>
+        </Form.Item>
+        <Form.Item name={"tools_container_id"} label="Tools Container Id" rules={[{ required: true, message: 'Please select container!' }]}>
+            <SelectContainer mode="multiple" containers={containers}></SelectContainer>
         </Form.Item>
         <Form.Item name={"script_type"} label="Script Type" rules={[{ required: true, message: 'Please select script type!' }]}>
             <Select options={
@@ -562,7 +365,7 @@ const ScriptContent: FC<any> = ({ data, form }) => {
 const FileContent: FC<any> = ({ data, form, structure }) => {
     const [templete, setTemplete] = useState<any>()
     const [options, setOptions] = useState<any>([])
-    const loadData =async  () => {
+    const loadData = async () => {
         const resp = await listPipelineComponentsApi({
             component_type: "file",
         })
@@ -608,8 +411,13 @@ const FileContent: FC<any> = ({ data, form, structure }) => {
         </Form.Item> */}
     </>
 }
+const SelectContainer: FC<any> = ({ value, onChange, mode, containers }) => {
 
-const SelectContainer: FC<any> = ({ value, onChange, container: container_ }) => {
+    return <>
+        <Select mode={mode} value={value} onChange={onChange} options={containers}></Select>
+    </>
+}
+const SelectContainer2: FC<any> = ({ value, onChange, container: container_ }) => {
     const { modal, openModal, closeModal } = useModal()
     const [container, setContainer] = useState<any>(container_)
     return <>
@@ -694,6 +502,16 @@ const WrapPipeline: FC<any> = ({ data, form }) => {
     //     "category": "metagenomics",
     //     "order": 1
     //   }
+    const [containers, setContainers] = useState<any>([])
+
+    const loadData = async () => {
+        const resp = await axios.get(`/container/list-all`)
+        const opentions = resp.data.map((item: any) => ({ label: `${item.name}`, value: item.container_id }))
+        setContainers(opentions)
+    }
+    useEffect(()=>{
+        loadData()
+    },[])
     return <>
         {/* <Form.Item name={"pipeline_key"} label="pipeline_key">
             <Input disabled={data ? true : false}></Input>
@@ -715,7 +533,7 @@ const WrapPipeline: FC<any> = ({ data, form }) => {
             <Input></Input>
         </Form.Item> */}
         <Form.Item name={"container_id"} label="Container">
-            <SelectContainer container={data?.container}></SelectContainer>
+            <SelectContainer mode="none" containers={containers}></SelectContainer>
         </Form.Item>
         {/* <Form.Item name={["content", "analysisPipline"]} label="analysisPipline">
             <Input></Input>
@@ -822,4 +640,236 @@ const NamespaceOperation: FC<any> = ({ visible, onClose, params, callback }) => 
 
 
     </Card>
+}
+
+
+const componentMap: any = {
+    pipeline: WrapPipeline,
+    // pipeline: WrapPipeline,
+    software: SoftwareContent,
+    file: FileContent,
+    script: ScriptContent,
+}
+// const ComponentsRender = memo(({ component_type, data, form, structure }: any) => {
+//     const Component = componentMap[component_type] || (() => <div>未知类型 {JSON.stringify(data)}</div>);
+//     return <Component data={data} form={form} structure={structure}></Component>
+// })
+const ComponentsRender = ({ component_type, data, form, structure }: any) => {
+    const Component = componentMap[component_type] || (() => <div>未知类型 {JSON.stringify(data)}</div>);
+    return <Component data={data} form={form} structure={structure}></Component>
+}
+export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, params, callback }) => {
+    if (!visible) return null;
+
+    const { data, structure } = params
+    const [form] = Form.useForm()
+    const [component, setComponent] = useState<any>()
+    const { namespace } = useSelector((state: any) => state.user);
+
+    const [loading, setLoaidng] = useState<any>(false)
+
+
+    const getPipeleine = async (componentId: any) => {
+        const resp = await axios.post("/find-pipeline", { component_id: componentId })
+
+        const data = resp.data
+        // data['content'] = JSON.parse(data['content']) //JSON.stringify(JSON.parse(data['content']), null, 2)
+        if (data['tags']) {
+            data['tags'] = JSON.parse(data['tags'])
+        }
+        if (data["component_ids"]) {
+            data["component_ids"] = JSON.parse(data["component_ids"])
+        }
+        if (data["tools_container_id"]) {
+            data["tools_container_id"] = JSON.parse(data["tools_container_id"])
+        }
+        setComponent(data)
+        console.log(data)
+        if (structure.component_type == "pipeline") {
+            data['content'] = JSON.parse(data['content'])
+            form.setFieldsValue(data)
+        } else {
+            form.setFieldsValue(data)
+        }
+
+    }
+
+
+
+    useEffect(() => {
+
+        if (visible) {
+            if (data) {
+                getPipeleine(data.component_id)
+            } else {
+                form.resetFields()
+            }
+        }
+
+    }, [visible])
+    const getParams = (values: any) => {
+        const params = {
+            ...values,
+            ...structure,
+
+        }
+        if (data) {
+            // params['relation_id'] = pipelineRelation.relation_id
+            // params['parent_component_id'] = pipelineRelation.parent_component_id
+            params['component_id'] = component.component_id
+
+
+        }
+
+
+        return params
+    }
+    const getParamsFormat = (values: any) => {
+        const params = getParams(values)
+        if (typeof params['content'] == 'string') {
+            params['content'] = JSON.parse(params['content'])
+        }
+
+        return params
+    }
+    const savePipeline = async () => {
+        setLoaidng(true)
+        const values = await form.validateFields()
+        const params = getParams(values)
+        if (typeof params['content'] != 'string') {
+            params['content'] = JSON.stringify(params['content'])
+        }
+        if (typeof params['tags'] != 'string') {
+            params['tags'] = JSON.stringify(params['tags'])
+        }
+        if (!params['content']) {
+            params['content'] = "{}"
+        }
+        // for file component
+        if (params["component_ids"]) {
+            params["component_ids"] = JSON.stringify(params["component_ids"])
+        }
+        if (params["tools_container_id"]) {
+            params["tools_container_id"] = JSON.stringify(params["tools_container_id"])
+        }
+
+        console.log(params)
+        try {
+            const resp = await axios.post("/save-pipeline", params)
+            console.log(resp)
+            setLoaidng(false)
+            if (callback) {
+                callback()
+                // await axios.get("/get-pipeline-v2/d9830ebd-240e-4758-adab-dd3a9d17e414")
+            }
+            onClose()
+        } catch (error) {
+            setLoaidng(false)
+        }
+
+    }
+
+    useEffect(() => {
+        form.setFieldValue("namespace", namespace)
+    }, [namespace])
+    const normFile = (e: any) => {
+        console.log(e)
+        if (Array.isArray(e)) {
+            return e;
+        }
+        return [{
+            uid: '-4',
+            name: 'image.png',
+            status: 'done',
+            url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
+        }];
+    };
+    return <>
+        <Drawer
+            loading={loading}
+            title={`${data ? "Update" : "Create"} Component(${structure?.component_type})`}
+            // okText={data ? "Update" : "Create"}
+            // onCancel={() => onClose()}
+            // onOk={savePipeline}
+            forceRender={true}
+
+            open={visible}
+            width={"80%"}
+            extra={<>
+                <Button size="small" color="cyan" variant="solid" onClick={savePipeline}>
+                    {data ? "Update" : "Create"}
+                </Button>
+            </>}
+            onClose={() => onClose()}
+        // onCancel={() => onClose()}
+        >
+            {/* {namespace} */}
+            <Form form={form}>
+                <Tabs items={[
+                    {
+                        label: "Component Info",
+                        key: "1",
+                        children: <>
+                            {/* <Form.Item name={"namespace"} label="Namespace"   >
+                                <Input disabled></Input>
+                            </Form.Item> */}
+
+                            <Form.Item name={"component_name"} label="Component Name" rules={[{ required: true, message: 'Please input component name!' }]}>
+                                <Input ></Input>
+                            </Form.Item>
+
+
+
+                            <ComponentsRender structure={structure} {...structure} data={component} form={form}></ComponentsRender>
+                        </>
+                    }, {
+                        label: "Component Description",
+                        key: "2",
+                        children: <>
+                            <Form.Item name={"tags"} label="Tags">
+                                <Select
+                                    mode="tags"
+                                    style={{ width: '100%' }}
+                                />
+                            </Form.Item>
+                            <Form.Item name={"category"} label="Category">
+                                <Input ></Input>
+                            </Form.Item>
+                            {/* valuePropName="fileList"  getValueFromEvent={normFile}*/}
+                            {data?.component_id && <Form.Item label="Upload" name={"img"}  >
+                                <UploadComp component_id={data?.component_id}></UploadComp>
+                            </Form.Item>}
+                            <Form.Item label="Order" name={"order_index"} initialValue={0}>
+                                <InputNumber ></InputNumber >
+                            </Form.Item>
+
+                            <Form.Item name={"description"} label="Description">
+                                <TextAreaComp templete={""}></TextAreaComp>
+
+                            </Form.Item>
+                        </>
+                    }
+                ]}>
+                </Tabs>
+
+                <Collapse ghost items={[
+                    {
+                        key: "1",
+                        label: "More",
+                        children: <>
+                            <Form.Item noStyle shouldUpdate>
+                                {() => (
+                                    <Typography>
+                                        <pre>{JSON.stringify(getParamsFormat(form.getFieldsValue()), null, 2)}</pre>
+                                    </Typography>
+                                )}
+                            </Form.Item>
+                        </>
+                    }
+                ]} />
+
+            </Form>
+
+        </Drawer>
+    </>
 }

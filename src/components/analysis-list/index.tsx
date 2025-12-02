@@ -467,7 +467,8 @@ const AnalysisList = forwardRef<any, any>(({
                             {
                                 key: "runningContainer",
                                 label: (<a onClick={() => {
-                                    openModal("componentsRender", { view: "runningContainer", analysis_id: record.analysis_id })
+                                    openModal("componentsRender", { view: "runningContainer", analysis_id: record.analysis_id,
+                                        component_id: record.component_id })
                                     // setRecord(record)
                                 }}>Running Container</a>)
                             }, {

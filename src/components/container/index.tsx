@@ -5,6 +5,7 @@ import { FC, useEffect, useState } from "react"
 import { useSelector } from "react-redux"
 import { RedoOutlined } from "@ant-design/icons"
 import { InspectPanel } from "@/pages/container"
+import { E } from "node_modules/@faker-js/faker/dist/airline-CLphikKp"
 const RunningContainer: FC<any> = ({ analysis_id, onClose }) => {
     const [data, setData] = useState<any>([])
     const [loading, setLoading] = useState<boolean>(false)
@@ -12,12 +13,13 @@ const RunningContainer: FC<any> = ({ analysis_id, onClose }) => {
     const [event, setEvent] = useState<any>()
     const sseData = useSelector((state: any) => state.global.sseData)
     const { modal, openModal, closeModal } = useModal();
+    const [toolsContainers, setToolsContainers] = useState<any>([])
 
     useEffect(() => {
         try {
             const sseData_ = sseData
             if (sseData_.event == "analysis_complete" || sseData_.event == "analysis_failed" || sseData_.event == "analysis_started") {
-                loadData(false)
+                loadData()
                 setEvent(sseData_)
             }
         } catch (error) {
@@ -25,19 +27,29 @@ const RunningContainer: FC<any> = ({ analysis_id, onClose }) => {
         }
 
     }, [sseData])
-    const loadData = async (force: any) => {
+    const loadData = async () => {
         setLoading(true)
-        // const resp = await axios.get(`/container/list-running-container?force=${force}`)
-        const resp = await axios.post(`/container/find-running-container`, {
-            analysis_id: analysis_id,
-        })
-        setData(resp.data)
+        if (analysis_id) {
+            const resp = await axios.get(`/analysis/list-tools-containers/${analysis_id}`)
+            setToolsContainers(resp.data.tools_containers)
+            setData(resp.data.running_containers)
+        } else {
+            const resp = await axios.post(`/container/find-running-container`, {
+                analysis_id: analysis_id,
+            })
+            setData(resp.data)
+
+        }
         setLoading(false)
+        // const resp = await axios.get(`/container/list-running-container?force=${force}`)
+
     }
 
     useEffect(() => {
-        loadData(false)
+        loadData()
     }, [baseURL])
+
+
 
 
     return <Card size="small" title={<>
@@ -51,11 +63,31 @@ const RunningContainer: FC<any> = ({ analysis_id, onClose }) => {
             {/* {JSON.stringify(event)} */}
             {onClose && <Button size="small" color="blue" variant="solid" onClick={() => onClose()}>Close</Button>}
             {/* <RedoOutlined style={{ cursor: "pointer" }} ></RedoOutlined> */}
-            <Button size="small" icon={<RedoOutlined />} color="cyan" variant="solid" onClick={() => loadData(true)}>Refresh</Button>
+            <Button size="small" icon={<RedoOutlined />} color="cyan" variant="solid" onClick={() => loadData()}>Refresh</Button>
         </Space>}
         style={{ marginBottom: "1rem" }}>
         {event && <Alert message={`${event.run_id}: ${event.event}`} type="success" />}
+        {/* {JSON.stringify(toolsContainers)} */}
+        <Space style={{ marginBottom: "1rem" }}>
+            {toolsContainers.map((item: any, index: any) =>
+                <Popconfirm key={index} title={`Run tool container ${item.name}?`} onConfirm={async () => {
+                    await axios.post(`/run-analysis-v2/${analysis_id}?run_type=tools&tool_container_id=${item.container_id}`)
+                    // loadData(true)
+                }}>
 
+                    <Button
+                        size="small" variant="solid" color={item.status === "running" ? "red" : "green"} key={index}>
+                        {/* Tool Container: <a href={`${item.url}`} target="_blank" rel="noreferrer">{item.name}</a> */}
+                        {item.name} {item.status}
+                    </Button>
+                </Popconfirm>)}
+            {/* {toolsContainers.length > 0 && <RedoOutlined style={{ cursor: "pointer" }} onClick={loadToolsContainer}></RedoOutlined>} */}
+        </Space>
+
+        {/* 
+        <a onClick={async () => {
+            await axios.post(`/run-analysis-v2/c5e07823-6c12-47d7-a78a-9a8eacbe5d9f?run_type=tools&tool_container_id=941d6427-9b9f-4a5a-a2c2-5a0b6df8b6c8`)
+        }} >test </a> */}
 
         {/* <List
             className="demo-loadmore-list"
@@ -100,6 +132,7 @@ const RunningContainer: FC<any> = ({ analysis_id, onClose }) => {
                 </List.Item>
             )}
         /> */}
+
         <ContainerTable
             data={data}
             loading={loading}
@@ -136,12 +169,12 @@ interface Props {
 
 const ContainerTable: React.FC<Props> = ({ data, loading, openModal }) => {
     const columns = [
-         {
+        {
             title: "Status",
             dataIndex: "status",
             key: "status",
             ellipsis: true,
-        },{
+        }, {
             title: "Image",
             dataIndex: "image",
             key: "image",
@@ -216,8 +249,8 @@ const ContainerTable: React.FC<Props> = ({ data, loading, openModal }) => {
             pagination={false}
             bordered
             size="small"
-            footer={()=><>
-            A total of {data.length} running container{data.length>1?"s":""}
+            footer={() => <>
+                A total of {data.length} running container{data.length > 1 ? "s" : ""}
             </>}
         />
     );
