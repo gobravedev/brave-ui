@@ -240,11 +240,11 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
                                     </Button>
                                 </Popconfirm>
                                 <Tooltip title={<>
-                                    {`${containerURL}/container/${analsyisResult.analysis_id}/`}
+                                    {`${containerURL}/container/server-${analsyisResult.analysis_id}/`}
                                 </>}>
                                     <ExportOutlined style={{ cursor: "pointer" }} onClick={() => {
 
-                                        window.open(`${containerURL}/container/${analsyisResult.analysis_id}/`, "_blank")
+                                        window.open(`${containerURL}/container/server-${analsyisResult.analysis_id}/`, "_blank")
                                     }} />
                                 </Tooltip>
 

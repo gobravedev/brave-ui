@@ -416,11 +416,11 @@ const AnalysisList = forwardRef<any, any>(({
                                     </Button>
                                 </Popconfirm>
                                 <Tooltip title={<>
-                                    {`${containerURL}/container/${record.analysis_id}/`}
+                                    {`${containerURL}/container/server-${record.analysis_id}/`}
                                 </>}>
                                     <ExportOutlined style={{ cursor: "pointer" }} onClick={() => {
 
-                                        window.open(`${containerURL}/container/${record.analysis_id}/`, "_blank")
+                                        window.open(`${containerURL}/container/server-${record.analysis_id}/`, "_blank")
                                     }} />
                                 </Tooltip>
 

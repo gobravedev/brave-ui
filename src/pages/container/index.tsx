@@ -214,10 +214,10 @@ export const ContainerOpt: FC<any> = ({ record, reload, traefikUI = false }) => 
             </> :
                 <>
                     <Tooltip title={<>
-                        {`${containerURL}/container/${record.container_id}/`}
+                        {`${containerURL}/container/retry-${record.container_id}/`}
                     </>}>
                         <Button size="small" color="blue" variant="solid" onClick={() => {
-                            window.open(`${containerURL}/container/${record.container_id}/`, "_blank")
+                            window.open(`${containerURL}/container/retry-${record.container_id}/`, "_blank")
                         }}>Open URL</Button>
                     </Tooltip>
                 </>

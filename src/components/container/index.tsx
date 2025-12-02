@@ -1,9 +1,9 @@
 import { useModal } from "@/hooks/useModal"
-import { Alert, Button, Card, Flex, List, Popconfirm, Skeleton, Space, Table } from "antd"
+import { Alert, Button, Card, Flex, List, Popconfirm, Skeleton, Space, Table, Tooltip } from "antd"
 import axios from "axios"
 import { FC, useEffect, useState } from "react"
 import { useSelector } from "react-redux"
-import { RedoOutlined } from "@ant-design/icons"
+import { ExportOutlined, RedoOutlined } from "@ant-design/icons"
 import { InspectPanel } from "@/pages/container"
 import { E } from "node_modules/@faker-js/faker/dist/airline-CLphikKp"
 const RunningContainer: FC<any> = ({ analysis_id, onClose }) => {
@@ -69,18 +69,20 @@ const RunningContainer: FC<any> = ({ analysis_id, onClose }) => {
         {event && <Alert message={`${event.run_id}: ${event.event}`} type="success" />}
         {/* {JSON.stringify(toolsContainers)} */}
         <Space style={{ marginBottom: "1rem" }}>
-            {toolsContainers.map((item: any, index: any) =>
-                <Popconfirm key={index} title={`Run tool container ${item.name}?`} onConfirm={async () => {
-                    await axios.post(`/run-analysis-v2/${analysis_id}?run_type=tools&tool_container_id=${item.container_id}`)
-                    // loadData(true)
-                }}>
+            {Array.isArray(toolsContainers) && toolsContainers?.map((item: any, index: any) =>
+                <Tooltip key={index} title={`${item.image}`}>
+                    <Popconfirm title={`Run tool container ${item.name}?`} onConfirm={async () => {
+                        await axios.post(`/run-analysis-v2/${analysis_id}?run_type=tools&tool_container_id=${item.container_id}`)
+                        // loadData(true)
+                    }}>
 
-                    <Button
-                        size="small" variant="solid" color={item.status === "running" ? "red" : "green"} key={index}>
-                        {/* Tool Container: <a href={`${item.url}`} target="_blank" rel="noreferrer">{item.name}</a> */}
-                        {item.name} {item.status}
-                    </Button>
-                </Popconfirm>)}
+                        <Button
+                            size="small" variant="solid" color={item.status === "running" ? "red" : "green"} key={index}>
+                            {/* Tool Container: <a href={`${item.url}`} target="_blank" rel="noreferrer">{item.name}</a> */}
+                            {item.name} {item.status}
+                        </Button>
+                    </Popconfirm>
+                </Tooltip>)}
             {/* {toolsContainers.length > 0 && <RedoOutlined style={{ cursor: "pointer" }} onClick={loadToolsContainer}></RedoOutlined>} */}
         </Space>
 
@@ -151,24 +153,26 @@ export default RunningContainer;
 
 
 
-interface ContainerItem {
-    analysis_id: string;
-    image: string;
-    run_id: string;
-    name: string;
-    id: string;
-    image_id: string;
-    status: string;
-}
+// interface ContainerItem {
+//     analysis_id: string;
+//     image: string;
+//     run_id: string;
+//     name: string;
+//     id: string;
+//     image_id: string;
+//     status: string;
+// }
 
 interface Props {
-    data: ContainerItem[];
+    data: any[];
     loading: boolean;
     openModal: (key: string, params: any) => void;
 }
 
 const ContainerTable: React.FC<Props> = ({ data, loading, openModal }) => {
-    const columns = [
+    const { containerURL } = useSelector((state: any) => state.user);
+
+    const columns:any = [
         {
             title: "Status",
             dataIndex: "status",
@@ -200,7 +204,10 @@ const ContainerTable: React.FC<Props> = ({ data, loading, openModal }) => {
         {
             title: "Actions",
             key: "actions",
-            render: (_: any, item: ContainerItem) => (
+            fixed: "right",
+            ellipsis: true,
+            width: 200,
+            render: (_: any, item: any) => (
                 <Flex gap="small">
                     <Popconfirm
                         title="Stop?"
@@ -208,10 +215,18 @@ const ContainerTable: React.FC<Props> = ({ data, loading, openModal }) => {
                             await axios.post(`/container/stop-container-by-run-id/${item.name}`);
                         }}
                     >
-                        <Button size="small" color="cyan" variant="solid">
+                        <Button size="small" color="red" variant="solid">
                             Stop
                         </Button>
                     </Popconfirm>
+                    <Tooltip title={<>
+                        {`${containerURL}/container/${item.name}/`}
+                    </>}>
+                        <ExportOutlined style={{ cursor: "pointer" }} onClick={() => {
+
+                            window.open(`${containerURL}/container/${item.name}/`, "_blank")
+                        }} />
+                    </Tooltip>
 
                     <Button
                         size="small"
