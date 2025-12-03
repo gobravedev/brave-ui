@@ -304,8 +304,8 @@ const AnalysisList = forwardRef<any, any>(({
             key: "used",
             ellipsis: true,
             render: (text: any, record: any) => (
-                <Popconfirm title={text?"Whether to cancel the use?":"Whether to use?"} 
-                onConfirm={async () => {
+                <Popconfirm title={text ? "Whether to cancel the use?" : "Whether to use?"}
+                    onConfirm={async () => {
                         const resp: any = await axios.post(`/analysis/update_used/${record?.analysis_id}`)
                         message.info("use successfully")
                         loadData()
@@ -467,8 +467,10 @@ const AnalysisList = forwardRef<any, any>(({
                             {
                                 key: "runningContainer",
                                 label: (<a onClick={() => {
-                                    openModal("componentsRender", { view: "runningContainer", analysis_id: record.analysis_id,
-                                        component_id: record.component_id })
+                                    openModal("componentsRender", {
+                                        view: "runningContainer", analysis_id: record.analysis_id,
+                                        component_id: record.component_id
+                                    })
                                     // setRecord(record)
                                 }}>Running Container</a>)
                             }, {
@@ -628,15 +630,15 @@ const AnalysisList = forwardRef<any, any>(({
     useEffect(() => {
         loadData()
     }, [project])
-    const [searchText, setSearchText] = useState("");
-    const filteredData = useMemo(() => {
-        if (!searchText) return data;
-        return data.filter((item: any) =>
-            Object.values(item).some((val) =>
-                String(val).toLowerCase().includes(searchText.toLowerCase())
-            )
-        );
-    }, [data, searchText]);
+    // const [searchText, setSearchText] = useState("");
+    // const filteredData = useMemo(() => {
+    //     if (!searchText) return data;
+    //     return data.filter((item: any) =>
+    //         Object.values(item).some((val) =>
+    //             String(val).toLowerCase().includes(searchText.toLowerCase())
+    //         )
+    //     );
+    // }, [data, searchText]);
     return <>
         {/* {JSON.stringify(location.pathname)} */}
         <Card size="small"
@@ -656,8 +658,12 @@ const AnalysisList = forwardRef<any, any>(({
                         placeholder="Search..."
                         allowClear
                         enterButton
-                        value={searchText}
-                        onChange={(e: any) => setSearchText(e.target.value)}
+                        onSearch={(e:any) => {
+                            // console.log(e)
+                            search(e)
+                        }}
+                        // value={searchText}
+                        // onChange={(e: any) => setSearchText(e.target.value)}
                         style={{ width: 300 }}
                     />
                     {/* {software && <>
@@ -717,7 +723,7 @@ const AnalysisList = forwardRef<any, any>(({
                         />
                     </Flex>}
                 </>}
-                dataSource={filteredData} />
+                dataSource={data} />
 
         </Card>
         <div style={{ marginBottom: "1rem" }}></div>

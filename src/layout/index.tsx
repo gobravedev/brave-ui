@@ -204,12 +204,6 @@ const App: React.FC = () => {
                 en_US: "Dashboard"
             }
 
-        },{
-            key: `/files`,
-            label: {
-                zh_CN: "文件",
-                en_US: "Files"
-            }
         },
         // {
         //     key: "/doc",
@@ -291,6 +285,12 @@ const App: React.FC = () => {
                 }
             ]
         }, {
+            key: `/files`,
+            label: {
+                zh_CN: "文件",
+                en_US: "Files"
+            }
+        },{
             key: `/tasks`,
             label: {
                 zh_CN: "任务",

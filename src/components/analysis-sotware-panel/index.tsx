@@ -665,12 +665,15 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
 
 
     const [analysisResultId, setAnalysisResultId] = useState<any>()
+    const [componentParentIdsMap, setComponentParentIdsMap] = useState<any>({})
 
     return <>
 
         {analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 0 && <>
             <ResultList
                 {...rest}
+                componentParentIdsMap={componentParentIdsMap}
+                setComponentParentIdsMap={setComponentParentIdsMap}
                 onChangeAnalysisResultId={setAnalysisResultId}
                 pipeline={pipeline}
                 software={rest}

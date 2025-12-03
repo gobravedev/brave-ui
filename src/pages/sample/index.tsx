@@ -343,7 +343,7 @@ const Sample: FC<any> = ({ operatePipeline, rowSelection }) => {
             // pagination={{ pageSize: 30 }}
             pagination={false}
             loading={loading}
-            virtual
+            // virtual
             scroll={{ x: 'max-content', y: 100 * 5 }}
             columns={columns}
             footer={() => `A total of ${sampleData.length} records`}
@@ -394,6 +394,8 @@ export const BindSample: FC<any> = ({ visible, onClose, operatePipeline, params 
         <Sample
             rowSelection={{
                 type: "radio",
+                ellipsis: true,
+                width:100,
                 onChange: (selectedRowKeys: any, selectedRows: any) => {
                     // console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
                     setSelectedRowKey(selectedRowKeys)
