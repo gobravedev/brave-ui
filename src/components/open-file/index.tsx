@@ -18,16 +18,21 @@ const OpenFile: FC<any> = ({ visible, onClose, params }) => {
             if (params?.fileType && params.fileType === "collected") {
                 readFile(params.content as string)
             } else {
-                const paramsList = Object.entries(params.content).map(([key, value]) => ({
-                    key: value,
-                    label: key
-                }))
-                setFileList(paramsList)
-                if (paramsList.length > 0) {
-                    const file_path = paramsList[0].key
-                    setTabKey(file_path)
-                    readFile(file_path as string)
+                if (typeof params.content === 'string') {
+                    readFile(params.content as string)
+                } else {
+                    const paramsList = Object.entries(params.content).map(([key, value]) => ({
+                        key: value,
+                        label: key
+                    }))
+                    setFileList(paramsList)
+                    if (paramsList.length > 0) {
+                        const file_path = paramsList[0].key
+                        setTabKey(file_path)
+                        readFile(file_path as string)
+                    }
                 }
+
             }
 
         }
@@ -49,9 +54,9 @@ const OpenFile: FC<any> = ({ visible, onClose, params }) => {
         onCancel={onClose}
         title="Open Task File"
         footer={<>
-        {tabKey}
+            {tabKey}
         </>}
-        
+
     >
 
         <Tabs tabBarExtraContent={

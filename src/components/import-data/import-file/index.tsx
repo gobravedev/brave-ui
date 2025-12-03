@@ -120,7 +120,7 @@ const ImportFile: FC<{ component_type: any, analysisResultParentId: any, compone
                     component_id: component_id,
                     file_type: file_type,
                     parent_id: analysisResultParentId,
-                    content: JSON.stringify(rest),
+                    content:(file_type && file_type == "collected") ? rest?.content : JSON.stringify(rest),
                     sample_name: sample_name,
                 }
             })

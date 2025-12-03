@@ -11,6 +11,7 @@ import OpenFile from "@/components/open-file";
 import { CreateOrUpdatePipelineComponent } from "@/components/create-pipeline";
 import Sample, { BindSample } from "../sample";
 import MetadataForm from "@/components/metadata-form";
+import SysFileBrowser from "@/components/file-browser/sys-file";
 const { Search } = Input;
 
 const Files: FC<any> = () => {
@@ -65,6 +66,14 @@ const Files: FC<any> = () => {
                         key: "sample",
                         label: "Metadata",
                         children: <Sample operatePipeline={operatePipeline}></Sample>
+                    },{
+                        key: "data_file_browser",
+                        label: "Data File browser",
+                        children: <SysFileBrowser path="/"  type="data"></SysFileBrowser>
+                    },{
+                        key: "analysis_file_browser",
+                        label: "Analysis File browser",
+                        children: <SysFileBrowser path="/" type="analysis"></SysFileBrowser>
                     }
                 ]}
                 tabBarExtraContent={<>
