@@ -80,33 +80,49 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
 
     const buildFormJson = () => {
         if (data?.content?.reInputFile) {
-            return [ ...data?.content?.reInputFile || [],...data.content?.formJson || [], ...data.content?.upstreamFormJson || [],
-            data?.component_type == "software" ? {
-                "name": "group_field",
-                "label": "Group Field",
-                "rules": [
-                    {
-                        "required": true,
-                        "message": "该字段不能为空!"
-                    }
-                ],
-                "type": "GroupFieldSelect"
-            } : {}
-            ]
+            const formJson = [...data?.content?.reInputFile || [], ...data.content?.formJson || [], ...data.content?.upstreamFormJson || []]
+            if (data?.component_type == "software") {
+                formJson.push({
+                    "name": "group_field",
+                    "label": "Group Field",
+                    "rules": [
+                        {
+                            "required": true,
+                            "message": "该字段不能为空!"
+                        }
+                    ],
+                    "type": "GroupFieldSelect"
+                })
+            }
+            return formJson
+            // data?.component_type == "software" ? {
+            //     "name": "group_field",
+            //     "label": "Group Field",
+            //     "rules": [
+            //         {
+            //             "required": true,
+            //             "message": "该字段不能为空!"
+            //         }
+            //     ],
+            //     "type": "GroupFieldSelect"
+            // } : []
+            // ]
         } else {
-            return [ ...data?.inputFormJson || [],...data.content?.formJson || [], ...data.content?.upstreamFormJson || [],
-            data?.component_type == "software" ? {
-                "name": "group_field",
-                "label": "Group Field",
-                "rules": [
-                    {
-                        "required": true,
-                        "message": "该字段不能为空!"
-                    }
-                ],
-                "type": "GroupFieldSelect"
-            } : {}
-            ]
+            const formJson = [...data?.inputFormJson || [], ...data.content?.formJson || [], ...data.content?.upstreamFormJson || []]
+            if (data?.component_type == "software") {
+                formJson.push({
+                    "name": "group_field",
+                    "label": "Group Field",
+                    "rules": [
+                        {
+                            "required": true,
+                            "message": "该字段不能为空!"
+                        }
+                    ],
+                    "type": "GroupFieldSelect"
+                })
+            }
+            return formJson
         }
 
     }
@@ -292,7 +308,7 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                                 ...formJson
                             ]} dataMap={{}} ></FormJsonComp>
 
-                            {/* {JSON.stringify(dbFormJson)} */}
+                            {/* {JSON.stringify(formJson)} */}
                         </>
                     }
                 ]}></Tabs>
