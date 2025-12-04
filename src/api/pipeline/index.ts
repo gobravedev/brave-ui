@@ -11,6 +11,12 @@ export const pagePipelineComponents  = async (params:any)=>{
     return resp
 }
 
+export const pageComponentsRelation  = async (params:any)=>{
+    const resp: any = await axios.post(`/component/page-component-relation`,params)
+    return resp
+}
+
+
 export const listPipelineComponents  = async (params:any)=>{
     const resp: any = await axios.post(`/list-pipeline-components`,params)
     return resp

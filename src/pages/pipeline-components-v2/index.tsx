@@ -43,7 +43,8 @@ const Pipeline: FC<any> = () => {
 
 
     console.log("Pipeline")
-    const { component_type, component_id: name } = useParams()
+    const {  relation_id } = useParams()
+    const component_type = ""
     // console.log(pipelineId)
     const [pipeline, setPipeline] = useState<any>()
     const navigate = useNavigate();
@@ -172,12 +173,12 @@ const Pipeline: FC<any> = () => {
         })
     }
 
-    const getData = async ({ name, component_type }: any) => {
-        let api = `/get-pipeline-v2/${name}?component_type=${component_type}`
-        if (component_type == "script") {
-            api = `/get-component-parent/${name}?component_type=${component_type}`
-        }
-        const resp = await axios.get(api)
+    const getData = async () => {
+        // let api = `/get-pipeline-v2/${name}?component_type=${component_type}`
+        // if (component_type == "script") {
+        //     api = `/get-component-parent/${name}?component_type=${component_type}`
+        // }
+        const resp = await axios.get(`/component/get-components/${relation_id}`)
         // console.log(resp.data)
         let pipeline = resp.data
         if ("content" in pipeline) {
@@ -185,242 +186,243 @@ const Pipeline: FC<any> = () => {
             const { content, ...pipelineRest } = { ...contentJSON, ...pipeline }
             pipeline = pipelineRest
         }
-        if (pipeline["tags"]) {
-            pipeline["tags"] = JSON.parse(pipeline["tags"])
-        }
+        // if (pipeline["tags"]) {
+        //     pipeline["tags"] = JSON.parse(pipeline["tags"])
+        // }
         return pipeline
     }
     const loadData = async () => {
         setLoading(true)
-        const pipeline = await getData({ name, component_type })
+        const pipeline = await getData()
+        setComponent(pipeline)
 
-        setPipeline(pipeline)
-        setLoading(false)
-        console.log(pipeline)
-        let components = pipeline;
+        // setPipeline(pipeline)
+        // setLoading(false)
+        // console.log(pipeline)
+        // let components = pipeline;
 
-        let menus: any[] = []
-        let defaultMenuKey = ""
-        let componentMap: any = {}
-        let defalutView = null
+        // let menus: any[] = []
+        // let defaultMenuKey = ""
+        // let componentMap: any = {}
+        // let defalutView = null
 
-        if (component_type === "pipeline") {
-            menus = menus.concat([
-                {
-                    key: 'workflow',
-                    label: 'Workflow Overview',
-                }, {
-                    key: 'workflow-input',
-                    label: 'Workflow Input',
-                },
-            ])
-            if (pipeline?.software) {
-                // const software = pipeline?.software.map((item: any) => ({
-                //     key: item.component_id,
-                //     label: item.component_name || item.component_id,
-                // }))
-                // // menus = menus.concat(software)
-                // menus.push({
-                //     key: 'tools',
-                //     label: 'Tools',
-                //     children: software,
-                // })
-                const scripts = pipeline?.software.map((item: any, index: any) => {
-                    const children = item.outputFile?.flatMap((it: any) => ([
-                        //  {
-                        //     key: it.component_id,
-                        //     type: 'group',
-                        //     label: `${it.component_name || it.component_id}`,
-                        //     children: [...it.downstreamAnalysis?.map((it2: any) => ({
-                        //         key: it2.component_id,
-                        //         label: it2.component_name || it2.component_id,
-                        //     }))],
-                        // }
+        // if (component_type === "pipeline") {
+        //     menus = menus.concat([
+        //         {
+        //             key: 'workflow',
+        //             label: 'Workflow Overview',
+        //         }, {
+        //             key: 'workflow-input',
+        //             label: 'Workflow Input',
+        //         },
+        //     ])
+        //     if (pipeline?.software) {
+        //         // const software = pipeline?.software.map((item: any) => ({
+        //         //     key: item.component_id,
+        //         //     label: item.component_name || item.component_id,
+        //         // }))
+        //         // // menus = menus.concat(software)
+        //         // menus.push({
+        //         //     key: 'tools',
+        //         //     label: 'Tools',
+        //         //     children: software,
+        //         // })
+        //         const scripts = pipeline?.software.map((item: any, index: any) => {
+        //             const children = item.outputFile?.flatMap((it: any) => ([
+        //                 //  {
+        //                 //     key: it.component_id,
+        //                 //     type: 'group',
+        //                 //     label: `${it.component_name || it.component_id}`,
+        //                 //     children: [...it.downstreamAnalysis?.map((it2: any) => ({
+        //                 //         key: it2.component_id,
+        //                 //         label: it2.component_name || it2.component_id,
+        //                 //     }))],
+        //                 // }
 
-                        ...it.downstreamAnalysis?.map((it2: any) => ({
-                            key: `${it2.component_id}_${index}`,
-                            label: it2.component_name || it2.component_id,
-                        }))
-                    ]))
-                    return {
-                        key: `${item.component_id}-title`,
-                        label: item.component_name || item.component_id,
-                        icon: <AppstoreOutlined />,
-                        children: [
+        //                 ...it.downstreamAnalysis?.map((it2: any) => ({
+        //                     key: `${it2.component_id}_${index}`,
+        //                     label: it2.component_name || it2.component_id,
+        //                 }))
+        //             ]))
+        //             return {
+        //                 key: `${item.component_id}-title`,
+        //                 label: item.component_name || item.component_id,
+        //                 icon: <AppstoreOutlined />,
+        //                 children: [
 
-                            {
-                                key: item.component_id,
-                                label: "Tools Analysis",
-                            }, ...children || []
-                        ],
-                    }
-                })
-                menus = menus.concat(scripts)
-
-
-
-                componentMap = pipeline.software.reduce((acc: any, item: any) => {
-                    acc[item.component_id] = item
-                    return acc
-                }, {})
-
-
-                // visualize downstream scripts
-                const outputFileList = pipeline?.software.flatMap((item: any) => item.outputFile)
-                const downstreamScripts = outputFileList?.filter((it: any) => it?.downstreamAnalysis)?.flatMap((item: any) => {
-                    const { downstreamAnalysis, ...rest } = item
-                    return downstreamAnalysis.map((item2: any) => ({
-                        ...item2,
-                        parent: [rest],
-                    }))
-                })
-
-                const scriptComponentMap = downstreamScripts.reduce((acc: any, item: any) => {
-                    acc[item.component_id] = item
-                    return acc
-                }, {})
-                componentMap = { ...componentMap, ...scriptComponentMap }
-
-            }
-
-            defaultMenuKey = "workflow"
-            defalutView = "workflow"
-            // component = pipeline
-
-        } else if (component_type === "software") {
-            menus = menus.concat([
-                {
-                    key: 'software',
-                    label: 'Tools Analysis',
-                },
-            ])
-            defaultMenuKey = "software"
-            defalutView = "software"
-            // component = pipeline
-            if (pipeline?.outputFile) {
-                const scripts = pipeline?.outputFile.map((item: any) => (
-                    {
-                        key: item.component_id,
-                        label: item.component_name || item.component_id,
-                        type: 'group',
-                        children: [...item.downstreamAnalysis.map((it: any) => ({
-                            key: it.component_id,
-                            component_type: "script",
-                            label: it.component_name || it.component_id,
-                        }))]
-                    }
-
-                ))
-                menus = menus.concat(scripts)
-                const downstreamScripts = pipeline?.outputFile.flatMap((item: any) => {
-                    const { downstreamAnalysis, ...rest } = item
-                    return downstreamAnalysis.map((item2: any) => ({
-                        ...item2,
-                        parent: [rest],
-                    }))
-                })
-
-                componentMap = downstreamScripts.reduce((acc: any, item: any) => {
-                    acc[item.component_id] = item
-                    return acc
-                }, {})
-            }
-
-        } else if (component_type === "script") {
-            // component = pipeline
-            if (pipeline?.parent && pipeline.parent.length > 0) {
-                const { parent, ...rest } = pipeline
-                const filesMenus = parent.map((item: any) => ({
-                    key: item.component_id,
-                    label: item.component_name || item.component_id,
-                }))
-                menus = menus.concat(filesMenus)
-                componentMap = parent.reduce((acc: any, item: any) => {
-                    acc[item.component_id] = {
-                        ...rest,
-                        parent: [item],
-                    }
-                    return acc
-                }, {})
-                defalutView = "script"
-            
-                defaultMenuKey = parent[0]?.component_id || ""
-                components = componentMap[defaultMenuKey]
-            } else {
-                // components = pipeline
-                setComponent(components)
-                defalutView = "script"
-            }
-
-            // setView("script")
-        } else if (component_type === "file") {
-            menus = menus.concat([
-                {
-                    key: 'file',
-                    label: 'File',
-                },
-            ])
-            defalutView = "file"
-            defaultMenuKey = "file"
-            // component = pipeline
-            // setView("file")
-            if (pipeline?.downstreamAnalysis) {
-                const scripts = pipeline?.downstreamAnalysis.map((item: any) => ({
-                    key: item.component_id,
-                    label: item.component_name || item.component_id,
-                }))
-                menus = menus.concat(scripts)
-                const { downstreamAnalysis, ...rest } = pipeline
-
-                componentMap = downstreamAnalysis.reduce((acc: any, item: any) => {
-                    acc[item.component_id] = { ...item, parent: [rest] }
-                    return acc
-                }, {})
-            }
-
-        }
+        //                     {
+        //                         key: item.component_id,
+        //                         label: "Tools Analysis",
+        //                     }, ...children || []
+        //                 ],
+        //             }
+        //         })
+        //         menus = menus.concat(scripts)
 
 
 
+        //         componentMap = pipeline.software.reduce((acc: any, item: any) => {
+        //             acc[item.component_id] = item
+        //             return acc
+        //         }, {})
 
-        if (!menuKey) {
-            setMenuKey(defaultMenuKey)
-            setView(defalutView)
-            setComponent(components)
-            if (defaultMenuKey) {
-                updateQueryParam("key", defaultMenuKey)
-            }
 
-        } else {
-            let key = menuKey
-            if (menuKey.includes("_")) {
-                key = menuKey.split("_")[0]
-            }
-            if (key in componentMap) {
+        //         // visualize downstream scripts
+        //         const outputFileList = pipeline?.software.flatMap((item: any) => item.outputFile)
+        //         const downstreamScripts = outputFileList?.filter((it: any) => it?.downstreamAnalysis)?.flatMap((item: any) => {
+        //             const { downstreamAnalysis, ...rest } = item
+        //             return downstreamAnalysis.map((item2: any) => ({
+        //                 ...item2,
+        //                 parent: [rest],
+        //             }))
+        //         })
 
-                console.log("componentMap[key]: ", componentMap[key])
-                const component = componentMap[key]
-                console.log("component: ", component)
-                setComponent(component)
-                setView(component.component_type)
-            } else {
-                setView(menuKey)
-                setComponent(pipeline)
-            }
-        }
+        //         const scriptComponentMap = downstreamScripts.reduce((acc: any, item: any) => {
+        //             acc[item.component_id] = item
+        //             return acc
+        //         }, {})
+        //         componentMap = { ...componentMap, ...scriptComponentMap }
 
-        // if (!view) {
-        //     setView(defalutView)
-        //     setComponent(pipeline)
-        // } else {
+        //     }
 
+        //     defaultMenuKey = "workflow"
+        //     defalutView = "workflow"
+        //     // component = pipeline
+
+        // } else if (component_type === "software") {
+        //     menus = menus.concat([
+        //         {
+        //             key: 'software',
+        //             label: 'Tools Analysis',
+        //         },
+        //     ])
+        //     defaultMenuKey = "software"
+        //     defalutView = "software"
+        //     // component = pipeline
+        //     if (pipeline?.outputFile) {
+        //         const scripts = pipeline?.outputFile.map((item: any) => (
+        //             {
+        //                 key: item.component_id,
+        //                 label: item.component_name || item.component_id,
+        //                 type: 'group',
+        //                 children: [...item.downstreamAnalysis.map((it: any) => ({
+        //                     key: it.component_id,
+        //                     component_type: "script",
+        //                     label: it.component_name || it.component_id,
+        //                 }))]
+        //             }
+
+        //         ))
+        //         menus = menus.concat(scripts)
+        //         const downstreamScripts = pipeline?.outputFile.flatMap((item: any) => {
+        //             const { downstreamAnalysis, ...rest } = item
+        //             return downstreamAnalysis.map((item2: any) => ({
+        //                 ...item2,
+        //                 parent: [rest],
+        //             }))
+        //         })
+
+        //         componentMap = downstreamScripts.reduce((acc: any, item: any) => {
+        //             acc[item.component_id] = item
+        //             return acc
+        //         }, {})
+        //     }
+
+        // } else if (component_type === "script") {
+        //     // component = pipeline
+        //     if (pipeline?.parent && pipeline.parent.length > 0) {
+        //         const { parent, ...rest } = pipeline
+        //         const filesMenus = parent.map((item: any) => ({
+        //             key: item.component_id,
+        //             label: item.component_name || item.component_id,
+        //         }))
+        //         menus = menus.concat(filesMenus)
+        //         componentMap = parent.reduce((acc: any, item: any) => {
+        //             acc[item.component_id] = {
+        //                 ...rest,
+        //                 parent: [item],
+        //             }
+        //             return acc
+        //         }, {})
+        //         defalutView = "script"
+
+        //         defaultMenuKey = parent[0]?.component_id || ""
+        //         components = componentMap[defaultMenuKey]
+        //     } else {
+        //         // components = pipeline
+        //         setComponent(components)
+        //         defalutView = "script"
+        //     }
+
+        //     // setView("script")
+        // } else if (component_type === "file") {
+        //     menus = menus.concat([
+        //         {
+        //             key: 'file',
+        //             label: 'File',
+        //         },
+        //     ])
+        //     defalutView = "file"
+        //     defaultMenuKey = "file"
+        //     // component = pipeline
+        //     // setView("file")
+        //     if (pipeline?.downstreamAnalysis) {
+        //         const scripts = pipeline?.downstreamAnalysis.map((item: any) => ({
+        //             key: item.component_id,
+        //             label: item.component_name || item.component_id,
+        //         }))
+        //         menus = menus.concat(scripts)
+        //         const { downstreamAnalysis, ...rest } = pipeline
+
+        //         componentMap = downstreamAnalysis.reduce((acc: any, item: any) => {
+        //             acc[item.component_id] = { ...item, parent: [rest] }
+        //             return acc
+        //         }, {})
+        //     }
 
         // }
 
 
 
-        setMenus(menus)
-        setComponentMap(componentMap)
+
+        // if (!menuKey) {
+        //     setMenuKey(defaultMenuKey)
+        //     setView(defalutView)
+        //     setComponent(components)
+        //     if (defaultMenuKey) {
+        //         updateQueryParam("key", defaultMenuKey)
+        //     }
+
+        // } else {
+        //     let key = menuKey
+        //     if (menuKey.includes("_")) {
+        //         key = menuKey.split("_")[0]
+        //     }
+        //     if (key in componentMap) {
+
+        //         console.log("componentMap[key]: ", componentMap[key])
+        //         const component = componentMap[key]
+        //         console.log("component: ", component)
+        //         setComponent(component)
+        //         setView(component.component_type)
+        //     } else {
+        //         setView(menuKey)
+        //         setComponent(pipeline)
+        //     }
+        // }
+
+        // // if (!view) {
+        // //     setView(defalutView)
+        // //     setComponent(pipeline)
+        // // } else {
+
+
+        // // }
+
+
+
+        // setMenus(menus)
+        // setComponentMap(componentMap)
 
 
 
@@ -469,12 +471,12 @@ const Pipeline: FC<any> = () => {
         loadData()
     }, [])
     return <div style={{ maxWidth: "1800px", margin: "1rem auto", padding: `${isSticky ? '0 16px 0 16px' : '0'}` }}>
-
-        <Spin spinning={loading}>
+        {/* {JSON.stringify(pipeline)} */}
+        <Spin spinning={false}>
             {/* {JSON.stringify(pipeline)} */}
             {/* {menuKey} */}
             <Row gutter={[isSticky ? 16 : 0, 16]} style={{}} ref={containerRef} >
-                {(component_type && ["software", "pipeline", "file", "script"].includes(component_type)) &&
+                {/* {(component_type && ["software", "pipeline", "file", "script"].includes(component_type)) &&
                     <Col lg={4} sm={4} xs={24}
                         style={isSticky ? {
                             overflow: "hidden",
@@ -486,9 +488,9 @@ const Pipeline: FC<any> = () => {
                         } : {}}
 
                     >
-                        {/* {top} */}
+
                         <Card
-                            title={pipeline?.component_name}
+                            title={pipeline?.name}
                             extra={<>
                             </>}
                             style={{
@@ -539,8 +541,8 @@ const Pipeline: FC<any> = () => {
                                 items={menus} />
 
                         </Card>
-                    </Col>}
-                <Col lg={size[0]} sm={size[0]} xs={24}
+                    </Col>} */}
+                <Col lg={18} sm={18} xs={24}
                     style={{
 
                         display: "flex",
@@ -564,7 +566,7 @@ const Pipeline: FC<any> = () => {
                             }
                         }}
                         title={<>
-                            {component?.component_name} <Tag color="blue">{component?.script_type}</Tag>
+                            {component?.name} <Tag color="blue">{component?.script_type}</Tag>
                             {component?.category &&
                                 <Tag style={{ marginLeft: "0.5rem" }} color="blue">{component?.category}</Tag>
                             }
@@ -579,7 +581,7 @@ const Pipeline: FC<any> = () => {
                                     }}
                                     style={{ color: "#1890ff" }} />
 
-                                {component?.component_type != "pipeline" && <>
+                                {/* {component?.component_type != "pipeline" && <>
 
                                     <Popconfirm title="Whether to remove?" onConfirm={() => {
                                         operatePipeline.deletePipelineRelation(component.relation_id)
@@ -588,28 +590,9 @@ const Pipeline: FC<any> = () => {
                                             <DeleteOutlined style={{ color: "red" }} />
                                         </Tooltip>
                                     </Popconfirm>
-                                </>}
+                                </>} */}
 
 
-                                {component_type == "pipeline" && <>
-                                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                        openModal("sortSoftware", { software: pipeline.software })
-                                    }}>Update Sorting</Button> */}
-
-
-                                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                        operatePipeline.openModal("modalA", {
-                                            data: undefined, pipelineStructure: {
-                                                relation_type: "pipeline_software",
-                                                parent_component_id: component.component_id,
-                                                pipeline_id: component.component_id
-
-                                            }
-                                        })
-                                    }}>Add Tools</Button> */}
-
-                                </>
-                                }
                                 {/* {
                                     component?.component_type == "software" && <>
 
@@ -636,11 +619,16 @@ const Pipeline: FC<any> = () => {
                                 }}>Metadata</Button>
 
                                 <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                    openModal("modalC", {
-                                        data: component, structure: {
-                                            component_type: component?.component_type,
+                                    openModal("createORUpdateCompnentRelation", {
+                                        // data: component, structure: {
+                                        //     component_type: component?.component_type,
+                                        // }
+                                        data: { relation_id: component.relation_id },
+                                        pipelineStructure: {
+                                            relation_type: "tools",
                                         }
                                     })
+
                                 }}>Edit {component?.component_type}</Button>
 
 
@@ -650,17 +638,13 @@ const Pipeline: FC<any> = () => {
                                         operatePipeline.openModal("modalE", component.databases)
                                     }}>Database</Button>
                                 </>}
-                                {["pipeline", "software", "script"].includes(component?.component_type || "") && <>
-                                    <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                        operatePipeline.openModal("modalB", {
-                                            component_id: component?.component_id,
-                                        })
-                                    }}>Component Code</Button>
+                                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                    operatePipeline.openModal("modalB", {
+                                        component_id: component?.component_id,
+                                    })
+                                }}>Component Code</Button>
 
-                                </>}
-
-
-                                {component_type == "pipeline" && <>
+                                {/* {component_type == "pipeline" && <>
                                     <Dropdown menu={{
                                         onClick: (val: any) => {
                                             const key = val.key
@@ -719,23 +703,23 @@ const Pipeline: FC<any> = () => {
                                             </Space>
                                         </Button>
                                     </Dropdown>
-                                </>}
+                                </>} */}
 
                                 <Button size="small" color="cyan" variant="solid" onClick={loadData}>Refresh</Button>
 
-                                <Button size="small" color="primary" variant="solid" onClick={() => navigate(`/${component_type}-card`)}>Back</Button>
+                                <Button size="small" color="primary" variant="solid" onClick={() => navigate(`/tools-card`)}>Back</Button>
                             </Flex>
 
                         </Flex>}
                     >
                         {/* {JSON.stringify(component)} */}
-                        {(view && component) ? <>
+                        {( component) ? <>
                             <ComponentsDetailsRender
                                 component={component}
                                 operatePipeline={operatePipeline}
                                 project={project_id}
                                 componentLayout={componentLayout}
-                                view={view} />
+                                view={"tools"} />
                         </> : <Skeleton active></Skeleton>}
 
 
@@ -755,7 +739,7 @@ const Pipeline: FC<any> = () => {
                     </Card> */}
 
                 </Col>
-                <Col lg={size[1]} sm={size[1]} xs={24}
+                <Col lg={6} sm={6} xs={24}
                     ref={containerRef} style={isSticky ? {
                         overflow: "hidden",
                         // marginTop: "1rem",
@@ -767,7 +751,7 @@ const Pipeline: FC<any> = () => {
 
                 >
                     <Card
-                        title={`More Info (${component?.component_name})`}
+                        title={`Chat with llm (${component?.name})`}
                         extra={<>
                             {!(component_type && ["script11"].includes(component_type)) && <>
                                 <CloseOutlined onClick={() => {
@@ -864,6 +848,13 @@ const Pipeline: FC<any> = () => {
             visible={modal.key == "modalC" && modal.visible}
             onClose={closeModal}
             params={modal.params}></CreateOrUpdatePipelineComponent>
+
+        <CreateORUpdatePipelineCompnentRelation
+            callback={loadData}
+            visible={modal.key == "createORUpdateCompnentRelation" && modal.visible}
+            onClose={closeModal}
+            params={modal.params}
+        ></CreateORUpdatePipelineCompnentRelation>
         {/* 
         <ImportData
             visible={modals.modalD.visible}

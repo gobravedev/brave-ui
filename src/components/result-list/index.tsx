@@ -188,9 +188,9 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
 
     }
 
-    useEffect(()=>{
+    useEffect(() => {
         reload()
-    },[componentParentIdsMap])
+    }, [componentParentIdsMap])
 
     const getCurrentAnalysisMenthod = (activeTabKey: any) => {
         const analysisMethodDict: any = analysisMethod.reduce((acc: any, item: any) => {
@@ -572,7 +572,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                             //     form.setFieldValue("id", record?.id)
                             // }
                             // readHdfs(record.content)
-                        }}>{ record.type=="folder"?"Open Folder":"Open File" }</Button>
+                        }}>{record.type == "folder" ? "Open Folder" : "Open File"}</Button>
                     </Popover>
 
                     <Dropdown menu={{
@@ -846,9 +846,11 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                     </Popconfirm>}
 
                     <ImportOutlined style={{ cursor: "pointer" }} onClick={() => {
-                        openModal("importFile", { ...currentAnalysisMethod,
+                        openModal("importFile", {
+                            ...currentAnalysisMethod,
                             analysisResultParentId: componentParentIdsMap ? componentParentIdsMap[currentAnalysisMethod.component_id] : undefined,
-                            operatePipeline: operatePipeline })
+                            operatePipeline: operatePipeline
+                        })
                     }} />
 
                     <a onClick={() => {
@@ -856,129 +858,124 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                     }}>Create Folder</a>
 
                     {operatePipeline?.openModal && <>
-                        {(rest.component_type == "software" || rest.component_type == "file" || rest.component_type == "script") && <>
-                            <Dropdown menu={{
-                                items: [
+                        <Dropdown menu={{
+                            items: [
 
-                                    {
-                                        key: '4',
-                                        label: (<Tooltip title={currentAnalysisMethod?.component_name}>
+                                // {
+                                //     key: '4',
+                                //     label: (<Tooltip title={currentAnalysisMethod?.component_name}>
 
+                                //         <a onClick={() => {
+                                //             operatePipeline.openModal("modalC", {
+                                //                 data: undefined,
+                                //                 structure: {
+                                //                     relation_type: relationType, //"software_input_file",
+                                //                     parent_component_id: software.component_id,
+                                //                     // pipeline_id: pipeline.component_id,
+                                //                     component_type: "file"
+                                //                 }
+                                //             })
+                                //         }}>New File</a>
+                                //     </Tooltip>
+                                //     )
+                                // }, 
+                                {
+                                    key: '3',
+                                    label: (
+                                        <Tooltip title={currentAnalysisMethod?.component_name}>
                                             <a onClick={() => {
                                                 operatePipeline.openModal("modalC", {
-                                                    data: undefined,
-                                                    structure: {
-                                                        relation_type: relationType, //"software_input_file",
-                                                        parent_component_id: software.component_id,
-                                                        // pipeline_id: pipeline.component_id,
-                                                        component_type: "file"
+                                                    data: currentAnalysisMethod, structure: {
+                                                        component_type: "file",
                                                     }
                                                 })
-                                            }}>New File</a>
+                                            }}>Edit File</a>
                                         </Tooltip>
-                                        )
-                                    }, {
-                                        key: '3',
-                                        label: (
-                                            <Tooltip title={currentAnalysisMethod?.component_name}>
-                                                <a onClick={() => {
-                                                    operatePipeline.openModal("modalC", {
-                                                        data: currentAnalysisMethod, structure: {
-                                                            component_type: "file",
-                                                        }
-                                                    })
-                                                }}>Edit File</a>
-                                            </Tooltip>
-                                        )
-                                    }, {
-                                        key: '2',
-                                        label: (
-                                            <Tooltip title={currentAnalysisMethod?.component_name}>
-                                                <a onClick={() => {
-                                                    operatePipeline.openModal("modalA", {
-                                                        data: undefined,
-                                                        pipelineStructure: {
-                                                            relation_type: relationType, //"software_input_file",
-                                                            parent_component_id: software.component_id,
-                                                            // pipeline_id: pipeline.component_id
-                                                        }
-                                                    })
-                                                }}>Add File</a>
-                                            </Tooltip>
+                                    )
+                                }, 
+                                // {
+                                //     key: '2',
+                                //     label: (
+                                //         <Tooltip title={currentAnalysisMethod?.component_name}>
+                                //             <a onClick={() => {
+                                //                 operatePipeline.openModal("modalA", {
+                                //                     data: undefined,
+                                //                     pipelineStructure: {
+                                //                         relation_type: relationType, //"software_input_file",
+                                //                         parent_component_id: software.component_id,
+                                //                         // pipeline_id: pipeline.component_id
+                                //                     }
+                                //                 })
+                                //             }}>Add File</a>
+                                //         </Tooltip>
 
-                                        )
-                                    }, {
-                                        key: '1',
-                                        label: (
-                                            <Tooltip title={currentAnalysisMethod?.component_name}>
-                                                <a onClick={() => {
-                                                    // operatePipeline.setOperateOpen(true)
-                                                    // operatePipeline.setPipelineRecord(currentAnalysisMethod)
-                                                    // operatePipeline.setPipelineStructure({ pipeline_type: pipelineType })
-                                                    operatePipeline.openModal("modalA", {
-                                                        data: currentAnalysisMethod,
-                                                        pipelineStructure: {
-                                                            relation_type: relationType,// "software_input_file",
-                                                            // pipeline_id: pipeline.component_id
-                                                            // parent_component_id: currentAnalysisMethod.component_id,
-                                                            // pipeline_id: currentAnalysisMethod.pipeline_id
-                                                        }
-                                                    })
-                                                }}>Replace File</a>
-                                            </Tooltip>
-                                        )
-                                    },
-                                    {
-                                        label: (
-                                            <Tooltip title={currentAnalysisMethod?.component_name}>
-                                                <Popconfirm title="Whether to remove file?" onConfirm={() => {
-                                                    operatePipeline.deletePipelineRelation(currentAnalysisMethod.relation_id)
-                                                }}>
-                                                    {/* <Button size="small" color="cyan" variant="solid" ></Button> */}
-                                                    <a>Remove File</a>
-                                                </Popconfirm>
-                                            </Tooltip>
-                                        ),
-                                        key: '0',
-                                    },
-                                    {
-                                        label: (
-                                            <Tooltip title={currentAnalysisMethod?.component_name}>
-                                                <Popconfirm title="Whether bind metadata?" onConfirm={async () => {
-                                                    await axios.post(`/analysis-result/batch-bind-sample/${currentAnalysisMethod.component_id}?project_id=${project}`)
-                                                    message.success("Bind metadata successfully!")
-                                                    reload()
-                                                }}>
-                                                    <a>Bind metadata</a>
-                                                </Popconfirm>
-                                            </Tooltip>
-                                        ),
-                                        key: '9',
-                                    },
-                                    {
-                                        label: (
-                                            <Tooltip title={currentAnalysisMethod?.component_name}>
-                                                <Popconfirm title="Remove all?" onConfirm={async () => {
-                                                    await axios.post(`/analysis-result/batch-remove/${currentAnalysisMethod.component_id}?project_id=${project}`)
-                                                    message.success("Remove all successfully!")
-                                                    reload()
-                                                }}>
-                                                    <a>Remove all</a>
-                                                </Popconfirm>
-                                            </Tooltip>
-                                        ),
-                                        key: '10',
-                                    }
-                                ]
-                            }}>
-                                <a onClick={(e) => e.preventDefault()}>
-                                    <Space>
-                                        More
-                                        <DownOutlined />
-                                    </Space>
-                                </a>
-                            </Dropdown>
-                        </>}
+                                //     )
+                                // }, {
+                                //     key: '1',
+                                //     label: (
+                                //         <Tooltip title={currentAnalysisMethod?.component_name}>
+                                //             <a onClick={() => {
+            
+                                //                 operatePipeline.openModal("modalA", {
+                                //                     data: currentAnalysisMethod,
+                                //                     pipelineStructure: {
+                                //                         relation_type: relationType,
+                                                  
+                                //                     }
+                                //                 })
+                                //             }}>Replace File</a>
+                                //         </Tooltip>
+                                //     )
+                                // },
+                                // {
+                                //     label: (
+                                //         <Tooltip title={currentAnalysisMethod?.component_name}>
+                                //             <Popconfirm title="Whether to remove file?" onConfirm={() => {
+                                //                 operatePipeline.deletePipelineRelation(currentAnalysisMethod.relation_id)
+                                //             }}>
+                                //                 <a>Remove File</a>
+                                //             </Popconfirm>
+                                //         </Tooltip>
+                                //     ),
+                                //     key: '0',
+                                // },
+                                {
+                                    label: (
+                                        <Tooltip title={currentAnalysisMethod?.component_name}>
+                                            <Popconfirm title="Whether bind metadata?" onConfirm={async () => {
+                                                await axios.post(`/analysis-result/batch-bind-sample/${currentAnalysisMethod.component_id}?project_id=${project}`)
+                                                message.success("Bind metadata successfully!")
+                                                reload()
+                                            }}>
+                                                <a>Bind metadata</a>
+                                            </Popconfirm>
+                                        </Tooltip>
+                                    ),
+                                    key: '9',
+                                },
+                                {
+                                    label: (
+                                        <Tooltip title={currentAnalysisMethod?.component_name}>
+                                            <Popconfirm title="Remove all?" onConfirm={async () => {
+                                                await axios.post(`/analysis-result/batch-remove/${currentAnalysisMethod.component_id}?project_id=${project}`)
+                                                message.success("Remove all successfully!")
+                                                reload()
+                                            }}>
+                                                <a>Remove all</a>
+                                            </Popconfirm>
+                                        </Tooltip>
+                                    ),
+                                    key: '10',
+                                }
+                            ]
+                        }}>
+                            <a onClick={(e) => e.preventDefault()}>
+                                <Space>
+                                    More
+                                    <DownOutlined />
+                                </Space>
+                            </a>
+                        </Dropdown>
                     </>}
 
                     <RedoOutlined style={{ cursor: "pointer" }} onClick={reload} />
@@ -1015,7 +1012,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                 {JSON.stringify(analysisMethod,null,2)}
             </pre> */}
 
-            {/* {JSON.stringify(rest)} */}
+            {/* {JSON.stringify(currentAnalysisMethod)} */}
             {/* {JSON.stringify(projectObj)} */}
             {/* {JSON.stringify(filteredData)} */}
             {sseData.msgType === "analysis_result" && <>

@@ -52,6 +52,7 @@ type AnalysisSoftware = {
     description?: string
     componentLayout?: string
     component_name?: string
+    name?: string
 }
 
 const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
@@ -190,7 +191,7 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
                     items={[
                         {
                             key: '1',
-                            label: `Output File  (${rest?.component_name})`,
+                            label: `Output File  (${rest?.name})`,
                             children: <>
                                 {checkAvailable(outputFile) ? <UpstreamAnalysisOutput
                                     {...rest}
@@ -383,7 +384,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
                     items={[
                         {
                             key: '1',
-                            label: `Input File (${rest.component_name})`,
+                            label: `Input File (${rest.name})`,
                             children: <>
 
                                 {/* {JSON.stringify(componentParentIdsMap)} */}
@@ -692,14 +693,12 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
                 setRecord={(data: any) => { setRecord(data) }}
             ></ResultList>
         </>}
-        {(!script && currentAnalysisMethod) && <Flex gap={"small"} justify="center" style={{ margin: "2rem" }}>
-            {/* {JSON.stringify(currentAnalysisMethod)} */}
+        {/* {(!script && currentAnalysisMethod) && <Flex gap={"small"} justify="center" style={{ margin: "2rem" }}>
             <Button size="small" color="cyan" variant="solid" onClick={() => {
                 operatePipeline.openModal("modalC", {
                     data: undefined,
                     structure: {
                         relation_type: "file_script",
-                        // pipeline_id: pipeline.component_id,
                         parent_component_id: currentAnalysisMethod?.component_id,
                         component_type: "script"
                     }
@@ -710,7 +709,6 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
                     data: undefined,
                     pipelineStructure: {
                         relation_type: "file_script",
-                        // pipeline_id: pipeline.component_id,
                         parent_component_id: currentAnalysisMethod?.component_id,
                     }
                 })
@@ -718,7 +716,7 @@ export const UpstreamAnalysisOutput: FC<any> = (rest) => {
             }}>Add Script ({currentAnalysisMethod.component_name})</Button>
 
 
-        </Flex>}
+        </Flex>} */}
 
 
     </>
@@ -898,7 +896,7 @@ export const ScriptAnalysis: FC<any> = (rest) => {
                                     <li>file:{currentAnalysisMethod?.component_id}</li>
                                     <li>script:{downstreamData?.component_id}</li>
                                 </ul>
-                            </>}>Run  Analysis {downstreamData ? `(${downstreamData.component_name})` : ""}{analysis_id ? `(${analysis_id})` : ""}</Tooltip>,
+                            </>}>Input File {downstreamData ? `(${downstreamData.component_name})` : ""}{analysis_id ? `(${analysis_id})` : ""}</Tooltip>,
                             children: <>
                                 {analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 0 && <>
                                     <ResultList
@@ -953,6 +951,18 @@ export const ScriptAnalysis: FC<any> = (rest) => {
                                         })
 
                                     }}>Add File</Button>
+
+
+                                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                        operatePipeline.openModal("modalA", {
+                                            data: { relation_id: currentAnalysisMethod?.relation_id },
+                                            pipelineStructure: {
+                                                relation_type: "parent_file_script", //"software_input_file",
+                                                component_id: downstreamData.component_id,
+                                                // pipeline_id: pipeline.component_id
+                                            }
+                                        })
+                                    }}>Update File</Button>
 
 
                                     {downstreamData.relation_id && <>
@@ -1033,6 +1043,47 @@ export const ScriptAnalysis: FC<any> = (rest) => {
             ></AnalysisList>
         }
 
+
+        <Collapse
+            style={{ marginTop: "1rem" }}
+            // defaultActiveKey={['1']}
+            size="small"
+            items={[
+                {
+                    key: '1',
+                    label: "Output File",
+                    children: <>
+                        {/* {JSON.stringify(currentAnalysisMethod)} */}
+
+                        <Flex justify="center" style={{ margin: "2rem" }} gap={"small"}>
+                            {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                operatePipeline.openModal("modalC", {
+                                    data: undefined,
+                                    structure: {
+                                        relation_type: "script_file", //"software_input_file",
+                                        parent_component_id: script.component_id,
+                                        // pipeline_id: pipeline.component_id,
+                                        component_type: "file"
+                                    }
+                                })
+                            }}>New File</Button> */}
+                            <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                operatePipeline.openModal("modalA", {
+                                    data: { relation_id: currentAnalysisMethod?.relation_id },
+                                    pipelineStructure: {
+                                        relation_type: "script_file", //"software_input_file",
+                                        parent_component_id: script.component_id,
+                                        // pipeline_id: pipeline.component_id
+                                    }
+                                })
+                            }}>Add Output File</Button>
+                        </Flex>
+
+                    </>
+                },
+
+            ]}
+        />
 
     </>
 }

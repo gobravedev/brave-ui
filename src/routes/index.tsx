@@ -56,17 +56,21 @@ const AnalysisSoftware = lazy(() => import('@/pages/pipeline-components/software
 const AnalysisFile = lazy(() => import('@/pages/pipeline-components/file'));
 const Script = lazy(() => import('@/pages/pipeline-components/script'));
 const Pipeline = lazy(() => import('@/pages/pipeline-components'));
+
+const ComponentsV2 = lazy(() => import('@/pages/pipeline-components-v2'));
+const ComponentsCardV2 = lazy(() => import('@/components/pipeline-components-card-v2'));
+
 const PipelineComponentsCard = lazy(() => import('@/components/pipeline-components-card'));
 const SoftwareAnalysisEditor = lazy(() => import('@/pages/software-analysis-editor'));
 const AnalysisReport = lazy(() => import('@/pages/analysis-report'));
 const EntityPage = lazy(() => import('@/pages/entity'));
 const EntityRelation = lazy(() => import('@/pages/entity-relation'));
-const PsycMicroGraphHome = lazy(()=>import("@/pages/psycmicrograph"))
-const Test = lazy(()=>import("@/pages/test"))
-const Mining = lazy(()=>import("@/pages/mining"))
-const MiningData = lazy(()=>import("@/pages/mining/components/mining-data"))
-const ToolKit = lazy(()=>import("@/pages/tool-kit"))
-const DigitalTwins = lazy(()=>import("@/pages/digital-twins"))
+const PsycMicroGraphHome = lazy(() => import("@/pages/psycmicrograph"))
+const Test = lazy(() => import("@/pages/test"))
+const Mining = lazy(() => import("@/pages/mining"))
+const MiningData = lazy(() => import("@/pages/mining/components/mining-data"))
+const ToolKit = lazy(() => import("@/pages/tool-kit"))
+const DigitalTwins = lazy(() => import("@/pages/digital-twins"))
 const ContainerPage = lazy(() => import('@/pages/container'));
 const Files = lazy(() => import('@/pages/files'));
 const InteractiveTools = lazy(() => import('@/pages/interactive-tools'));
@@ -76,7 +80,7 @@ import { useDispatch } from "react-redux";
 
 const rootElement = document.getElementById("root")!;
 const appType = rootElement.getAttribute("data-app");
-console.log("data-app: ",appType)
+console.log("data-app: ", appType)
 let routes: RouteObject[] = []
 if (appType == "index") {
     const children = [
@@ -109,16 +113,30 @@ if (appType == "index") {
         },
         {
             path: "/pipeline-card",
-            element: <PipelineComponentsCard 
-            params={{ component_type: "pipeline" }} />
+            element: <PipelineComponentsCard
+                params={{ component_type: "pipeline" }} />
         },
         {
             path: "/tool-kit",
             element: <ToolKit />
-        },{
+        }, {
             path: "/files",
             element: <Files />
-        },
+        }, {
+            path: "/tools-card",
+            element: <ComponentsCardV2
+                // map={(item: any) => ({
+                //     ...item,
+                //     name: item.component_name,
+                //     path: `/tools/${item.component_id}`,
+
+                // })}
+                // params={{ relation_type: "tools" }}
+                 />
+        }, {
+            path: "/tools/:relation_id",
+            element: <ComponentsV2 />
+        }, 
         {
             path: "/software-card",
             element: <PipelineComponentsCard
@@ -126,14 +144,14 @@ if (appType == "index") {
                     ...item,
                     name: item.component_name,
                     path: `/software/${item.component_id}`,
-                 
+
                 })}
                 params={{ component_type: "software" }} />
         }, {
             path: "/file-card",
             element: <PipelineComponentsCard
                 map={(item: any) => ({
-                     ...item,
+                    ...item,
                     name: item.component_name,
                     path: `/software/${item.component_id}`,
                 })}
@@ -155,8 +173,12 @@ if (appType == "index") {
 
         {
             path: "/component/:component_type/:component_id",
-            element: <Pipeline             />
-        }, {
+            element: <Pipeline />
+        }, 
+         
+        
+        
+        {
             path: "/software/:softwareId",
             element: <AnalysisSoftware />
         },
@@ -217,11 +239,11 @@ if (appType == "index") {
         }, {
             path: "/:project/single_genome/gene-expression",
             element: <GeneExpressison />
-        },{
+        }, {
             path: "/interactive-tools",
             element: <InteractiveTools />
         }
-        
+
     ]
     routes = [
         {
@@ -233,14 +255,14 @@ if (appType == "index") {
             children: [
                 ...children,
             ]
-        },{
+        }, {
             path: "/test",
             element: <Test />
         },
     ]
 } else if (appType == "micrograph") {
     const children = [
-       
+
         {
             path: "/",
             element: <PsycMicroGraphHome />
@@ -352,15 +374,15 @@ if (appType == "index") {
         }, {
             path: "/mining",
             element: <Mining />
-        },{
+        }, {
             path: "/mining-data/:entity_id",
             element: <MiningData />
-        },{
+        }, {
             path: "/digital-twins",
             element: <DigitalTwins />
         },
-        
-        
+
+
 
         {
             path: "/:project/meta_genome/reads-based-abundance-analysis",

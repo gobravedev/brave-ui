@@ -225,47 +225,19 @@ const App: React.FC = () => {
             },
             children: [
                 {
-                    key: `/pipeline-card`,
-                    label: {
-                        zh_CN: "分析流程",
-                        en_US: "Workflows"
-                    },
-                    children: [
-                        {
-                            key: `/component/pipeline`,
-                            // label: {
-                            //     zh_CN: "",
-                            //     en_US: "report"
-                            // },
-                            hidden: true
-                        }
-                    ]
-                },
-                {
-                    key: `/software-card`,
+
+                    key: `/tools-card`,
                     label: {
                         zh_CN: "工具",
                         en_US: "Tools"
                     },
                     children: [
                         {
-                            key: `/component/software`,
-                            // label: "分析报告",
-                            hidden: true
-                        }
-                    ]
-                },
-
-                {
-                    key: `/script-card`,
-                    label: {
-                        zh_CN: "可视化",
-                        en_US: "Visualization"
-                    },
-                    children: [
-                        {
-                            key: `/component/script`,
-                            // label: "分析报告",
+                            key: `/tools`,
+                            // label: {
+                            //     zh_CN: "",
+                            //     en_US: "report"
+                            // },
                             hidden: true
                         }
                     ]
@@ -282,7 +254,52 @@ const App: React.FC = () => {
                             hidden: true
                         }
                     ]
-                }
+                }, {
+                    key: `/pipeline-card`,
+                    label: {
+                        zh_CN: "分析流程(deprecated)",
+                        en_US: "Workflows(deprecated)"
+                    },
+                    children: [
+                        {
+                            key: `/component/pipeline`,
+                            // label: {
+                            //     zh_CN: "",
+                            //     en_US: "report"
+                            // },
+                            hidden: true
+                        }
+                    ]
+                },
+                {
+                    key: `/software-card`,
+                    label: {
+                        zh_CN: "工具(deprecated)",
+                        en_US: "Tools(deprecated)"
+                    },
+                    children: [
+                        {
+                            key: `/component/software`,
+                            // label: "分析报告",
+                            hidden: true
+                        }
+                    ]
+                },
+
+                {
+                    key: `/script-card`,
+                    label: {
+                        zh_CN: "可视化(deprecated)",
+                        en_US: "Visualization(deprecated)"
+                    },
+                    children: [
+                        {
+                            key: `/component/script`,
+                            // label: "分析报告",
+                            hidden: true
+                        }
+                    ]
+                },
             ]
         }, {
             key: `/files`,
@@ -290,7 +307,7 @@ const App: React.FC = () => {
                 zh_CN: "文件",
                 en_US: "Files"
             }
-        },{
+        }, {
             key: `/tasks`,
             label: {
                 zh_CN: "任务",
@@ -348,7 +365,7 @@ const App: React.FC = () => {
                 //         en_US: "Analysis Result"
                 //     },
                 // },
-                 {
+                {
                     key: `/container-page`,
                     label: {
                         zh_CN: "容器管理",

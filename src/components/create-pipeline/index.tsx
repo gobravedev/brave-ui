@@ -11,194 +11,6 @@ import { es, tr } from "@faker-js/faker"
 import { PlusOutlined } from '@ant-design/icons'
 
 
-export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClose, params, callback }) => {
-    if (!visible) return null;
-
-    const { data, pipelineStructure, namespace } = params
-    const [form] = Form.useForm()
-    const [pipeline, setPipeline] = useState<any>()
-    const [pipelineRelation, setPipelineRelation] = useState<any>()
-    const [components, setComponents] = useState<any>([])
-    const [loading, setLoaidng] = useState<any>(false)
-    const componentMap: any = {
-        // wrap_pipeline: WrapPipeline,
-        // pipeline: WrapPipeline,
-        pipeline_software: DefaultComponentRelation,
-        software_input_file: DefaultComponentRelation,
-        software_output_file: DefaultComponentRelation,
-        file_script: DefaultComponentRelation,
-        parent_file_script: AddFileComponentRelation
-    }
-    const ComponentsRender = ({ relation_type, data, form }: any) => {
-        const Component = componentMap[relation_type] || (() => <div>未知类型 {JSON.stringify(data)}</div>);
-        return <Component data={data} form={form} components={components}></Component>
-    }
-    const listPipelineComponents = async (componentType: any) => {
-        const resp = await listPipelineComponentsApi({
-            component_type: componentType,
-            namespace: namespace
-        })
-        const data = resp.data.map((item: any) => {
-            const content = JSON.parse(item.content)
-            if (pipelineStructure.relation_type == "pipeline_software") {
-                return {
-                    label: `${item.component_name}(${item.component_id})`,
-                    value: item.component_id
-                }
-            } else if (pipelineStructure.relation_type == "file_script") {
-                return {
-                    label: `${item.component_name}(${item.component_id})`,
-                    value: item.component_id
-                }
-            } else {
-                return {
-                    label: `${item.component_name}(${item.component_id})`,
-                    value: item.component_id
-                }
-            }
-
-        })
-        console.log(data)
-        setComponents(data)
-        console.log(resp)
-    }
-    const getPipeleineRelation = async (relationId: any) => {
-        const resp = await axios.post(`/find-pipeline-relation/${relationId}`)
-
-        const data = resp.data
-        setPipelineRelation(data)
-        form.setFieldsValue(data)
-    }
-    // const getPipeleine = async (componentId: any) => {
-    //     const resp = await axios.post("/find-pipeline", { component_id: componentId })
-
-    //     const data = resp.data
-    //     data['content'] = JSON.parse(data['content']) //JSON.stringify(JSON.parse(data['content']), null, 2)
-    //     setPipeline(data)
-    //     // form.setFieldsValue(data)
-    // }
-
-    useEffect(() => {
-
-        if (visible) {
-            if (pipelineStructure.relation_type == "pipeline_software") {
-                listPipelineComponents("software")
-            } else if (pipelineStructure.relation_type == "software_input_file"
-                || pipelineStructure.relation_type == "parent_file_script"
-                || pipelineStructure.relation_type == "software_output_file") {
-                listPipelineComponents("file")
-
-            } else if (pipelineStructure.relation_type == "file_script") {
-                listPipelineComponents("script")
-            }
-            if (data) {
-                getPipeleineRelation(data.relation_id)
-
-                // 
-            } else {
-                form.resetFields()
-            }
-        }
-
-    }, [visible])
-    const getParams = (values: any) => {
-        const params = {
-            ...values,
-            ...pipelineStructure,
-
-        }
-        if (params.relation_type == "parent_file_script") {
-            params.relation_type = "file_script"
-        }
-        if (data) {
-            params['relation_id'] = pipelineRelation.relation_id
-            // params['parent_component_id'] = pipelineRelation.parent_component_id
-        }
-        // if (pipelineStructure.relation_type == "pipeline_software") {
-        //     params['component_id'] = values.to_component_id
-        // }else{
-
-        // }
-        // if (data) {
-        //     params['parent_component_id'] =data.componemt_id
-        //     params['pipeline_id'] =data.pipeline_id
-        // }
-
-        return params
-    }
-    const savePipeline = async () => {
-        setLoaidng(true)
-        const values = await form.validateFields()
-        const params = getParams(values)
-        if (typeof params['content'] != 'string') {
-            params['content'] = JSON.stringify(params['content'])
-        }
-
-        console.log(params)
-        try {
-            const resp = await axios.post("/save-pipeline-relation", params)
-            console.log(resp)
-            setLoaidng(false)
-            onClose()
-            if (callback) {
-                callback()
-            }
-        } catch (error) {
-            setLoaidng(false)
-        }
-
-
-    }
-    return <>
-        <Modal
-            loading={loading}
-            title={`${data ? "Update" : "Add"} (${pipelineStructure?.relation_type})`}
-            okText={data ? "Update" : "Add"}
-            onOk={savePipeline}
-            open={visible}
-            footer={(_, { OkBtn, CancelBtn }) => (
-                <>
-                    {/* <Button>编辑组件</Button> */}
-                    <CancelBtn />
-                    <OkBtn />
-                </>
-            )}
-            onClose={() => onClose()}
-            onCancel={() => onClose()}>
-            <Form form={form}>
-
-                {/* 
-                <Form.Item name={"component_id"} label="组件">
-                    <Select showSearch options={components}></Select>
-                </Form.Item> */}
-
-                {pipelineRelation && <>
-                    {/* {JSON.stringify(pipelineRelation)}
-                    <hr /> */}
-                    {/*  */}
-                </>}
-                <ComponentsRender {...pipelineStructure} data={pipeline} form={form}></ComponentsRender>
-                <Collapse ghost items={[
-                    {
-                        key: "1",
-                        label: "More",
-                        children: <>
-                            <Form.Item noStyle shouldUpdate>
-                                {() => (
-                                    <Typography>
-                                        <pre>{JSON.stringify(getParams(form.getFieldsValue()), null, 2)}</pre>
-                                    </Typography>
-                                )}
-                            </Form.Item>
-                        </>
-                    }
-                ]} />
-
-            </Form>
-
-        </Modal>
-    </>
-}
 
 
 const PipelineSoftwareComponent: FC<any> = ({ components }) => {
@@ -212,7 +24,6 @@ const PipelineSoftwareComponent: FC<any> = ({ components }) => {
     </>
 }
 
-export default CreateORUpdatePipelineCompnentRelation
 
 
 const UploadComp: FC<any> = ({ value, onChange, component_id }) => {
@@ -275,6 +86,19 @@ const DefaultComponentRelation: FC<any> = ({ data, form, components }) => {
             <Select showSearch options={components}></Select>
         </Form.Item>
 
+    </>
+}
+const Tools: FC<any> = ({ components }) => {
+    return <>
+        <Form.Item name={"component_id"} label="Script">
+            <Select showSearch options={components?.scripts} ></Select>
+        </Form.Item>
+        <Form.Item name={"input_component_ids"} label="Input File">
+            <Select showSearch options={components?.files} mode="multiple"></Select>
+        </Form.Item>
+        <Form.Item name={"output_component_ids"} label="Output File">
+            <Select showSearch options={components?.files} mode="multiple"></Select>
+        </Form.Item>
     </>
 }
 import { softwareTemplete, scriptTemplete, fileTemplete } from './templete'
@@ -509,9 +333,9 @@ const WrapPipeline: FC<any> = ({ data, form }) => {
         const opentions = resp.data.map((item: any) => ({ label: `${item.name}`, value: item.container_id }))
         setContainers(opentions)
     }
-    useEffect(()=>{
+    useEffect(() => {
         loadData()
-    },[])
+    }, [])
     return <>
         {/* <Form.Item name={"pipeline_key"} label="pipeline_key">
             <Input disabled={data ? true : false}></Input>
@@ -873,3 +697,234 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
         </Drawer>
     </>
 }
+
+const componentRelationMap: any = {
+    // wrap_pipeline: WrapPipeline,
+    // pipeline: WrapPipeline,
+    pipeline_software: DefaultComponentRelation,
+    software_input_file: DefaultComponentRelation,
+    software_output_file: DefaultComponentRelation,
+    file_script: DefaultComponentRelation,
+    parent_file_script: AddFileComponentRelation,
+    tools: Tools
+}
+const ComponentsRelationRender = ({ relation_type, data, form, components }: any) => {
+    const Component = componentRelationMap[relation_type] || (() => <div>未知类型 {JSON.stringify(data)}</div>);
+    return <Component data={data} form={form} components={components}></Component>
+}
+export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClose, params, callback }) => {
+    if (!visible) return null;
+
+    const { data, pipelineStructure, namespace } = params
+    const [form] = Form.useForm()
+    const [pipeline, setPipeline] = useState<any>()
+    const [pipelineRelation, setPipelineRelation] = useState<any>()
+    const [components, setComponents] = useState<any>([])
+    const [loading, setLoaidng] = useState<any>(false)
+
+    const listPipelineComponents = async (componentType: any) => {
+        const resp = await listPipelineComponentsApi({
+            component_type: componentType,
+            namespace: namespace
+        })
+        const data = resp.data.map((item: any) => {
+            const content = JSON.parse(item.content)
+            if (pipelineStructure.relation_type == "pipeline_software") {
+                return {
+                    label: `${item.component_name}(${item.component_id})`,
+                    value: item.component_id
+                }
+            } else if (pipelineStructure.relation_type == "file_script") {
+                return {
+                    label: `${item.component_name}(${item.component_id})`,
+                    value: item.component_id
+                }
+            } else {
+                return {
+                    label: `${item.component_name}(${item.component_id})`,
+                    value: item.component_id
+                }
+            }
+
+        })
+        return data
+    }
+
+    const loadData = async () => {
+        setLoaidng(true)
+        if (pipelineStructure.relation_type == "pipeline_software") {
+            const data = await listPipelineComponents("software")
+            setComponents(data)
+        } else if (pipelineStructure.relation_type == "software_input_file"
+            || pipelineStructure.relation_type == "parent_file_script"
+            || pipelineStructure.relation_type == "software_output_file") {
+            const data = await listPipelineComponents("file")
+            setComponents(data)
+
+        } else if (pipelineStructure.relation_type == "file_script") {
+            const data = await listPipelineComponents("script")
+            setComponents(data)
+        } else if (pipelineStructure.relation_type == "tools") {
+            const files = await listPipelineComponents("file")
+            const scripts = await listPipelineComponents("script")
+
+            setComponents({
+                files: files,
+                scripts: scripts
+            })
+        }
+
+
+        if (data) {
+            await getPipeleineRelation(data.relation_id)
+
+            // 
+        } else {
+            form.resetFields()
+        }
+        setLoaidng(false)
+    }
+    const getPipeleineRelation = async (relationId: any) => {
+        const resp = await axios.post(`/find-pipeline-relation/${relationId}`)
+
+        const data = resp.data
+        // if (data?.tags) {
+        //     data['tags'] = JSON.parse(data['tags'])
+        // }
+        // if (data?.input_component_ids) {
+        //     data['input_component_ids'] = JSON.parse(data['input_component_ids'])
+        // }
+        // if (data?.output_component_ids) {
+        //     data['output_component_ids'] = JSON.parse(data['output_component_ids'])
+        // }
+        setPipelineRelation(data)
+        form.setFieldsValue(data)
+    }
+    // const getPipeleine = async (componentId: any) => {
+    //     const resp = await axios.post("/find-pipeline", { component_id: componentId })
+
+    //     const data = resp.data
+    //     data['content'] = JSON.parse(data['content']) //JSON.stringify(JSON.parse(data['content']), null, 2)
+    //     setPipeline(data)
+    //     // form.setFieldsValue(data)
+    // }
+
+    useEffect(() => {
+
+        if (visible) {
+            loadData()
+        }
+
+    }, [visible])
+    const getParams = (values: any) => {
+        const params = {
+            ...values,
+            ...pipelineStructure,
+
+        }
+        if (params.relation_type == "parent_file_script") {
+            params.relation_type = "file_script"
+        }
+        if (data) {
+            params['relation_id'] = pipelineRelation.relation_id
+            // params['parent_component_id'] = pipelineRelation.parent_component_id
+        }
+        // if (pipelineStructure.relation_type == "pipeline_software") {
+        //     params['component_id'] = values.to_component_id
+        // }else{
+
+        // }
+        // if (data) {
+        //     params['parent_component_id'] =data.componemt_id
+        //     params['pipeline_id'] =data.pipeline_id
+        // }
+
+        return params
+    }
+    const savePipeline = async () => {
+        setLoaidng(true)
+        const values = await form.validateFields()
+        const params = getParams(values)
+        if (typeof params['content'] != 'string') {
+            params['content'] = JSON.stringify(params['content'])
+        }
+
+        console.log(params)
+        try {
+            const resp = await axios.post("/save-pipeline-relation", params)
+            console.log(resp)
+            setLoaidng(false)
+            onClose()
+            if (callback) {
+                callback()
+            }
+        } catch (error) {
+            setLoaidng(false)
+        }
+
+
+    }
+    return <>
+        {/* savePipeline */}
+        <Drawer
+            loading={loading}
+            title={`${data ? "Update" : "Create"} (${pipelineStructure?.relation_type})`}
+            open={visible}
+            extra={<>
+                <Button size="small" color="cyan" variant="solid" onClick={savePipeline}>
+                    {data ? "Update" : "Create"}
+                </Button>
+            </>}
+            width={"80%"}
+            onClose={() => onClose()}>
+
+
+            <Form form={form}>
+                <Form.Item name={"name"} label="Name">
+                    <Input ></Input>
+                </Form.Item>
+                <ComponentsRelationRender components={components} {...pipelineStructure} data={pipeline} form={form}></ComponentsRelationRender>
+
+                <Form.Item name={"tags"} label="Tags">
+                    <Select
+                        mode="tags"
+                        style={{ width: '100%' }}
+                    />
+                </Form.Item>
+                <Form.Item name={"category"} label="Category">
+                    <Input ></Input>
+                </Form.Item>
+                {/* valuePropName="fileList"  getValueFromEvent={normFile}*/}
+                {/* {data?.component_id && <Form.Item label="Upload" name={"img"}  >
+                    <UploadComp component_id={data?.component_id}></UploadComp>
+                </Form.Item>} */}
+                <Form.Item label="Order" name={"order_index"} initialValue={0}>
+                    <InputNumber ></InputNumber >
+                </Form.Item>
+
+                <Form.Item name={"description"} label="Description">
+                    <TextArea></TextArea>
+                </Form.Item>
+
+                <Collapse ghost items={[
+                    {
+                        key: "1",
+                        label: "More",
+                        children: <>
+                            <Form.Item noStyle shouldUpdate>
+                                {() => (
+                                    <Typography>
+                                        <pre>{JSON.stringify(getParams(form.getFieldsValue()), null, 2)}</pre>
+                                    </Typography>
+                                )}
+                            </Form.Item>
+                        </>
+                    }
+                ]} />
+
+            </Form>
+
+        </Drawer>
+    </>
+}
+export default CreateORUpdatePipelineCompnentRelation
