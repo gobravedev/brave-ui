@@ -1,7 +1,7 @@
-import { Button, Card, Collapse, Divider, Drawer, Flex, Form, Input, InputNumber, Modal, Popconfirm, Select, Space, Tabs, Typography, Upload, UploadFile, UploadProps } from "antd"
+import { Button, Card, Collapse, Divider, Drawer, Flex, Form, Input, InputNumber, Modal, Popconfirm, Select, Skeleton, Space, Spin, Tabs, Typography, Upload, UploadFile, UploadProps } from "antd"
 import TextArea from "antd/es/input/TextArea"
 import axios from "axios"
-import { FC, memo, use, useEffect, useRef, useState } from "react"
+import { FC, lazy, memo, Suspense, use, useEffect, useRef, useState } from "react"
 import { listPipelineComponents as listPipelineComponentsApi } from '@/api/pipeline'
 import { useModal } from "@/hooks/useModal"
 import { data } from "react-router"
@@ -25,6 +25,49 @@ const PipelineSoftwareComponent: FC<any> = ({ components }) => {
 }
 
 
+const UploadRelationComp: FC<any> = ({ value, onChange, relation_id }) => {
+    const [fileList, setFileList] = useState<any>([])
+    const { baseURL } = useSelector((state: any) => state.user)
+
+    const handleChange: UploadProps['onChange'] = ({ file, fileList }) => {
+        // console.log()
+        setFileList([file]);
+        if (file.status === 'done') {
+            console.log(file)
+            onChange(`${file.response.url}`)
+
+        }
+
+        // console.log(fileList)
+    }
+
+    useEffect(() => {
+        if (value) {
+            setFileList([{
+                uid: '-1',
+                name: 'image.png',
+                status: 'done',
+                url: `${baseURL}${value}`
+            }])
+        }
+
+    }, [value])
+    return <>
+        {/* {value} */}
+        <Upload
+            onChange={handleChange}
+            fileList={fileList}
+            action={`${baseURL}/brave-api/component/relation-img-upload/${relation_id}`} listType="picture-card"  >
+            <button
+                style={{ color: 'inherit', cursor: 'inherit', border: 0, background: 'none' }}
+                type="button"
+            >
+                <PlusOutlined />
+                <div style={{ marginTop: 8 }}>Upload</div>
+            </button>
+        </Upload>
+    </>
+}
 
 const UploadComp: FC<any> = ({ value, onChange, component_id }) => {
     const [fileList, setFileList] = useState<any>([])
@@ -104,6 +147,7 @@ const Tools: FC<any> = ({ components }) => {
 import { softwareTemplete, scriptTemplete, fileTemplete } from './templete'
 import ContainerPage from "@/pages/container"
 import { useSelector } from "react-redux"
+import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 const SoftwareContent: FC<any> = ({ data, form }) => {
     const [templete, setTemplete] = useState<any>()
     const [containers, setContainers] = useState<any>([])
@@ -152,8 +196,8 @@ const ScriptContent: FC<any> = ({ data, form }) => {
         const resp = await axios.get(`/container/list-all`)
         const opentions = resp.data.map((item: any) => ({ label: `${item.name}`, value: item.container_id }))
         setContainers(opentions)
-
     }
+    const content = Form.useWatch((values: any) => values?.content, form);
 
 
     useEffect(() => {
@@ -167,7 +211,7 @@ const ScriptContent: FC<any> = ({ data, form }) => {
         <Form.Item name={"container_id"} label="Container" rules={[{ required: true, message: 'Please select container!' }]}>
             <SelectContainer mode="none" containers={containers}></SelectContainer>
         </Form.Item>
-        <Form.Item name={"tools_container_id"} label="Tools Container Id" rules={[{ required: true, message: 'Please select container!' }]}>
+        <Form.Item name={"tools_container_id"} label="Tools Container Id" >
             <SelectContainer mode="multiple" containers={containers}></SelectContainer>
         </Form.Item>
         <Form.Item name={"script_type"} label="Script Type" rules={[{ required: true, message: 'Please select script type!' }]}>
@@ -180,10 +224,47 @@ const ScriptContent: FC<any> = ({ data, form }) => {
         <Form.Item name={"content"} label="content" rules={[{ required: true, message: 'Please input content!' }]}>
             <TextAreaComp templete={templete}></TextAreaComp>
         </Form.Item>
+        <PreviewJsonForm value={content}></PreviewJsonForm>
+
+
+
 
         {/* <Form.Item name={"component_id"} label="component_id">
             <Input></Input>
         </Form.Item> */}
+    </>
+}
+
+
+const PreviewJsonForm: FC<any> = ({ value }) => {
+    const message = useGlobalMessage()
+
+    const [formJson, setFormJson] = useState<any>([])
+    const [databases, setDatabases] = useState<any>([])
+
+    const renderFormJson = () => {
+        try {
+            const data = JSON.parse(value)
+            if (data?.formJson) {
+                setFormJson(data.formJson)
+                message.success("Render form json success!")
+            }
+            if (data?.databases) {
+                setDatabases(data.databases)
+            }
+        } catch (error) {
+            message.error("Invalid JSON format!")
+        }
+    }
+    return <>
+        <Button size="small" onClick={renderFormJson}>render</Button>
+        <Suspense fallback={<Skeleton active />}>
+            <RenderFromJson
+                formJson={formJson}
+                databases={databases}
+                dataMap={{}}
+            ></RenderFromJson>
+        </Suspense>
     </>
 }
 const FileContent: FC<any> = ({ data, form, structure }) => {
@@ -276,14 +357,17 @@ const TextAreaContent: FC<any> = ({ data, form }) => {
         </Form.Item> */}
     </>
 }
+const RenderFromJson = lazy(() => import("@/components/edit-params/render-form-json"));
 const TextAreaComp: FC<any> = ({ value, onChange, templete }) => {
     // const [data, setData] = useState<any>(JSON.stringify(value))
     const editorRef = useRef<any>(null)
+
     useEffect(() => {
         if (templete) {
             onChange(templete)
         }
     }, [])
+
     // useEffect(()=>{
     //     // setData(JSON.stringify(value))
     //     // editorRef.current.getValue()
@@ -296,8 +380,11 @@ const TextAreaComp: FC<any> = ({ value, onChange, templete }) => {
             // console.log(e.target.value)
         }}></TextArea> */}
         {/* {templete} */}
-
+        {/* {value} */}
         <MonacoEditor value={value} onChange={onChange} editorRef={editorRef} defaultLanguage="json" ></MonacoEditor>
+
+
+
         {/* <Button onClick={() => {
             setData(JSON.stringify(value, null, 2))
         }}>格式化</Button> */}
@@ -486,11 +573,46 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
     if (!visible) return null;
 
     const { data, structure } = params
+
+    return <>
+        <Drawer
+            // loading={loading}
+            title={`${data ? "Update" : "Create"} Component(${structure?.component_type})`}
+            // okText={data ? "Update" : "Create"}
+            // onCancel={() => onClose()}
+            // onOk={savePipeline}
+            forceRender={true}
+
+            open={visible}
+            width={"80%"}
+            extra={<>
+
+            </>}
+            onClose={() => onClose()}
+        // onCancel={() => onClose()}
+        >
+            <CreateOrUpdatePipeline data={data} structure={structure} callback={() => {
+                onClose()
+                if (callback) {
+                    callback()
+                }
+
+            }} />
+
+        </Drawer>
+    </>
+}
+
+
+export const CreateOrUpdatePipeline: FC<any> = ({ data, structure, callback }) => {
+    // if (!visible) return null;
+
+    // const { data, structure } = params
     const [form] = Form.useForm()
     const [component, setComponent] = useState<any>()
     const { namespace } = useSelector((state: any) => state.user);
 
-    const [loading, setLoaidng] = useState<any>(false)
+    const [loading, setLoading] = useState<any>(false)
 
 
     const getPipeleine = async (componentId: any) => {
@@ -521,23 +643,19 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
 
 
     useEffect(() => {
-
-        if (visible) {
-            if (data) {
-                getPipeleine(data.component_id)
-            } else {
-                form.resetFields()
-            }
+        if (data?.component_id) {
+            getPipeleine(data.component_id)
+        } else {
+            form.resetFields()
         }
-
-    }, [visible])
+    }, [data])
     const getParams = (values: any) => {
         const params = {
             ...values,
             ...structure,
 
         }
-        if (data) {
+        if (component?.component_id) {
             // params['relation_id'] = pipelineRelation.relation_id
             // params['parent_component_id'] = pipelineRelation.parent_component_id
             params['component_id'] = component.component_id
@@ -557,7 +675,7 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
         return params
     }
     const savePipeline = async () => {
-        setLoaidng(true)
+        setLoading(true)
         const values = await form.validateFields()
         const params = getParams(values)
         if (typeof params['content'] != 'string') {
@@ -581,14 +699,14 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
         try {
             const resp = await axios.post("/save-pipeline", params)
             console.log(resp)
-            setLoaidng(false)
+            setLoading(false)
             if (callback) {
                 callback()
                 // await axios.get("/get-pipeline-v2/d9830ebd-240e-4758-adab-dd3a9d17e414")
             }
-            onClose()
+            // onClose()
         } catch (error) {
-            setLoaidng(false)
+            setLoading(false)
         }
 
     }
@@ -609,7 +727,7 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
         }];
     };
     return <>
-        <Drawer
+        {/* <Drawer
             loading={loading}
             title={`${data ? "Update" : "Create"} Component(${structure?.component_type})`}
             // okText={data ? "Update" : "Create"}
@@ -620,60 +738,75 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
             open={visible}
             width={"80%"}
             extra={<>
-                <Button size="small" color="cyan" variant="solid" onClick={savePipeline}>
-                    {data ? "Update" : "Create"}
-                </Button>
+
             </>}
             onClose={() => onClose()}
-        // onCancel={() => onClose()}
-        >
-            {/* {namespace} */}
-            <Form form={form}>
-                <Tabs items={[
-                    {
-                        label: "Component Info",
-                        key: "1",
-                        children: <>
-                            {/* <Form.Item name={"namespace"} label="Namespace"   >
+
+        > */}
+        {/* {namespace} */}
+
+        <Spin spinning={loading}>
+            <Form form={form} >
+                <Tabs
+                    tabBarExtraContent={<Space>
+                        {data?.component_id &&
+                            <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                getPipeleine(data.component_id)
+                            }}>
+                                Refresh
+                            </Button>
+                        }
+
+                        <Button size="small" color="cyan" variant="solid" onClick={savePipeline}>
+                            {data?.component_id ? "Update" : "Create"}
+                        </Button>
+                    </Space>
+                    }
+                    items={[
+                        {
+                            label: "Component Info",
+                            key: "1",
+                            children: <>
+                                {/* <Form.Item name={"namespace"} label="Namespace"   >
                                 <Input disabled></Input>
                             </Form.Item> */}
 
-                            <Form.Item name={"component_name"} label="Component Name" rules={[{ required: true, message: 'Please input component name!' }]}>
-                                <Input ></Input>
-                            </Form.Item>
+                                <Form.Item name={"component_name"} label="Component Name" rules={[{ required: true, message: 'Please input component name!' }]}>
+                                    <Input ></Input>
+                                </Form.Item>
 
 
 
-                            <ComponentsRender structure={structure} {...structure} data={component} form={form}></ComponentsRender>
-                        </>
-                    }, {
-                        label: "Component Description",
-                        key: "2",
-                        children: <>
-                            <Form.Item name={"tags"} label="Tags">
-                                <Select
-                                    mode="tags"
-                                    style={{ width: '100%' }}
-                                />
-                            </Form.Item>
-                            <Form.Item name={"category"} label="Category">
-                                <Input ></Input>
-                            </Form.Item>
-                            {/* valuePropName="fileList"  getValueFromEvent={normFile}*/}
-                            {data?.component_id && <Form.Item label="Upload" name={"img"}  >
-                                <UploadComp component_id={data?.component_id}></UploadComp>
-                            </Form.Item>}
-                            <Form.Item label="Order" name={"order_index"} initialValue={0}>
-                                <InputNumber ></InputNumber >
-                            </Form.Item>
+                                <ComponentsRender structure={structure} {...structure} data={component} form={form}></ComponentsRender>
+                            </>
+                        }, {
+                            label: "Component Description",
+                            key: "2",
+                            children: <>
+                                <Form.Item name={"tags"} label="Tags">
+                                    <Select
+                                        mode="tags"
+                                        style={{ width: '100%' }}
+                                    />
+                                </Form.Item>
+                                <Form.Item name={"category"} label="Category">
+                                    <Input ></Input>
+                                </Form.Item>
+                                {/* valuePropName="fileList"  getValueFromEvent={normFile}*/}
+                                {data?.component_id && <Form.Item label="Upload" name={"img"}  >
+                                    <UploadComp component_id={data?.component_id}></UploadComp>
+                                </Form.Item>}
+                                <Form.Item label="Order" name={"order_index"} initialValue={0}>
+                                    <InputNumber ></InputNumber >
+                                </Form.Item>
 
-                            <Form.Item name={"description"} label="Description">
-                                <TextAreaComp templete={""}></TextAreaComp>
+                                <Form.Item name={"description"} label="Description">
+                                    <TextAreaComp templete={""}></TextAreaComp>
 
-                            </Form.Item>
-                        </>
-                    }
-                ]}>
+                                </Form.Item>
+                            </>
+                        }
+                    ]}>
                 </Tabs>
 
                 <Collapse ghost items={[
@@ -693,8 +826,11 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
                 ]} />
 
             </Form>
+        </Spin>
 
-        </Drawer>
+
+
+        {/* </Drawer> */}
     </>
 }
 
@@ -895,9 +1031,11 @@ export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClo
                     <Input ></Input>
                 </Form.Item>
                 {/* valuePropName="fileList"  getValueFromEvent={normFile}*/}
-                {/* {data?.component_id && <Form.Item label="Upload" name={"img"}  >
-                    <UploadComp component_id={data?.component_id}></UploadComp>
-                </Form.Item>} */}
+                {/* {JSON.stringify(data)} */}
+                {data?.relation_id && <Form.Item label="Upload" name={"img"}  >
+                    {/* {data?.relation_id} */}
+                    <UploadRelationComp relation_id={data?.relation_id}></UploadRelationComp>
+                </Form.Item>}
                 <Form.Item label="Order" name={"order_index"} initialValue={0}>
                     <InputNumber ></InputNumber >
                 </Form.Item>

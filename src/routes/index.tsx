@@ -57,8 +57,9 @@ const AnalysisFile = lazy(() => import('@/pages/pipeline-components/file'));
 const Script = lazy(() => import('@/pages/pipeline-components/script'));
 const Pipeline = lazy(() => import('@/pages/pipeline-components'));
 
-const ComponentsV2 = lazy(() => import('@/pages/pipeline-components-v2'));
-const ComponentsCardV2 = lazy(() => import('@/components/pipeline-components-card-v2'));
+const ComponentsRelation = lazy(() => import('@/pages/components-relation'));
+const ComponentsRelationCard = lazy(() => import('@/components/pipeline-components-card-v2'));
+const Components = lazy(() => import('@/pages/components-relation/components'));
 
 const PipelineComponentsCard = lazy(() => import('@/components/pipeline-components-card'));
 const SoftwareAnalysisEditor = lazy(() => import('@/pages/software-analysis-editor'));
@@ -123,20 +124,39 @@ if (appType == "index") {
             path: "/files",
             element: <Files />
         }, {
-            path: "/tools-card",
-            element: <ComponentsCardV2
+            path: "/workflow-card",
+            element: <ComponentsRelationCard
                 // map={(item: any) => ({
                 //     ...item,
                 //     name: item.component_name,
                 //     path: `/tools/${item.component_id}`,
 
                 // })}
-                // params={{ relation_type: "tools" }}
-                 />
+                params={{ relation_type: "workflow" }}
+            />
         }, {
-            path: "/tools/:relation_id",
-            element: <ComponentsV2 />
-        }, 
+            path: "/tools-card",
+            element: <ComponentsRelationCard
+                // map={(item: any) => ({
+                //     ...item,
+                //     name: item.component_name,
+                //     path: `/tools/${item.component_id}`,
+
+                // })}
+                params={{ relation_type: "tools" }}
+            />
+        }, {
+            path: "/relation/:relation_type/:relation_id",
+            element: <ComponentsRelation />
+        }, {
+            path: "/componentsV2/:component_type",
+            element: <Components />
+        },
+
+
+
+
+
         {
             path: "/software-card",
             element: <PipelineComponentsCard
@@ -174,10 +194,10 @@ if (appType == "index") {
         {
             path: "/component/:component_type/:component_id",
             element: <Pipeline />
-        }, 
-         
-        
-        
+        },
+
+
+
         {
             path: "/software/:softwareId",
             element: <AnalysisSoftware />

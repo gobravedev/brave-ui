@@ -43,7 +43,7 @@ const Pipeline: FC<any> = () => {
 
 
     console.log("Pipeline")
-    const {  relation_id } = useParams()
+    const { relation_type, relation_id } = useParams()
     const component_type = ""
     // console.log(pipelineId)
     const [pipeline, setPipeline] = useState<any>()
@@ -604,7 +604,7 @@ const Pipeline: FC<any> = () => {
                                     </>
                                 } */}
                                 <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                    openModal("publishModal", { ...pipeline, component_type: component_type })
+                                    openModal("publishModal", { ...component, relation_type: relation_type })
                                 }}>Publish</Button>
 
                                 <Button size="small" color="cyan" variant="solid" onClick={() => {
@@ -615,7 +615,7 @@ const Pipeline: FC<any> = () => {
                                     operatePipeline.openModal("modalG", pipeline)
                                 }}>Dependencies</Button>
                                 <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                    openModals("metadataModal", { ...pipeline, operatePipeline: operatePipeline })
+                                    openModals("metadataModal", { ...component, operatePipeline: operatePipeline })
                                 }}>Metadata</Button>
 
                                 <Button size="small" color="cyan" variant="solid" onClick={() => {
@@ -625,11 +625,23 @@ const Pipeline: FC<any> = () => {
                                         // }
                                         data: { relation_id: component.relation_id },
                                         pipelineStructure: {
-                                            relation_type: "tools",
+                                            relation_type: relation_type,
                                         }
                                     })
 
-                                }}>Edit {component?.component_type}</Button>
+                                }}>Edit {component?.relation_type}</Button>
+                                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                    openModal("createOrUpdatePipelineComponent", {
+                                        data: {component_id: component?.component_id}, structure: {
+                                            component_type: "script",
+                                        }
+                                        // data: { relation_id: component.relation_id },
+                                        // pipelineStructure: {
+                                        //     relation_type: "tools",
+                                        // }
+                                    })
+
+                                }}>Edit Script</Button>
 
 
 
@@ -707,19 +719,19 @@ const Pipeline: FC<any> = () => {
 
                                 <Button size="small" color="cyan" variant="solid" onClick={loadData}>Refresh</Button>
 
-                                <Button size="small" color="primary" variant="solid" onClick={() => navigate(`/tools-card`)}>Back</Button>
+                                <Button size="small" color="primary" variant="solid" onClick={() => navigate(`/${relation_type}-card`)}>Back</Button>
                             </Flex>
 
                         </Flex>}
                     >
                         {/* {JSON.stringify(component)} */}
-                        {( component) ? <>
+                        {(component) ? <>
                             <ComponentsDetailsRender
                                 component={component}
                                 operatePipeline={operatePipeline}
                                 project={project_id}
                                 componentLayout={componentLayout}
-                                view={"tools"} />
+                                view={relation_type} />
                         </> : <Skeleton active></Skeleton>}
 
 
@@ -845,7 +857,7 @@ const Pipeline: FC<any> = () => {
             callback={loadData}
             // pipelineStructure={pipelineStructure}
             // data={record}
-            visible={modal.key == "modalC" && modal.visible}
+            visible={modal.key == "createOrUpdatePipelineComponent" && modal.visible}
             onClose={closeModal}
             params={modal.params}></CreateOrUpdatePipelineComponent>
 
@@ -947,11 +959,11 @@ const PublishModal: FC<any> = ({ visible, onClose, params }) => {
     // component_id: str
     // store_path:Optional[str]=None
     // force: Optional[bool]=False
-    const publishToStore = async (component_id: any, store_path: any = undefined) => {
+    const publishToStore = async (relation_id: any, store_path: any = undefined) => {
         try {
             setLoading(true)
-            const resp = await axios.post(`/publish-component`, {
-                component_id: component_id,
+            const resp = await axios.post(`/publish-relation`, {
+                relation_id: relation_id,
                 store_path: store_path,
                 force: force
             })
@@ -973,7 +985,7 @@ const PublishModal: FC<any> = ({ visible, onClose, params }) => {
     return <Modal
         loading={loading}
         title={<>
-            {`Publish ${params?.component_name} (${params?.component_type})`}
+            {`Publish ${params?.name} (${params?.relation_type})`}
             <Switch style={{ marginLeft: "1rem" }} checked={force} onChange={(checked) => { setForce(checked) }} /> Force
         </>}
         open={visible}
@@ -981,6 +993,7 @@ const PublishModal: FC<any> = ({ visible, onClose, params }) => {
         footer={null}
 
     >
+        {/* {JSON.stringify(params)} */}
         <Flex gap={"small"} style={{ marginBottom: "1rem" }}>
             {/* <Popconfirm title={"pubpish?"} onConfirm={() => publishToStore(params?.component_id, undefined)}>
                 <Button size="small" color="cyan" variant="solid"
@@ -991,7 +1004,7 @@ const PublishModal: FC<any> = ({ visible, onClose, params }) => {
 
             {storeList.map((item: any, index: any) => (
                 <Tooltip title={item.store_path} key={index}>
-                    <Popconfirm title={"pubpish?"} onConfirm={() => publishToStore(params?.component_id, item.store_path)}>
+                    <Popconfirm title={"pubpish?"} onConfirm={() => publishToStore(params?.relation_id, item.store_path)}>
 
                         <Button size="small" color="cyan" variant="solid"
 

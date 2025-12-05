@@ -20,7 +20,7 @@ import { base } from "@faker-js/faker"
 import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 import { add } from "@dnd-kit/utilities"
 import { useStickyTop } from "@/hooks/useStickyTop"
-const PipelineComponentsCard: FC<any> = ({  map }) => {
+const PipelineComponentsCard: FC<any> = ({ params, map }) => {
     const { Search } = Input;
     // const [searchText, setSearchText] = useState("");
     const { baseURL } = useSelector((state: any) => state.user)
@@ -32,8 +32,8 @@ const PipelineComponentsCard: FC<any> = ({  map }) => {
 
 
     // const [pipelineComponents, setPipelineComponents] = useState<any>([])
-    // const { relation_type } = params
-    const params = {relation_type:"tools"}
+    const { relation_type } = params
+    // const params = {relation_type:"tools"}
     const mapFun = (item: any) => {
         // if (map) {
         //     item = map(item)
@@ -44,7 +44,7 @@ const PipelineComponentsCard: FC<any> = ({  map }) => {
         // console.log(item)
         return {
             ...item,
-            path: `/tools/${item.relation_id}`,
+            path: `/relation/${relation_type}/${item.relation_id}`,
             // id: item.id,
             // component_id: item.component_id,
             // name: item.component_name,
@@ -75,7 +75,7 @@ const PipelineComponentsCard: FC<any> = ({  map }) => {
     const [categoryLoading, setCategoryLoading] = useState(false)
     const loadCateory = async () => {
         setCategoryLoading(true)
-        const resp = await axios.get(`/component/get-all-category`)
+        const resp = await axios.get(`/component/get-all-relation-category`)
         setCategory(["all", ...resp.data])
         setCategoryLoading(false)
     }
@@ -171,14 +171,14 @@ const PipelineComponentsCard: FC<any> = ({  map }) => {
                         <Flex gap="small">
                             <Button size="small" color="cyan" variant="solid" onClick={() => {
                                 openModal("installComponents", { relation_type: "tools" })
-                            }}>Intsall Components </Button>
+                            }}>Intsall {relation_type} </Button>
 
                             <Button size="small" color="cyan" variant="solid" onClick={() => {
 
                                 openModal("createORUpdateCompnentRelation", {
                                     data: undefined,
                                     pipelineStructure: {
-                                        relation_type: "tools",
+                                        relation_type: relation_type,
                                     }
                                 })
                             }}>Create Components </Button>
@@ -253,39 +253,50 @@ const PipelineComponentsCard: FC<any> = ({  map }) => {
                                     <span style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)", fontSize: "0.5rem" }}> {item?.namespace_name}</span>
                                 </Tooltip> */}
                                         </Flex>} description={item?.description} style={{ marginBottom: "1rem" }} />
-                                        {item.tags && Array.isArray(item.tags) && item.tags.map((tag: any, index: any) => (
-                                            <Tooltip key={index} title={tag}>
-                                                <Tag style={{
-                                                    wordBreak: "break-word",
-                                                    whiteSpace: "nowrap",
-                                                    overflow: "hidden",
-                                                    textOverflow: "ellipsis",
-                                                    maxWidth: 100,
-                                                    display: "inline-block",
-                                                    cursor: "default"
-                                                }} color={colors[index]}>{tag}</Tag>
-                                            </Tooltip>
+                                        <Tag style={{
+                                            wordBreak: "break-word",
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis",
+                                            maxWidth: 100,
+                                            display: "inline-block",
+                                            cursor: "default"
+                                        } } color="blue">
+                                            { item?.category}
+                                        </Tag>
+                                    {item.tags && Array.isArray(item.tags) && item.tags.map((tag: any, index: any) => (
+                                        <Tooltip key={index} title={tag}>
+                                            <Tag style={{
+                                                wordBreak: "break-word",
+                                                whiteSpace: "nowrap",
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis",
+                                                maxWidth: 100,
+                                                display: "inline-block",
+                                                cursor: "default"
+                                            }} color={colors[index]}>{tag}</Tag>
+                                        </Tooltip>
 
-                                        ))}
-                                        {/* {JSON.stringify(item)} */}
+                                    ))}
+                                    {/* {JSON.stringify(item)} */}
 
-                                        <div onClick={(e) => {
-                                            e.stopPropagation()
-                                            openModal("modalG", item)
-                                            // setCreateOpen(true)
-                                            // console.log(item)
-                                            // setRecord(item)
-                                        }} style={{
-                                            position: "absolute",
-                                            right: 10,
-                                            bottom: 10,
-                                            fontSize: 15,
-                                            color: "rgba(0,0,0,0.45)",
-                                            cursor: "pointer",
-                                        }}>
-                                            <ApartmentOutlined />
-                                        </div>
-                                        {/* <div style={{
+                                    <div onClick={(e) => {
+                                        e.stopPropagation()
+                                        openModal("modalG", item)
+                                        // setCreateOpen(true)
+                                        // console.log(item)
+                                        // setRecord(item)
+                                    }} style={{
+                                        position: "absolute",
+                                        right: 10,
+                                        bottom: 10,
+                                        fontSize: 15,
+                                        color: "rgba(0,0,0,0.45)",
+                                        cursor: "pointer",
+                                    }}>
+                                        <ApartmentOutlined />
+                                    </div>
+                                    {/* <div style={{
                                 position: "absolute",
                                 right: 40,
                                 bottom: 10,
@@ -297,7 +308,7 @@ const PipelineComponentsCard: FC<any> = ({  map }) => {
                                     {item.namespace_name}
                                 </Tooltip>
                             </div> */}
-                                        {/* <EditOutlined
+                                    {/* <EditOutlined
                                 onClick={(e) => {
                                     e.stopPropagation()
                                     openModal("modalA", {
@@ -335,86 +346,86 @@ const PipelineComponentsCard: FC<any> = ({  map }) => {
                                     }}
                                 />
                             </Popconfirm> */}
-                                    </Card>
+                                </Card>
                                 </Col>
                             ))}
 
-                        </Row> : <Empty></Empty>}
-                    </Spin>
-                    {totalPage != 0 && <Flex style={{ marginTop: "1rem" }} align="center">
-                        A total of {totalPage}records &nbsp;
-                        <Pagination
-                            current={pageNumber}
-                            pageSize={pageSize}
-                            total={totalPage}
-                            onChange={(p) => setPageNumber(p)}
-                            showSizeChanger={false}
-                        />
-                    </Flex>}
-                </Card>
-            </Col>
-            <Col lg={3} sm={3} xs={24}
-                style={isSticky ? {
-                    overflow: "hidden",
-                    // marginTop: "1rem",
-                    position: "sticky",
-                    top: `${top}px`, // 吸顶距离
-                    alignSelf: "flex-start", // 避免被stretch
-                    height: `calc(100vh - ${top}px - 1rem )`, // 可选：固定高度，让内部滚动
-                } : {}}
-            // style={{
+                    </Row> : <Empty></Empty>}
+                </Spin>
+                {totalPage != 0 && <Flex style={{ marginTop: "1rem" }} align="center">
+                    A total of {totalPage}records &nbsp;
+                    <Pagination
+                        current={pageNumber}
+                        pageSize={pageSize}
+                        total={totalPage}
+                        onChange={(p) => setPageNumber(p)}
+                        showSizeChanger={false}
+                    />
+                </Flex>}
+            </Card>
+        </Col>
+        <Col lg={3} sm={3} xs={24}
+            style={isSticky ? {
+                overflow: "hidden",
+                // marginTop: "1rem",
+                position: "sticky",
+                top: `${top}px`, // 吸顶距离
+                alignSelf: "flex-start", // 避免被stretch
+                height: `calc(100vh - ${top}px - 1rem )`, // 可选：固定高度，让内部滚动
+            } : {}}
+        // style={{
 
-            //     display: "flex",
-            //     flexDirection: "column", // 让 Card 撑满高度
-            //     height: "100%",          // 关键：继承 Row 的高度
-            // }}
-            >
-                <Card
-                    style={{
+        //     display: "flex",
+        //     flexDirection: "column", // 让 Card 撑满高度
+        //     height: "100%",          // 关键：继承 Row 的高度
+        // }}
+        >
+            <Card
+                style={{
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    height: " 100%"
+                }}
+                styles={{
+                    body: {
+                        // height: "90%",
                         flex: 1,
-                        display: "flex",
-                        flexDirection: "column",
-                        height: " 100%"
-                    }}
-                    styles={{
-                        body: {
-                            // height: "90%",
-                            flex: 1,
-                            overflowY: "auto"
-                        }
-                    }}
-                    extra={<RedoOutlined style={{ cursor: "pointer" }} onClick={() => loadCateory()} />}
-                    size="small"
-                    loading={categoryLoading}
-                    title={<span style={{ fontWeight: 600 }}>Category</span>}
+                        overflowY: "auto"
+                    }
+                }}
+                extra={<RedoOutlined style={{ cursor: "pointer" }} onClick={() => loadCateory()} />}
+                size="small"
+                loading={categoryLoading}
+                title={<span style={{ fontWeight: 600 }}>Category</span>}
 
-                >
-                    {categoryLoading ? (
-                        <Skeleton active paragraph={{ rows: 5 }} />
-                    ) : (
-                        <List
-                            dataSource={category}
-                            split={false}
-                            renderItem={(item) => (
-                                <List.Item
+            >
+                {categoryLoading ? (
+                    <Skeleton active paragraph={{ rows: 5 }} />
+                ) : (
+                    <List
+                        dataSource={category}
+                        split={false}
+                        renderItem={(item) => (
+                            <List.Item
+                                style={{
+                                    padding: "6px 0",
+                                    border: "none",
+                                }}
+                            >
+                                <Button
+                                    block
+                                    type={activeCategory === item ? "primary" : "default"}
+                                    onClick={() => setActiveCategory(item)}
                                     style={{
-                                        padding: "6px 0",
-                                        border: "none",
+                                        textAlign: "left",
+                                        borderRadius: "8px",
+                                        transition: "all 0.2s",
                                     }}
+                                    className="hover:shadow-md"
                                 >
-                                    <Button
-                                        block
-                                        type={activeCategory === item ? "primary" : "default"}
-                                        onClick={() => setActiveCategory(item)}
-                                        style={{
-                                            textAlign: "left",
-                                            borderRadius: "8px",
-                                            transition: "all 0.2s",
-                                        }}
-                                        className="hover:shadow-md"
-                                    >
-                                        {item}
-                                        {/* {activeCategory === item && (
+                                    {item}
+                                    {/* {activeCategory === item && (
                                             <Tag
                                                 color="blue"
                                                 style={{
@@ -425,19 +436,19 @@ const PipelineComponentsCard: FC<any> = ({  map }) => {
                                                 ✓
                                             </Tag>
                                         )} */}
-                                    </Button>
-                                </List.Item>
-                            )}
-                        />
-                    )}
-                </Card>
-            </Col>
-        </Row>
+                                </Button>
+                            </List.Item>
+                        )}
+                    />
+                )}
+            </Card>
+        </Col>
+    </Row>
 
 
 
 
-        {/* <CreatePipeline
+    {/* <CreatePipeline
             callback={loadPipeine}
             pipelineStructure={{
                 pipeline_type: "wrap_pipeline",
@@ -463,11 +474,11 @@ const PipelineComponentsCard: FC<any> = ({  map }) => {
             params={modal.params}
         ></CreateORUpdatePipelineCompnentRelation>
 
-        {/* <CreateOrUpdateNamespace
+    {/* <CreateOrUpdateNamespace
             visible={modal.key == "modalB" && modal.visible}
             onClose={closeModal}
             params={modal.params}></CreateOrUpdateNamespace> */}
-        {/* <InstallNamespace
+    {/* <InstallNamespace
             visible={modal.key == "modalC" && modal.visible}
             onClose={closeModal}
             params={modal.params}></InstallNamespace> */}
@@ -484,7 +495,7 @@ const PipelineComponentsCard: FC<any> = ({  map }) => {
             callback={reload}
             params={modal.params}
         ></InstallComponents>
-    </div>
+    </div >
 }
 
 export default PipelineComponentsCard
@@ -509,11 +520,11 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
 
     // const isRemote = storePosition == "Remote"
     useEffect(() => {
-        if (visible && params?.component_type) {
+        if (visible && params?.relation_type) {
             loadStoreList()
 
         }
-    }, [visible, params?.component_type, address])
+    }, [visible, params?.relation_type, address])
 
     const loadStoreList = async () => {
         try {
@@ -550,9 +561,9 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
         setComponentLoading(true)
         // list-by-type/${store_name}?component_type=${params?.component_type}&is_remote=${isRemote ? 'true' : 'false'}
         try {
-            const resp = await axios.post(`/component-store/list-components`, {
+            const resp = await axios.post(`/component-store/list-relations`, {
                 store_name: store_name,
-                component_type: params?.component_type,
+                relation_type: params?.relation_type,
                 address: address,
                 remote_force: remote_force,
                 token: githubToken,
@@ -594,7 +605,7 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
     }
     return <Modal footer={null} title={<Flex gap={"small"}>
 
-        <span>{`Install Components`} </span>
+        <span>{`Install ${params?.relation_type}`} </span>
         <RedoOutlined style={{ cursor: "pointer" }} onClick={() => {
             if (address == "github") {
                 loadData(tabKey, true)
@@ -651,10 +662,10 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
                                         okButtonProps={{ color: `${item.installed ? "red" : "blue"}`, variant: "solid" }}
                                         okText={item.installed ? "Reinstall" : "Install"}
                                         title={
-                                            item.installed ? `Reinstall ${item.component_name} ?` : `Install ${item.component_name} ?`
+                                            item.installed ? `Reinstall ${item.name} ?` : `Install ${item.name} ?`
                                         }
                                         onConfirm={async () => {
-                                            await axios.post(`/install-components`, {
+                                            await axios.post(`/install-relation`, {
                                                 path: item.file_path,
                                                 force: true,
                                                 address: item.address,
@@ -673,8 +684,8 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
                                             size="small"
                                             hoverable
                                             className="custom-card"
-                                            title={<Tooltip title={item?.component_id}>
-                                                {item.component_name}
+                                            title={<Tooltip title={item?.relation_id}>
+                                                {item.name}
 
                                             </Tooltip>}
                                             // title={item.label}

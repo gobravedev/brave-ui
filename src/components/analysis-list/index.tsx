@@ -22,6 +22,7 @@ const AnalysisList = forwardRef<any, any>(({
     project,
     component_id,
     component_ids,
+    relation_id,
 
 }, ref) => {
     const { data, pageNumber, totalPage, loading, reload: loadData, pageSize, setPageNumber, search } = usePagination({
@@ -29,7 +30,8 @@ const AnalysisList = forwardRef<any, any>(({
         params: {
             component_id: component_id,
             component_ids: component_ids,
-            project: project
+            project: project,
+            relation_id: relation_id,
         },
         initialPageSize: 10
     })
@@ -224,16 +226,28 @@ const AnalysisList = forwardRef<any, any>(({
                 return <Tag color={text === "success" ? "green" : text === "failed" ? "red" : "blue"}>{text}</Tag>
             }
         }, {
-            title: "Component Name",
-            dataIndex: 'component_name',
-            key: 'component_name',
+            title: "Relation Name",
+            dataIndex: 'relation_name',
+            key: 'relation_name',
             ellipsis: true,
             render: (text: any, record: any) => {
-                return <Tooltip title={record.component_id}>
+                return <Tooltip title={record.relation_id}>
                     <span style={{ cursor: "pointer" }}>{text}</span>
                 </Tooltip>
             }
-        }, {
+        },
+        // {
+        //     title: "Component Name",
+        //     dataIndex: 'component_name',
+        //     key: 'component_name',
+        //     ellipsis: true,
+        //     render: (text: any, record: any) => {
+        //         return <Tooltip title={record.component_id}>
+        //             <span style={{ cursor: "pointer" }}>{text}</span>
+        //         </Tooltip>
+        //     }
+        // },
+         {
             title: "Analysis Name",
             dataIndex: 'analysis_name',
             key: 'analysis_name',

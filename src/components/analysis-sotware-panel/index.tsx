@@ -19,6 +19,7 @@ import { CloseCircleOutlined, QuestionCircleOutlined } from "@ant-design/icons"
 import SortTable from "@/components/sort-table"
 import Markdown from "../markdown"
 import Item from "antd/es/list/Item"
+import { CreateOrUpdateParsms } from "../edit-params"
 type AnalysisFile = {
     name: string,
     label: string
@@ -302,18 +303,19 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
     // const {    setPipelineStructure,setOperateOpen,setPipelineRecord,datelePipeline} = operatePipeline
     const tableRef = useRef<any>(null)
 
-    const getrRequestParams = (values: any) => {
+    const buildRequestParams = () => {
         if (inputAnalysisMethod) {
             const dataComponentIds = inputAnalysisMethod.map((item: any) => item.component_id)
             const requestParams = {
-                ...values,
+                // ...values,
                 project: project,
                 // inputFormJson: inputAnalysisMethod,
                 // analysis_pipline: analysisPipline,
                 // parse_analysis_module: rest.parse_analysis_module,
                 component_id: rest.component_id,
                 data_component_ids: JSON.stringify(dataComponentIds),
-                component_parent_ids_map: componentParentIdsMap
+                component_parent_ids_map: componentParentIdsMap,
+                relation_id: rest.relation_id,
                 // pipeline_id: pipeline.component_id
                 // parse_analysis_result_module: rest.parseAnalysisResultModule
             }
@@ -321,45 +323,45 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
         }
 
     }
-    const saveUpstreamAnalysis = async (save: any) => {
-        const values = await upstreamForm.validateFields()
-        const requestParams = getrRequestParams(values)
-        setLoading(true)
-        try {
-            const resp: any = await axios.post(`/fast-api/analysis-controller?save=${save}`, requestParams)
-            // setFilePlot(resp.data)
-            // setAnalysisParams(resp.data)
-            console.log(resp)
+    // const saveUpstreamAnalysis = async (save: any) => {
+    //     const values = await upstreamForm.validateFields()
+    //     const requestParams = getrRequestParams(values)
+    //     setLoading(true)
+    //     try {
+    //         const resp: any = await axios.post(`/fast-api/analysis-controller?save=${save}`, requestParams)
+    //         // setFilePlot(resp.data)
+    //         // setAnalysisParams(resp.data)
+    //         console.log(resp)
 
-            if (save) {
-                messageApi.success("执行成功!")
-                if (tableRef.current) {
-                    tableRef.current.reload()
-                }
-            } else {
-                operatePipeline.openModal("modalF", resp.data)
-            }
-        } catch (error: any) {
-            console.log(error)
-            if (error.response?.data) {
-                messageApi.error(error.response.data.detail)
-            }
-        }
-        setLoading(false)
-    }
-    const host_genome_index = [
-        {
-            label: "人类",
-            value: "/data/metagenome_data/bowtie2_index/human/human38"
-        }, {
-            label: "小鼠",
-            value: "/data/databases/mouse/bowtie2/Mus_musculus.GRCm39.dna_sm.toplevel.fa"
-        }
-    ]
+    //         if (save) {
+    //             messageApi.success("执行成功!")
+    //             if (tableRef.current) {
+    //                 tableRef.current.reload()
+    //             }
+    //         } else {
+    //             operatePipeline.openModal("modalF", resp.data)
+    //         }
+    //     } catch (error: any) {
+    //         console.log(error)
+    //         if (error.response?.data) {
+    //             messageApi.error(error.response.data.detail)
+    //         }
+    //     }
+    //     setLoading(false)
+    // }
+    // const host_genome_index = [
+    //     {
+    //         label: "人类",
+    //         value: "/data/metagenome_data/bowtie2_index/human/human38"
+    //     }, {
+    //         label: "小鼠",
+    //         value: "/data/databases/mouse/bowtie2/Mus_musculus.GRCm39.dna_sm.toplevel.fa"
+    //     }
+    // ]
 
-    const dataMap: any = {
-        "host_genome_index": host_genome_index
-    }
+    // const dataMap: any = {
+    //     "host_genome_index": host_genome_index
+    // }
     const checkAvailable = (analysisMethod: any) => {
         return analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 0
     }
@@ -377,7 +379,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
 
             <div style={{ marginBottom: "1rem" }}></div>
             <Form form={upstreamForm}>
-
+                {/* {JSON.stringify(rest)} */}
                 <Collapse
                     style={{ marginTop: "1rem" }}
                     size="small"
@@ -436,10 +438,22 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
                                 }
 
 
-
+                                {/* {JSON.stringify(inputFileList)} */}
                                 <Spin spinning={loading}>
+                                    <CreateOrUpdateParsms
+                                        // analysisResultId={analysisResultId}
+                                        form={upstreamForm}
+                                        requestParam={buildRequestParams()}
+                                        dataMap={resultTableList}
+                                        formJson={rest.formJson}
+                                        databases={rest.databases}
+                                        callback={() => {
+                                            if (tableRef.current) {
+                                                tableRef.current.reload()
+                                            }
+                                        }} ></CreateOrUpdateParsms>
 
-                                    {!rest?.disableGroupField && <>
+                                    {/* {!rest?.disableGroupField && <>
                                         <FormJsonComp formJson={[{
                                             "name": "group_field",
                                             "label": "Group Field",
@@ -452,27 +466,28 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
                                             "type": "GroupFieldSelect"
                                         }]} dataMap={[]}></FormJsonComp>
 
-                                    </>}
+                                    </>} */}
 
 
-                                    {rest?.reInputFile ? <FormJsonComp formJson={rest?.reInputFile} dataMap={resultTableList}></FormJsonComp> :
-                                        <FormJsonComp formJson={inputFileList} dataMap={resultTableList}></FormJsonComp>}
+                                    {/* {rest?.reInputFile ? <FormJsonComp formJson={rest?.reInputFile} dataMap={resultTableList}></FormJsonComp> :
+                                        <FormJsonComp formJson={inputFileList} dataMap={resultTableList}></FormJsonComp>} */}
 
                                     {/* {JSON.stringify(inputFileList)} */}
-                                    <BioDatabaseForm openModal={() => operatePipeline.openModal("modalE", rest.databases)} formJson={rest.databases}></BioDatabaseForm>
+                                    {/* <BioDatabaseForm openModal={() => operatePipeline.openModal("modalE", rest.databases)} formJson={rest.databases}></BioDatabaseForm> */}
 
 
-                                    {upstreamFormJson &&
+                                    {/* {upstreamFormJson &&
                                         <FormJsonComp formJson={upstreamFormJson} dataMap={dataMap}></FormJsonComp>
                                     }
                                     {rest?.formJson &&
                                         <FormJsonComp formJson={rest?.formJson} dataMap={dataMap}></FormJsonComp>
-                                    }
-                                    <Form.Item initialValue={`${rest.component_name}`} name={"analysis_name"} label={"Analysis Name"} rules={[{ required: true, message: '该字段不能为空!' }]}>
+                                    } */}
+                                    {/* initialValue={`${rest.name}`}  */}
+                                    {/* <Form.Item name={"analysis_name"} label={"Analysis Name"} rules={[{ required: true, message: '该字段不能为空!' }]}>
                                         <Input></Input>
-                                    </Form.Item>
+                                    </Form.Item> */}
 
-                                    <Flex gap={"small"}>
+                                    {/* <Flex gap={"small"}>
                                         <Button size="small" color="cyan" variant="solid" onClick={() => {
                                             saveUpstreamAnalysis(false)
 
@@ -481,11 +496,11 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
                                         <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>{formId ? <>Update Analysis</> : <>Save  Analysis</>}</Button>
                                         {formId && <Button size="small" color="cyan" variant="solid" onClick={() => upstreamForm.setFieldValue("analysis_id", undefined)}>Cancel Update</Button>}
 
-                                    </Flex>
+                                    </Flex> */}
                                     {/* <hr />
                                 
                                 <hr /> */}
-                                    <Collapse ghost items={[
+                                    {/* <Collapse ghost items={[
                                         {
                                             key: "1",
                                             label: "More",
@@ -499,7 +514,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
                                                 </Form.Item>
                                             </>
                                         }
-                                    ]} />
+                                    ]} /> */}
 
 
                                 </Spin>
@@ -520,7 +535,8 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
             <AnalysisList
                 ref={tableRef}
                 project={project}
-                component_id={rest?.component_id}
+                relation_id={rest?.relation_id}
+                // component_id={rest?.component_id}
             ></AnalysisList>
 
             <div style={{ marginBottom: "1rem" }}></div>

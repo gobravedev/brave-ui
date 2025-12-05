@@ -884,7 +884,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                                     label: (
                                         <Tooltip title={currentAnalysisMethod?.component_name}>
                                             <a onClick={() => {
-                                                operatePipeline.openModal("modalC", {
+                                                operatePipeline.openModal("createOrUpdatePipelineComponent", {
                                                     data: currentAnalysisMethod, structure: {
                                                         component_type: "file",
                                                     }

@@ -224,7 +224,22 @@ const App: React.FC = () => {
                 en_US: "Apps"
             },
             children: [
+
+
                 {
+
+                    key: `/workflow-card`,
+                    label: {
+                        zh_CN: "工作流",
+                        en_US: "Workflows"
+                    },
+                    children: [
+                        {
+                            key: `/relation/workflow`,
+                            hidden: true
+                        }
+                    ]
+                }, {
 
                     key: `/tools-card`,
                     label: {
@@ -233,19 +248,112 @@ const App: React.FC = () => {
                     },
                     children: [
                         {
-                            key: `/tools`,
-                            // label: {
-                            //     zh_CN: "",
-                            //     en_US: "report"
-                            // },
+                            key: `/relation/tools`,
                             hidden: true
                         }
                     ]
                 }, {
-                    key: `/file-card`,
+
+                    key: `/componentsV2/file`,
                     label: {
                         zh_CN: "文件",
-                        en_US: "File"
+                        en_US: "Files"
+                    }
+
+                }, {
+
+                    key: `/componentsV2/script`,
+                    label: {
+                        zh_CN: "脚本",
+                        en_US: "Scripts"
+                    }
+                }, {
+                    key: `/container-page`,
+                    label: {
+                        zh_CN: "容器管理",
+                        en_US: "Container"
+                    },
+                },{
+                    key: `/interactive-tools`,
+                    label: {
+                        zh_CN: "交互工具",
+                        en_US: "Interactive Tools"
+                    }
+                }
+
+
+
+
+            ]
+        }, {
+            key: `/files`,
+            label: {
+                zh_CN: "文件",
+                en_US: "Files"
+            }
+        }, {
+            key: `/tasks`,
+            label: {
+                zh_CN: "任务",
+                en_US: "Tasks"
+            },
+        },
+        {
+            key: `/analysis-report`,
+            label: {
+                zh_CN: "分析报告",
+                en_US: "Report"
+            }
+
+        },
+        // {
+        //     key: `/entity-page`,
+        //     label: "研究实体"
+
+        // }, {
+        //     key: `/entity-relation`,
+        //     label: "实体关系"
+
+        // },
+        {
+            key: `/more`,
+            label: {
+                zh_CN: "更多",
+                en_US: "More"
+            },
+            children: [
+                {
+                    key: `/tool-kit`,
+                    label: {
+                        zh_CN: "工具集",
+                        en_US: "TookKit"
+                    }
+                },
+                //  {
+                //     key: `/psycmicrograph`,
+                //     label: {
+                //         zh_CN: "菌群知识库",
+                //         en_US: "PsycMicroGraph"
+                //     }
+                // },
+                // {
+                //     key: `/analysis-result`,
+                //     label: {
+                //         zh_CN: "分析结果",
+                //         en_US: "Analysis Result"
+                //     },
+                // },
+                {
+                    key: `/literature`,
+                    label: {
+                        zh_CN: "文献资料",
+                        en_US: "Literature"
+                    }
+                }, {
+                    key: `/file-card`,
+                    label: {
+                        zh_CN: "文件(deprecated)",
+                        en_US: "File(deprecated)"
                     },
                     children: [
                         {
@@ -299,84 +407,6 @@ const App: React.FC = () => {
                             hidden: true
                         }
                     ]
-                },
-            ]
-        }, {
-            key: `/files`,
-            label: {
-                zh_CN: "文件",
-                en_US: "Files"
-            }
-        }, {
-            key: `/tasks`,
-            label: {
-                zh_CN: "任务",
-                en_US: "Tasks"
-            },
-        },
-        {
-            key: `/analysis-report`,
-            label: {
-                zh_CN: "分析报告",
-                en_US: "Report"
-            }
-
-        },
-        // {
-        //     key: `/entity-page`,
-        //     label: "研究实体"
-
-        // }, {
-        //     key: `/entity-relation`,
-        //     label: "实体关系"
-
-        // },
-        {
-            key: `/more`,
-            label: {
-                zh_CN: "更多",
-                en_US: "More"
-            },
-            children: [
-                {
-                    key: `/interactive-tools`,
-                    label: {
-                        zh_CN: "交互工具",
-                        en_US: "Interactive Tools"
-                    }
-                }, {
-                    key: `/tool-kit`,
-                    label: {
-                        zh_CN: "工具集",
-                        en_US: "TookKit"
-                    }
-                },
-                //  {
-                //     key: `/psycmicrograph`,
-                //     label: {
-                //         zh_CN: "菌群知识库",
-                //         en_US: "PsycMicroGraph"
-                //     }
-                // },
-                // {
-                //     key: `/analysis-result`,
-                //     label: {
-                //         zh_CN: "分析结果",
-                //         en_US: "Analysis Result"
-                //     },
-                // },
-                {
-                    key: `/container-page`,
-                    label: {
-                        zh_CN: "容器管理",
-                        en_US: "Container"
-                    },
-                }, {
-                    key: `/literature`,
-                    label: {
-                        zh_CN: "文献资料",
-                        en_US: "Literature"
-                    }
                 },
             ]
         }

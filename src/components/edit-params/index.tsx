@@ -15,7 +15,7 @@ import ParamsView from "../params-view";
 import Project from "@/pages/project";
 import BioDatabaseForm from "../bio-database-form";
 import BioDatabases from "../bio-databases";
-const FormJsonComp = lazy(() => import("../form-components"));
+const RenderFromJson = lazy(() => import("./render-form-json"));
 
 const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
     const [form] = Form.useForm()
@@ -79,51 +79,52 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
     }
 
     const buildFormJson = () => {
-        if (data?.content?.reInputFile) {
-            const formJson = [...data?.content?.reInputFile || [], ...data.content?.formJson || [], ...data.content?.upstreamFormJson || []]
-            if (data?.component_type == "software") {
-                formJson.push({
-                    "name": "group_field",
-                    "label": "Group Field",
-                    "rules": [
-                        {
-                            "required": true,
-                            "message": "该字段不能为空!"
-                        }
-                    ],
-                    "type": "GroupFieldSelect"
-                })
-            }
-            return formJson
-            // data?.component_type == "software" ? {
-            //     "name": "group_field",
-            //     "label": "Group Field",
-            //     "rules": [
-            //         {
-            //             "required": true,
-            //             "message": "该字段不能为空!"
-            //         }
-            //     ],
-            //     "type": "GroupFieldSelect"
-            // } : []
-            // ]
-        } else {
-            const formJson = [...data?.inputFormJson || [], ...data.content?.formJson || [], ...data.content?.upstreamFormJson || []]
-            if (data?.component_type == "software") {
-                formJson.push({
-                    "name": "group_field",
-                    "label": "Group Field",
-                    "rules": [
-                        {
-                            "required": true,
-                            "message": "该字段不能为空!"
-                        }
-                    ],
-                    "type": "GroupFieldSelect"
-                })
-            }
-            return formJson
-        }
+        // if (data?.content?.reInputFile) {
+        //     if (data?.component_type == "software") {
+        //         formJson.push({
+        //             "name": "group_field",
+        //             "label": "Group Field",
+        //             "rules": [
+        //                 {
+        //                     "required": true,
+        //                     "message": "该字段不能为空!"
+        //                 }
+        //             ],
+        //             "type": "GroupFieldSelect"
+        //         })
+        //     }
+        //     return formJson
+        //     // data?.component_type == "software" ? {
+        //     //     "name": "group_field",
+        //     //     "label": "Group Field",
+        //     //     "rules": [
+        //     //         {
+        //     //             "required": true,
+        //     //             "message": "该字段不能为空!"
+        //     //         }
+        //     //     ],
+        //     //     "type": "GroupFieldSelect"
+        //     // } : []
+        //     // ]
+        // } else {
+        //     const formJson = [...data?.inputFormJson || [], ...data.content?.formJson || [], ...data.content?.upstreamFormJson || []]
+        //     if (data?.component_type == "software") {
+        //         formJson.push({
+        //             "name": "group_field",
+        //             "label": "Group Field",
+        //             "rules": [
+        //                 {
+        //                     "required": true,
+        //                     "message": "该字段不能为空!"
+        //                 }
+        //             ],
+        //             "type": "GroupFieldSelect"
+        //         })
+        //     }
+        //     return formJson
+        // }
+
+        return [...data.formJson || []]
 
     }
 
@@ -163,7 +164,7 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
                     requestParam={{ ...data.request_param, analysis_id: data?.analysis_id }}
                     dataMap={{ ...resultData, first_data_key: getFirstKey(resultData) }}
                     formJson={buildFormJson()}
-                    databases={data.content?.databases}
+                    databases={data?.databases}
                     // inputFormJson={data?.inputFormJson}
                     // onChangeAddProject={(value:any)=>{
                     //     // loadData(value)
@@ -183,27 +184,15 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
 export default EditParams
 
 export const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
-    requestParam, dataMap, formJson: formJson_,
+    requestParam, dataMap, formJson, setLoading=()=>{},
     databases, callback, analysisResultId, showCancal = false }) => {
     const { modals, openModals, closeModals } = useModals(["paramsView", "bioDatabases"]);
-    const [dbFormJson, setDbFormJson] = useState<any>([])
-    const [formJson, setFormJson] = useState<any>([])
+  
     const { messageApi } = useOutletContext<any>()
     // useEffect(()=>{
 
     // },[project])
-    useEffect(() => {
-        initForm()
-    }, [JSON.stringify(formJson_)])
-
-    const initForm = () => {
-        if (Array.isArray(formJson_)) {
-            const formJson = formJson_.filter((item: any) => !item?.required && !item?.db && !item.component_id)
-            const dbFormJson = formJson_.filter((item: any) => item?.required || item?.db || item.component_id)
-            setDbFormJson(dbFormJson)
-            setFormJson(formJson)
-        }
-    }
+ 
 
 
     const getRequestParams = (values: any) => {
@@ -219,7 +208,9 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
         delete requestParams.analysis_id
         console.log(requestParams)
         try {
+            setLoading(true)
             const resp: any = await axios.post(`/fast-api/analysis-controller?save=true&is_submit=true&is_report=true`, requestParams)
+            setLoading(false)
             // setFilePlot(resp.data)
             // setAnalysisParams(resp.data)
             console.log(resp)
@@ -246,7 +237,7 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
             console.log(resp)
 
             if (save) {
-                messageApi.success("执行成功!")
+                messageApi.success("save successful!")
                 if (callback) {
                     callback()
 
@@ -275,43 +266,12 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
 
         }}>
             {/* {JSON.stringify(formJson_)} */}
-            <Tabs
-                // ={true}
-
-                items={[
-                    {
-                        key: "1",
-                        label: "Required Parameters",
-                        forceRender: true,
-                        children: <>
-
-                            <FormJsonComp analysisResultId={analysisResultId} formJson={[...dbFormJson]} dataMap={dataMap} ></FormJsonComp>
-                            {databases && <BioDatabaseForm openModal={() => {
-                                openModals("bioDatabases", databases)
-                            }} formJson={databases}></BioDatabaseForm>}
-                        </>
-                    }, {
-                        key: "2",
-                        label: "Optional parameters",
-                        forceRender: true,
-                        children: <>
-                            {/* {data.request_param.data_component_ids} */}
-                            <FormJsonComp formJson={[
-                                // {
-                                //     "name": "addedProject",
-                                //     "label": "项目",
-                                //     "required": true,
-                                //     "mode": "multiple",
-                                //     "type": "BaseSelect",
-                                //     "data": projectList
-                                // },
-                                ...formJson
-                            ]} dataMap={{}} ></FormJsonComp>
-
-                            {/* {JSON.stringify(formJson)} */}
-                        </>
-                    }
-                ]}></Tabs>
+            <RenderFromJson
+                analysisResultId={analysisResultId}
+                formJson={formJson}
+                databases={databases}
+                dataMap={dataMap}
+            ></RenderFromJson>
             <Form.Item label="Analysyis Name" name={"analysis_name"} style={{ maxWidth: 600 }} rules={[{ required: true, message: 'This field cannot be empty!' }]}>
                 <Input></Input>
             </Form.Item>
@@ -362,9 +322,6 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
             visible={modals.paramsView.visible}
             onClose={() => closeModals("paramsView")}
             params={modals.paramsView.params}></ParamsView>
-        <BioDatabases
-            visible={modals.bioDatabases.visible}
-            onClose={() => closeModals("bioDatabases")}
-            params={modals.bioDatabases.params}></BioDatabases>
+
     </Suspense>
 }
