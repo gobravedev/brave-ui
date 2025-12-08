@@ -1,4 +1,4 @@
-import { Breadcrumb, Button, Card, message, Empty, Flex, Modal, Popconfirm, Skeleton, Switch, Tabs, Tag, Tooltip, Row, Col, Spin, Menu, Dropdown, Space, Collapse, Typography } from "antd"
+import { Breadcrumb, Button, Card, message, Empty, Flex, Modal, Popconfirm, Skeleton, Switch, Tabs, Tag, Tooltip, Row, Col, Spin, Menu, Dropdown, Space, Collapse, Typography, Segmented } from "antd"
 import { FC, lazy, Suspense, useEffect, useRef, useState } from "react"
 import AnalysisPanel, { UpstreamAnalysisInput, UpstreamAnalysisOutput } from '../../components/analysis-sotware-panel'
 import Meta from "antd/es/card/Meta"
@@ -53,11 +53,13 @@ const Pipeline: FC<any> = () => {
     const [test, setTest] = useState<any>(true)
     const [messageApi, contextHolder] = message.useMessage();
     const [component, setComponent] = useState<any>()
+    const [rightPanelVisible, setRightPanelVisible] = useState<"script_illustrate" | "llm">("script_illustrate")
     const [size, setSize] = useState<any>((component_type && ["script111"].includes(component_type)) ? [18, 6] : [20, 0])
     const tableRef = {
         inputFile: useRef<HTMLInputElement>(null),
         outputFile: useRef<HTMLInputElement>(null)
     };
+
 
 
     // const [editor, setEditor] = useState<any>({
@@ -470,6 +472,8 @@ const Pipeline: FC<any> = () => {
     useEffect(() => {
         loadData()
     }, [])
+
+
     return <div style={{ maxWidth: "1800px", margin: "1rem auto", padding: `${isSticky ? '0 16px 0 16px' : '0'}` }}>
         {/* {JSON.stringify(pipeline)} */}
         <Spin spinning={false}>
@@ -632,7 +636,7 @@ const Pipeline: FC<any> = () => {
                                 }}>Edit {component?.relation_type}</Button>
                                 <Button size="small" color="cyan" variant="solid" onClick={() => {
                                     openModal("createOrUpdatePipelineComponent", {
-                                        data: {component_id: component?.component_id}, structure: {
+                                        data: { component_id: component?.component_id }, structure: {
                                             component_type: "script",
                                         }
                                         // data: { relation_id: component.relation_id },
@@ -765,11 +769,22 @@ const Pipeline: FC<any> = () => {
                     <Card
                         title={`Chat with llm (${component?.name})`}
                         extra={<>
-                            {!(component_type && ["script11"].includes(component_type)) && <>
+                            {/* {!(component_type && ["script11"].includes(component_type)) && <>
                                 <CloseOutlined onClick={() => {
                                     setSize([20, 0])
                                 }}></CloseOutlined>
-                            </>}
+                            </>} */}
+                            <Segmented size="small" value={rightPanelVisible}
+                                onChange={(val: any) => setRightPanelVisible(val)}
+                                options={[
+                                    {
+                                        label: "Script Illustrate",
+                                        value: "script_illustrate"
+                                    }, {
+                                        label: "llm",
+                                        value: "llm"
+                                    }
+                                ]} />
                         </>}
                         style={{
                             flex: 1,
@@ -791,8 +806,14 @@ const Pipeline: FC<any> = () => {
                             <Tag style={{ marginTop: "0.5rem" }} key={index} color={colors[index]}>{tag}</Tag>
                         ))}
                         {/* {JSON.stringify(component)} */}
-                        <Markdown data={component?.description}></Markdown>
-                        <AI></AI>
+
+                        {rightPanelVisible === "script_illustrate" && <>
+                            <Markdown data={component?.component_description}></Markdown>
+
+                        </>}
+                        {rightPanelVisible === "llm" && <>
+                            <AI></AI>
+                        </>}
                         <Collapse ghost items={[
                             {
                                 key: "1",

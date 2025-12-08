@@ -170,6 +170,7 @@ const AnalysisReport: FC<any> = () => {
                     {analysisKey ? <Suspense fallback={<Skeleton active></Skeleton>}>
                         <AnalysisResultView
                             overflowY="auto"
+                            showDesc={true}
                             openPanel={setPanel}
                             loadTree={() => {
                                 loadData()

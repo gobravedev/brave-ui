@@ -33,9 +33,9 @@ export const ComponentsRender0 = ({ type, ...rest }: any) => {
         <Component {...rest} />
     </div>;
 }
-export const ComponentsRender =  memo(ComponentsRender0)
+export const ComponentsRender = memo(ComponentsRender0)
 
-export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree, openPanel, overflowY = "hidden" }) => {
+export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree, openPanel, showDesc = false, overflowY = "hidden" }) => {
     const [loading, setLoading] = useState<boolean>(false)
     const [analsyisResult, setAnalsyisResult] = useState<any>(null)
     const navigate = useNavigate()
@@ -138,7 +138,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
                 {analsyisResult ? <>
                     <Tag style={{ cursor: "pointer" }} onClick={() => {
                         navigate(`/component/${analsyisResult?.component_type}/${analsyisResult?.component_id}`)
-                    }}>{analsyisResult?.component_name}</Tag>
+                    }}>{analsyisResult?.name}</Tag>
                     <Tag>{analsyisResult?.analysis_name}</Tag>
                     <Tag>{String(analsyisResult?.analysis_id).slice(0, 8)}</Tag>
                     <Tag>{analsyisResult?.job_status}</Tag>
@@ -159,8 +159,8 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
                     </>}
                     {openPanel && <>
                         {analsyisResult && <Button size="small" color="primary" variant="solid" onClick={() =>
-                            navigate(`/component/${analsyisResult?.component_type}/${analsyisResult?.component_id}`)
-                        }>Go {analsyisResult?.component_type}</Button>}
+                            navigate(`/relation/${analsyisResult?.relation_type}/${analsyisResult?.relation_id}`)
+                        }>Go {analsyisResult?.relation_type}</Button>}
                         <Button size="small" color="cyan" variant="solid" onClick={() => {
                             openPanel("note")
                         }}>Open Note</Button>
@@ -221,7 +221,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
                         }
                         {analsyisResult?.server_status == "running" ?
                             <>
-{/* 
+                                {/* 
                                 <Tooltip title={<>
                                     {`${containerURL}/container/${analsyisResult.analysis_id}/`}
                                 </>}>
@@ -395,10 +395,12 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
 
 
                         {/* <Divider /> */}
-                        <div style={{ border: "1px solid rgba(5,5,5,0.06)", maxHeight: "70vh", overflowY: "auto", padding: "0.5rem", marginBottom: "1rem" }}>
-                            <Markdown data={analsyisResult?.description}></Markdown>
+                        {showDesc &&
+                            <div style={{ border: "1px solid rgba(5,5,5,0.06)", maxHeight: "70vh", overflowY: "auto", padding: "0.5rem", marginBottom: "1rem" }}>
+                                <Markdown data={analsyisResult?.component_description}></Markdown>
+                            </div>
 
-                        </div>
+                        }
 
 
                     </Col>
@@ -454,7 +456,7 @@ const AnalysisResultDisplay: FC<any> = ({ analsyisResult, loading }) => {
                 {
                     Array.isArray(analsyisResult.images) ?
 
-                        <Row gutter={[8,8]}>
+                        <Row gutter={[8, 8]}>
                             {analsyisResult.images.map((it: any, index: any) => (
                                 <Col lg={8} sm={8} xs={24} key={index} span={4}>
                                     <ImgView {...it} baseURL={baseURL}></ImgView>

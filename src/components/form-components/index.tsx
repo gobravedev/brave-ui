@@ -9,7 +9,7 @@ import { QuestionCircleOutlined } from "@ant-design/icons";
 
 
 const ComponentsRender = ({ type, dataMap, constDataMap, componentMap, inputAnalysisMethod, dataKey: dataKey_, data: data_, name, component_id, inputKey, ...rest }: any) => {
-    if (!dataMap) return <div>加载中....</div> //(() => )
+    if (!dataMap) return <div>Data Map not exist!</div> //(() => )
     dataMap = { ...dataMap, ...constDataMap }
     const componentObj = componentMap[type] //|| (() => <div>未知类型</div>);
     // if (first_data_key in dataMap_)
@@ -184,6 +184,8 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
             // dataKey: "sample_group_list"
         }, CollectedGroupSelectSampleButton2: {
             Component: CollectedGroupSelectSampleButton2,
+        }, CollectedSampleSelect: {
+            Component: CollectedSampleSelect,
         }, MetaphlanCladeSelect: {
             Component: MetaphlanCladeSelect,
         }, SelectAll: {
@@ -532,6 +534,142 @@ export const CollectedGroupSelectSampleButton2: FC<any> = ({ label, name, rules,
                 <ColorPickerComp />
             </Form.Item>
         </Flex>
+
+    </>
+}
+export const CollectedSampleSelect: FC<any> = ({ label, projParameter, columns, name, rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
+    const [sampleGrouped, setSampleGrouped] = useState<any>()
+    const [options, setOptions] = useState<any>([])
+    const [collectFiles, setCollectFiles] = useState<any>([])
+    // const {  project } = useOutletContext<any>()
+
+    // const [sampleGroupedOptions, setSampleGroupedOptions] = useState<any>([])
+    const form = Form.useFormInstance();
+    let filterName: any = []
+    if (filter) {
+        filterName = filter.map((it: any) => it.name)
+    }
+    const customFilterValue = Form.useWatch((values) => {
+        const data = Object.entries(values).filter(([key]) => filterName.includes(key))
+        return Object.fromEntries(data)
+    }, form);
+
+    const groupField = Form.useWatch(group, form);
+    const selectCollectFile = Form.useWatch([name, "file"], form);
+
+
+    // const calculateGroup = (sampleGroup: any, groupField: any) => {
+
+    //     const grouped = sampleGroup.reduce((acc: any, item: any) => {
+    //         const key = item[groupField];
+    //         if (!acc[key]) {
+    //             acc[key] = [];
+    //         }
+    //         acc[key].push(item.value);
+    //         return acc;
+    //     }, {});
+    //     setSampleGrouped(sampleGroup)
+
+
+    // }
+    useEffect(() => {
+        if (data && Array.isArray(data)) {
+            const collectedFiles = data.map((it: any) => ({
+                label: `${it.file_name}`,
+                value: it.id,
+            }))
+            setCollectFiles(collectedFiles)
+        }
+
+    }, [data])
+    useEffect(() => {
+        if (selectCollectFile) {
+            let columnsData = data.find((it: any) => it.id == selectCollectFile)
+            // debugger
+            if (columnsData) {
+                columnsData = columnsData.columns.map((it: any) => ({
+                    label: it.columns_name,
+                    value: it.columns_name,
+                    ...it
+                }))
+                if (filter && customFilterValue) {
+                    columnsData = filter.reduce((result: any, filterHandle: any) => {
+                        return result.filter((item: any) => {
+                            return filterHandle.method(item) === customFilterValue[filterHandle.name];
+                        });
+                    }, columnsData);
+
+                    columnsData = columnsData.map((it: any) => {
+                        const { label, id, value, ...rest } = it
+                        return {
+                            label: `${it.label}(${filter[0].method(it)})`,
+                            value: it.value,
+                            ...rest
+
+                        }
+                    })
+
+                }
+                // console.log(data)
+                // console.log(data)
+                // if (columnsData && groupField_) {
+                //     // console.log(data)
+                //     calculateGroup(columnsData, groupField_)
+                // } else {
+                //     if (columnsData && groupField) {
+                //         calculateGroup(columnsData, groupField)
+                //     }
+                // }
+
+                setOptions(columnsData)
+            }
+
+        }
+
+    }, [data, selectCollectFile, groupField, customFilterValue])
+
+    // useEffect(() => {
+    //     if (selectCollectFile) {
+    //         // form.setFieldsValue(requestParam)
+    //         setTimeout(() => {
+    //             form.setFieldsValue(requestParam)
+
+    //         }, 50);
+    //     }
+    // }, [selectCollectFile])
+    return <>
+
+        <Form.Item label={`${label} File`} name={[name, "file"]} rules={rules}>
+            <Select options={collectFiles} ></Select>
+        </Form.Item>
+
+
+        {(columns && Array.isArray(columns)) && columns.map((item: any, index: any) => (
+            <div key={index}>
+                {/* {JSON.stringify()} */}
+                <Form.Item label={`${item} Columns`} name={[name, item]} rules={rules}>
+                    <Select showSearch
+                        filterOption={(input: any, option: any) =>
+                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+                        options={options}></Select>
+                    {/* <GroupSelectSample sampleGrouped={sampleGrouped} sampleGroup={options} ></GroupSelectSample> */}
+                </Form.Item>
+                {/* <Flex gap="small">
+                    {item}
+                    <Form.Item label={item} name={[name, "group", `${item}`]} noStyle >
+                        <GroupSelectButton sampleGrouped={sampleGrouped} field={[name, item]}></GroupSelectButton>
+                    </Form.Item>
+                    <Form.Item name={[name, "group_name", `${item}`]} >
+                        <Input size="small" placeholder="Optional group name"></Input>
+                    </Form.Item>
+                    <Form.Item name={[name, "color", `${item}`]} >
+                        <ColorPickerComp projParameter={projParameter} />
+                    </Form.Item>
+                </Flex> */}
+            </div>
+        ))}
+
+
 
     </>
 }
