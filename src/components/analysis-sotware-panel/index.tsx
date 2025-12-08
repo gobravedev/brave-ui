@@ -307,23 +307,25 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
     const tableRef = useRef<any>(null)
 
     const buildRequestParams = () => {
+        let dataComponentIds:any = []
         if (inputAnalysisMethod) {
-            const dataComponentIds = inputAnalysisMethod.map((item: any) => item.component_id)
-            const requestParams = {
-                // ...values,
-                project: project,
-                // inputFormJson: inputAnalysisMethod,
-                // analysis_pipline: analysisPipline,
-                // parse_analysis_module: rest.parse_analysis_module,
-                component_id: rest.component_id,
-                data_component_ids: JSON.stringify(dataComponentIds),
-                component_parent_ids_map: componentParentIdsMap,
-                relation_id: rest.relation_id,
-                // pipeline_id: pipeline.component_id
-                // parse_analysis_result_module: rest.parseAnalysisResultModule
-            }
-            return requestParams
+            dataComponentIds = inputAnalysisMethod.map((item: any) => item.component_id)
+
         }
+        const requestParams = {
+            // ...values,
+            project: project,
+            // inputFormJson: inputAnalysisMethod,
+            // analysis_pipline: analysisPipline,
+            // parse_analysis_module: rest.parse_analysis_module,
+            component_id: rest.component_id,
+            data_component_ids: JSON.stringify(dataComponentIds),
+            component_parent_ids_map: componentParentIdsMap,
+            relation_id: rest.relation_id,
+            // pipeline_id: pipeline.component_id
+            // parse_analysis_result_module: rest.parseAnalysisResultModule
+        }
+        return requestParams
 
     }
     // const saveUpstreamAnalysis = async (save: any) => {
@@ -447,7 +449,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
                                         // analysisResultId={analysisResultId}
                                         form={upstreamForm}
                                         requestParam={buildRequestParams()}
-                                        dataMap={resultTableList}
+                                        dataMap={resultTableList ? resultTableList : {}}
                                         formJson={rest.formJson}
                                         databases={rest.databases}
                                         callback={() => {
