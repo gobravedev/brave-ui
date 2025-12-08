@@ -802,29 +802,31 @@ const Pipeline: FC<any> = () => {
 
                         size="small" >
 
-                        {component?.tags && Array.isArray(component.tags) && component.tags.map((tag: any, index: any) => (
-                            <Tag style={{ marginTop: "0.5rem" }} key={index} color={colors[index]}>{tag}</Tag>
-                        ))}
+
                         {/* {JSON.stringify(component)} */}
 
                         {rightPanelVisible === "script_illustrate" && <>
+                            {component?.tags && Array.isArray(component.tags) && component.tags.map((tag: any, index: any) => (
+                                <Tag style={{ marginTop: "0.5rem" }} key={index} color={colors[index]}>{tag}</Tag>
+                            ))}
                             <Markdown data={component?.component_description}></Markdown>
-
+                            <Collapse ghost items={[
+                                {
+                                    key: "1",
+                                    label: "More",
+                                    children: <>
+                                        <Typography>
+                                            <pre>{JSON.stringify(component, null, 2)}   </pre>
+                                        </Typography>
+                                    </>
+                                }
+                            ]} />
                         </>}
                         {rightPanelVisible === "llm" && <>
-                            <AI></AI>
+                            {/* {component?.relation_id} */}
+                            <AI type={"tools"} biz_id={component?.relation_id}></AI>
                         </>}
-                        <Collapse ghost items={[
-                            {
-                                key: "1",
-                                label: "More",
-                                children: <>
-                                    <Typography>
-                                        <pre>{JSON.stringify(component, null, 2)}   </pre>
-                                    </Typography>
-                                </>
-                            }
-                        ]} />
+
                         {/* {JSON.stringify(pipeline.description)} */}
                         {/* {pipeline?.description && <>
 

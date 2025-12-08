@@ -142,6 +142,10 @@ const Tools: FC<any> = ({ components }) => {
         <Form.Item name={"output_component_ids"} label="Output File">
             <Select showSearch options={components?.files} mode="multiple"></Select>
         </Form.Item>
+        {/* prompt */}
+        <Form.Item name={"prompt"} label="Prompt" >
+            <TextArea rows={4}></TextArea>
+        </Form.Item>
     </>
 }
 import { softwareTemplete, scriptTemplete, fileTemplete } from './templete'

@@ -178,7 +178,7 @@ const App2: FC<any> = ({ questions = MOCK_QUESTIONS }) => {
     request: async ({ message }, { onSuccess, onUpdate, onError }) => {
       try {
         const res = await fetch(
-          `${baseURL}/brave-api/llm/chat/stream`,
+          `${baseURL}/brave-api/llm/chat/stream-test`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -451,9 +451,9 @@ export default App2;
 
 
 const AIComp = lazy(() => import('./ai'));
-export const AI:FC<any> = () => {
+export const AI:FC<any> = (rest) => {
 
   return <Suspense fallback={<Skeleton active></Skeleton>}>
-    <AIComp />
+    <AIComp {...rest}/>
   </Suspense>
 }

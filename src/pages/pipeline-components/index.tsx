@@ -796,7 +796,7 @@ const Pipeline: FC<any> = () => {
                         ))}
                         {/* {JSON.stringify(component)} */}
                         <Markdown data={component?.description}></Markdown>
-                        <AI></AI>
+                        <AI ></AI>
                         <Collapse ghost items={[
                             {
                                 key: "1",

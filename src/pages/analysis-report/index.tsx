@@ -315,7 +315,7 @@ const AnalysisReport: FC<any> = () => {
                     </>}
 
                     {rightPanel == "llm" && <>
-                        <AI></AI>
+                        <AI type={"analysis"} biz_id={analysisKey}></AI>
                     </>}
 
 

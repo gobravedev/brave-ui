@@ -1,9 +1,10 @@
 import { Bubble, BubbleProps, Sender, useXAgent, useXChat } from "@ant-design/x";
 import { Button, Flex, GetProp, Typography } from "antd";
-import React from "react";
+import React, { FC } from "react";
 import { useSelector } from "react-redux";
 import { AppstoreAddOutlined, CloudUploadOutlined, CopyOutlined, DislikeOutlined, LikeOutlined, OpenAIFilled, PaperClipOutlined, ProductOutlined, ReloadOutlined, ScheduleOutlined, UserOutlined } from '@ant-design/icons';
 import markdownit from 'markdown-it';
+import analysisList from "../analysis-list";
 
 const roles: GetProp<typeof Bubble.List, 'roles'> = {
   ai: {
@@ -37,7 +38,7 @@ const renderMarkdown: BubbleProps['messageRender'] = (content) => {
   );
 };
 
-const AI = () => {
+const AI:FC<any> = ({biz_id,type}) => {
   const [content, setContent] = React.useState('');
   const { baseURL } = useSelector((state: any) => state.user)
 
@@ -46,7 +47,7 @@ const AI = () => {
     request: async ({ message }, { onSuccess, onUpdate, onError }) => {
       try {
         const res = await fetch(
-          `${baseURL}/brave-api/llm/chat/stream`,
+          `${baseURL}/brave-api/llm/chat/stream/${type}/${biz_id}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
