@@ -9,7 +9,7 @@ import { QuestionCircleOutlined } from "@ant-design/icons";
 
 
 const ComponentsRender = ({ type, dataMap, constDataMap, componentMap, inputAnalysisMethod, dataKey: dataKey_, data: data_, name, component_id, inputKey, ...rest }: any) => {
-    if (!dataMap) return <div>Data Map not exist!</div> //(() => )
+    if (!dataMap) return <div></div> //(() => )
     dataMap = { ...dataMap, ...constDataMap }
     const componentObj = componentMap[type] //|| (() => <div>未知类型</div>);
     // if (first_data_key in dataMap_)

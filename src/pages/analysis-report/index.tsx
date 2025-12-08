@@ -9,6 +9,7 @@ import { useModal } from "@/hooks/useModal"
 import FormProject from "@/components/form-project"
 import Markdown from "@/components/markdown"
 import { useStickyTop } from "@/hooks/useStickyTop"
+import { AI } from "@/components/chat"
 
 const ResultParse = lazy(() => import("@/components/result-parse"))
 // import AnalysisResultPanel from '@/components/analysis-result-view/panel'
@@ -27,6 +28,8 @@ const AnalysisReport: FC<any> = () => {
     const dispatch = useDispatch()
     const { modal, openModal, closeModal } = useModal();
     const [componentType, setComponentType] = useState<any>()
+    const [rightPanel, setRightPanel] = useState<any>("toc");
+
     // const [queryProject, setQueryProject] = useState<any>()
     const [analysisKey, setAnalysisKey] = useState<any>(key)
 
@@ -154,7 +157,7 @@ const AnalysisReport: FC<any> = () => {
 
             gutter={[isSticky ? 16 : 0, 16]}>
 
-            <Col lg={20} sm={20} xs={24} style={{
+            <Col lg={18} sm={18} xs={24} style={{
 
                 display: "flex",
                 flexDirection: "column", // 让 Card 撑满高度
@@ -227,12 +230,12 @@ const AnalysisReport: FC<any> = () => {
 
                         }>
 
-                        {projectObj?.description ? <Markdown data={projectObj?.description}></Markdown> : <Empty  />}
+                        {projectObj?.description ? <Markdown data={projectObj?.description}></Markdown> : <Empty />}
                     </Card>
                 </div>}
 
             </Col>
-            <Col lg={4} sm={4} xs={24}
+            <Col lg={6} sm={6} xs={24}
 
                 ref={containerRef} style={isSticky ? {
                     overflowY: "hidden",
@@ -269,7 +272,17 @@ const AnalysisReport: FC<any> = () => {
                     }}
                     extra={
                         <Flex gap={"small"}>
-
+                            <Segmented size="small" value={rightPanel}
+                                onChange={(val: any) => setRightPanel(val)}
+                                options={[
+                                    {
+                                        label: "TOC",
+                                        value: "toc"
+                                    }, {
+                                        label: "LLM",
+                                        value: "llm"
+                                    }
+                                ]} />
                             <RedoOutlined style={{ cursor: "pointer" }} onClick={loadData} />
 
                             {/* <Button size="small" color="cyan" variant="solid" onClick={loadData}>Refresh</Button> */}
@@ -278,25 +291,33 @@ const AnalysisReport: FC<any> = () => {
                     {/* {JSON.stringify(analysis)} */}
 
                     {/* <Button onClick={() => { setAnalysis(data[0]) }}></Button> */}
-                    {Array.isArray(data) && data.length != 0 ? <>
-                        <LeftPanel onSelect={(val: any) => {
-                            if (val.node?.type == "analysis") {
-                                setAnalysis(val.node)
-                                setAnalysisKey(val.node.key)
-                                setComponentType(val.node.component_type)
-                                updateQueryParam("project", project);
-                                updateQueryParam("key", val.node.key);
-                            } else if (val.node?.type == "components") {
-                                console.log(val.node)
-                                // loadComponents(val.node.key)
-                            }
+                    {rightPanel == "toc" && <>
+                        {Array.isArray(data) && data.length != 0 ? <>
+                            <LeftPanel onSelect={(val: any) => {
+                                if (val.node?.type == "analysis") {
+                                    setAnalysis(val.node)
+                                    setAnalysisKey(val.node.key)
+                                    setComponentType(val.node.component_type)
+                                    updateQueryParam("project", project);
+                                    updateQueryParam("key", val.node.key);
+                                } else if (val.node?.type == "components") {
+                                    console.log(val.node)
+                                    // loadComponents(val.node.key)
+                                }
 
-                            // console.log(val)
-                        }} defaultSelectKey={analysisKey} treeData={data}></LeftPanel>
+                                // console.log(val)
+                            }} defaultSelectKey={analysisKey} treeData={data}></LeftPanel>
 
-                    </> : <>
-                        <Empty></Empty>
+                        </> : <>
+                            <Empty></Empty>
+                        </>}
+
                     </>}
+
+                    {rightPanel == "llm" && <>
+                        <AI></AI>
+                    </>}
+
 
                 </Card>
 

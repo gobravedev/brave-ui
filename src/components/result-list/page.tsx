@@ -151,18 +151,18 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
     }
 
     useEffect(() => {
-       
+
         loadTable()
 
     }, [analysisResultId, rowNum])
 
-    useEffect(()=>{
-         if (!analysisResultId && component && component?.file_type == "collected") {
+    useEffect(() => {
+        if (!analysisResultId && component && component?.file_type == "collected") {
             if (data.length > 0) {
                 setAnalysisResultId(data[0].analysis_result_id)
             }
         }
-    },[data])
+    }, [data])
     // const loadData = async ({ activeTabKey, params, componentIdList }: any) => {
     //     setLoading(true)
 
@@ -272,7 +272,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                 </Tooltip>
             }
 
-        },{
+        }, {
             title: 'Analysis Name',
             dataIndex: 'analysis_name',
             key: 'analysis_name',
@@ -280,7 +280,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
             ellipsis: true,
         },
 
-         {
+        {
             title: 'Analysis Id',
             dataIndex: 'analysis_id',
             key: 'analysis_id',
@@ -646,16 +646,16 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                                 const resp = await axios.get(`/analysis-result/download-example/${component.component_id}`)
                                 window.open(`${baseURL}${resp.data.example_url}`, '_blank');
                                 message.success(`Example ${baseURL}${resp.data.example_url} downloading...`)
-                            }}>Example <DownloadOutlined /></a>
+                            }}> <DownloadOutlined /></a>
                         </Tooltip>
-
+{/* 
                         {component?.relation_id && <Popconfirm title="Are you sure to delete?" onConfirm={() => {
                             operatePipeline.deletePipelineRelation(component.relation_id)
                         }}>
                             <Tooltip title={`Delete ${component?.component_name}`}>
                                 <DeleteOutlined style={{ cursor: "pointer", color: "red" }} />
                             </Tooltip>
-                        </Popconfirm>}
+                        </Popconfirm>} */}
 
                         <ImportOutlined style={{ cursor: "pointer" }} onClick={() => {
                             openModal("importFile", {
@@ -665,9 +665,13 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                             })
                         }} />
 
-                        <a onClick={() => {
-                            openModal("createFolder", { ...component })
-                        }}>Create Folder</a>
+
+                        {component?.file_type != "collected" && <>
+                            <a onClick={() => {
+                                openModal("createFolder", { ...component })
+                            }}>Create Folder</a>
+
+                        </>}
 
                         {operatePipeline?.openModal && <>
                             {(rest.component_type == "software" || rest.component_type == "file" || rest.component_type == "script") && <>
@@ -832,7 +836,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                     {component.component_name}
                 </Tag>}
             </>
-                {/* {analysisResultId} */}
+            {/* {analysisResultId} */}
 
 
             {/* {analysisResultId} */}
@@ -891,10 +895,6 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                                                 const currentData = data.find((it: any) => it.analysis_result_id == analysisResultId)
                                                 console.log("currentData", currentData)
                                                 window.open(`${baseURL}${currentData.url}`, '_blank');
-                                                //  if(currentData.length){
-
-                                                //  }
-
                                             }} />
                                             <EditOutlined style={{ cursor: "pointer" }}
                                                 onClick={() => {

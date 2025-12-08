@@ -183,38 +183,39 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
                 </>} */}
 
 
+                {checkAvailable(outputFile) && <>
+                    <Collapse
+                        // activeKey={collapseActiveKey}
+                        style={{ marginTop: "1rem" }}
+                        // defaultActiveKey={['1']}
+                        size="small"
+                        items={[
+                            {
+                                key: '1',
+                                label: `Output File  (${rest?.name})`,
+                                children: <>
+                                    <UpstreamAnalysisOutput
+                                        {...rest}
+                                        pipeline={pipeline}
 
-                <Collapse
-                    // activeKey={collapseActiveKey}
-                    style={{ marginTop: "1rem" }}
-                    // defaultActiveKey={['1']}
-                    size="small"
-                    items={[
-                        {
-                            key: '1',
-                            label: `Output File  (${rest?.name})`,
-                            children: <>
-                                {checkAvailable(outputFile) ? <UpstreamAnalysisOutput
-                                    {...rest}
-                                    pipeline={pipeline}
+                                        software={{
+                                            pipeline_id: rest.pipeline_id,
+                                            component_id: rest.component_id
+                                        }}
 
-                                    software={{
-                                        pipeline_id: rest.pipeline_id,
-                                        component_id: rest.component_id
-                                    }}
-
-                                    children={children}
-                                    onClickItem={setRecord}
-                                    downstreamAnalysis={downstreamAnalysis}
-                                    operatePipeline={operatePipeline}
-                                    project={project}
-                                    analysisType={analysisType}
-                                    analysisMethod={outputFile}
-                                    appendSampleColumns={appendSampleColumns}></UpstreamAnalysisOutput>
-                                    : <>
-                                        {/* {wrapAnalysisPipeline != analysisPipline &&
+                                        children={children}
+                                        onClickItem={setRecord}
+                                        downstreamAnalysis={downstreamAnalysis}
+                                        operatePipeline={operatePipeline}
+                                        project={project}
+                                        analysisType={analysisType}
+                                        analysisMethod={outputFile}
+                                        appendSampleColumns={appendSampleColumns}></UpstreamAnalysisOutput>
+                                    {/* {checkAvailable(outputFile) ?
+                                    : <> */}
+                                    {/* {wrapAnalysisPipeline != analysisPipline &&
                             */}
-                                        <Flex justify="center" style={{ margin: "2rem" }} gap={"small"}>
+                                    {/* <Flex justify="center" style={{ margin: "2rem" }} gap={"small"}>
                                             <Button size="small" color="cyan" variant="solid" onClick={() => {
                                                 operatePipeline.openModal("modalC", {
                                                     data: undefined,
@@ -236,17 +237,19 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
                                                     }
                                                 })
                                             }}>Add File</Button>
-                                        </Flex>
-                                    </>}
-                            </>
-                        },
+                                        </Flex> */}
+                                    {/* </>} */}
+                                </>
+                            },
 
-                    ]}
-                >
-                </Collapse>
+                        ]}
+                    >
+                    </Collapse>
+                </>}
 
 
-                <div style={{ marginBottom: "1rem" }}></div>
+
+                {/* <div style={{ marginBottom: "1rem" }}></div> */}
 
 
 
@@ -409,7 +412,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
                                     analysisType={"sample"}
                                     analysisMethod={inputAnalysisMethod}
                                     setResultTableList={setResultTableList}></ResultList> : <>
-
+                                    {/* 
                                     {!rest?.disableInputFile && <>
                                         <Flex justify="center" style={{ margin: "2rem" }} gap={"small"}>
                                             <Button size="small" color="cyan" variant="solid" onClick={() => {
@@ -432,7 +435,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
                                                 })
                                             }}>Add File</Button>
                                         </Flex>
-                                    </>}
+                                    </>} */}
 
                                 </>
                                 }
@@ -536,7 +539,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
                 ref={tableRef}
                 project={project}
                 relation_id={rest?.relation_id}
-                // component_id={rest?.component_id}
+            // component_id={rest?.component_id}
             ></AnalysisList>
 
             <div style={{ marginBottom: "1rem" }}></div>

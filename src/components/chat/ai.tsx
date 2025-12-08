@@ -1,8 +1,9 @@
-import { Bubble, Sender, useXAgent, useXChat } from "@ant-design/x";
-import { Button, Flex, GetProp } from "antd";
+import { Bubble, BubbleProps, Sender, useXAgent, useXChat } from "@ant-design/x";
+import { Button, Flex, GetProp, Typography } from "antd";
 import React from "react";
 import { useSelector } from "react-redux";
 import { AppstoreAddOutlined, CloudUploadOutlined, CopyOutlined, DislikeOutlined, LikeOutlined, OpenAIFilled, PaperClipOutlined, ProductOutlined, ReloadOutlined, ScheduleOutlined, UserOutlined } from '@ant-design/icons';
+import markdownit from 'markdown-it';
 
 const roles: GetProp<typeof Bubble.List, 'roles'> = {
   ai: {
@@ -24,6 +25,16 @@ const roles: GetProp<typeof Bubble.List, 'roles'> = {
     placement: 'end',
     avatar: { icon: <UserOutlined />, style: { background: '#87d068' } },
   },
+};
+const md = markdownit({ html: true, breaks: true });
+
+const renderMarkdown: BubbleProps['messageRender'] = (content) => {
+  return (
+    <Typography>
+      {/* biome-ignore lint/security/noDangerouslySetInnerHtml: used in demo */}
+      <div dangerouslySetInnerHTML={{ __html: md.render(content) }} />
+    </Typography>
+  );
 };
 
 const AI = () => {
@@ -81,12 +92,15 @@ const AI = () => {
     <Flex vertical gap="middle">
       <Bubble.List
         roles={roles}
-        style={{ maxHeight: 300 }}
+        style={{height:"70vh" }}
+
         items={messages.map(({ id, message, status }) => ({
           key: id,
           loading: status === 'loading',
           role: status === 'local' ? 'local' : 'ai',
           content: message,
+          messageRender: renderMarkdown,
+
         }))}
       />
       <Sender
@@ -103,4 +117,4 @@ const AI = () => {
 };
 
 
-export default  AI;
+export default AI;

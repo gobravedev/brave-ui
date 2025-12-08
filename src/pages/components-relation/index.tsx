@@ -781,7 +781,7 @@ const Pipeline: FC<any> = () => {
                                         label: "Script Illustrate",
                                         value: "script_illustrate"
                                     }, {
-                                        label: "llm",
+                                        label: "LLM",
                                         value: "llm"
                                     }
                                 ]} />

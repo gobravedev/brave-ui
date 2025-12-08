@@ -133,7 +133,7 @@ const DefaultComponentRelation: FC<any> = ({ data, form, components }) => {
 }
 const Tools: FC<any> = ({ components }) => {
     return <>
-        <Form.Item name={"component_id"} label="Script">
+        <Form.Item name={"component_id"} label="Script" rules={[{ required: true, message: 'Please select script!' }]}>
             <Select showSearch options={components?.scripts} ></Select>
         </Form.Item>
         <Form.Item name={"input_component_ids"} label="Input File">
@@ -1016,7 +1016,7 @@ export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClo
 
 
             <Form form={form}>
-                <Form.Item name={"name"} label="Name">
+                <Form.Item name={"name"} label="Name" rules={[{ required: true, message: 'Please input name!' }]}>
                     <Input ></Input>
                 </Form.Item>
                 <ComponentsRelationRender components={components} {...pipelineStructure} data={pipeline} form={form}></ComponentsRelationRender>

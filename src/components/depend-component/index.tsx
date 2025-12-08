@@ -1,4 +1,4 @@
-import { deleteComponentApi, deletePipelineRelationApi } from "@/api/pipeline"
+import { deleteComponentApi, deletePipelineRelationApi, deleteRelationApi } from "@/api/pipeline"
 import { Button, Collapse, Flex, Modal, Popconfirm, Table } from "antd"
 import axios from "axios"
 import { useEffect, useState } from "react"
@@ -11,11 +11,11 @@ const DependComponent = ({ visible, onClose, params, callback }: any) => {
         return null
     }
     const { modal, openModal, closeModal } = useModal()
-    const { component_id, component_type, namespace, namespace_name, name, ...rest } = params
+    const { relation_id, component_type, namespace, namespace_name, name, ...rest } = params
     const [dependComponent, setDependComponent] = useState<any[]>([])
     const { messageApi } = useOutletContext<any>()
     const getDependComponent = async () => {
-        const resp = await axios.get(`/get-depend-component/${component_id}`)
+        const resp = await axios.get(`/get-depend-relation/${relation_id}`)
         setDependComponent(resp.data)
     }
     const deletePipelineRelation = async (realtionId: any) => {
@@ -30,7 +30,7 @@ const DependComponent = ({ visible, onClose, params, callback }: any) => {
     }
     const deleteComponent = async (componentId: any) => {
         try {
-            const resp = await deleteComponentApi(componentId)
+            const resp = await deleteRelationApi(componentId)
             messageApi.success("删除成功!")
             onClose()
             if (callback) {
@@ -43,7 +43,7 @@ const DependComponent = ({ visible, onClose, params, callback }: any) => {
     }
     useEffect(() => {
         getDependComponent()
-    }, [component_id])
+    }, [relation_id])
     return <div>
         <Modal
             width={"70%"}
@@ -52,7 +52,7 @@ const DependComponent = ({ visible, onClose, params, callback }: any) => {
             footer={(_, { OkBtn, CancelBtn }) => (
                 <>
                     <Popconfirm title="Are you sure to delete this component?" onConfirm={() => {
-                        deleteComponent(component_id)
+                        deleteComponent(relation_id)
                     }}>
                         <Button size="small" color="danger" variant="solid">Delete Component</Button>
                     </Popconfirm>
@@ -90,30 +90,30 @@ const DependComponent = ({ visible, onClose, params, callback }: any) => {
                     title: "Relation ID",
                     dataIndex: "relation_id",
                     key: "relation_id"
-                }, {
-                    title: "Action",
-                    key: "action",
-                    render: (_, record) => (
-                        <Flex gap={"small"}>
-                            <Popconfirm
-                                title="Are you sure to delete this relation?"
-                                onConfirm={() => {
-                                    deletePipelineRelation(record.relation_id)
-                                }}
-                            >
-                                <Button size="small" color="danger" variant="solid">Delete Relation</Button>
-                            </Popconfirm>
-                            <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                openModal("modalA", {
-                                    data: record, structure: {
-                                        component_type: record.component_type,
-                                    }
-                                })
-                            }}>Update</Button>
-                            {/* <Button size="small" color="cyan" variant="solid">修改组件</Button> */}
-                        </Flex>
-                    )
-                }
+                }, 
+                // {
+                //     title: "Action",
+                //     key: "action",
+                //     render: (_, record) => (
+                //         <Flex gap={"small"}>
+                //             <Popconfirm
+                //                 title="Are you sure to delete this relation?"
+                //                 onConfirm={() => {
+                //                     deletePipelineRelation(record.relation_id)
+                //                 }}
+                //             >
+                //                 <Button size="small" color="danger" variant="solid">Delete Relation</Button>
+                //             </Popconfirm>
+                //             <Button size="small" color="cyan" variant="solid" onClick={() => {
+                //                 openModal("modalA", {
+                //                     data: record, structure: {
+                //                         component_type: record.component_type,
+                //                     }
+                //                 })
+                //             }}>Update</Button>
+                //         </Flex>
+                //     )
+                // }
                 ]} dataSource={dependComponent} />
             </div>
 

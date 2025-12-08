@@ -1,20 +1,59 @@
-import { Button, Card, Col, Empty, Row } from "antd"
-import { FC, useRef, useState } from "react"
+import { Button, Card, Col, Empty, Modal, Popconfirm, Row, Segmented, Space, Table } from "antd"
+import { FC, use, useEffect, useRef, useState } from "react"
 import ComponentsPage from "./components/page"
 import { useParams } from "react-router"
 import ComponentsDetailsRender from "./components-details-render"
 import { CreateOrUpdatePipelineComponent } from "@/components/create-pipeline"
 import { useModal } from "@/hooks/useModal"
+import axios from "axios"
+import { useGlobalMessage } from "@/hooks/useGlobalMessage"
+import { ApartmentOutlined, CopyOutlined, DeleteOutlined } from "@ant-design/icons"
 
 const Components: FC<any> = () => {
     const { modal, openModal, closeModal } = useModal();
-
+    // const [segmentedOptions, setSegmentedOptions] = useState<any[]>([])
     const { component_type } = useParams()
     const tabeRef = useRef<any>(null)
     const [component, setComponent] = useState<any>()
     const loadTable = () => {
         tabeRef.current?.reload()
     }
+    let segmentedOptions: any = []
+    if (component_type == "script") {
+        segmentedOptions = [
+            {
+                label: "structure",
+                value: "structure"
+            }, {
+                label: "code",
+                value: "code"
+            }
+        ]
+    } else if (component_type == "file") {
+        segmentedOptions = [
+            {
+                label: "structure",
+                value: "structure"
+            }, {
+                label: "files",
+                value: "files"
+            }
+        ]
+    }
+
+    const [panel, setPanel] = useState<string>("structure")
+    const message = useGlobalMessage()
+    useEffect(() => {
+        if (!component?.component_id && panel != "structure") {
+            setPanel("structure")
+        }
+        if (panel == "deleted") {
+            setPanel("structure")
+        }
+
+    }, [component])
+
+
     return <div style={{ maxWidth: "1800px", margin: "1rem auto", padding: '0 16px 0 16px' }}>
         <Row gutter={[16, 16]}>
             <Col lg={6} sm={6} xs={24}>
@@ -49,12 +88,76 @@ const Components: FC<any> = () => {
             <Col lg={18} sm={18} xs={24}>
                 {/* {JSON.stringify(component)} */}
                 {component ? <>
-                    <ComponentsDetailsRender
-                        callback={loadTable}
-                        view={`${component_type}V2`}
-                        component={component}
-                        component_type={component_type}
-                    ></ComponentsDetailsRender>
+
+
+                    <Card
+                        size="small"
+                        title={<Space>
+                            {component?.component_name || ''}
+                            {component?.component_id && <>
+
+                                <Popconfirm title="Copy component ?" onConfirm={async (e: any) => {
+                                    e.stopPropagation()
+                                    await axios.post(`/copy-component/${component.component_id}`)
+                                    message.success("Component copied!")
+                                    // reload()
+                                    loadTable()
+                                }}>
+                                    <CopyOutlined onClick={(e) => {
+                                        e.stopPropagation()
+
+                                    }} />
+
+                                </Popconfirm>
+
+
+                            </>}
+
+                        </Space>}
+                        extra={<Space>
+
+                            <Popconfirm title="Are you sure to delete this component?" onConfirm={async (e: any) => {
+                                await axios.delete(`/delete-component/${component.component_id}`)
+                                message.success("Component deleted!")
+                                setPanel("deleted")
+                                // reload()
+                                loadTable()
+                            }}>
+                                <DeleteOutlined style={{ color: "red" }} onClick={(e) => {
+                                    e.stopPropagation()
+
+                                }} />
+
+                            </Popconfirm>
+
+                            <ApartmentOutlined style={{ cursor: "pointer" }} onClick={(e) => {
+                                e.stopPropagation()
+                                openModal("componentRelation", {
+                                    component_id: component.component_id,
+                                    component_name: component.component_name,
+                                })
+                            }} />
+                            {component?.component_id &&
+                                <Segmented size="small" value={panel}
+                                    onChange={(val: any) => setPanel(val)}
+                                    options={segmentedOptions} />}
+                        </Space>}
+
+                    >
+
+                        {panel == "deleted" ? <Empty description="Component has been deleted"></Empty> : <>
+                            <ComponentsDetailsRender
+                                callback={loadTable}
+                                view={`${component_type}V2`}
+                                component={component}
+                                openModal={openModal}
+                                panel={panel}
+                                component_type={component_type}
+                            ></ComponentsDetailsRender>
+
+                        </>}
+                    </Card >
+
 
                 </> : <>
                     <Card>
@@ -66,6 +169,10 @@ const Components: FC<any> = () => {
             </Col>
         </Row>
 
+        <ComponentRelation
+            visible={modal.key == "componentRelation" && modal.visible}
+            onClose={closeModal}
+            params={modal.params}></ComponentRelation>
         {/* <CreateOrUpdatePipelineComponent
             callback={loadTable}
             // pipelineStructure={pipelineStructure}
@@ -78,3 +185,42 @@ const Components: FC<any> = () => {
 }
 export default Components
 
+
+
+const ComponentRelation: FC<any> = ({ visible, onClose, params }) => {
+    // /list-component-relation/{component_id}
+    const [data, setData] = useState<any[]>([])
+    const loadData = async () => {
+        const res = await axios.get(`/list-component-relation/${params.component_id}`)
+        setData(res.data)
+    }
+    useEffect(() => {
+        if (visible) {
+            loadData()
+        }
+    }, [visible])
+    return <Modal
+        open={visible}
+        onCancel={onClose}
+        width={800}
+        title={`Component Relation(${params?.component_name})`}
+        footer={null}
+    >
+        {/* {JSON.stringify(data, null, 2)} */}
+        <Table
+            dataSource={data}
+            rowKey={"relation_id"}
+            footer={() => `Total ${data.length} items`}
+            pagination={false}
+            columns={[
+                {
+                    title: "Relation ID",
+                    dataIndex: "relation_id",
+                }, {
+                    title: "Relation Name",
+                    dataIndex: "name",
+                }
+            ]}
+        ></Table>
+    </Modal>
+}

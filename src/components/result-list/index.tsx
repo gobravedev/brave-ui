@@ -5,7 +5,7 @@ import { Alert, Button, Card, Dropdown, Empty, Flex, Form, GetProp, Input, Input
 import axios from "axios"
 import { FC, forwardRef, memo, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { useNavigate, useOutletContext, useParams } from "react-router"
-import { DeleteFilled, DeleteOutlined, DownloadOutlined, DownOutlined, EditOutlined, FileOutlined, ImportOutlined, InboxOutlined, PlusCircleOutlined, QuestionCircleOutlined, RedoOutlined, UploadOutlined } from "@ant-design/icons"
+import { CloudDownloadOutlined, CloudUploadOutlined, DeleteFilled, DeleteOutlined, DownloadOutlined, DownOutlined, EditOutlined, FileOutlined, ImportOutlined, InboxOutlined, PlusCircleOutlined, QuestionCircleOutlined, RedoOutlined, UploadOutlined } from "@ant-design/icons"
 import ImportData from "../import-data"
 import { useModal } from "@/hooks/useModal"
 export const readHdfsAPi = (contentPath: any) => axios.get(`/api/read-hdfs?path=${contentPath}`)
@@ -816,9 +816,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                         style={{ width: 300 }}
                     />
 
-                    {/* {(currentAnalysisMethod?.component_type != "file" )&&  <>
-                      
-                    </>} */}
+
 
                     <Popconfirm title="Confirm adding example?" onConfirm={async () => {
                         await axios.post(`/analysis-result/add-example/${currentAnalysisMethod.component_id}?project=${project}`)
@@ -834,16 +832,9 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                             const resp = await axios.get(`/analysis-result/download-example/${currentAnalysisMethod.component_id}`)
                             window.open(`${baseURL}${resp.data.example_url}`, '_blank');
                             message.success(`Example ${baseURL}${resp.data.example_url} downloading...`)
-                        }}>Example <DownloadOutlined /></a>
+                        }}> <DownloadOutlined /></a>
                     </Tooltip>
 
-                    {currentAnalysisMethod?.relation_id && <Popconfirm title="Are you sure to delete?" onConfirm={() => {
-                        operatePipeline.deletePipelineRelation(currentAnalysisMethod.relation_id)
-                    }}>
-                        <Tooltip title={`Delete ${currentAnalysisMethod?.component_name}`}>
-                            <DeleteOutlined style={{ cursor: "pointer", color: "red" }} />
-                        </Tooltip>
-                    </Popconfirm>}
 
                     <ImportOutlined style={{ cursor: "pointer" }} onClick={() => {
                         openModal("importFile", {
@@ -853,32 +844,20 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                         })
                     }} />
 
-                    <a onClick={() => {
-                        openModal("createFolder", { ...currentAnalysisMethod })
-                    }}>Create Folder</a>
+
+                    {currentAnalysisMethod?.file_type != "collected" && <>
+                        <a onClick={() => {
+                            openModal("createFolder", { ...currentAnalysisMethod })
+                        }}>Create Folder</a>
+
+                    </>}
+
 
                     {operatePipeline?.openModal && <>
                         <Dropdown menu={{
                             items: [
 
-                                // {
-                                //     key: '4',
-                                //     label: (<Tooltip title={currentAnalysisMethod?.component_name}>
 
-                                //         <a onClick={() => {
-                                //             operatePipeline.openModal("modalC", {
-                                //                 data: undefined,
-                                //                 structure: {
-                                //                     relation_type: relationType, //"software_input_file",
-                                //                     parent_component_id: software.component_id,
-                                //                     // pipeline_id: pipeline.component_id,
-                                //                     component_type: "file"
-                                //                 }
-                                //             })
-                                //         }}>New File</a>
-                                //     </Tooltip>
-                                //     )
-                                // }, 
                                 {
                                     key: '3',
                                     label: (
@@ -892,53 +871,8 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                                             }}>Edit File</a>
                                         </Tooltip>
                                     )
-                                }, 
-                                // {
-                                //     key: '2',
-                                //     label: (
-                                //         <Tooltip title={currentAnalysisMethod?.component_name}>
-                                //             <a onClick={() => {
-                                //                 operatePipeline.openModal("modalA", {
-                                //                     data: undefined,
-                                //                     pipelineStructure: {
-                                //                         relation_type: relationType, //"software_input_file",
-                                //                         parent_component_id: software.component_id,
-                                //                         // pipeline_id: pipeline.component_id
-                                //                     }
-                                //                 })
-                                //             }}>Add File</a>
-                                //         </Tooltip>
+                                },
 
-                                //     )
-                                // }, {
-                                //     key: '1',
-                                //     label: (
-                                //         <Tooltip title={currentAnalysisMethod?.component_name}>
-                                //             <a onClick={() => {
-            
-                                //                 operatePipeline.openModal("modalA", {
-                                //                     data: currentAnalysisMethod,
-                                //                     pipelineStructure: {
-                                //                         relation_type: relationType,
-                                                  
-                                //                     }
-                                //                 })
-                                //             }}>Replace File</a>
-                                //         </Tooltip>
-                                //     )
-                                // },
-                                // {
-                                //     label: (
-                                //         <Tooltip title={currentAnalysisMethod?.component_name}>
-                                //             <Popconfirm title="Whether to remove file?" onConfirm={() => {
-                                //                 operatePipeline.deletePipelineRelation(currentAnalysisMethod.relation_id)
-                                //             }}>
-                                //                 <a>Remove File</a>
-                                //             </Popconfirm>
-                                //         </Tooltip>
-                                //     ),
-                                //     key: '0',
-                                // },
                                 {
                                     label: (
                                         <Tooltip title={currentAnalysisMethod?.component_name}>
@@ -1007,14 +941,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
 
         >
 
-            {/* {JSON.stringify(componentParentIdsMap)} */}
-            {/* <pre>
-                {JSON.stringify(analysisMethod,null,2)}
-            </pre> */}
 
-            {/* {JSON.stringify(currentAnalysisMethod)} */}
-            {/* {JSON.stringify(projectObj)} */}
-            {/* {JSON.stringify(filteredData)} */}
             {sseData.msgType === "analysis_result" && <>
                 {/* <Alert closable message={`${sseData?.analysis_name}: Add Analsyis: ${sseData?.add_num}; Update Analysis: ${sseData?.update_num}; Complete Analysis: ${sseData?.complete_num}`} /> */}
                 {/* {JSON.stringify(sseData)} */}
@@ -1022,14 +949,6 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
 
             {/* {analysisResultId} */}
             {currentAnalysisMethod?.file_type == "collected" ? <>
-                {/* {data && <>
-
-                    {data.map((item: any, index: any) => (<div key={index} >
-
-                    </div>))}
-
-                </>} */}
-
                 {data ? <>
 
                     <Spin spinning={uploading} tip={"Uploading..."}>
@@ -1049,7 +968,6 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                             </Dragger>
 
 
-                            {/* <Button onClick={handleUpload}>aa</Button> */}
                         </>
                             :
                             <>
@@ -1073,20 +991,12 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
 
                                             <Upload {...props}>
                                                 <Tooltip title="Upload new file">
-                                                    <UploadOutlined style={{ cursor: "pointer" }} />
+                                                    <CloudUploadOutlined style={{ cursor: "pointer" }} />
                                                 </Tooltip>
 
                                             </Upload>
 
-                                            <DownloadOutlined style={{ cursor: "pointer" }} onClick={() => {
-                                                const currentData = data.find((it: any) => it.analysis_result_id == analysisResultId)
-                                                console.log("currentData", currentData)
-                                                window.open(`${baseURL}${currentData.url}`, '_blank');
-                                                //  if(currentData.length){
 
-                                                //  }
-
-                                            }} />
                                             <EditOutlined style={{ cursor: "pointer" }}
                                                 onClick={() => {
                                                     console.log("analysisResultId", analysisResultId)
@@ -1108,6 +1018,13 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                                         key: item.analysis_result_id,
                                         label: <Tooltip title={`${item?.content} ${item.analysis_result_id}`}>
                                             {`${item?.file_name}`}
+                                            {/* {item?.url} */}
+
+                                            <CloudDownloadOutlined style={{ cursor: "pointer", marginLeft: "0.2rem" }} onClick={() => {
+                                                // const currentData = data.find((it: any) => it.analysis_result_id == analysisResultId)
+                                                console.log("currentData", item)
+                                                window.open(`${baseURL}${item.url}`, '_blank');
+                                            }} />
 
                                         </Tooltip>
                                     }))}></Tabs>
@@ -1123,10 +1040,6 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                     </Spin>
 
                 </> : <Skeleton active />}
-
-
-
-
             </> : <>
 
                 <Table
@@ -1165,9 +1078,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
             </Typography>}
 
         </Card>
-        {/* <Card style={{ marginBottom: "1rem" }}>
-            <Button onClick={loadData}>刷新</Button>
-        </Card> */}
+
 
         <ImportData
             visible={modal.visible && modal.key == "importFile"}
