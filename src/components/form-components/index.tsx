@@ -203,21 +203,50 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
             Component: HeatmapParams,
         }
     };
+    const form = Form.useFormInstance();
+    const dependsValue = Form.useWatch((values: any) => values, form);
+    const isDisplay = (depends: any) => {
+        
+        const display = depends.map((item: any) => {
+            if ( dependsValue) {
+                return dependsValue[item.name] == item.value
+            }
+        }).every(Boolean)
+        // console.log("dependsValue:", display)
+        return display
+    }
+    // console.log("dependsValue:", dependsValue)
+    // if (depends) {
+    //     // const dependsName = depends.map((item:any)=>item.name)
 
+    // const display = depends.map((item: any) => dependsValue[item.name] == item.value).every(Boolean)
+    // console.log("dependsValue:", display)
+
+    // }
     return <>
         {/* {JSON.stringify(dataMap)} */}
         <Row gutter={[8, 0]}>
             {/* {JSON.stringify(projectObj?.parameter)} */}
-            {formJson.map((it: any, index: any) => (
-                <Col span={it?.col ? it?.col : 12} key={index}>
-                    {/* {JSON.stringify(it)} */}
+            {formJson.map((it: any, index: any) => {
+                if (!it?.depends) {
+                    return <Col span={it?.col ? it?.col : 24} key={index} >
+                        {/* {it?.depends && isDisplay(it?.depends) && <>aaaaaaaaaa</>} */}
+                        {/* {JSON.stringify(it)} */}
 
-                    <ComponentsRender projParameter={parameter} analysisResultId={analysisResultId} key={index} {...it} dataMap={dataMap} componentMap={componentMap} constDataMap={constDataMap}></ComponentsRender>
-                </Col>
+                        <ComponentsRender projParameter={parameter} analysisResultId={analysisResultId} key={index} {...it} dataMap={dataMap} componentMap={componentMap} constDataMap={constDataMap}></ComponentsRender>
+                    </Col>
+                } else {
+                    if (isDisplay(it?.depends)) {
+                        return <Col span={it?.col ? it?.col : 24} key={index} >
+                            {/* {it?.depends && isDisplay(it?.depends) && <>aaaaaaaaaa</>} */}
+                            {/* {JSON.stringify(it)} */}
 
+                            <ComponentsRender projParameter={parameter} analysisResultId={analysisResultId} key={index} {...it} dataMap={dataMap} componentMap={componentMap} constDataMap={constDataMap}></ComponentsRender>
+                        </Col>
+                    }
+                }
 
-
-            ))}
+            })}
         </Row>
 
 
@@ -268,7 +297,7 @@ const FilterSelect: FC<any> = ({ label, name, data, rules, field, ...rest }) => 
         </Form.Item>
     </>
 }
-const BasicSelect: FC<any> = ({ options, clear, value, onChange, ...rest }) => {
+const BasicSelect: FC<any> = ({ options, clear, value, onChange, projParameter, analysisResultId, ...rest }) => {
     const form = Form.useFormInstance();
 
     const selectChange = (value: any) => {
@@ -369,8 +398,18 @@ const BaseTextArea: FC<any> = ({ label, name, data, initialValue, rules, ...rest
         </Form.Item>
     </>
 }
-const BaseInput: FC<any> = ({ label, name, data, initialValue, rules, ...rest }) => {
+const BaseInput: FC<any> = ({ label, name, form, data, initialValue, rules, ...rest }) => {
+
+    // if (depends) {
+    //     // const dependsName = depends.map((item:any)=>item.name)
+    //     const dependsValue = Form.useWatch((values: any) => values, form);
+    //     const display = depends.map((item: any) => dependsValue[item.name] == item.value).every(Boolean)
+    //     console.log("dependsValue:", display)
+
+    // }
+
     return <>
+        {/* {JSON.stringify(depends)} */}
         <Form.Item initialValue={initialValue} label={label} name={name} rules={rules}>
             <Input {...rest} />
         </Form.Item>
@@ -537,7 +576,7 @@ export const CollectedGroupSelectSampleButton2: FC<any> = ({ label, name, rules,
 
     </>
 }
-export const CollectedSampleSelect: FC<any> = ({ label, projParameter, columns, name, rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
+export const CollectedSampleSelect: FC<any> = ({ label, modes = [], columns, name, rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
     const [sampleGrouped, setSampleGrouped] = useState<any>()
     const [options, setOptions] = useState<any>([])
     const [collectFiles, setCollectFiles] = useState<any>([])
@@ -649,11 +688,12 @@ export const CollectedSampleSelect: FC<any> = ({ label, projParameter, columns, 
                 {/* {JSON.stringify()} */}
                 <Form.Item label={`${item} Columns`} name={[name, item]} rules={rules}>
                     <Select showSearch
+                        mode={modes[index] ? "multiple" : undefined}
                         filterOption={(input: any, option: any) =>
                             (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
                         options={options}></Select>
-                    {/* <GroupSelectSample sampleGrouped={sampleGrouped} sampleGroup={options} ></GroupSelectSample> */}
                 </Form.Item>
+
                 {/* <Flex gap="small">
                     {item}
                     <Form.Item label={item} name={[name, "group", `${item}`]} noStyle >

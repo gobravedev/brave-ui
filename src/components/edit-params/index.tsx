@@ -184,15 +184,15 @@ const EditParams: FC<any> = ({ visible, params, onClose, callback }) => {
 export default EditParams
 
 export const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
-    requestParam, dataMap, formJson, setLoading=()=>{},
+    requestParam, dataMap, formJson,
     databases, callback, analysisResultId, showCancal = false }) => {
     const { modals, openModals, closeModals } = useModals(["paramsView", "bioDatabases"]);
-  
+    const [loading, setLoading] = useState<boolean>(false)
     const { messageApi } = useOutletContext<any>()
     // useEffect(()=>{
 
     // },[project])
- 
+
 
 
     const getRequestParams = (values: any) => {
@@ -255,67 +255,72 @@ export const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
     }
 
     return <Suspense fallback={<Skeleton active></Skeleton>}>
-        <Form form={form} onValuesChange={(changedValues, allValues) => {
-            // onChange(allFields);
-            // console.log(_)
-            // if(changedValues?.addedProject){
-            //     // console.log(onChangeAddProject)
+        <Spin spinning={loading}>
+            <Form size="small" form={form} 
+            // labelCol={{ span: 8 }}
+            // wrapperCol={{ span: 16 }}
+             layout="vertical" onValuesChange={(changedValues, allValues) => {
+                // onChange(allFields);
+                // console.log(_)
+                // if(changedValues?.addedProject){
+                //     // console.log(onChangeAddProject)
 
 
-            // }
+                // }
 
-        }}>
-            {/* {JSON.stringify(formJson_)} */}
-            <RenderFromJson
-                analysisResultId={analysisResultId}
-                formJson={formJson}
-                databases={databases}
-                dataMap={dataMap}
-            ></RenderFromJson>
-            <Form.Item label="Analysyis Name" name={"analysis_name"} style={{ maxWidth: 600 }} rules={[{ required: true, message: 'This field cannot be empty!' }]}>
-                <Input></Input>
-            </Form.Item>
-            <Flex gap={"small"}>
-                <Button size="small" color="cyan" variant="solid" onClick={() => {
-                    saveUpstreamAnalysis(false)
-                }}>View Parameters</Button>
+            }}>
+                <RenderFromJson
+                    analysisResultId={analysisResultId}
+                    formJson={formJson}
+                    databases={databases}
+                    dataMap={dataMap}
+                ></RenderFromJson>
+                <Form.Item label="Analysyis Name" name={"analysis_name"} style={{ maxWidth: 600 }} rules={[{ required: true, message: 'This field cannot be empty!' }]}>
+                    <Input></Input>
+                </Form.Item>
+                <Flex gap={"small"}>
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        saveUpstreamAnalysis(false)
+                    }}>View Parameters</Button>
 
-                <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>
-                    {requestParam?.analysis_id ? <>Update Analysis({requestParam.analysis_name})({String(requestParam.analysis_id).slice(0, 8)})</> : <>Create Analysis</>}</Button>
-                {(requestParam?.analysis_id && showCancal) && <Button size="small" color="cyan" onClick={() => form.setFieldValue("analysis_id", undefined)}>Cancel Analysis</Button>}
-                {/* <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>更新分析</Button> */}
+                    <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>
+                        {requestParam?.analysis_id ? <>Update Analysis({requestParam.analysis_name})({String(requestParam.analysis_id).slice(0, 8)})</> : <>Create Analysis</>}</Button>
+                    {(requestParam?.analysis_id && showCancal) && <Button size="small" color="cyan" onClick={() => form.setFieldValue("analysis_id", undefined)}>Cancel Analysis</Button>}
+                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>更新分析</Button> */}
 
-                {showCreate &&
-                    <Popconfirm title="Are you sure to create a new analysis?"
-                        onConfirm={createAnalysis}
-                    >
-                        <Button size="small" color="orange" variant="solid" onClick={() => form.setFieldValue("analysis_id", undefined)}>Create Analysis</Button>
-                    </Popconfirm>
-                }
+                    {showCreate &&
+                        <Popconfirm title="Are you sure to create a new analysis?"
+                            onConfirm={createAnalysis}
+                        >
+                            <Button size="small" color="orange" variant="solid" onClick={() => form.setFieldValue("analysis_id", undefined)}>Create Analysis</Button>
+                        </Popconfirm>
+                    }
 
-            </Flex>
-            {/* <Form.Item name={"anno1"}>
+                </Flex>
+                {/* <Form.Item name={"anno1"}>
                 <Input></Input>
             </Form.Item>
         <Button onClick={()=>{
                     form.setFieldValue("eggnog", 6491)
                 }}> aa</Button> */}
-            <Collapse ghost items={[
-                {
-                    key: "1",
-                    label: "More",
-                    children: <>
-                        <Form.Item noStyle shouldUpdate>
-                            {() => (
-                                <Typography>
-                                    <pre>{JSON.stringify(getRequestParams(form.getFieldsValue()), null, 2)}</pre>
-                                </Typography>
-                            )}
-                        </Form.Item>
-                    </>
-                }
-            ]} />
-        </Form>
+                <Collapse ghost items={[
+                    {
+                        key: "1",
+                        label: "More",
+                        children: <>
+                            <Form.Item noStyle shouldUpdate>
+                                {() => (
+                                    <Typography>
+                                        <pre>{JSON.stringify(getRequestParams(form.getFieldsValue()), null, 2)}</pre>
+                                    </Typography>
+                                )}
+                            </Form.Item>
+                        </>
+                    }
+                ]} />
+            </Form>
+        </Spin>
+
 
         <ParamsView
 

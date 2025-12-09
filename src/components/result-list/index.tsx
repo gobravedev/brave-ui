@@ -1030,10 +1030,8 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                                     }))}></Tabs>
                                 <Spin spinning={tableRowLoading} tip={"Loading table data..."}>
 
-                                    <div style={{ height: '50vh' }}>
-                                        <BigTable shape={tableRowsInfo} rows={[tableColumns,
-                                            ...filteredData]} />
-                                    </div>
+                                    <BigTable shape={tableRowsInfo} rows={[tableColumns,
+                                        ...filteredData]} />
                                 </Spin>
                             </>}
 

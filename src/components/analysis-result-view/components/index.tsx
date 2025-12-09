@@ -188,7 +188,7 @@ export const TableView: FC<any> = ({ data, url, filename, columns, baseURL, proj
         </Flex>
 
 
-        <div style={{ height: '50vh' }}>
+        <div >
             <BigTable shape={tableRowsInfo} rows={[...filteredData]} />
         </div>
     </>

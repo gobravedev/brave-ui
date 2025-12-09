@@ -7,7 +7,7 @@ import { useModal } from "@/hooks/useModal"
 import { data } from "react-router"
 import { useForm } from "antd/es/form/Form"
 import { MonacoEditor } from "../react-monaco-editor"
-import { es, tr } from "@faker-js/faker"
+import { el, es, tr } from "@faker-js/faker"
 import { PlusOutlined } from '@ant-design/icons'
 
 
@@ -133,7 +133,7 @@ const DefaultComponentRelation: FC<any> = ({ data, form, components }) => {
 }
 const Tools: FC<any> = ({ components }) => {
     return <>
-        <Form.Item name={"component_id"} label="Script" rules={[{ required: true, message: 'Please select script!' }]}>
+        <Form.Item name={"component_id"} label="Script" >
             <Select showSearch options={components?.scripts} ></Select>
         </Form.Item>
         <Form.Item name={"input_component_ids"} label="Input File">
@@ -201,7 +201,6 @@ const ScriptContent: FC<any> = ({ data, form }) => {
         const opentions = resp.data.map((item: any) => ({ label: `${item.name}`, value: item.container_id }))
         setContainers(opentions)
     }
-    const content = Form.useWatch((values: any) => values?.content, form);
 
 
     useEffect(() => {
@@ -228,7 +227,6 @@ const ScriptContent: FC<any> = ({ data, form }) => {
         <Form.Item name={"content"} label="content" rules={[{ required: true, message: 'Please input content!' }]}>
             <TextAreaComp templete={templete}></TextAreaComp>
         </Form.Item>
-        <PreviewJsonForm value={content}></PreviewJsonForm>
 
 
 
@@ -247,27 +245,34 @@ const PreviewJsonForm: FC<any> = ({ value }) => {
     const [databases, setDatabases] = useState<any>([])
 
     const renderFormJson = () => {
-        try {
-            const data = JSON.parse(value)
-            if (data?.formJson) {
-                setFormJson(data.formJson)
-                message.success("Render form json success!")
+        if (formJson.length > 0 || databases.length > 0) {
+            setFormJson([])
+            setDatabases([])
+        } else {
+            try {
+                const data = JSON.parse(value)
+                if (data?.formJson) {
+                    setFormJson(data.formJson)
+                    message.success("Render form json success!")
+                }
+                if (data?.databases) {
+                    setDatabases(data.databases)
+                }
+            } catch (error) {
+                message.error("Invalid JSON format!")
             }
-            if (data?.databases) {
-                setDatabases(data.databases)
-            }
-        } catch (error) {
-            message.error("Invalid JSON format!")
         }
+
     }
     return <>
         <Button size="small" onClick={renderFormJson}>render</Button>
+
         <Suspense fallback={<Skeleton active />}>
-            <RenderFromJson
+            {(formJson.length > 0 || databases.length > 0) && <RenderFromJson
                 formJson={formJson}
                 databases={databases}
                 dataMap={{}}
-            ></RenderFromJson>
+            ></RenderFromJson>}
         </Suspense>
     </>
 }
@@ -618,6 +623,8 @@ export const CreateOrUpdatePipeline: FC<any> = ({ data, structure, callback }) =
 
     const [loading, setLoading] = useState<any>(false)
 
+    const content = Form.useWatch((values: any) => values?.content, form);
+
 
     const getPipeleine = async (componentId: any) => {
         const resp = await axios.post("/find-pipeline", { component_id: componentId })
@@ -650,6 +657,7 @@ export const CreateOrUpdatePipeline: FC<any> = ({ data, structure, callback }) =
         if (data?.component_id) {
             getPipeleine(data.component_id)
         } else {
+            setComponent({})
             form.resetFields()
         }
     }, [data])
@@ -659,10 +667,10 @@ export const CreateOrUpdatePipeline: FC<any> = ({ data, structure, callback }) =
             ...structure,
 
         }
-        if (component?.component_id) {
+        if (data?.component_id) {
             // params['relation_id'] = pipelineRelation.relation_id
             // params['parent_component_id'] = pipelineRelation.parent_component_id
-            params['component_id'] = component.component_id
+            params['component_id'] = data.component_id
 
 
         }
@@ -673,7 +681,12 @@ export const CreateOrUpdatePipeline: FC<any> = ({ data, structure, callback }) =
     const getParamsFormat = (values: any) => {
         const params = getParams(values)
         if (typeof params['content'] == 'string') {
-            params['content'] = JSON.parse(params['content'])
+            try {
+                params['content'] = JSON.parse(params['content'])
+
+            } catch (error) {
+
+            }
         }
 
         return params
@@ -750,6 +763,8 @@ export const CreateOrUpdatePipeline: FC<any> = ({ data, structure, callback }) =
         {/* {namespace} */}
 
         <Spin spinning={loading}>
+            {/* {JSON.stringify(component)} */}
+
             <Form form={form} >
                 <Tabs
                     tabBarExtraContent={<Space>
@@ -830,6 +845,8 @@ export const CreateOrUpdatePipeline: FC<any> = ({ data, structure, callback }) =
                 ]} />
 
             </Form>
+            <PreviewJsonForm value={content}></PreviewJsonForm>
+
         </Spin>
 
 

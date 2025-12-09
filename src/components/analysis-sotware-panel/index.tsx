@@ -276,7 +276,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
     const [upstreamForm] = Form.useForm();
     const [resultTableList, setResultTableList] = useState<any>()
     const [messageApi, contextHolder] = message.useMessage();
-    const [loading, setLoading] = useState<boolean>(false)
+    // const [loading, setLoading] = useState<boolean>(false)
     const formId = Form.useWatch((values) => values?.analysis_id, upstreamForm);
     // const [currentAnalysisMethod, setCurrentAnalysisMethod] = useState<any>(analysisMethod[0].value[0])
     // const [currentAnalysisMethod, setCurrentAnalysisMethod] = useState<any>(analysisPipline ? analysisPipline : "")
@@ -307,7 +307,7 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
     const tableRef = useRef<any>(null)
 
     const buildRequestParams = () => {
-        let dataComponentIds:any = []
+        let dataComponentIds: any = []
         if (inputAnalysisMethod) {
             dataComponentIds = inputAnalysisMethod.map((item: any) => item.component_id)
 
@@ -383,155 +383,159 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
 
 
             <div style={{ marginBottom: "1rem" }}></div>
-            <Form form={upstreamForm}>
-                {/* {JSON.stringify(rest)} */}
-                <Collapse
-                    style={{ marginTop: "1rem" }}
-                    size="small"
-                    items={[
-                        {
-                            key: '1',
-                            label: `Input File (${rest.name})`,
-                            children: <>
+            {/* <Form form={upstreamForm}> */}
+            {/* {JSON.stringify(rest)} */}
+            <Collapse
+                style={{ marginTop: "1rem" }}
+                size="small"
+                items={[
+                    {
+                        key: '1',
+                        label: `Input File (${rest.name})`,
+                        children: <>
 
-                                {/* {JSON.stringify(componentParentIdsMap)} */}
+                            {/* {JSON.stringify(componentParentIdsMap)} */}
 
-                                {checkAvailable(inputAnalysisMethod) ? <ResultList
-                                    {...rest}
-                                    componentParentIdsMap={componentParentIdsMap}
-                                    setComponentParentIdsMap={setComponentParentIdsMap}
-                                    pipeline={pipeline}
-                                    software={rest}
-                                    currentAnalysisMethod={currentAnalysisMethod}
-                                    setCurrentAnalysisMethod={setCurrentAnalysisMethod}
-                                    operatePipeline={operatePipeline}
-                                    relationType="software_input_file"
-                                    cardExtra={cardExtra}
-                                    title={`Input File ${inputAnalysisMethod.length > 0 ? "" : inputAnalysisMethod.map((it: any) => it.label)}`}
-                                    activeTabKey={activeTabKey}
-                                    setActiveTabKey={setActiveTabKey}
-                                    shouldTrigger={true}
-                                    analysisType={"sample"}
-                                    analysisMethod={inputAnalysisMethod}
-                                    setResultTableList={setResultTableList}></ResultList> : <>
-                                    {/* 
-                                    {!rest?.disableInputFile && <>
-                                        <Flex justify="center" style={{ margin: "2rem" }} gap={"small"}>
-                                            <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                                operatePipeline.openModal("modalC", {
-                                                    data: undefined,
-                                                    structure: {
-                                                        relation_type: "software_input_file",
-                                                        parent_component_id: rest.component_id,
-                                                        component_type: "file"
-                                                    }
-                                                })
-                                            }}>New File</Button>
-                                            <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                                operatePipeline.openModal("modalA", {
-                                                    data: undefined,
-                                                    pipelineStructure: {
-                                                        relation_type: "software_input_file",
-                                                        parent_component_id: rest.component_id,
-                                                    }
-                                                })
-                                            }}>Add File</Button>
-                                        </Flex>
-                                    </>} */}
-
-                                </>
-                                }
-
-
-                                {/* {JSON.stringify(inputFileList)} */}
-                                <Spin spinning={loading}>
-                                    <CreateOrUpdateParsms
-                                        // analysisResultId={analysisResultId}
-                                        form={upstreamForm}
-                                        requestParam={buildRequestParams()}
-                                        dataMap={resultTableList ? resultTableList : {}}
-                                        formJson={rest.formJson}
-                                        databases={rest.databases}
-                                        callback={() => {
-                                            if (tableRef.current) {
-                                                tableRef.current.reload()
-                                            }
-                                        }} ></CreateOrUpdateParsms>
-
-                                    {/* {!rest?.disableGroupField && <>
-                                        <FormJsonComp formJson={[{
-                                            "name": "group_field",
-                                            "label": "Group Field",
-                                            "rules": [
-                                                {
-                                                    "required": true,
-                                                    "message": "This field cannot be empty!"
-                                                }
-                                            ],
-                                            "type": "GroupFieldSelect"
-                                        }]} dataMap={[]}></FormJsonComp>
-
-                                    </>} */}
-
-
-                                    {/* {rest?.reInputFile ? <FormJsonComp formJson={rest?.reInputFile} dataMap={resultTableList}></FormJsonComp> :
-                                        <FormJsonComp formJson={inputFileList} dataMap={resultTableList}></FormJsonComp>} */}
-
-                                    {/* {JSON.stringify(inputFileList)} */}
-                                    {/* <BioDatabaseForm openModal={() => operatePipeline.openModal("modalE", rest.databases)} formJson={rest.databases}></BioDatabaseForm> */}
-
-
-                                    {/* {upstreamFormJson &&
-                                        <FormJsonComp formJson={upstreamFormJson} dataMap={dataMap}></FormJsonComp>
-                                    }
-                                    {rest?.formJson &&
-                                        <FormJsonComp formJson={rest?.formJson} dataMap={dataMap}></FormJsonComp>
-                                    } */}
-                                    {/* initialValue={`${rest.name}`}  */}
-                                    {/* <Form.Item name={"analysis_name"} label={"Analysis Name"} rules={[{ required: true, message: '该字段不能为空!' }]}>
-                                        <Input></Input>
-                                    </Form.Item> */}
-
-                                    {/* <Flex gap={"small"}>
+                            {checkAvailable(inputAnalysisMethod) ? <ResultList
+                                {...rest}
+                                componentParentIdsMap={componentParentIdsMap}
+                                setComponentParentIdsMap={setComponentParentIdsMap}
+                                pipeline={pipeline}
+                                software={rest}
+                                currentAnalysisMethod={currentAnalysisMethod}
+                                setCurrentAnalysisMethod={setCurrentAnalysisMethod}
+                                operatePipeline={operatePipeline}
+                                relationType="software_input_file"
+                                cardExtra={cardExtra}
+                                title={`Input File ${inputAnalysisMethod.length > 0 ? "" : inputAnalysisMethod.map((it: any) => it.label)}`}
+                                activeTabKey={activeTabKey}
+                                setActiveTabKey={setActiveTabKey}
+                                shouldTrigger={true}
+                                analysisType={"sample"}
+                                analysisMethod={inputAnalysisMethod}
+                                setResultTableList={setResultTableList}></ResultList> : <>
+                                {/* 
+                                {!rest?.disableInputFile && <>
+                                    <Flex justify="center" style={{ margin: "2rem" }} gap={"small"}>
                                         <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                            saveUpstreamAnalysis(false)
-
-                                        }}>View Parameters                                        </Button>
-
-                                        <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>{formId ? <>Update Analysis</> : <>Save  Analysis</>}</Button>
-                                        {formId && <Button size="small" color="cyan" variant="solid" onClick={() => upstreamForm.setFieldValue("analysis_id", undefined)}>Cancel Update</Button>}
-
-                                    </Flex> */}
-                                    {/* <hr />
-                                
-                                <hr /> */}
-                                    {/* <Collapse ghost items={[
-                                        {
-                                            key: "1",
-                                            label: "More",
-                                            children: <>
-                                                <Form.Item noStyle shouldUpdate>
-                                                    {() => (
-                                                        <Typography>
-                                                            <pre>{JSON.stringify(getrRequestParams(upstreamForm.getFieldsValue()), null, 2)}</pre>
-                                                        </Typography>
-                                                    )}
-                                                </Form.Item>
-                                            </>
-                                        }
-                                    ]} /> */}
-
-
-                                </Spin>
+                                            operatePipeline.openModal("modalC", {
+                                                data: undefined,
+                                                structure: {
+                                                    relation_type: "software_input_file",
+                                                    parent_component_id: rest.component_id,
+                                                    component_type: "file"
+                                                }
+                                            })
+                                        }}>New File</Button>
+                                        <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                            operatePipeline.openModal("modalA", {
+                                                data: undefined,
+                                                pipelineStructure: {
+                                                    relation_type: "software_input_file",
+                                                    parent_component_id: rest.component_id,
+                                                }
+                                            })
+                                        }}>Add File</Button>
+                                    </Flex>
+                                </>} */}
 
                             </>
-                        },
+                            }
 
-                    ]}
-                >
-                </Collapse>
 
-            </Form>
+                            {/* {JSON.stringify(inputFileList)} */}
+                            {/* <Spin spinning={loading}> */}
+
+                            <div style={{maxWidth:"40rem",margin:"0 auto"}}>
+                                <CreateOrUpdateParsms
+                                    // analysisResultId={analysisResultId}
+                                    form={upstreamForm}
+                                    requestParam={buildRequestParams()}
+                                    dataMap={resultTableList ? resultTableList : {}}
+                                    formJson={rest.formJson}
+                                    databases={rest.databases}
+                                    callback={() => {
+                                        if (tableRef.current) {
+                                            tableRef.current.reload()
+                                        }
+                                    }} ></CreateOrUpdateParsms>
+                            </div>
+
+
+                            {/* {!rest?.disableGroupField && <>
+                                    <FormJsonComp formJson={[{
+                                        "name": "group_field",
+                                        "label": "Group Field",
+                                        "rules": [
+                                            {
+                                                "required": true,
+                                                "message": "This field cannot be empty!"
+                                            }
+                                        ],
+                                        "type": "GroupFieldSelect"
+                                    }]} dataMap={[]}></FormJsonComp>
+
+                                </>} */}
+
+
+                            {/* {rest?.reInputFile ? <FormJsonComp formJson={rest?.reInputFile} dataMap={resultTableList}></FormJsonComp> :
+                                    <FormJsonComp formJson={inputFileList} dataMap={resultTableList}></FormJsonComp>} */}
+
+                            {/* {JSON.stringify(inputFileList)} */}
+                            {/* <BioDatabaseForm openModal={() => operatePipeline.openModal("modalE", rest.databases)} formJson={rest.databases}></BioDatabaseForm> */}
+
+
+                            {/* {upstreamFormJson &&
+                                    <FormJsonComp formJson={upstreamFormJson} dataMap={dataMap}></FormJsonComp>
+                                }
+                                {rest?.formJson &&
+                                    <FormJsonComp formJson={rest?.formJson} dataMap={dataMap}></FormJsonComp>
+                                } */}
+                            {/* initialValue={`${rest.name}`}  */}
+                            {/* <Form.Item name={"analysis_name"} label={"Analysis Name"} rules={[{ required: true, message: '该字段不能为空!' }]}>
+                                    <Input></Input>
+                                </Form.Item> */}
+
+                            {/* <Flex gap={"small"}>
+                                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                        saveUpstreamAnalysis(false)
+
+                                    }}>View Parameters                                        </Button>
+
+                                    <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>{formId ? <>Update Analysis</> : <>Save  Analysis</>}</Button>
+                                    {formId && <Button size="small" color="cyan" variant="solid" onClick={() => upstreamForm.setFieldValue("analysis_id", undefined)}>Cancel Update</Button>}
+
+                                </Flex> */}
+                            {/* <hr />
+                            
+                            <hr /> */}
+                            {/* <Collapse ghost items={[
+                                    {
+                                        key: "1",
+                                        label: "More",
+                                        children: <>
+                                            <Form.Item noStyle shouldUpdate>
+                                                {() => (
+                                                    <Typography>
+                                                        <pre>{JSON.stringify(getrRequestParams(upstreamForm.getFieldsValue()), null, 2)}</pre>
+                                                    </Typography>
+                                                )}
+                                            </Form.Item>
+                                        </>
+                                    }
+                                ]} /> */}
+
+
+                            {/* </Spin> */}
+
+                        </>
+                    },
+
+                ]}
+            >
+            </Collapse>
+
+            {/* </Form> */}
             <div style={{ marginBottom: "1rem" }}></div>
 
 

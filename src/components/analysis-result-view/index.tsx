@@ -327,7 +327,6 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
                         </div> : <>
                             {((analsyisResult?.job_status == "running" && analsyisResult?.run_type != "server")) ? <Skeleton active></Skeleton> : <>
 
-
                                 {analysis_id && <AnalysisResultDisplay analsyisResult={analsyisResult} loading={loading}></AnalysisResultDisplay>}
 
                             </>
@@ -450,9 +449,10 @@ const AnalysisResultDisplay: FC<any> = ({ analsyisResult, loading }) => {
     const { modal, openModal, closeModal } = useModal()
 
     return <div >
+        
         {analsyisResult && <>
 
-            {analsyisResult.images && <div style={{ padding: "1rem" }}>
+            {analsyisResult.images && <div >
                 {
                     Array.isArray(analsyisResult.images) ?
 
@@ -467,8 +467,8 @@ const AnalysisResultDisplay: FC<any> = ({ analsyisResult, loading }) => {
                         </>
                 }
             </div>}
-
-            <div style={{ padding: "1rem" }}>
+            
+            <div >
                 {analsyisResult.htmls && Array.isArray(analsyisResult.htmls) && <>
                     {analsyisResult.htmls.map((item: any, index: any) => (
                         <div key={index}>
@@ -487,7 +487,7 @@ const AnalysisResultDisplay: FC<any> = ({ analsyisResult, loading }) => {
             </div>
 
             {/* <MicrobiomeSummaryCard></MicrobiomeSummaryCard> */}
-            <div style={{ padding: "1rem" }}>
+            <div >
                 {analsyisResult.tables && Array.isArray(analsyisResult.tables) && <>
                     {analsyisResult.tables.map((item: any, index: any) => (
                         <ComponentsRender projectObj={projectObj} key={index} {...item} baseURL={baseURL}></ComponentsRender>

@@ -42,6 +42,7 @@ function BigTable({ rows, shape, columns }: { rows: any[], shape: any, columns?:
             }
 
             <List
+                style={{ maxHeight:"40vh",border: `1px solid ${token.colorBorderSecondary}`, borderTop: "none" }}
                 rowComponent={RowComponent}
                 rowCount={rows?.length}
                 rowHeight={30}
@@ -85,7 +86,7 @@ function RowComponent({
                 e.currentTarget.style.backgroundColor = index % 2 ? token.colorBgContainer : token.colorFillQuaternary;
             }}
         >
-            {(row && Array.isArray(row) ) && row.map((value: any, j: number) => (
+            {(row && Array.isArray(row)) && row.map((value: any, j: number) => (
                 <div
                     key={j}
                     style={{
