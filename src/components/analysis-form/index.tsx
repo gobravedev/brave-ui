@@ -5,7 +5,7 @@ import FormJsonComp from "../form-components";
 import { listAnalysisFiles } from '@/api/analysis-software'
 import { useOutletContext } from "react-router";
 import BioDatabaseForm from "../bio-database-form";
-import { CreateOrUpdateParsms } from "../edit-params";
+import CreateOrUpdateParsms from "../edit-params/components/create-or-update-parsms";
 
 export const AnalysisForm: FC<any> = ({
     pipeline,

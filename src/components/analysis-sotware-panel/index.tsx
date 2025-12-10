@@ -19,7 +19,7 @@ import { CloseCircleOutlined, QuestionCircleOutlined } from "@ant-design/icons"
 import SortTable from "@/components/sort-table"
 import Markdown from "../markdown"
 import Item from "antd/es/list/Item"
-import { CreateOrUpdateParsms } from "../edit-params"
+import CreateOrUpdateParsms from "../edit-params/components/create-or-update-parsms"
 type AnalysisFile = {
     name: string,
     label: string

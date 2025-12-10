@@ -23,6 +23,7 @@ import { CreateOrUpdatePipelineComponent } from "../create-pipeline";
 import BigTable from '@/components/big-table';
 import { componentMap, ImgView, UrlComp } from './components'
 import MicrobiomeSummaryCard from "./components/diff-summary-card";
+import EditParamsPanel from "../edit-params/components/panel";
 
 
 
@@ -338,8 +339,11 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
                     </Col>
                     <Col lg={8} sm={8} xs={24} style={{}}>
                         {/* <Divider  />  layout="vertical" */}
-                        <div style={{ border: "1px solid rgba(5,5,5,0.06)", maxHeight: "70vh", overflowY: "auto", padding: "0.5rem", marginBottom: "1rem" }}>
-                            <Form form={form} size="small" layout="vertical"  >
+                        <div style={{ border: "1px solid rgba(5,5,5,0.06)", maxHeight: "80vh", overflowY: "auto", padding: "0.5rem", marginBottom: "1rem" }}>
+                            <EditParamsPanel
+                                analysis_id={analysis_id}></EditParamsPanel>
+
+                            {/* <Form form={form} size="small" layout="vertical"  >
                                 {analsyisResult?.form_json && <>
 
 
@@ -356,15 +360,6 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
                                                     console.log(values)
                                                     message.success("Submit Success!")
                                                 }
-
-                                                // // console.log('values', values)
-                                                // const requestParam = buildRequest(values)
-                                                // // console.log('requestParam', requestParam)
-                                                // setAnalsyisResult({
-                                                //     ...analsyisResult,
-                                                //     request_param: requestParam
-                                                // })
-                                                // messageApi.success("Update Success")
                                             }}>
                                             <Button disabled={analsyisResult?.job_status == "running"} type="primary" size="small" >Submit</Button>
                                         </Popconfirm>
@@ -387,7 +382,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
                                     ]} />
 
                                 </>}
-                            </Form>
+                            </Form> */}
                         </div>
 
                         {/* {analsyisResult?.params && <ParamsView params={analsyisResult?.params}></ParamsView>} */}
@@ -449,7 +444,7 @@ const AnalysisResultDisplay: FC<any> = ({ analsyisResult, loading }) => {
     const { modal, openModal, closeModal } = useModal()
 
     return <div >
-        
+
         {analsyisResult && <>
 
             {analsyisResult.images && <div >
@@ -467,7 +462,7 @@ const AnalysisResultDisplay: FC<any> = ({ analsyisResult, loading }) => {
                         </>
                 }
             </div>}
-            
+
             <div >
                 {analsyisResult.htmls && Array.isArray(analsyisResult.htmls) && <>
                     {analsyisResult.htmls.map((item: any, index: any) => (

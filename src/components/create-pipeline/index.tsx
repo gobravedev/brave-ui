@@ -366,7 +366,7 @@ const TextAreaContent: FC<any> = ({ data, form }) => {
         </Form.Item> */}
     </>
 }
-const RenderFromJson = lazy(() => import("@/components/edit-params/render-form-json"));
+const RenderFromJson = lazy(() => import("@/components/edit-params/components/render-form-json"));
 const TextAreaComp: FC<any> = ({ value, onChange, templete }) => {
     // const [data, setData] = useState<any>(JSON.stringify(value))
     const editorRef = useRef<any>(null)

@@ -1,9 +1,9 @@
 import { Tabs } from "antd"
-import FormJsonComp from "../form-components"
-import BioDatabaseForm from "../bio-database-form"
+import FormJsonComp from "../../form-components"
+import BioDatabaseForm from "../../bio-database-form"
 import { FC, useEffect, useState } from "react"
 import { useModals } from "@/hooks/useModal"
-import BioDatabases from "../bio-databases"
+import BioDatabases from "../../bio-databases"
 
 const RenderFromJson: FC<any> = ({ formJson: formJson_, dataMap,databases, analysisResultId }) => {
     const { modals, openModals, closeModals } = useModals(["paramsView", "bioDatabases"]);
