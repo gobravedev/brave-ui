@@ -1,4 +1,4 @@
-import { Button, Card, Col, Empty, Modal, Popconfirm, Row, Segmented, Space, Table } from "antd"
+import { Button, Card, Col, Empty, Modal, Popconfirm, Row, Segmented, Skeleton, Space, Table } from "antd"
 import { FC, use, useEffect, useRef, useState } from "react"
 import ComponentsPage from "./components/page"
 import { useParams } from "react-router"
@@ -18,40 +18,55 @@ const Components: FC<any> = () => {
     const loadTable = () => {
         tabeRef.current?.reload()
     }
-    let segmentedOptions: any = []
-    if (component_type == "script") {
-        segmentedOptions = [
-            {
-                label: "structure",
-                value: "structure"
-            }, {
-                label: "code",
-                value: "code"
-            }
-        ]
-    } else if (component_type == "file") {
-        segmentedOptions = [
-            {
-                label: "structure",
-                value: "structure"
-            }, {
-                label: "files",
-                value: "files"
-            }
-        ]
-    }
+    let [segmentedOptions, setSegmentedOptions] = useState<any[]>([])
+    const [panel, setPanel] = useState<string>()
 
-    const [panel, setPanel] = useState<string>("structure")
-    const message = useGlobalMessage()
     useEffect(() => {
-        if (!component?.component_id && panel != "structure") {
-            setPanel("structure")
-        }
-        if (panel == "deleted") {
-            setPanel("structure")
-        }
 
-    }, [component])
+        if (component_type == "script") {
+             setPanel("llmScript")
+            setSegmentedOptions([
+                {
+                    label: "LLM",
+                    value: "llmScript"
+                },
+                {
+                    label: "structure",
+                    value: "createOrUpdateComponent"
+                }, {
+                    label: "Code",
+                    value: "scriptCode"
+                }
+            ])
+        } else if (component_type == "file") {
+            setPanel("llmFile")
+            setSegmentedOptions([
+                {
+                    label: "LLM",
+                    value: "llmFile"
+                },
+                {
+                    label: "structure",
+                    value: "createOrUpdateComponent"
+                }
+                // , {
+                //     label: "Files",
+                //     value: "analysisResult"
+                // }
+            ])
+        }
+    }, [])
+
+    const message = useGlobalMessage()
+    // useEffect(() => {
+    //     if (!component?.component_id && panel != "structure") {
+    //         setPanel("structure")
+    //     }
+    //     if (panel == "deleted") {
+    //         setPanel("structure")
+    //     }
+
+    // }, [component])
 
 
     return <div style={{ maxWidth: "1800px", margin: "1rem auto", padding: '0 16px 0 16px' }}>
@@ -144,18 +159,22 @@ const Components: FC<any> = () => {
                         </Space>}
 
                     >
+                        {panel ? <>
 
-                        {panel == "deleted" ? <Empty description="Component has been deleted"></Empty> : <>
                             <ComponentsDetailsRender
                                 callback={loadTable}
-                                view={`${component_type}V2`}
+                                view={panel}
                                 component={component}
                                 openModal={openModal}
-                                panel={panel}
                                 component_type={component_type}
                             ></ComponentsDetailsRender>
 
-                        </>}
+                        </> : <Skeleton active></Skeleton>}
+
+                        {/* {panel == "deleted" ? <Empty description="Component has been deleted"></Empty> : <>
+
+
+                        </>} */}
                     </Card >
 
 

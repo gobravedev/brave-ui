@@ -7,9 +7,17 @@ const ScriptComponent = lazy(() => import('./script'))
 const ScriptV2Component = lazy(() => import('./script/indexV2'))
 
 const FileComponent = lazy(() => import('./file'))
-const FileV2Component = lazy(() => import('./file/indexV2'))
-
+const FileV2Component = lazy(() => import('./components/create-or-update-component'))
+const CreateOrUpdateComponent = lazy(() => import('./components/create-or-update-component'))
+const AnalysisResultPageAdapter = lazy(() => import('./components/analysis-result-page'))
 const PipelineInputComponent = lazy(() => import('./pipeline/components/pipeline-input'))
+const LLMFile = lazy(()=>import("./components/llm-file"))
+const LLMTools = lazy(()=>import("./components/llm-tools"))
+const ScriptDesc = lazy(()=>import("./components/script-desc"))
+const LLMScript = lazy(()=>import("./components/llm-script"))
+const ScriptCode = lazy(()=>import("./components/script-code"))
+
+
 const viewMapping: {
     key: string;
     label: string;
@@ -24,6 +32,17 @@ const viewMapping: {
         { key: "fileV2", label: "file", component: FileV2Component },
 
         { key: "scriptV2", label: "script", component: ScriptV2Component },
+        { key: "createOrUpdateComponent", label: "CreateOrUpdateComponent", component: CreateOrUpdateComponent },
+        { key: "analysisResult", label: "analysisResult", component: AnalysisResultPageAdapter },
+        
+        { key: "llmFile", label: "llmFile", component: LLMFile },
+        { key: "llmTools", label: "llmTools", component: LLMTools },
+        { key: "llmScript", label: "llmScript", component: LLMScript },
+
+        { key: "scriptDesc", label: "scriptDesc", component: ScriptDesc },
+        { key: "scriptCode", label: "scriptCode", component: ScriptCode },
+
+
 
         { key: "workflow-input", label: "workflow-input", component: PipelineInputComponent },
 

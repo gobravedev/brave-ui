@@ -53,7 +53,7 @@ const Pipeline: FC<any> = () => {
     const [test, setTest] = useState<any>(true)
     const [messageApi, contextHolder] = message.useMessage();
     const [component, setComponent] = useState<any>()
-    const [rightPanelVisible, setRightPanelVisible] = useState<"script_illustrate" | "llm">("script_illustrate")
+    const [rightPanel, setRightPanel] = useState<any>("scriptDesc")
     const [size, setSize] = useState<any>((component_type && ["script111"].includes(component_type)) ? [18, 6] : [20, 0])
     const tableRef = {
         inputFile: useRef<HTMLInputElement>(null),
@@ -774,15 +774,15 @@ const Pipeline: FC<any> = () => {
                                     setSize([20, 0])
                                 }}></CloseOutlined>
                             </>} */}
-                            <Segmented size="small" value={rightPanelVisible}
-                                onChange={(val: any) => setRightPanelVisible(val)}
+                            <Segmented size="small" value={rightPanel}
+                                onChange={(val: any) => setRightPanel(val)}
                                 options={[
                                     {
                                         label: "Script Illustrate",
-                                        value: "script_illustrate"
+                                        value: "scriptDesc"
                                     }, {
                                         label: "LLM",
-                                        value: "llm"
+                                        value: "llmTools"
                                     }
                                 ]} />
                         </>}
@@ -804,7 +804,14 @@ const Pipeline: FC<any> = () => {
 
 
                         {/* {JSON.stringify(component)} */}
-
+                        <ComponentsDetailsRender
+                            // callback={loadTable}
+                            view={rightPanel}
+                            component={component}
+                            openModal={openModal}
+                            component_type={component_type}
+                        ></ComponentsDetailsRender>
+{/* 
                         {rightPanelVisible === "script_illustrate" && <>
                             {component?.tags && Array.isArray(component.tags) && component.tags.map((tag: any, index: any) => (
                                 <Tag style={{ marginTop: "0.5rem" }} key={index} color={colors[index]}>{tag}</Tag>
@@ -823,9 +830,8 @@ const Pipeline: FC<any> = () => {
                             ]} />
                         </>}
                         {rightPanelVisible === "llm" && <>
-                            {/* {component?.relation_id} */}
                             <AI type={"tools"} biz_id={component?.relation_id}></AI>
-                        </>}
+                        </>} */}
 
                         {/* {JSON.stringify(pipeline.description)} */}
                         {/* {pipeline?.description && <>

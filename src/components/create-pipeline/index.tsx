@@ -797,11 +797,15 @@ export const CreateOrUpdatePipeline: FC<any> = ({ data, structure, callback }) =
 
 
                                 <ComponentsRender structure={structure} {...structure} data={component} form={form}></ComponentsRender>
+
                             </>
                         }, {
                             label: "Component Description",
                             key: "2",
                             children: <>
+                                <Form.Item name={"prompt"} label="Prompt" >
+                                    <TextArea rows={4}></TextArea>
+                                </Form.Item>
                                 <Form.Item name={"tags"} label="Tags">
                                     <Select
                                         mode="tags"
@@ -823,6 +827,7 @@ export const CreateOrUpdatePipeline: FC<any> = ({ data, structure, callback }) =
                                     <TextAreaComp templete={""}></TextAreaComp>
 
                                 </Form.Item>
+
                             </>
                         }
                     ]}>

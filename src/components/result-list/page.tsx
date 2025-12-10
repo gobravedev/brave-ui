@@ -157,10 +157,14 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
     }, [analysisResultId, rowNum])
 
     useEffect(() => {
-        if (!analysisResultId && component && component?.file_type == "collected") {
+        if (component && component?.file_type == "collected") {
             if (data.length > 0) {
                 setAnalysisResultId(data[0].analysis_result_id)
+            }else{
+                setAnalysisResultId(undefined)
             }
+        }else{
+            setAnalysisResultId(undefined)
         }
     }, [data])
     // const loadData = async ({ activeTabKey, params, componentIdList }: any) => {
