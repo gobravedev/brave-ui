@@ -133,13 +133,8 @@ const EditParamsPanel: FC<any> = ({ analysis_id, runBtn, callback }) => {
 
     //     }
     // }, [form])
-    return <Spin spinning={loading}>
-
-
-
-
-
-        {data && <>
+    return <>
+        {(data && !loading) ? <>
             <div>
                 <Tag>{data?.component_name}</Tag>
                 <Tag color="success">{data?.analysis_name}</Tag>
@@ -172,11 +167,8 @@ const EditParamsPanel: FC<any> = ({ analysis_id, runBtn, callback }) => {
                     callback && callback()
                 }} ></CreateOrUpdateParsms>
 
-        </>}
-
-
-
-    </Spin>
+        </>:<Skeleton active></Skeleton>}
+    </>
 }
 
 export default EditParamsPanel

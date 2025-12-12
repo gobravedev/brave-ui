@@ -5,7 +5,7 @@ import { List } from "react-window";
 import { type RowComponentProps } from "react-window";
 
 
-function BigTable({ rows, shape, columns }: { rows: any[], shape: any, columns?: any[] }) {
+function BigTable({ rows, shape, columns , maxHeight="40vh"}: { rows: any[], shape: any, columns?: any[] , maxHeight?: string }) {
     const { token } = theme.useToken();
 
     return (
@@ -42,7 +42,7 @@ function BigTable({ rows, shape, columns }: { rows: any[], shape: any, columns?:
             }
 
             <List
-                style={{ maxHeight:"40vh",border: `1px solid ${token.colorBorderSecondary}`, borderTop: "none" }}
+                style={{ maxHeight:maxHeight,border: `1px solid ${token.colorBorderSecondary}`, borderTop: "none" }}
                 rowComponent={RowComponent}
                 rowCount={rows?.length}
                 rowHeight={30}

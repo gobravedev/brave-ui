@@ -272,7 +272,7 @@ const AnalysisReport: FC<any> = () => {
                     }}
                     extra={
                         <Flex gap={"small"}>
-                            <Segmented size="small" value={rightPanel}
+                            {/* <Segmented size="small" value={rightPanel}
                                 onChange={(val: any) => setRightPanel(val)}
                                 options={[
                                     {
@@ -282,7 +282,7 @@ const AnalysisReport: FC<any> = () => {
                                         label: "LLM",
                                         value: "llm"
                                     }
-                                ]} />
+                                ]} /> */}
                             <RedoOutlined style={{ cursor: "pointer" }} onClick={loadData} />
 
                             {/* <Button size="small" color="cyan" variant="solid" onClick={loadData}>Refresh</Button> */}
@@ -291,32 +291,33 @@ const AnalysisReport: FC<any> = () => {
                     {/* {JSON.stringify(analysis)} */}
 
                     {/* <Button onClick={() => { setAnalysis(data[0]) }}></Button> */}
-                    {rightPanel == "toc" && <>
-                        {Array.isArray(data) && data.length != 0 ? <>
-                            <LeftPanel onSelect={(val: any) => {
-                                if (val.node?.type == "analysis") {
-                                    setAnalysis(val.node)
-                                    setAnalysisKey(val.node.key)
-                                    setComponentType(val.node.component_type)
-                                    updateQueryParam("project", project);
-                                    updateQueryParam("key", val.node.key);
-                                } else if (val.node?.type == "components") {
-                                    console.log(val.node)
-                                    // loadComponents(val.node.key)
-                                }
-
-                                // console.log(val)
-                            }} defaultSelectKey={analysisKey} treeData={data}></LeftPanel>
-
-                        </> : <>
-                            <Empty></Empty>
-                        </>}
-
+                    {/* {rightPanel == "toc" && <>
+                       
                     </>}
 
                     {rightPanel == "llm" && <>
-                        <AI type={"analysis"} biz_id={analysisKey}></AI>
+                        <AI biz_type={"analysis"} biz_id={analysisKey}></AI>
+                    </>} */}
+                    {Array.isArray(data) && data.length != 0 ? <>
+                        <LeftPanel onSelect={(val: any) => {
+                            if (val.node?.type == "analysis") {
+                                setAnalysis(val.node)
+                                setAnalysisKey(val.node.key)
+                                setComponentType(val.node.component_type)
+                                updateQueryParam("project", project);
+                                updateQueryParam("key", val.node.key);
+                            } else if (val.node?.type == "components") {
+                                console.log(val.node)
+                                // loadComponents(val.node.key)
+                            }
+
+                            // console.log(val)
+                        }} defaultSelectKey={analysisKey} treeData={data}></LeftPanel>
+
+                    </> : <>
+                        <Empty></Empty>
                     </>}
+
 
 
                 </Card>

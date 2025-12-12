@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from "react"
 import Markdown from "../../components/markdown"
-import { Alert, Button, Card, Col, Flex, List, message, Popconfirm, Row, Skeleton, Tabs, Tag } from "antd"
+import { Alert, Button, Card, Col, Flex, List, message, Popconfirm, Row, Segmented, Skeleton, Tabs, Tag } from "antd"
 
 import { chinese } from './chinese'
 import { english } from './english'
@@ -9,6 +9,7 @@ import { introduction } from './introduction'
 import { EmbedLLM } from '../../components/embed-llm'
 // import Demo from "@/components/smart-table"
 import axios from "axios"
+import DashboardRender from "./dashboard-render"
 const Project: FC<any> = () => {
     const [data, setData] = useState<any>(introduction)
     const onChange = (value: any) => {
@@ -18,16 +19,29 @@ const Project: FC<any> = () => {
             setData(english)
         }
     }
+    const [panel, setPanel] = useState<string>("llm")
 
     return <div style={{ maxWidth: "1000px", margin: "1rem auto" }}>
         <Row>
             <Col xs={24} sm={24} md={24} lg={24} xl={24} >
 
-                <Card >
-                    <Flex vertical={true} justify="center" align="center" gap="large">
-                        <Markdown data={data}></Markdown>
-
-                    </Flex>
+                <Card title="Brave Dashboard" size="small" extra={<>
+                    <Segmented size="small" value={panel}
+                        onChange={(val: any) => setPanel(val)}
+                        options={[
+                            {
+                                label: 'LLM',
+                                value: 'llm'
+                            }, {
+                                label: 'Introduce',
+                                value: 'markdown'
+                            }
+                        ]} />
+                </>} >
+                    <DashboardRender
+                        view={panel}
+                        introduction={introduction}
+                    ></DashboardRender>
                 </Card>
             </Col>
 

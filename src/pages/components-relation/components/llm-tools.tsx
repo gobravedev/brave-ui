@@ -4,7 +4,7 @@ import { FC } from "react";
 const LLMTools: FC<any> = ({component, callback, openModal, panel, component_type}) => {
 
     return <>
-        <AI type={"tools"} biz_id={component?.relation_id}></AI>
+        <AI biz_type={"tools"} biz_id={component?.relation_id}></AI>
     </>
 
 }

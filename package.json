@@ -11,7 +11,9 @@
   },
   "dependencies": {
     "@ant-design/plots": "^2.3.3",
-    "@ant-design/x": "^1.6.1",
+    "@ant-design/x": "^2.1.1",
+    "@ant-design/x-markdown": "^2.1.1",
+    "@ant-design/x-sdk": "^2.1.1",
     "@antv/s2": "^2.4.0",
     "@antv/s2-react": "^2.2.0",
     "@dnd-kit/core": "^6.3.1",

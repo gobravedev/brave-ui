@@ -49,10 +49,10 @@ const Components: FC<any> = () => {
                     label: "structure",
                     value: "createOrUpdateComponent"
                 }
-                // , {
-                //     label: "Files",
-                //     value: "analysisResult"
-                // }
+                , {
+                    label: "Files",
+                    value: "analysisResult"
+                }
             ])
         }
     }, [])

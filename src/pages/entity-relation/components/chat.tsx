@@ -3,7 +3,7 @@ import { FC } from "react"
 import AIChat from '@/components/chat'
 // const  AIChat  = lazy(() => import('@/components/chat'));
 import { CloseOutlined, RedoOutlined } from '@ant-design/icons'
-import { Copilot } from "@/pages/test"
+// import { Copilot } from "@/pages/test"
 
 const ChatView: FC<any> = ({ close ,height}) => {
     return <Card

@@ -1,4 +1,4 @@
-import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Alert, Modal, Tooltip, Divider } from "antd";
+import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Alert, Modal, Tooltip, Divider, Segmented } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { FC, forwardRef, memo, use, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import Markdown from '../markdown'
@@ -23,7 +23,8 @@ import { CreateOrUpdatePipelineComponent } from "../create-pipeline";
 import BigTable from '@/components/big-table';
 import { componentMap, ImgView, UrlComp } from './components'
 import MicrobiomeSummaryCard from "./components/diff-summary-card";
-import EditParamsPanel from "../edit-params/components/panel";
+import AnalysisResultRender from "./analysis-result-render";
+// import EditParamsPanel from "../edit-params/components/panel";
 
 
 
@@ -49,6 +50,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
     const { containerURL, project } = useSelector((state: any) => state.user);
     const [runingLoading, setRuningLoading] = useState<boolean>(false)
     const [form] = Form.useForm();
+    const [rightPanel, setRightPanel] = useState<string>("llmAnalysis")
 
     const loadData = async (analysis_id: any) => {
         setLoading(true)
@@ -338,63 +340,45 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
 
                     </Col>
                     <Col lg={8} sm={8} xs={24} style={{}}>
-                        {/* <Divider  />  layout="vertical" */}
-                        <div style={{ border: "1px solid rgba(5,5,5,0.06)", maxHeight: "80vh", overflowY: "auto", padding: "0.5rem", marginBottom: "1rem" }}>
-                            <EditParamsPanel
-                                analysis_id={analysis_id}></EditParamsPanel>
+                        <Card
 
-                            {/* <Form form={form} size="small" layout="vertical"  >
-                                {analsyisResult?.form_json && <>
-
-
-                                    <FormJsonComp formJson={analsyisResult?.form_json} dataMap={{}} ></FormJsonComp>
-                                    <Form.Item  >
-                                        <Popconfirm
-                                            title={"Whether to submit?"}
-                                            onConfirm={async () => {
-                                                if (analsyisResult?.job_status == "running") {
-                                                    message.error("Running, please wait!")
-                                                } else {
-                                                    const values = buildRequest(await form.validateFields())
-                                                    const resp: any = await axios.post(`/fast-api/analysis-controller?save=true&is_submit=true`, values)
-                                                    console.log(values)
-                                                    message.success("Submit Success!")
-                                                }
-                                            }}>
-                                            <Button disabled={analsyisResult?.job_status == "running"} type="primary" size="small" >Submit</Button>
-                                        </Popconfirm>
-
-                                    </Form.Item>
-                                    <Collapse ghost items={[
+                            size="small"
+                            extra={<>
+                                <Segmented size="small" value={rightPanel}
+                                    onChange={(val: any) => setRightPanel(val)}
+                                    options={[
                                         {
-                                            key: "1",
-                                            label: "More",
-                                            children: <>
-                                                <Form.Item noStyle shouldUpdate>
-                                                    {() => (
-                                                        <Typography>
-                                                            <pre>{JSON.stringify(buildRequest(form.getFieldsValue()), null, 2)}</pre>
-                                                        </Typography>
-                                                    )}
-                                                </Form.Item>
-                                            </>
+                                            label: "LLM",
+                                            value: "llmAnalysis"
+                                        }, {
+                                            label: "Parameters",
+                                            value: "editParamsPanel"
+                                        }, {
+                                            label: "Description",
+                                            value: "description"
                                         }
                                     ]} />
+                            </>}
+                        >
+                            <AnalysisResultRender
+                                analysis_id={analysis_id}
+                                component_description={analsyisResult?.component_description}
+                                view={rightPanel}
+                            ></AnalysisResultRender>
+                            {/* <EditParamsPanel
+                                analysis_id={analysis_id}></EditParamsPanel> */}
+                        </Card>
 
-                                </>}
-                            </Form> */}
-                        </div>
 
-                        {/* {analsyisResult?.params && <ParamsView params={analsyisResult?.params}></ParamsView>} */}
 
 
                         {/* <Divider /> */}
-                        {showDesc &&
+                        {/* {showDesc &&
                             <div style={{ border: "1px solid rgba(5,5,5,0.06)", maxHeight: "70vh", overflowY: "auto", padding: "0.5rem", marginBottom: "1rem" }}>
                                 <Markdown data={analsyisResult?.component_description}></Markdown>
                             </div>
 
-                        }
+                        } */}
 
 
                     </Col>

@@ -18,6 +18,7 @@ import BigTable from '@/components/big-table';
 import { el, fa } from "@faker-js/faker"
 import { EditResultTableModal } from "../edit-table"
 import { usePagination } from "@/hooks/usePagination"
+import AnalysisResultLLMLPanel from "./components/analysis-result-llm-panel"
 
 
 const ResultList = forwardRef<any, any>((params_, ref) => {
@@ -160,10 +161,10 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
         if (component && component?.file_type == "collected") {
             if (data.length > 0) {
                 setAnalysisResultId(data[0].analysis_result_id)
-            }else{
+            } else {
                 setAnalysisResultId(undefined)
             }
-        }else{
+        } else {
             setAnalysisResultId(undefined)
         }
     }, [data])
@@ -262,6 +263,12 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
             title: 'File Name',
             dataIndex: 'file_name',
             key: 'file_name',
+            width: 100,
+            ellipsis: true,
+        },{
+            title: 'File Type',
+            dataIndex: 'file_type',
+            key: 'file_type',
             width: 100,
             ellipsis: true,
         }, {
@@ -394,7 +401,12 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                             // readHdfs(record.content)
                         }}>{record.type == "folder" ? "Open Folder" : "Open File"}</Button>
                     </Popover>
-
+                    {/* {record?.file_type == 'collected' && <>
+                        
+                    </>} */}
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                            openModal("llmPanel", record)
+                        } }>llm</Button>
                     <Dropdown menu={{
                         items: [
                             {
@@ -652,7 +664,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                                 message.success(`Example ${baseURL}${resp.data.example_url} downloading...`)
                             }}> <DownloadOutlined /></a>
                         </Tooltip>
-{/* 
+                        {/* 
                         {component?.relation_id && <Popconfirm title="Are you sure to delete?" onConfirm={() => {
                             operatePipeline.deletePipelineRelation(component.relation_id)
                         }}>
@@ -990,6 +1002,11 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
             params={modal.params}
             callback={reload}
             onClose={closeModal}></ImportData>
+        <AnalysisResultLLMLPanel
+            visible={modal.visible && modal.key == "llmPanel"}
+            params={modal.params}
+            onClose={closeModal}
+        ></AnalysisResultLLMLPanel>
 
         <AnalysisResultEdit
             visible={modal.visible && modal.key == "analysisResultEdit"}
