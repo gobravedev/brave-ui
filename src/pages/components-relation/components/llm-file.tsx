@@ -4,6 +4,7 @@ import { FC, use, useEffect, useState } from "react";
 import { Card, Col, Row, Space, Tag } from "antd";
 import axios from "axios";
 import { MonacoEditor } from "@/components/react-monaco-editor";
+import ComponentStructure from "./component-structure";
 
 const LLMFile: FC<any> = ({ component, callback, openModal, panel, component_type }) => {
     // const [analysisResultId, setAnalysisResultId] = useState<any>(null);
@@ -12,24 +13,24 @@ const LLMFile: FC<any> = ({ component, callback, openModal, panel, component_typ
     //     setAnalysisResultId(undefined)
     // },[component?.component_id ])
 
-    // const [data, setData] = useState<any>()
-    const [content, setContent] = useState<string>("")
-    const loadData = async () => {
-        const resp = await axios.post("/find-pipeline", { component_id: component?.component_id })
-        // setData(resp.data)
-        const data = resp.data
-        setContent(data?.content || "")
-    }
-    useEffect(() => {
-        if (component?.component_id) {
-            loadData()
-        }
-    }, [component?.component_id])
+    // // const [data, setData] = useState<any>()
+    // const [content, setContent] = useState<string>("")
+    // const loadData = async () => {
+    //     const resp = await axios.post("/find-pipeline", { component_id: component?.component_id })
+    //     // setData(resp.data)
+    //     const data = resp.data
+    //     setContent(data?.content || "")
+    // }
+    // useEffect(() => {
+    //     if (component?.component_id) {
+    //         loadData()
+    //     }
+    // }, [component?.component_id])
 
     return <Row gutter={[16, 16]}>
         <Col lg={12} sm={12} xs={24}>
-            <MonacoEditor height={"100%"}value={content} onChange={setContent}  defaultLanguage="json"></MonacoEditor>
-
+            {/* <MonacoEditor height={"100%"}value={content} onChange={setContent}  defaultLanguage="json"></MonacoEditor> */}
+            <ComponentStructure  component_id={component?.component_id}></ComponentStructure>
             {/* <AnalysisResultPage
                 title="Analysis Results"
 

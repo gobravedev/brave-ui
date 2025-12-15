@@ -31,7 +31,7 @@ import { useStickyTop } from "@/hooks/useStickyTop"
 import Markdown from "@/components/markdown"
 import PipelineComponent from './pipeline'
 import ComponentsDetailsRender from "./components-details-render"
-import { AppstoreOutlined, CloseOutlined, DeleteColumnOutlined, DeleteOutlined, DownOutlined, QuestionCircleOutlined } from '@ant-design/icons'
+import { AppstoreOutlined, CloseOutlined, DeleteColumnOutlined, DeleteOutlined, DownOutlined, PlusOutlined, QuestionCircleOutlined, RedoOutlined } from '@ant-design/icons'
 import { AI } from '@/components/chat'
 
 const Pipeline: FC<any> = () => {
@@ -44,6 +44,7 @@ const Pipeline: FC<any> = () => {
 
     console.log("Pipeline")
     const { relation_type, relation_id } = useParams()
+    const [leftPanel, setLeftPanel] = useState<any>(relation_type)
     const component_type = ""
     // console.log(pipelineId)
     const [pipeline, setPipeline] = useState<any>()
@@ -53,7 +54,7 @@ const Pipeline: FC<any> = () => {
     const [test, setTest] = useState<any>(true)
     const [messageApi, contextHolder] = message.useMessage();
     const [component, setComponent] = useState<any>()
-    const [rightPanel, setRightPanel] = useState<any>("scriptDesc")
+    const [rightPanel, setRightPanel] = useState<any>("llmTools")
     const [size, setSize] = useState<any>((component_type && ["script111"].includes(component_type)) ? [18, 6] : [20, 0])
     const tableRef = {
         inputFile: useRef<HTMLInputElement>(null),
@@ -75,6 +76,7 @@ const Pipeline: FC<any> = () => {
     const { modals, openModals, closeModals } = useModals(["modalD", "metadataModal", "bindSample"])
     // const { project: { project_id } } = useSelector((state: any) => state.context)
     const { project: project_id, componentLayout } = useSelector((state: any) => state.user);
+    const leftRef = useRef<any>(null)
 
     const [menus, setMenus] = useState<any[]>([])
     const [menuKey, setMenuKey] = useState<string | null>(key)
@@ -577,8 +579,7 @@ const Pipeline: FC<any> = () => {
 
                         </>}
                         extra={<Flex justify={"space-between"} align={"center"} gap="small">
-
-                            <Flex gap="small" wrap>
+                            <Space wrap>
                                 <QuestionCircleOutlined
                                     onClick={() => {
                                         setSize([14, 6])
@@ -654,11 +655,59 @@ const Pipeline: FC<any> = () => {
                                         operatePipeline.openModal("modalE", component.databases)
                                     }}>Database</Button>
                                 </>}
-                                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                                     operatePipeline.openModal("modalB", {
                                         component_id: component?.component_id,
                                     })
-                                }}>Component Code</Button>
+                                }}>Component Code</Button> */}
+                                {(leftPanel != "component-script") ? <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                    setLeftPanel("component-script")
+                                }}>Code</Button> : <>
+                                    {/* <Dropdown.Button   size="small"  menu={{items:[
+
+                                    ]}} onClick={()=>   setLeftPanel(relation_type)}>
+                                        Return
+                                    </Dropdown.Button> */}
+                                    <Space.Compact>
+                                        <Button size="small" color="blue" variant="solid" onClick={() => {
+                                            setLeftPanel(relation_type)
+                                        }}>Return</Button>
+
+                                        <Popconfirm title="Whether to generate scripts?" onConfirm={async () => {
+                                            leftRef.current?.generateScript()
+                                        }}>
+                                            <Button size="small" color="blue" variant="solid" icon={<PlusOutlined />}></Button>
+
+                                        </Popconfirm>
+
+                                        <Button size="small" color="blue" variant="solid" icon={<RedoOutlined />}
+                                            onClick={() => { leftRef.current?.loadData() }}></Button>
+                                        <Button size="small" color="blue" variant="solid" onClick={() => {
+                                            leftRef.current?.save()
+                                        }}>Save</Button>
+                                    </Space.Compact>
+
+                                </>}
+
+                                {(leftPanel != "component-structure") ? <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                    setLeftPanel("component-structure")
+                                }}>Structure</Button> : <>
+                                    <Space.Compact>
+                                        <Button size="small" color="blue" variant="solid" onClick={() => {
+                                            setLeftPanel(relation_type)
+                                        }}>Return</Button>
+                                        <Button size="small" color="blue" variant="solid" icon={<RedoOutlined />}
+                                            onClick={() => { leftRef.current?.loadData() }}></Button>
+                                        <Button size="small" color="blue" variant="solid" onClick={() => {
+                                            leftRef.current?.save()
+                                        }}>Save</Button>
+                                    </Space.Compact>
+
+                                </>}
+                                {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                    setLeftPanel("component-structure")
+                                }}>Structure</Button> */}
+
 
                                 {/* {component_type == "pipeline" && <>
                                     <Dropdown menu={{
@@ -724,20 +773,25 @@ const Pipeline: FC<any> = () => {
                                 <Button size="small" color="cyan" variant="solid" onClick={loadData}>Refresh</Button>
 
                                 <Button size="small" color="primary" variant="solid" onClick={() => navigate(`/${relation_type}-card`)}>Back</Button>
-                            </Flex>
+                            </Space>
+                            {/* <Flex gap="small" wrap>
+                               
+                            </Flex> */}
 
                         </Flex>}
                     >
                         {/* {JSON.stringify(component)} */}
                         {(component) ? <>
                             <ComponentsDetailsRender
+                                ref={leftRef}
+                                component_id={component?.component_id}
                                 component={component}
                                 operatePipeline={operatePipeline}
                                 project={project_id}
                                 componentLayout={componentLayout}
-                                view={relation_type} />
+                                view={leftPanel} />
                         </> : <Skeleton active></Skeleton>}
-
+                        {/* component-structure */}
 
                         {/* <MemoizedComponentsRender
                             setMenus={setMenus}
@@ -778,11 +832,11 @@ const Pipeline: FC<any> = () => {
                                 onChange={(val: any) => setRightPanel(val)}
                                 options={[
                                     {
-                                        label: "Script Illustrate",
-                                        value: "scriptDesc"
-                                    }, {
                                         label: "LLM",
                                         value: "llmTools"
+                                    }, {
+                                        label: "Script Illustrate",
+                                        value: "scriptDesc"
                                     }
                                 ]} />
                         </>}
@@ -811,7 +865,7 @@ const Pipeline: FC<any> = () => {
                             openModal={openModal}
                             component_type={component_type}
                         ></ComponentsDetailsRender>
-{/* 
+                        {/* 
                         {rightPanelVisible === "script_illustrate" && <>
                             {component?.tags && Array.isArray(component.tags) && component.tags.map((tag: any, index: any) => (
                                 <Tag style={{ marginTop: "0.5rem" }} key={index} color={colors[index]}>{tag}</Tag>

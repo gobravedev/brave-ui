@@ -1,13 +1,14 @@
-import type { BubbleListProps } from '@ant-design/x';
+import type { BubbleItemType, BubbleListProps } from '@ant-design/x';
 import { Bubble, Sender } from '@ant-design/x';
 import { AbstractChatProvider, DefaultMessageInfo, useXChat, XRequest, XRequestOptions } from '@ant-design/x-sdk';
-import { Button, Card, Flex, Space } from 'antd';
+import { Button, Card, Flex, GetProp, Popconfirm, Space } from 'antd';
 import React, { FC, forwardRef, useEffect, useImperativeHandle } from 'react';
 import { useSelector } from 'react-redux';
 import XMarkdown from '@ant-design/x-markdown';
 import axios from 'axios';
-import { RedoOutlined } from '@ant-design/icons';
+import { ClearOutlined, DeleteOutlined, RedoOutlined } from '@ant-design/icons';
 import { de } from '@faker-js/faker';
+import { useGlobalMessage } from '@/hooks/useGlobalMessage';
 
 // 类型定义：自定义聊天系统的输入输出和消息结构
 // Type definitions: custom chat system input/output and message structure
@@ -92,28 +93,77 @@ class CustomProvider<
 
 // 消息角色配置：定义不同角色消息的布局和样式
 // Message role configuration: define layout and styles for different role messages
-const role: BubbleListProps['role'] = {
-    assistant: {
-        placement: 'start',
-        contentRender(content: CustomMessage) {
-            // return (content as any)?.content;
-            const newContent = content.content //.replace(/\n\n/g, '<br/><br/>');
-            return <XMarkdown content={newContent} />;
+const roles = (
+    setMessage: any,
+    loadHistoryMessage: any,
+): GetProp<typeof Bubble.List, 'role'> => (
+    {
+
+        assistant: {
+            footerPlacement: 'inner-start',
+            placement: 'start',
+
+            contentRender(content: CustomMessage) {
+                // return (content as any)?.content;
+                const newContent = content.content //.replace(/\n\n/g, '<br/><br/>');
+                return <XMarkdown content={newContent} />;
+            }, footer: (
+                (content) => (
+                    <div style={{ display: 'flex' }}>
+                        {content?.chat_history_id && <>
+                            <Popconfirm title="Are you sure to delete this message?" onConfirm={async () => {
+                                const resp = await axios.delete(`/llm/chat/history/del-by-chat-history-id/${content?.chat_history_id}`);
+                                loadHistoryMessage();
+
+                            }}>
+                                <Button style={{ color: "red" }} type="text" size="small" icon={<DeleteOutlined />} />
+                            </Popconfirm>
+                        </>}
+
+                        {/* {JSON.stringify(content)} */}
+                        {/* <Button type="text" size="small" icon={<ReloadOutlined />} />
+                <Button type="text" size="small" icon={<CopyOutlined />} />
+                <Button type="text" size="small" icon={<LikeOutlined />} />
+                <Button type="text" size="small" icon={<DislikeOutlined />} /> */}
+                    </div>
+                )
+            ),
         },
-    },
-    user: {
-        placement: 'end',
-        contentRender(content: CustomMessage) {
-            return (content as any)?.content;
+        user: {
+            placement: 'end',
+            footerPlacement: 'inner-start',
+            contentRender(content: CustomMessage) {
+                return (content as any)?.content;
+            }, footer: (
+                (content) => (
+                    <div style={{ display: 'flex' }}>
+                        {content?.chat_history_id && <>
+                            <Popconfirm title="Are you sure to delete this message?" onConfirm={async () => {
+                                const resp = await axios.delete(`/llm/chat/history/del-by-chat-history-id/${content?.chat_history_id}`);
+                                loadHistoryMessage()
+                            }}>
+                                <Button style={{ color: "red" }} type="text" size="small" icon={<DeleteOutlined />} />
+                            </Popconfirm>
+                        </>}
+
+                        {/* {JSON.stringify(content)} */}
+                        {/* <Button type="text" size="small" icon={<ReloadOutlined />} />
+                <Button type="text" size="small" icon={<CopyOutlined />} />
+                <Button type="text" size="small" icon={<LikeOutlined />} />
+                <Button type="text" size="small" icon={<DislikeOutlined />} /> */}
+                    </div>
+                )
+            ),
         },
-    },
-    system: {
-        variant: 'borderless', // 无边框样式
-        contentRender(content: CustomMessage) {
-            return content?.content;
+        system: {
+            variant: 'borderless', // 无边框样式
+            contentRender(content: CustomMessage) {
+                return content?.content;
+            },
         },
-    },
-};
+    }
+)
+// const role: BubbleListProps['role'] = 
 
 // 本地化钩子：根据当前语言环境返回对应的文本
 // Localization hook: return corresponding text based on current language environment
@@ -149,6 +199,7 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
 
     const [content, setContent] = React.useState('');
     const locale = useLocale();
+    const messageApi = useGlobalMessage()
 
     // const [defaultMessages, setDefaultMessages] = React.useState<any>([])
     const BASE_URL = `${baseURL}/brave-api/llm/chat/stream`
@@ -160,7 +211,7 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
             project_id: project,
         });
         const data = resp.data.map((item: any) => {
-            return { id: item.id, message: { content: item.content, role: item.role }, status: 'local' }
+            return { id: item.id, message: { content: item.content, role: item.role, chat_history_id: item.chat_history_id }, status: 'local' }
         })
         // console.log('history message resp:', data);
         setMessages(data)
@@ -268,7 +319,7 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
     useEffect(() => {
         loadHistoryMessage();
     }, [project, biz_id])
-    
+
     useImperativeHandle(ref, () => ({
         loadHistoryMessage
     }))
@@ -279,13 +330,30 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
         //     extra={<Space>
         //         <RedoOutlined style={{ cursor: "pointer" }} onClick={loadHistoryMesage} />
         //     </Space>}>
-        <Flex vertical gap="middle">
+        <>
+            <Flex justify='end'>
+                <Button size='small' icon={<RedoOutlined />} onClick={loadHistoryMessage} >
+                </Button>
+                <Popconfirm title="Are you sure to clear chat history?" onConfirm={async () => {
+                    const resp = await axios.post(`/llm/chat/history/clear`, {
+                        biz_id: biz_id,
+                        project_id: project,
+                    });
+                    // setMessages([])
+                    messageApi.success('Chat history cleared')
+                    loadHistoryMessage()
+                }}>
+                    <Button size='small' icon={<ClearOutlined />} ></Button>
+                </Popconfirm>
 
-            {/* <div>
+            </Flex>
+            <Flex vertical gap="small">
+
+                {/* <div>
                 <h3>{locale.customProviderTitle}</h3>
                 <p>{locale.customProviderDesc}</p>
             </div> */}
-            {/* <Flex gap="small">
+                {/* <Flex gap="small">
                 <Button disabled={!isRequesting} onClick={abort}>
                     {locale.abort}
                 </Button>
@@ -297,41 +365,46 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
                 </Button>
             </Flex> */}
 
-            {/* 消息列表：显示所有聊天消息 */}
-            {/* Message list: display all chat messages */}
-            <Bubble.List
-                role={role}
-                style={{ height: "70vh" }}
-                items={messages.map(({ id, message, status }) => ({
-                    key: id,
-                    loading: status === 'loading',
-                    role: message.role,
-                    content: message,
-                }))}
-            />
+                {/* 消息列表：显示所有聊天消息 */}
+                {/* Message list: display all chat messages */}
+                <Bubble.List
+                    role={roles(setMessage,loadHistoryMessage)}
 
-            {/* 发送器：用户输入区域，支持发送消息和中止请求 */}
-            {/* Sender: user input area, supports sending messages and aborting requests */}
-            <Sender
-                loading={isRequesting}
-                value={content}
-                onChange={setContent}
-                onCancel={abort}
-                placeholder={"Please ask me questions related to bioinformatics ..."}
-                onSubmit={(nextContent) => {
-                    onRequest({
-                        stream: true,
-                        role: 'user',
-                        message: nextContent,
-                        biz_id: biz_id,
-                        biz_type: biz_type,
-                        project_id: project,
-                        is_save_prompt: true,
-                    });
-                    setContent('');
-                }}
-            />
-        </Flex>
+                    style={{ height: "70vh" }}
+                    items={messages.map(({ id, message, status }) => {
+                        // console.log('message item:', message, status);
+                        return {
+                            key: id,
+                            loading: status === 'loading',
+                            role: message.role,
+                            content: message,
+                        }
+                    })}
+                />
+
+                {/* 发送器：用户输入区域，支持发送消息和中止请求 */}
+                {/* Sender: user input area, supports sending messages and aborting requests */}
+                <Sender
+                    loading={isRequesting}
+                    value={content}
+                    onChange={setContent}
+                    onCancel={abort}
+                    placeholder={"Please ask me questions related to bioinformatics ..."}
+                    onSubmit={(nextContent) => {
+                        onRequest({
+                            stream: true,
+                            role: 'user',
+                            message: nextContent,
+                            biz_id: biz_id,
+                            biz_type: biz_type,
+                            project_id: project,
+                            is_save_prompt: true,
+                        });
+                        setContent('');
+                    }}
+                />
+            </Flex>
+        </>
 
         // </Card>
 

@@ -16,8 +16,8 @@ const LLMTools = lazy(()=>import("./components/llm-tools"))
 const ScriptDesc = lazy(()=>import("./components/script-desc"))
 const LLMScript = lazy(()=>import("./components/llm-script"))
 const ScriptCode = lazy(()=>import("./components/script-code"))
-
-
+const ComponentStructure = lazy(()=>import("./components/component-structure"))
+const ComponentScript = lazy(()=>import("./components/component-script"))
 const viewMapping: {
     key: string;
     label: string;
@@ -42,6 +42,9 @@ const viewMapping: {
         { key: "scriptDesc", label: "scriptDesc", component: ScriptDesc },
         { key: "scriptCode", label: "scriptCode", component: ScriptCode },
 
+        { key: "component-structure", label: "component-structure", component: ComponentStructure },
+        { key: "component-script", label: "component-script", component: ComponentScript },
+
 
 
         { key: "workflow-input", label: "workflow-input", component: PipelineInputComponent },
@@ -55,7 +58,7 @@ const ComponentsDetailsRender: FC<any> = ({ view, ...rest }) => {
     const { component: Component, key } = item
     // const Component = item.component;
 
-    return <Suspense fallback={<Skeleton active></Skeleton>}>
+    return <Suspense fallback={<Skeleton active></Skeleton>} >
         <Component  {...rest} />
     </Suspense>
 }

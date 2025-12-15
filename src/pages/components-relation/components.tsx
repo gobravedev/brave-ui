@@ -24,7 +24,7 @@ const Components: FC<any> = () => {
     useEffect(() => {
 
         if (component_type == "script") {
-             setPanel("llmScript")
+            setPanel("llmScript")
             setSegmentedOptions([
                 {
                     label: "LLM",
@@ -86,6 +86,7 @@ const Components: FC<any> = () => {
                             //         component_type: component_type,
                             //     }
                             // })
+                            setPanel("createOrUpdateComponent")
                             setComponent({})
                         }}>
                             Create
@@ -145,17 +146,20 @@ const Components: FC<any> = () => {
 
                             </Popconfirm>
 
-                            <ApartmentOutlined style={{ cursor: "pointer" }} onClick={(e) => {
-                                e.stopPropagation()
-                                openModal("componentRelation", {
-                                    component_id: component.component_id,
-                                    component_name: component.component_name,
-                                })
-                            }} />
+
                             {component?.component_id &&
-                                <Segmented size="small" value={panel}
-                                    onChange={(val: any) => setPanel(val)}
-                                    options={segmentedOptions} />}
+                                <>
+                                    <ApartmentOutlined style={{ cursor: "pointer" }} onClick={(e) => {
+                                        e.stopPropagation()
+                                        openModal("componentRelation", {
+                                            component_id: component.component_id,
+                                            component_name: component.component_name,
+                                        })
+                                    }} />
+                                    <Segmented size="small" value={panel}
+                                        onChange={(val: any) => setPanel(val)}
+                                        options={segmentedOptions} />
+                                </>}
                         </Space>}
 
                     >
