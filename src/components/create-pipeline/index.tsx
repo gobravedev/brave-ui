@@ -134,13 +134,13 @@ const DefaultComponentRelation: FC<any> = ({ data, form, components }) => {
 const Tools: FC<any> = ({ components }) => {
     return <>
         <Form.Item name={"component_id"} label="Script" >
-            <Select showSearch options={components?.scripts} ></Select>
+            <Select showSearch optionFilterProp="label" options={components?.scripts} ></Select>
         </Form.Item>
         <Form.Item name={"input_component_ids"} label="Input File">
-            <Select showSearch options={components?.files} mode="multiple"></Select>
+            <Select showSearch optionFilterProp="label" options={components?.files} mode="multiple"></Select>
         </Form.Item>
         <Form.Item name={"output_component_ids"} label="Output File">
-            <Select showSearch options={components?.files} mode="multiple"></Select>
+            <Select showSearch optionFilterProp="label" options={components?.files} mode="multiple"></Select>
         </Form.Item>
         {/* prompt */}
         <Form.Item name={"prompt"} label="Prompt" >

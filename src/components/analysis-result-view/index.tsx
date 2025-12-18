@@ -37,7 +37,7 @@ export const ComponentsRender0 = ({ type, ...rest }: any) => {
 }
 export const ComponentsRender = memo(ComponentsRender0)
 
-export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree, openPanel, showDesc = false, overflowY = "hidden" }) => {
+export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, callback, openPanel, showDesc = false, overflowY = "hidden" }) => {
     const [loading, setLoading] = useState<boolean>(false)
     const [analsyisResult, setAnalsyisResult] = useState<any>(null)
     const navigate = useNavigate()
@@ -266,8 +266,8 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
                             message.success("operate successfully!")
                             // setAnalsyisResult(null)
                             loadData(analysis_id)
-                            if (loadTree) {
-                                loadTree()
+                            if (callback) {
+                                callback()
                             }
                             // loadData()
                         }}>
@@ -280,8 +280,8 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
                         <Popconfirm title={`Delete ${analysis_id}?`} onConfirm={async () => {
                             await axios.delete(`/fast-api/analysis/${analysis_id}`)
                             message.success("Deleted Successfully!")
-                            if (loadTree) {
-                                loadTree()
+                            if (callback) {
+                                callback()
                             }
                             onClose()
                         }}>
@@ -361,6 +361,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
                             </>}
                         >
                             <AnalysisResultRender
+                                callback={callback}
                                 analysis_id={analysis_id}
                                 component_description={analsyisResult?.component_description}
                                 view={rightPanel}
@@ -389,7 +390,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, loadTree
 
             <EditParams
                 callback={() => {
-                    loadTree()
+                    callback?.()
                     loadData(analysis_id)
                 }}
                 visible={modals.editParams.visible}

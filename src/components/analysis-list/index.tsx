@@ -744,6 +744,7 @@ const AnalysisList = forwardRef<any, any>(({
 
         <AnalysisResultPanel
             // ref={analysisResultRef}
+            callback={loadData}
             visible={modal.key == "modalA" && modal.visible}
             params={modal.params}
             onClose={closeModal}></AnalysisResultPanel>

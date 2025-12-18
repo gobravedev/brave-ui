@@ -206,9 +206,9 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
     const form = Form.useFormInstance();
     const dependsValue = Form.useWatch((values: any) => values, form);
     const isDisplay = (depends: any) => {
-        
+
         const display = depends.map((item: any) => {
-            if ( dependsValue) {
+            if (dependsValue) {
                 return dependsValue[item.name] == item.value
             }
         }).every(Boolean)
@@ -714,7 +714,7 @@ export const CollectedSampleSelect: FC<any> = ({ label, modes = [], columns, nam
     </>
 }
 
-export const CollectedGroupSelectSampleButton: FC<any> = ({ label, projParameter, columns, name, rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
+export const CollectedGroupSelectSampleButton: FC<any> = ({ label, modes = [], projParameter, columns, name, rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
     const [sampleGrouped, setSampleGrouped] = useState<any>()
     const [options, setOptions] = useState<any>([])
     const [collectFiles, setCollectFiles] = useState<any>([])
@@ -824,9 +824,9 @@ export const CollectedGroupSelectSampleButton: FC<any> = ({ label, projParameter
         {(columns && Array.isArray(columns)) && columns.map((item: any, index: any) => (
             <div key={index}>
                 <Form.Item label={`${item} Columns`} name={[name, item]} rules={rules}>
-                    <GroupSelectSample sampleGrouped={sampleGrouped} sampleGroup={options} ></GroupSelectSample>
+                    <GroupSelectSample mode={modes[index] ? "multiple" : undefined} sampleGrouped={sampleGrouped} sampleGroup={options} ></GroupSelectSample>
                 </Form.Item>
-                <Flex gap="small">
+                {modes[index]!=0 && <Flex gap="small">
                     {item}
                     <Form.Item label={item} name={[name, "group", `${item}`]} noStyle >
                         <GroupSelectButton sampleGrouped={sampleGrouped} field={[name, item]}></GroupSelectButton>
@@ -837,7 +837,8 @@ export const CollectedGroupSelectSampleButton: FC<any> = ({ label, projParameter
                     <Form.Item name={[name, "color", `${item}`]} >
                         <ColorPickerComp projParameter={projParameter} />
                     </Form.Item>
-                </Flex>
+                </Flex>}
+
             </div>
         ))}
 
@@ -1090,13 +1091,13 @@ const SelectAllComp: FC<any> = ({ data, value, onChange, mode, ...rest }) => {
             // console.log(values)
             setSelectedItems(values)
             onChange(values)
-        }}>选择全部{selectedItems && <>({selectedItems.length})</>}</Button>}
+        }}>Select All{selectedItems && <>({selectedItems.length})</>}</Button>}
     </>
 }
 
 
 
-const GroupSelectSample: FC<any> = ({ value, onChange, sampleGroup, watch, sampleGrouped }) => {
+const GroupSelectSample: FC<any> = ({ value, onChange, mode , sampleGroup, watch, sampleGrouped }) => {
     // const [options, setOptions] = useState<any>([])
     // const [groupedLabel,setGroupedLabel] = useState<any>([])
     // const [grouped, setGrouped] = useState<any>({})
@@ -1134,12 +1135,15 @@ const GroupSelectSample: FC<any> = ({ value, onChange, sampleGroup, watch, sampl
     return <>
         {/* {watch}{group} */}
         {/* {JSON.stringify(value)} */}
+        {/* {mode} */}
         <Select showSearch
             filterOption={(input: any, option: any) =>
                 (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
-            mode={"multiple"}
+            mode={mode}
             value={value} onChange={onChange} options={sampleGroup}></Select>
-        {value && <>A total of {value.length} samples were selected</>}
+        {(mode == 'multiple' && value) &&
+            <>A total of {value.length} samples were selected</>
+        }
 
     </>
 }

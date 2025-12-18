@@ -44,7 +44,7 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
         console.log(requestParams)
         try {
             setLoading(true)
-            const resp: any = await axios.post(`/fast-api/analysis-controller?save=true&is_submit=true&is_report=true`, requestParams)
+            const resp: any = await axios.post(`/fast-api/analysis-controller?save=true&is_submit=false&is_report=true`, requestParams)
             setLoading(false)
             // setFilePlot(resp.data)
             // setAnalysisParams(resp.data)

@@ -175,7 +175,7 @@ const AnalysisReport: FC<any> = () => {
                             overflowY="auto"
                             showDesc={true}
                             openPanel={setPanel}
-                            loadTree={() => {
+                            callback={() => {
                                 loadData()
                             }} analysis_id={analysisKey}></AnalysisResultView>
                     </Suspense> : <>
