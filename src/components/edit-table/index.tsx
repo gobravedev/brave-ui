@@ -81,7 +81,7 @@ export const EditMetadataTableModal: FC<any> = ({ visible, params, onClose, call
         }}
         onClose={onClose}
         open={visible} onCancel={onClose} width={"80%"}
-        title="Edit Table">
+        title={params?.data?"Edit Metadata":"Create Metadata"}>
         {/* {data} */}
         {/* {JSON.stringify(projectObj?.metadata_form)} */}
         <MonacoEditor value={data} onChange={setData}  ></MonacoEditor>

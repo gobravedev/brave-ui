@@ -203,8 +203,22 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
             Component: HeatmapParams,
         }
     };
+    const getWatchData = (values: any) => {
+        const watchData: Record<string, any> = {}
+
+        formJson
+            .filter((item: any) => item.depends)
+            .forEach((it: any) => {
+                it.depends.forEach((dep: any) => {
+                    watchData[dep.name] = values?.[dep.name]
+                })
+            })
+
+        return watchData
+    }
+
     const form = Form.useFormInstance();
-    const dependsValue = Form.useWatch((values: any) => values, form);
+    const dependsValue: any = Form.useWatch((values: any) => (getWatchData(values)), form);
     const isDisplay = (depends: any) => {
 
         const display = depends.map((item: any) => {
@@ -215,6 +229,13 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
         // console.log("dependsValue:", display)
         return display
     }
+
+    //  "depends": [
+    //     {
+    //       "name": "method",
+    //       "value": "elasticnet"
+    //     }
+    //   ],
     // console.log("dependsValue:", dependsValue)
     // if (depends) {
     //     // const dependsName = depends.map((item:any)=>item.name)
@@ -224,7 +245,7 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
 
     // }
     return <>
-        {/* {JSON.stringify(dataMap)} */}
+        {/* {JSON.stringify(dependsValue)} */}
         <Row gutter={[8, 0]}>
             {/* {JSON.stringify(projectObj?.parameter)} */}
             {formJson.map((it: any, index: any) => {
@@ -826,7 +847,7 @@ export const CollectedGroupSelectSampleButton: FC<any> = ({ label, modes = [], p
                 <Form.Item label={`${item} Columns`} name={[name, item]} rules={rules}>
                     <GroupSelectSample mode={modes[index] ? "multiple" : undefined} sampleGrouped={sampleGrouped} sampleGroup={options} ></GroupSelectSample>
                 </Form.Item>
-                {modes[index]!=0 && <Flex gap="small">
+                {modes[index] != 0 && <Flex gap="small">
                     {item}
                     <Form.Item label={item} name={[name, "group", `${item}`]} noStyle >
                         <GroupSelectButton sampleGrouped={sampleGrouped} field={[name, item]}></GroupSelectButton>
@@ -1097,7 +1118,7 @@ const SelectAllComp: FC<any> = ({ data, value, onChange, mode, ...rest }) => {
 
 
 
-const GroupSelectSample: FC<any> = ({ value, onChange, mode , sampleGroup, watch, sampleGrouped }) => {
+const GroupSelectSample: FC<any> = ({ value, onChange, mode, sampleGroup, watch, sampleGrouped }) => {
     // const [options, setOptions] = useState<any>([])
     // const [groupedLabel,setGroupedLabel] = useState<any>([])
     // const [grouped, setGrouped] = useState<any>({})
@@ -1240,7 +1261,7 @@ const DifferenceAnalysisConditions: FC<any> = ({ label, sig_type, name, rules })
 
             <Col span={12}>
                 <Form.Item
-                    initialValue={1}
+                    initialValue={0}
                     label="Effect threshold"
                     name={`__${name}_effect_threshold`}
                     tooltip="Minimum effect size (e.g., log2 fold change) required to consider a result biologically meaningful."

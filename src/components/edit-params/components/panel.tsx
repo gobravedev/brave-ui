@@ -12,9 +12,11 @@ const EditParamsPanel: FC<any> = ({ analysis_id, runBtn, callback }) => {
     const [form] = Form.useForm()
     const { messageApi, project } = useOutletContext<any>()
     // const addedProject = Form.useWatch((values: any) => values?.addedProject, form);
+    const jobStatus = useRef<any>(null)
 
     useEffect(() => {
         if (analysis_id) {
+            analysisIdRef.current = analysis_id
             loadData()
         }
     }, [analysis_id])
@@ -36,8 +38,10 @@ const EditParamsPanel: FC<any> = ({ analysis_id, runBtn, callback }) => {
     const loadData = async () => {
         setLoading(true)
         const resp = await axios.post(`/analysis/edit-params/${analysis_id}`)
+        jobStatus.current = resp.data?.job_status
 
         setData(resp.data)
+
         // await loadAnalysisResult(JSON.parse(resp.data.request_param.data_component_ids))
         setResultData(resp.data.analysis_result)
         form.resetFields()
@@ -59,12 +63,15 @@ const EditParamsPanel: FC<any> = ({ analysis_id, runBtn, callback }) => {
     const analysisIdRef = useRef<any>(analysis_id)
 
     useEffect(() => {
-        // console.log("sseData in result list:", data.msgType)
         const data = sseData
-        if (analysisIdRef.current == data.analysis_id) {
+        console.log("sseData in result list:", analysisIdRef.current, data)
 
-            if (data.event == "analysis_complete" || data.event == "analysis_failed" || data.event == "analysis_started") {
+        if (analysisIdRef.current == data.analysis_id) {
+            //  || data.event == "analysis_started"
+            if (data.event == "analysis_complete" || data.event == "analysis_failed") {
                 loadData()
+            } else if (data.event == "analysis_started") {
+                jobStatus.current = "running"
             }
         }
     }, [sseData])
@@ -134,14 +141,14 @@ const EditParamsPanel: FC<any> = ({ analysis_id, runBtn, callback }) => {
     //     }
     // }, [form])
     return <>
-        {(data && !loading) ? <>
+        {data ? <>
             <div>
                 <Tag>{data?.component_name}</Tag>
                 <Tag color="success">{data?.analysis_name}</Tag>
                 <Tooltip title={data?.analysis_id}>
-                    <Tag>{String(data?.analysis_id).slice(0, 8)}</Tag>
+                    <Tag>{String(analysisIdRef.current).slice(0, 8)}</Tag>
                 </Tooltip>
-                <Tag>{data?.job_status}</Tag>
+                <Tag>{jobStatus.current}</Tag>
                 <RedoOutlined style={{ cursor: "pointer" }} onClick={loadData} />
 
 
@@ -154,7 +161,7 @@ const EditParamsPanel: FC<any> = ({ analysis_id, runBtn, callback }) => {
                 dataMap={{ ...resultData, first_data_key: getFirstKey(resultData) }}
                 formJson={buildFormJson()}
                 databases={data?.databases}
-                job_status={data?.job_status}
+                jobStatus={jobStatus}
                 // inputFormJson={data?.inputFormJson}
                 // onChangeAddProject={(value:any)=>{
                 //     // loadData(value)
@@ -167,7 +174,7 @@ const EditParamsPanel: FC<any> = ({ analysis_id, runBtn, callback }) => {
                     callback && callback()
                 }} ></CreateOrUpdateParsms>
 
-        </>:<Skeleton active></Skeleton>}
+        </> : <Skeleton active></Skeleton>}
     </>
 }
 

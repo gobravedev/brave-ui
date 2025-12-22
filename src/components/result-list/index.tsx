@@ -17,6 +17,7 @@ import { useSelector } from "react-redux"
 import BigTable from '@/components/big-table';
 import { el, fa } from "@faker-js/faker"
 import { EditResultTableModal } from "../edit-table"
+// import PreviewExample from "./components/preview-example"
 
 
 const ResultList = forwardRef<any, any>((params_, ref) => {
@@ -62,7 +63,6 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
     const { modal, openModal, closeModal } = useModal();
     const [tableRows, setTableRows] = useState<any[]>([])
     const [tableRowsInfo, setTableRowsInfo] = useState<any>({})
-
     const [tableColumns, setTableColumns_] = useState<any[]>([])
     const [tableRowLoading, setTableRowLoading] = useState<boolean>(true)
     const [analysisResultId, setAnalysisResultId_] = useState<any>()
@@ -818,22 +818,11 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
 
 
 
-                    <Popconfirm title="Confirm adding example?" onConfirm={async () => {
-                        await axios.post(`/analysis-result/add-example/${currentAnalysisMethod.component_id}?project=${project}`)
-                        message.success("Example added successfully!")
-                        reload()
-                    }}>
-                        <a>Example</a>
-                    </Popconfirm>
+                   
+                    
+                     {/* <a onClick={()=>{openModal("previewExample",{component_id:currentAnalysisMethod.component_id})}}>Example</a> */}
+                    {/* /analysis-result/preview-example/{component_id} */}
 
-                    <Tooltip title="Download Example File">
-
-                        <a onClick={async () => {
-                            const resp = await axios.get(`/analysis-result/download-example/${currentAnalysisMethod.component_id}`)
-                            window.open(`${baseURL}${resp.data.example_url}`, '_blank');
-                            message.success(`Example ${baseURL}${resp.data.example_url} downloading...`)
-                        }}> <DownloadOutlined /></a>
-                    </Tooltip>
 
 
                     <ImportOutlined style={{ cursor: "pointer" }} onClick={() => {
@@ -1103,6 +1092,12 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
             onClose={closeModal}
             callback={reload}
         ></CreateFolderModal>
+        {/* <PreviewExample
+            visible={modal.visible && modal.key == "previewExample"}
+            params={modal.params}
+            onClose={closeModal}
+            callback={reload}
+        ></PreviewExample> */}
 
 
 

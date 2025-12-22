@@ -19,11 +19,17 @@ const RenderFromJson = lazy(() => import("./render-form-json"));
 
 
 const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
-    requestParam, dataMap, formJson,job_status,
+    requestParam, dataMap, formJson, jobStatus,
     databases, callback, analysisResultId, showCancal = false }) => {
     const { modals, openModals, closeModals } = useModals(["paramsView", "bioDatabases"]);
     const [loading, setLoading] = useState<boolean>(false)
     const { messageApi } = useOutletContext<any>()
+    // const [jobStatus, setJobStatus] = useState<string>(job_status )
+    // useEffect(() => {
+    //     // setJobStatus(job_status)
+    //     jobStatus.current=job_status
+    // }, [job_status])
+
     // useEffect(()=>{
 
     // },[project])
@@ -69,8 +75,11 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
             const resp: any = await axios.post(`/fast-api/analysis-controller?save=${save}&is_submit=${is_submit}`, requestParams)
             // setFilePlot(resp.data)
             // setAnalysisParams(resp.data)
-            console.log(resp)
+            // console.log(resp)
+            if (jobStatus) {
+                jobStatus.current = "running"
 
+            }
             if (save) {
                 messageApi.success("save successful!")
                 if (callback) {
@@ -114,17 +123,17 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                     <Input></Input>
                 </Form.Item>
                 <Flex gap={"small"} justify="space-between">
-                    <Button  disabled={job_status=="running"} size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true, true)}>
+                    <Button disabled={jobStatus?.current == "running"} size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true, true)}>
                         Submit
                     </Button>
                     <Space>
 
-                        <Button disabled={job_status=="running"} size="small" color="cyan" variant="solid" onClick={() => {
+                        <Button disabled={jobStatus?.current == "running"} size="small" color="cyan" variant="solid" onClick={() => {
                             saveUpstreamAnalysis(false)
                         }}>Parameters</Button>
 
                         {/* Analysis({requestParam.analysis_name})({String(requestParam.analysis_id).slice(0, 8)}) */}
-                        <Button disabled={job_status=="running"} size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>
+                        <Button disabled={jobStatus?.current == "running"} size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>
                             {requestParam?.analysis_id ? <>Update </> : <>Create</>}</Button>
                         {(requestParam?.analysis_id && showCancal) && <Button size="small" color="cyan" onClick={() => form.setFieldValue("analysis_id", undefined)}>Cancel</Button>}
                         {/* <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>更新分析</Button> */}
@@ -133,7 +142,7 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                             <Popconfirm title="Are you sure to create a new analysis?"
                                 onConfirm={createAnalysis}
                             >
-                                <Button disabled={job_status=="running"} size="small" color="orange" variant="solid" onClick={() => form.setFieldValue("analysis_id", undefined)}>Copy</Button>
+                                <Button disabled={jobStatus?.current == "running"} size="small" color="orange" variant="solid" onClick={() => form.setFieldValue("analysis_id", undefined)}>Copy</Button>
                             </Popconfirm>
                         }
                     </Space>

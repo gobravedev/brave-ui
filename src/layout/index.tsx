@@ -23,6 +23,7 @@ import ThemeSelector from '@/components/setting-switcher/theme';
 import { CreateOrUpdateNamespace, InstallNamespace } from '@/components/namespace-operature';
 import { useGlobalMessage } from '@/hooks/useGlobalMessage';
 import TextArea from 'antd/es/input/TextArea';
+import { keyEqualTo } from '@antv/s2/esm/utils/export/method.js';
 
 const { Content, Sider } = Layout;
 
@@ -350,6 +351,12 @@ const App: React.FC = () => {
                         en_US: "Literature"
                     }
                 }, {
+                    key:"/analysis-report-old",
+                    label: {
+                        zh_CN: "分析报告(old)", 
+                        en_US: "Report(old)"
+                    }
+                },{
                     key: `/file-card`,
                     label: {
                         zh_CN: "文件(deprecated)",

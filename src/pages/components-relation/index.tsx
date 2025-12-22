@@ -613,6 +613,10 @@ const Pipeline: FC<any> = () => {
                                 }}>Publish</Button>
 
                                 <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                    openModal("preview-relation-example", { ...component, relation_type: relation_type })
+                                }}>Example</Button>
+
+                                <Button size="small" color="cyan" variant="solid" onClick={() => {
                                     operatePipeline.openModal("projectForm", { project_id: project_id })
                                 }}>Edit Project</Button>
 
@@ -922,6 +926,19 @@ const Pipeline: FC<any> = () => {
                 parent_pipeline_id: "0"
 
             } */}
+        {/* {(modal.key == "modalC" && modal.visible) && <>
+
+
+        </>} */}
+        <ComponentsDetailsRender
+            view={modal.key}
+            visible={ modal.visible}
+            params={modal.params}
+            onClose={closeModal}
+            callback={loadData}
+        ></ComponentsDetailsRender>
+
+
         <ModuleEdit
             visible={modal.key == "modalB" && modal.visible}
             onClose={closeModal}

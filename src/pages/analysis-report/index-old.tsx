@@ -98,7 +98,7 @@ const AnalysisReport: FC<any> = () => {
     const loadData = async () => {
         setLoading(true)
         // ?analysis_method=${analysisMethod}&project=${project}
-        let resp: any = await axios.post(`/list-analysis-tree`, {
+        let resp: any = await axios.post(`/list-analysis-tree-old`, {
             // analysisMethod: analysisMethod,
             is_report: true,
             project: project
@@ -112,7 +112,7 @@ const AnalysisReport: FC<any> = () => {
                 setAnalysis(resp.data[0]?.children[0])
                 setAnalysisKey(resp.data[0]?.children[0]?.key)
                 console.log(resp.data[0]?.children[0])
-                setComponentType(resp.data[0]?.children[0]?.relation_type)
+                setComponentType(resp.data[0]?.children[0]?.component_type)
                 updateQueryParam("project", project);
                 updateQueryParam("key", resp.data[0]?.children[0]?.key);
             }
@@ -303,10 +303,10 @@ const AnalysisReport: FC<any> = () => {
                             if (val.node?.type == "analysis") {
                                 setAnalysis(val.node)
                                 setAnalysisKey(val.node.key)
-                                setComponentType(val.node.relation_type)
+                                setComponentType(val.node.component_type)
                                 updateQueryParam("project", project);
                                 updateQueryParam("key", val.node.key);
-                            } else if (val.node?.type == "relation") {
+                            } else if (val.node?.type == "components") {
                                 console.log(val.node)
                                 // loadComponents(val.node.key)
                             }

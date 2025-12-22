@@ -64,6 +64,8 @@ const Components = lazy(() => import('@/pages/components-relation/components'));
 const PipelineComponentsCard = lazy(() => import('@/components/pipeline-components-card'));
 const SoftwareAnalysisEditor = lazy(() => import('@/pages/software-analysis-editor'));
 const AnalysisReport = lazy(() => import('@/pages/analysis-report'));
+const AnalysisReportOld = lazy(() => import('@/pages/analysis-report/index-old'));
+
 const EntityPage = lazy(() => import('@/pages/entity'));
 const EntityRelation = lazy(() => import('@/pages/entity-relation'));
 const PsycMicroGraphHome = lazy(() => import("@/pages/psycmicrograph"))
@@ -111,6 +113,9 @@ if (appType == "index") {
         {
             path: "/analysis-report",
             element: <AnalysisReport />
+        },{
+            path: "/analysis-report-old",
+            element: <AnalysisReportOld />
         },
         {
             path: "/pipeline-card",

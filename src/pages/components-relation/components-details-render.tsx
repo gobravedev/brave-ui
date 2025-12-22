@@ -18,6 +18,7 @@ const LLMScript = lazy(()=>import("./components/llm-script"))
 const ScriptCode = lazy(()=>import("./components/script-code"))
 const ComponentStructure = lazy(()=>import("./components/component-structure"))
 const ComponentScript = lazy(()=>import("./components/component-script"))
+const PreviewRelationExample = lazy(() => import('./components/preview-example'))
 const viewMapping: {
     key: string;
     label: string;
@@ -44,6 +45,8 @@ const viewMapping: {
 
         { key: "component-structure", label: "component-structure", component: ComponentStructure },
         { key: "component-script", label: "component-script", component: ComponentScript },
+
+        { key: "preview-relation-example", label: "preview-relation-example", component: PreviewRelationExample },
 
 
 
