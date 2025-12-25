@@ -8,7 +8,7 @@ import { useGlobalMessage } from "@/hooks/useGlobalMessage";
 
 const ComponentStructure = forwardRef<any, any>(
 
-    ({ component_id }, ref) => {
+    ({ component_id, callback }, ref) => {
         // const [analysisResultId, setAnalysisResultId] = useState<any>(null);
         // const leftSize = analysisResultId ? 12 : 24;
         // useEffect(()=>{
@@ -33,6 +33,7 @@ const ComponentStructure = forwardRef<any, any>(
             })
             message.success("Structure saved")
             // loadData()
+            callback && callback()
 
         }
 

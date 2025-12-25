@@ -673,9 +673,9 @@ const Pipeline: FC<any> = () => {
                                         Return
                                     </Dropdown.Button> */}
                                     <Space.Compact>
-                                        <Button size="small" color="blue" variant="solid" onClick={() => {
+                                        <Button size="small" color="blue" variant="solid" icon={<CloseOutlined />} onClick={() => {
                                             setLeftPanel(relation_type)
-                                        }}>Return</Button>
+                                        }}></Button>
 
                                         <Popconfirm title="Whether to generate scripts?" onConfirm={async () => {
                                             leftRef.current?.generateScript()
@@ -697,9 +697,9 @@ const Pipeline: FC<any> = () => {
                                     setLeftPanel("component-structure")
                                 }}>Structure</Button> : <>
                                     <Space.Compact>
-                                        <Button size="small" color="blue" variant="solid" onClick={() => {
+                                        <Button size="small" color="blue" variant="solid"   icon={<CloseOutlined />} onClick={() => {
                                             setLeftPanel(relation_type)
-                                        }}>Return</Button>
+                                        }}></Button>
                                         <Button size="small" color="blue" variant="solid" icon={<RedoOutlined />}
                                             onClick={() => { leftRef.current?.loadData() }}></Button>
                                         <Button size="small" color="blue" variant="solid" onClick={() => {
@@ -788,6 +788,7 @@ const Pipeline: FC<any> = () => {
                         {(component) ? <>
                             <ComponentsDetailsRender
                                 ref={leftRef}
+                                callback={loadData}
                                 component_id={component?.component_id}
                                 component={component}
                                 operatePipeline={operatePipeline}

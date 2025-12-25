@@ -1157,7 +1157,7 @@ const GroupSelectSample: FC<any> = ({ value, onChange, mode, sampleGroup, watch,
         {/* {watch}{group} */}
         {/* {JSON.stringify(value)} */}
         {/* {mode} */}
-        <Select showSearch
+        <Select showSearch allowClear
             filterOption={(input: any, option: any) =>
                 (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
             mode={mode}
@@ -1283,6 +1283,16 @@ const HeatmapParams: FC<any> = ({ label, name, rules }) => {
 
 
         <Row gutter={[8, 8]}>
+            <Col span={24}>
+                <Form.Item
+                    initialValue={""}
+                    label="title"
+                    name={`__${name}_title`}
+                    tooltip="heatmap title."
+                >
+                    <Input />
+                </Form.Item>
+            </Col>
             {/* Width */}
             <Col span={12}>
                 <Form.Item
@@ -1359,6 +1369,7 @@ const HeatmapParams: FC<any> = ({ label, name, rules }) => {
                     <Switch />
                 </Form.Item>
             </Col>
+
         </Row>
 
 

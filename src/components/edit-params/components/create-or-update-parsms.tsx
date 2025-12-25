@@ -76,9 +76,8 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
             // setFilePlot(resp.data)
             // setAnalysisParams(resp.data)
             // console.log(resp)
-            if (jobStatus) {
+            if (jobStatus && is_submit) {
                 jobStatus.current = "running"
-
             }
             if (save) {
                 messageApi.success("save successful!")
