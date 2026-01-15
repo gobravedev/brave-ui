@@ -597,7 +597,7 @@ export const CollectedGroupSelectSampleButton2: FC<any> = ({ label, name, rules,
 
     </>
 }
-export const CollectedSampleSelect: FC<any> = ({ label, modes = [], columns, name, rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
+export const CollectedSampleSelect: FC<any> = ({ label, modes = [], columns, name, columns_rules=[], rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
     const [sampleGrouped, setSampleGrouped] = useState<any>()
     const [options, setOptions] = useState<any>([])
     const [collectFiles, setCollectFiles] = useState<any>([])
@@ -707,8 +707,12 @@ export const CollectedSampleSelect: FC<any> = ({ label, modes = [], columns, nam
         {(columns && Array.isArray(columns)) && columns.map((item: any, index: any) => (
             <div key={index}>
                 {/* {JSON.stringify()} */}
-                <Form.Item label={`${item} Columns`} name={[name, item]} rules={rules}>
+                <Form.Item label={`${item} Columns`} name={[name, item]} rules={[{
+                    "required": columns_rules[index] ? true : false,
+                    "message": "This field cannot be empty!"
+                }]}>
                     <Select showSearch
+                        allowClear
                         mode={modes[index] ? "multiple" : undefined}
                         filterOption={(input: any, option: any) =>
                             (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
