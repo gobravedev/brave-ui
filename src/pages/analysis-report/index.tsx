@@ -287,7 +287,7 @@ const AnalysisReport: FC<any> = () => {
                                         value: "llm"
                                     }
                                 ]} /> */}
-                            <RedoOutlined style={{ cursor: "pointer" }} onClick={loadData} />
+                            <RedoOutlined style={{ cursor: "pointer" }} onClick={()=>loadData()} />
 
                             {/* <Button size="small" color="cyan" variant="solid" onClick={loadData}>Refresh</Button> */}
                         </Flex>
