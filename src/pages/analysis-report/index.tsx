@@ -95,7 +95,7 @@ const AnalysisReport: FC<any> = () => {
 
     const { ref: containerRef, top, isSticky } = useStickyTop(576);
 
-    const loadData = async () => {
+    const loadData = async (first = true) => {
         setLoading(true)
         // ?analysis_method=${analysisMethod}&project=${project}
         let resp: any = await axios.post(`/list-analysis-tree`, {
@@ -107,22 +107,26 @@ const AnalysisReport: FC<any> = () => {
         const data = resp.data;
         setData(resp.data)
         // debugger
-        if (!key && resp.data.length > 0) {
-            if (resp.data[0]?.children && resp.data[0]?.children.length > 0) {
-                setAnalysis(resp.data[0]?.children[0])
-                setAnalysisKey(resp.data[0]?.children[0]?.key)
-                console.log(resp.data[0]?.children[0])
-                setComponentType(resp.data[0]?.children[0]?.relation_type)
-                updateQueryParam("project", project);
-                updateQueryParam("key", resp.data[0]?.children[0]?.key);
+        // debugger
+        if (first) {
+            if (!key && resp.data.length > 0) {
+                if (resp.data[0]?.children && resp.data[0]?.children.length > 0) {
+                    setAnalysis(resp.data[0]?.children[0])
+                    setAnalysisKey(resp.data[0]?.children[0]?.key)
+                    console.log(resp.data[0]?.children[0])
+                    setComponentType(resp.data[0]?.children[0]?.relation_type)
+                    updateQueryParam("project", project);
+                    updateQueryParam("key", resp.data[0]?.children[0]?.key);
+                }
+            } else {
+                // debugger
+                const componentType = data
+                    .flatMap((item: any) => item.children || [])
+                    .find((child: any) => child.key === key)?.component_type;
+                setComponentType(componentType)
             }
-        } else {
-            // debugger
-            const componentType = data
-                .flatMap((item: any) => item.children || [])
-                .find((child: any) => child.key === key)?.component_type;
-            setComponentType(componentType)
         }
+
 
 
         setLoading(false)
@@ -176,7 +180,7 @@ const AnalysisReport: FC<any> = () => {
                             showDesc={true}
                             openPanel={setPanel}
                             callback={() => {
-                                loadData()
+                                loadData(false)
                             }} analysis_id={analysisKey}></AnalysisResultView>
                     </Suspense> : <>
                         <Card size="small" variant="borderless">
