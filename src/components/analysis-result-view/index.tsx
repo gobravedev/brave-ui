@@ -50,7 +50,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, callback
     const { containerURL, project } = useSelector((state: any) => state.user);
     const [runingLoading, setRuningLoading] = useState<boolean>(false)
     const [form] = Form.useForm();
-    const [rightPanel, setRightPanel] = useState<string>("llmAnalysis")
+    const [rightPanel, setRightPanel] = useState<string>("editParamsPanel")
 
     const loadData = async (analysis_id: any) => {
         setLoading(true)
@@ -348,12 +348,12 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, callback
                                     onChange={(val: any) => setRightPanel(val)}
                                     options={[
                                         {
-                                            label: "LLM",
-                                            value: "llmAnalysis"
-                                        }, {
                                             label: "Parameters",
                                             value: "editParamsPanel"
-                                        }, {
+                                        },{
+                                            label: "LLM",
+                                            value: "llmAnalysis"
+                                        },  {
                                             label: "Description",
                                             value: "description"
                                         }
