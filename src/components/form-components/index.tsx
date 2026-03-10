@@ -2,7 +2,7 @@ import { Button, Col, ColorPicker, ColorPickerProps, Divider, Flex, Form, Input,
 import TextArea from "antd/es/input/TextArea";
 import axios from "axios";
 import { A } from "ollama/dist/shared/ollama.d792a03f.mjs";
-import { Component, FC, useEffect, useState, memo } from "react";
+import { Component, FC, useEffect, useState, memo, useMemo, useRef } from "react";
 import { useSelector } from "react-redux";
 import { data, useOutletContext } from "react-router";
 import { QuestionCircleOutlined } from "@ant-design/icons";
@@ -203,32 +203,92 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
             Component: HeatmapParams,
         }
     };
-    const getWatchData = (values: any) => {
-        const watchData: Record<string, any> = {}
 
-        formJson
-            .filter((item: any) => item.depends)
-            .forEach((it: any) => {
-                it.depends.forEach((dep: any) => {
-                    watchData[dep.name] = values?.[dep.name]
-                })
-            })
+    // const dependFields = useMemo(() => {
+    //     const set = new Set<string>()
 
-        return watchData
-    }
+    //     formJson.forEach((item: any) => {
+    //         item.depends?.forEach((dep: any) => {
+    //             set.add(dep.name)
+    //         })
+    //     })
 
-    const form = Form.useFormInstance();
-    const dependsValue: any = Form.useWatch((values: any) => (getWatchData(values)), form);
-    const isDisplay = (depends: any) => {
+    //     return Array.from(set)
+    // }, [formJson])
+    // const getWatchData = (values: any) => {
+    //     const watchData: Record<string, any> = {}
 
-        const display = depends.map((item: any) => {
-            if (dependsValue) {
-                return dependsValue[item.name] == item.value
-            }
-        }).every(Boolean)
-        // console.log("dependsValue:", display)
-        return display
-    }
+    //     formJson
+    //         .filter((item: any) => item.depends)
+    //         .forEach((it: any) => {
+    //             it.depends.forEach((dep: any) => {
+    //                 watchData[dep.name] = values?.[dep.name]
+    //             })
+    //         })
+    //     console.log("formJson:", formJson)
+    //     return watchData
+    // }
+
+    // const form = Form.useFormInstance();
+    // // ["show_stats","point_size"] 不能使用，因为这会被解释成 嵌套路径
+    // const dependsValue: any = Form.useWatch((values: any) => (getWatchData(values)), form);
+
+    // const form = Form.useFormInstance()
+    // // const initValues = Form.useWatch([], form)
+
+    // const dependFields = useMemo(() => {
+    //     const set = new Set<string>()
+
+    //     formJson?.forEach((item: any) => {
+    //         item.depends?.forEach((dep: any) => {
+    //             set.add(dep.name)
+    //         })
+    //     })
+
+    //     return Array.from(set)
+    // }, [formJson])
+
+    // const dependFieldsRef = useRef<string[]>(dependFields)
+
+    // useEffect(() => {
+    //     dependFieldsRef.current = dependFields
+    // }, [dependFields])
+
+    // const watchSelector = useMemo(() => {
+    //     return (values: any = {}) => {
+    //         const obj: Record<string, any> = {}
+
+    //         dependFieldsRef.current.forEach((name) => {
+    //             obj[name] = values[name]
+    //         })
+
+    //         return obj
+    //     }
+    // }, [])
+
+    // const dependsValue = Form.useWatch(watchSelector, form) ||   watchSelector(form.getFieldsValue(true))
+    // const watched = Form.useWatch(watchSelector, form)
+    // const dependsValue = useMemo(() => {
+    //     return watched ?? watchSelector(form.getFieldsValue(true))
+    // }, [watched, watchSelector, form])
+
+    // const isDisplay = (depends: any) => {
+
+    //     const display = depends.map((item: any) => {
+    //         if (dependsValue) {
+    //             return dependsValue[item.name] == item.value
+    //         }
+    //     }).every(Boolean)
+    //     // console.log("dependsValue:", display)
+    //     return display
+    // }
+    // const isDisplay = (depends: any[]) => {
+    //     if (!dependsValue) return false
+
+    //     return depends.every((item) =>
+    //         dependsValue[item.name] === item.value
+    //     )
+    // }
 
     //  "depends": [
     //     {
@@ -245,30 +305,63 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
 
     // }
     return <>
-        {/* {JSON.stringify(dependsValue)} */}
+        {/* {JSON.stringify(dependFields)}
+        {JSON.stringify(form.getFieldsValue())}
+        {JSON.stringify(dependsValue)} */}
         <Row gutter={[8, 0]}>
             {/* {JSON.stringify(projectObj?.parameter)} */}
-            {formJson.map((it: any, index: any) => {
+            {/* {formJson.map((it: any, index: any) => {
                 if (!it?.depends) {
                     return <Col span={it?.col ? it?.col : 24} key={index} >
-                        {/* {it?.depends && isDisplay(it?.depends) && <>aaaaaaaaaa</>} */}
-                        {/* {JSON.stringify(it)} */}
+                   
 
                         <ComponentsRender projParameter={parameter} analysisResultId={analysisResultId} key={index} {...it} dataMap={dataMap} componentMap={componentMap} constDataMap={constDataMap}></ComponentsRender>
                     </Col>
                 } else {
+
                     if (isDisplay(it?.depends)) {
                         return <Col span={it?.col ? it?.col : 24} key={index} >
-                            {/* {it?.depends && isDisplay(it?.depends) && <>aaaaaaaaaa</>} */}
-                            {/* {JSON.stringify(it)} */}
 
                             <ComponentsRender projParameter={parameter} analysisResultId={analysisResultId} key={index} {...it} dataMap={dataMap} componentMap={componentMap} constDataMap={constDataMap}></ComponentsRender>
                         </Col>
                     }
                 }
 
-            })}
+            })} */}
+
+            {formJson.map((it: any, index: any) => (
+                <Form.Item
+                    key={it.name}
+                    noStyle
+                    shouldUpdate={(prev, cur) => {
+                        if (!it.depends) return false;
+
+                        return it.depends.some((dep:any) => prev[dep.name] !== cur[dep.name]);
+                    }}
+                >
+                    {({ getFieldValue }) => {
+                        if (!it.depends) {
+                            return <Col span={it?.col ? it?.col : 24} key={index} >
+
+                                <ComponentsRender projParameter={parameter} analysisResultId={analysisResultId} key={index} {...it} dataMap={dataMap} componentMap={componentMap} constDataMap={constDataMap}></ComponentsRender>
+                            </Col>
+                        }
+
+                        const show = it.depends.every(
+                            (d: any) => getFieldValue(d.name) === d.value
+                        )
+
+                        if (!show) return null
+
+                        return <Col span={it?.col ? it?.col : 24} key={index} >
+                            <ComponentsRender projParameter={parameter} analysisResultId={analysisResultId} key={index} {...it} dataMap={dataMap} componentMap={componentMap} constDataMap={constDataMap}></ComponentsRender>
+                        </Col>
+                    }}
+                </Form.Item>
+            ))}
         </Row>
+
+
 
 
     </>
@@ -1086,7 +1179,7 @@ const ColorPickerComp: FC<any> = ({ projParameter, value, onChange, ...rest }) =
         /> */}
         {/* {JSON.stringify(value)} */}
         <ColorPicker styles={{ popupOverlayInner: { width: 480 } }}
-            panelRender={projParameter?.colors? customPanelRender : undefined} presets={(projParameter?.colors) ? projParameter?.colors : []} allowClear value={value} onChange={(color) => {
+            panelRender={projParameter?.colors ? customPanelRender : undefined} presets={(projParameter?.colors) ? projParameter?.colors : []} allowClear value={value} onChange={(color) => {
                 const hexColor = color.toHexString();
                 onChange(hexColor)
             }}  ></ColorPicker>
