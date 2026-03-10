@@ -420,7 +420,7 @@ const BasicSelect: FC<any> = ({ options, clear, value, onChange, projParameter, 
             form.resetFields(clear)
         }
     }
-    return <Select showSearch filterOption={(input: any, option: any) =>
+    return <Select allowClear showSearch filterOption={(input: any, option: any) =>
         (option?.label ?? '').toLowerCase().includes(input.toLowerCase())} {...rest} options={options} value={value} onChange={selectChange}></Select>
 }
 
