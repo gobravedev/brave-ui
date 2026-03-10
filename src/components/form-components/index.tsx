@@ -597,7 +597,7 @@ export const CollectedGroupSelectSampleButton2: FC<any> = ({ label, name, rules,
 
     </>
 }
-export const CollectedSampleSelect: FC<any> = ({ label, modes = [], columns, name, columns_rules=[], rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
+export const CollectedSampleSelect: FC<any> = ({ label, modes = [], columns, name, columns_rules = [], rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
     const [sampleGrouped, setSampleGrouped] = useState<any>()
     const [options, setOptions] = useState<any>([])
     const [collectFiles, setCollectFiles] = useState<any>([])
@@ -1052,8 +1052,11 @@ const ThreeColorPicker: FC<any> = ({ label, name, data, initialValue: initialVal
 }
 const BaseColorPicker: FC<any> = ({ label, name, data, initialValue, rules, ...rest }) => {
     return <>
+        {/* {JSON.stringify(data)} */}
         <Form.Item initialValue={initialValue} label={label} name={name} rules={rules}>
-            <ColorPicker {...rest} />
+            <ColorPickerComp {...rest} />
+            {/* {JSON.stringify(rest)} */}
+            {/* <Input></Input> */}
         </Form.Item>
     </>
 }
@@ -1083,7 +1086,7 @@ const ColorPickerComp: FC<any> = ({ projParameter, value, onChange, ...rest }) =
         /> */}
         {/* {JSON.stringify(value)} */}
         <ColorPicker styles={{ popupOverlayInner: { width: 480 } }}
-            panelRender={customPanelRender} presets={(projParameter?.colors) ? projParameter?.colors : []} allowClear value={value} onChange={(color) => {
+            panelRender={projParameter?.colors? customPanelRender : undefined} presets={(projParameter?.colors) ? projParameter?.colors : []} allowClear value={value} onChange={(color) => {
                 const hexColor = color.toHexString();
                 onChange(hexColor)
             }}  ></ColorPicker>
