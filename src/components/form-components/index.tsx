@@ -6,6 +6,7 @@ import { Component, FC, useEffect, useState, memo, useMemo, useRef } from "react
 import { useSelector } from "react-redux";
 import { data, useOutletContext } from "react-router";
 import { QuestionCircleOutlined } from "@ant-design/icons";
+import { useStoreForm } from "@/context/form/FormProvider";
 
 
 const ComponentsRender = ({ type, dataMap, constDataMap, componentMap, inputAnalysisMethod, dataKey: dataKey_, data: data_, name, component_id, inputKey, ...rest }: any) => {
@@ -78,7 +79,71 @@ const ComponentsRender = ({ type, dataMap, constDataMap, componentMap, inputAnal
     // console.log(dataMap[dataKey])
     return <Component {...crest}  {...rest} data={data} name={name} />;
 };
+const checkDepends = (depends: any, getFieldValue: any): boolean => {
 
+    if (!depends) return true
+
+    // ---------- 旧格式 ----------
+    if (Array.isArray(depends)) {
+
+        const group: Record<string, any[]> = {}
+
+        depends.forEach(d => {
+            if (!group[d.name]) {
+                group[d.name] = []
+            }
+            group[d.name].push(d.value)
+        })
+
+        return Object.entries(group).every(([name, values]) => {
+            return values.includes(getFieldValue(name))
+        })
+    }
+
+    // ---------- OR ----------
+    if (depends.or) {
+        return depends.or.some((d: any) =>
+            checkDepends(d, getFieldValue)
+        )
+    }
+
+    // ---------- AND ----------
+    if (depends.and) {
+        return depends.and.every((d: any) =>
+            checkDepends(d, getFieldValue)
+        )
+    }
+
+    // ---------- 单条件 ----------
+    if (depends.name) {
+        return getFieldValue(depends.name) === depends.value
+    }
+
+    return true
+}
+
+const extractDependsNames = (depends: any): string[] => {
+
+    if (!depends) return []
+
+    if (Array.isArray(depends)) {
+        return depends.map(d => d.name)
+    }
+
+    if (depends.or) {
+        return depends.or.flatMap(extractDependsNames)
+    }
+
+    if (depends.and) {
+        return depends.and.flatMap(extractDependsNames)
+    }
+
+    if (depends.name) {
+        return [depends.name]
+    }
+
+    return []
+}
 const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => {
     if (!formJson) return null
     // const { projectObj } = useOutletContext<any>()
@@ -186,7 +251,11 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
             Component: CollectedGroupSelectSampleButton2,
         }, CollectedSampleSelect: {
             Component: CollectedSampleSelect,
-        }, MetaphlanCladeSelect: {
+        }, CollectedColumnsSelect: {
+            Component: CollectedColumnsSelect,
+        },
+
+        MetaphlanCladeSelect: {
             Component: MetaphlanCladeSelect,
         }, SelectAll: {
             Component: SelectAll,
@@ -304,6 +373,7 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
     // console.log("dependsValue:", display)
 
     // }
+
     return <>
         {/* {JSON.stringify(dependFields)}
         {JSON.stringify(form.getFieldsValue())}
@@ -329,36 +399,40 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
 
             })} */}
 
-            {formJson.map((it: any, index: any) => (
-                <Form.Item
-                    key={it.name}
-                    noStyle
-                    shouldUpdate={(prev, cur) => {
-                        if (!it.depends) return false;
+            {formJson.map((it: any, index: any) => {
+                const dependNames = [...new Set(extractDependsNames(it.depends))]
+                return (
+                    <Form.Item
+                        key={it.name}
+                        noStyle
+                        shouldUpdate={(prev, cur) => dependNames.some(name => prev[name] !== cur[name])
+                        }
+                    >
+                        {({ getFieldValue }) => {
+                            if (!it.depends) {
+                                return <Col span={it?.col ? it?.col : 24} key={index} >
 
-                        return it.depends.some((dep:any) => prev[dep.name] !== cur[dep.name]);
-                    }}
-                >
-                    {({ getFieldValue }) => {
-                        if (!it.depends) {
+                                    <ComponentsRender projParameter={parameter} analysisResultId={analysisResultId} key={index} {...it} dataMap={dataMap} componentMap={componentMap} constDataMap={constDataMap}></ComponentsRender>
+                                </Col>
+                            }
+                            // and 
+                            // const show = it.depends.every(
+                            //     (d: any) => getFieldValue(d.name) === d.value
+                            // )
+                            // or 
+                            // const show = it.depends.some(
+                            //     (d: any) => getFieldValue(d.name) === d.value
+                            // )
+                            const show = checkDepends(it.depends, getFieldValue)
+                            if (!show) return null
+
                             return <Col span={it?.col ? it?.col : 24} key={index} >
-
                                 <ComponentsRender projParameter={parameter} analysisResultId={analysisResultId} key={index} {...it} dataMap={dataMap} componentMap={componentMap} constDataMap={constDataMap}></ComponentsRender>
                             </Col>
-                        }
-
-                        const show = it.depends.every(
-                            (d: any) => getFieldValue(d.name) === d.value
-                        )
-
-                        if (!show) return null
-
-                        return <Col span={it?.col ? it?.col : 24} key={index} >
-                            <ComponentsRender projParameter={parameter} analysisResultId={analysisResultId} key={index} {...it} dataMap={dataMap} componentMap={componentMap} constDataMap={constDataMap}></ComponentsRender>
-                        </Col>
-                    }}
-                </Form.Item>
-            ))}
+                        }}
+                    </Form.Item>
+                )
+            })}
         </Row>
 
 
@@ -694,6 +768,7 @@ export const CollectedSampleSelect: FC<any> = ({ label, modes = [], columns, nam
     const [sampleGrouped, setSampleGrouped] = useState<any>()
     const [options, setOptions] = useState<any>([])
     const [collectFiles, setCollectFiles] = useState<any>([])
+    const { addColumns } = useStoreForm()
     // const {  project } = useOutletContext<any>()
 
     // const [sampleGroupedOptions, setSampleGroupedOptions] = useState<any>([])
@@ -775,6 +850,7 @@ export const CollectedSampleSelect: FC<any> = ({ label, modes = [], columns, nam
                 // }
 
                 setOptions(columnsData)
+                addColumns(name, columnsData)
             }
 
         }
@@ -832,6 +908,51 @@ export const CollectedSampleSelect: FC<any> = ({ label, modes = [], columns, nam
     </>
 }
 
+
+export const CollectedColumnsSelect: FC<any> = ({ label, modes = [], columns, name, columns_rules = [], rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
+    const { columnsMap } = useStoreForm()
+    const options = columnsMap[name] ?? []
+    return <>
+
+        {/* <Form.Item label={`${label} File`} name={[name, "file"]} rules={rules}>
+            <Select options={collectFiles} ></Select>
+        </Form.Item> */}
+
+
+        {(columns && Array.isArray(columns)) && columns.map((item: any, index: any) => (
+            <div key={index}>
+                {/* {JSON.stringify()} */}
+                <Form.Item label={`${item} Columns`} name={[name, item]} rules={[{
+                    "required": columns_rules[index] ? true : false,
+                    "message": "This field cannot be empty!"
+                }]}>
+                    <Select showSearch
+                        allowClear
+                        mode={modes[index] ? "multiple" : undefined}
+                        filterOption={(input: any, option: any) =>
+                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+                        options={options}></Select>
+                </Form.Item>
+
+                {/* <Flex gap="small">
+                    {item}
+                    <Form.Item label={item} name={[name, "group", `${item}`]} noStyle >
+                        <GroupSelectButton sampleGrouped={sampleGrouped} field={[name, item]}></GroupSelectButton>
+                    </Form.Item>
+                    <Form.Item name={[name, "group_name", `${item}`]} >
+                        <Input size="small" placeholder="Optional group name"></Input>
+                    </Form.Item>
+                    <Form.Item name={[name, "color", `${item}`]} >
+                        <ColorPickerComp projParameter={projParameter} />
+                    </Form.Item>
+                </Flex> */}
+            </div>
+        ))}
+
+
+
+    </>
+}
 export const CollectedGroupSelectSampleButton: FC<any> = ({ label, modes = [], projParameter, columns, name, rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
     const [sampleGrouped, setSampleGrouped] = useState<any>()
     const [options, setOptions] = useState<any>([])
