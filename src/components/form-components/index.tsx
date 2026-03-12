@@ -204,6 +204,9 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
         Input: {
             Component: BaseTextArea,
         },
+        BaseTextArea: {
+            Component: BaseTextArea,
+        },
         BaseTextAreaNum: {
             Component: BaseTextAreaNum,
         },
