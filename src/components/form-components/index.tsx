@@ -1,11 +1,11 @@
-import { Button, Col, ColorPicker, ColorPickerProps, Divider, Flex, Form, Input, InputNumber, Row, Select, Switch, Tooltip } from "antd";
+import { Button, Col, ColorPicker, ColorPickerProps, Divider, Flex, Form, Input, InputNumber, Row, Select, Space, Switch, Tooltip } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import axios from "axios";
 import { A } from "ollama/dist/shared/ollama.d792a03f.mjs";
 import { Component, FC, useEffect, useState, memo, useMemo, useRef } from "react";
 import { useSelector } from "react-redux";
 import { data, useOutletContext } from "react-router";
-import { QuestionCircleOutlined } from "@ant-design/icons";
+import { MinusCircleOutlined, PlusOutlined, QuestionCircleOutlined } from "@ant-design/icons";
 import { useStoreForm } from "@/context/form/FormProvider";
 
 
@@ -256,8 +256,9 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
             Component: CollectedSampleSelect,
         }, CollectedColumnsSelect: {
             Component: CollectedColumnsSelect,
+        }, NestCollectedSampleSelect: {
+            Component: NestCollectedSampleSelect,
         },
-
         MetaphlanCladeSelect: {
             Component: MetaphlanCladeSelect,
         }, SelectAll: {
@@ -912,6 +913,41 @@ export const CollectedSampleSelect: FC<any> = ({ label, modes = [], columns, nam
     </>
 }
 
+
+export const NestCollectedSampleSelect: FC<any> = ({ label, modes = [], columns, name, columns_rules = [], rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
+
+    return <>
+    {name}
+        <Form.List name={name}>
+            {(fields, { add, remove }) => (
+                <>
+                    {fields.map(({ key, name, ...restField }) => (
+                        <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                            <Form.Item
+                                {...restField}
+                                name={[name, 'first']}
+                                rules={[{ required: true, message: 'Missing first name' }]}
+                            >
+                                <Input placeholder="First Name" />
+                            </Form.Item>
+                            {/* <CollectedSampleSelect></CollectedSampleSelect> */}
+                            
+                            <MinusCircleOutlined onClick={() => remove(name)} />
+                        </Space>
+                    ))}
+                    <Form.Item>
+                        <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                            Add field
+                        </Button>
+                    </Form.Item>
+                </>
+            )}
+        </Form.List>
+
+
+
+    </>
+}
 
 export const CollectedColumnsSelect: FC<any> = ({ label, modes = [], columns, name, columns_rules = [], rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
     const { columnsMap } = useStoreForm()

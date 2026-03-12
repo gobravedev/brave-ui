@@ -47,7 +47,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, callback
     // const { messageApi } = useOutletContext<any>()
     const message = useGlobalMessage()
     const { modals, openModals, closeModals } = useModals(["editParams", "moduleEdit", "createOrUpdatePipelineComponent"]);
-    const { containerURL, project } = useSelector((state: any) => state.user);
+    const { containerURL, project ,baseURL} = useSelector((state: any) => state.user);
     const [runingLoading, setRuningLoading] = useState<boolean>(false)
     const [form] = Form.useForm();
     const [rightPanel, setRightPanel] = useState<string>("editParamsPanel")
@@ -160,6 +160,30 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, callback
                     {onClose && <>
                         <Button size="small" color="blue" variant="solid" onClick={() => onClose()}>Close</Button>
                     </>}
+                    <Tooltip title={`Download Result ${analsyisResult?.analysis_name}`}>
+                        {/* <Popconfirm title={"Whether or not to download?"} onConfirm={async () => {
+                            // /analysis/download-results/{analysis_id}
+                            const res = await axios.post(`/analysis/download-results/${analysis_id}`);
+                            const url =`${baseURL}${res.data.download_url}`
+                            console.log(url)
+                            window.open(url, "_blank")
+                            // const blob = new Blob([res.data], { type: 'application/zip' });
+                        }}>
+                            <Button size="small" color="blue" variant="solid" icon={<DownloadOutlined />} >Download</Button>
+                        </Popconfirm> */}
+
+                        <Button 
+                        onClick={async ()=>{
+                            // /analysis/download-results/{analysis_id}
+                            const res = await axios.post(`/analysis/download-results/${analysis_id}`);
+                            const url =`${baseURL}${res.data.download_url}`
+                            console.log(url)
+                            window.open(url, "_blank")
+                            // const blob = new Blob([res.data], { type: 'application/zip' });
+                        }}
+                        size="small" color="blue" variant="solid" icon={<DownloadOutlined />} >Download</Button>
+
+                    </Tooltip>
                     {openPanel && <>
                         {analsyisResult && <Button size="small" color="primary" variant="solid" onClick={() =>
                             navigate(`/relation/${analsyisResult?.relation_type}/${analsyisResult?.relation_id}`)
@@ -189,11 +213,11 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, callback
                                 component_id: analsyisResult?.component_id,
                             })
                         }}>Component Code</Button>
-                        <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                             openModals("editParams", analsyisResult.analysis_id)
                         }}>
                             Edit Parameters
-                        </Button>
+                        </Button> */}
 
 
                         {analsyisResult?.job_status == "running" ?
@@ -350,10 +374,10 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, callback
                                         {
                                             label: "Parameters",
                                             value: "editParamsPanel"
-                                        },{
+                                        }, {
                                             label: "LLM",
                                             value: "llmAnalysis"
-                                        },  {
+                                        }, {
                                             label: "Description",
                                             value: "description"
                                         }

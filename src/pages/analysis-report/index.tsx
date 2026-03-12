@@ -1,8 +1,8 @@
-import { Button, Card, Col, Empty, Flex, Row, Segmented, Skeleton, Tabs, Tag, Tree, TreeDataNode, TreeProps } from "antd"
+import { Button, Card, Col, Empty, Flex, Row, Segmented, Skeleton, Tabs, Tag, Tooltip, Tree, TreeDataNode, TreeProps } from "antd"
 import axios from "axios"
 import { FC, lazy, Suspense, use, useEffect, useRef, useState } from "react"
 import { useLocation, useNavigate, useOutletContext, useParams } from "react-router"
-import { DownOutlined, RedoOutlined } from '@ant-design/icons'
+import { DownloadOutlined, DownOutlined, RedoOutlined } from '@ant-design/icons'
 import { useDispatch, useSelector } from "react-redux"
 import { setUserItem } from "@/store/userSlice"
 import { useModal } from "@/hooks/useModal"
@@ -17,7 +17,7 @@ const AnalysisResultView = lazy(() => import('@/components/analysis-result-view'
 const AnalysisReport: FC<any> = () => {
     const [loading, setLoading] = useState<boolean>(false)
     // const { project, projectObj } = useOutletContext<any>()
-    const { project, projectObj } = useSelector((state: any) => state.user);
+    const { project, projectObj,baseURL } = useSelector((state: any) => state.user);
 
     const [data, setData] = useState<any>()
     const [analysis, setAnalysis] = useState<any>()
@@ -287,7 +287,23 @@ const AnalysisReport: FC<any> = () => {
                                         value: "llm"
                                     }
                                 ]} /> */}
-                            <RedoOutlined style={{ cursor: "pointer" }} onClick={()=>loadData()} />
+
+                            <Tooltip title={`Download Project ${projectObj?.project_name}`}>
+
+
+                                <Button
+                                    onClick={async () => {
+                                        // /analysis/download-results/{analysis_id}
+                                        const res = await axios.post(`/analysis/download-project/${project}`);
+                                        const url = `${baseURL}${res.data.download_url}`
+                                        console.log(res)
+                                        window.open(url, "_blank")
+                                        // const blob = new Blob([res.data], { type: 'application/zip' });
+                                    }}
+                                    size="small" color="blue" variant="solid" icon={<DownloadOutlined />} >Download</Button>
+
+                            </Tooltip>
+                            <RedoOutlined style={{ cursor: "pointer" }} onClick={() => loadData()} />
 
                             {/* <Button size="small" color="cyan" variant="solid" onClick={loadData}>Refresh</Button> */}
                         </Flex>
