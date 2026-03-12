@@ -258,6 +258,20 @@ const InfoView: FC<any> = ({ data }) => {
 
     </div>
 }
+
+const MdView: FC<any> = ({ data }) => {
+
+    return <div >
+        {/* <Alert closable message={data} type="info" /> */}
+        <Markdown data={data}></Markdown>
+        {/* <Typography>
+            <pre style={{ margin: 0 }}>
+                {data}
+            </pre>
+        </Typography> */}
+
+    </div>
+}
 const TextView: FC<any> = ({ data }) => {
 
     return <>
@@ -434,9 +448,9 @@ const KeggMap: FC<any> = ({ data, ...rest }) => {
         {modal.visible && <Modal
             width={"80%"}
             title={<>
-            <a 
-            target="_blank"
-            href={`https://www.kegg.jp/pathway/${modal.params?.organism}${modal.params?.pathwayId}`}>{modal.params?.Description} ({modal.params?.organism}{modal.params?.pathwayId})</a>
+                <a
+                    target="_blank"
+                    href={`https://www.kegg.jp/pathway/${modal.params?.organism}${modal.params?.pathwayId}`}>{modal.params?.Description} ({modal.params?.organism}{modal.params?.pathwayId})</a>
             </>}
             footer={null}
             onCancel={closeModal}
@@ -444,7 +458,7 @@ const KeggMap: FC<any> = ({ data, ...rest }) => {
             open={modal.visible && modal.key == "KGMLMapSVG"}>
             {/* {JSON.stringify(modal.params)} */}
             <KGMLMapSVG
-                KOList={modal.params?.KO?modal.params?.KO.split("/"):[]}
+                KOList={modal.params?.KO ? modal.params?.KO.split("/") : []}
                 compound={data?.compound}
                 highlightKeys={modal.params?.geneID.split("/")}
                 pathwayId={modal.params?.pathwayId} organisms={modal.params?.organism}></KGMLMapSVG>
@@ -476,12 +490,13 @@ export const componentMap: any = {
     table: TableView,
     string: StringView,
     html: HtmlView,
+    md: MdView,
     // htmlDoc: HtmlDoc,
     json: JSONView,
     text: TextView,
     info: InfoView,
     kegg_map: KeggMap,
-    gsea_kegg_map:KeggMap,
+    gsea_kegg_map: KeggMap,
     download: Download,
     feature_list: FeatureList,
     diff: DiffSummaryCard
