@@ -375,6 +375,7 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
     // }
 
     return <>
+        {/* {JSON.stringify(formJson)} */}
         {/* {JSON.stringify(dependFields)}
         {JSON.stringify(form.getFieldsValue())}
         {JSON.stringify(dependsValue)} */}
@@ -403,7 +404,7 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
                 const dependNames = [...new Set(extractDependsNames(it.depends))]
                 return (
                     <Form.Item
-                        key={it.name}
+                        key={index}
                         noStyle
                         shouldUpdate={(prev, cur) => dependNames.some(name => prev[name] !== cur[name])
                         }

@@ -9,7 +9,7 @@ export const useStoreForm = () => {
 export const FormProvider: FC<any> = ({ children }) => {
 
     const [columnsMap, setColumnsMap] = useState<any>({})
-    const [data, setData] = useState<any>()
+    // const [data, setData] = useState<any>()
 
     const addColumns = (key: string, value: any) => {
         setColumnsMap((prev: any) => ({
@@ -46,8 +46,8 @@ export const FormProvider: FC<any> = ({ children }) => {
             value={{
                 columnsMap,
                 addColumns,
-                data,
-                setData
+                // data,
+                // setData
             }}
         >
             {children}
