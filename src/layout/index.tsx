@@ -219,74 +219,36 @@ const App: React.FC = () => {
         //     label: "检测样本"
         // }, 
         {
-            key: `/apps`,
+
+            key: `/tools-card`,
             label: {
-                zh_CN: "应用",
-                en_US: "Apps"
+                zh_CN: "工具",
+                en_US: "Tools"
             },
             children: [
-
-
                 {
-
-                    key: `/workflow-card`,
-                    label: {
-                        zh_CN: "工作流",
-                        en_US: "Workflows"
-                    },
-                    children: [
-                        {
-                            key: `/relation/workflow`,
-                            hidden: true
-                        }
-                    ]
-                }, {
-
-                    key: `/tools-card`,
-                    label: {
-                        zh_CN: "工具",
-                        en_US: "Tools"
-                    },
-                    children: [
-                        {
-                            key: `/relation/tools`,
-                            hidden: true
-                        }
-                    ]
-                }, {
-
-                    key: `/componentsV2/file`,
-                    label: {
-                        zh_CN: "文件",
-                        en_US: "Files"
-                    }
-
-                }, {
-
-                    key: `/componentsV2/script`,
-                    label: {
-                        zh_CN: "脚本",
-                        en_US: "Scripts"
-                    }
-                }, {
-                    key: `/container-page`,
-                    label: {
-                        zh_CN: "容器管理",
-                        en_US: "Container"
-                    },
-                },{
-                    key: `/interactive-tools`,
-                    label: {
-                        zh_CN: "交互工具",
-                        en_US: "Interactive Tools"
-                    }
+                    key: `/relation/tools`,
+                    hidden: true
                 }
-
-
-
-
             ]
         }, {
+
+            key: `/componentsV2/script`,
+            label: {
+                zh_CN: "脚本",
+                en_US: "Scripts"
+            }
+        },
+        // {
+        //     key: `/apps`,
+        //     label: {
+        //         zh_CN: "应用",
+        //         en_US: "Apps"
+        //     },
+        //     children: [
+        //     ]
+        // },
+        {
             key: `/files`,
             label: {
                 zh_CN: "文件",
@@ -323,7 +285,41 @@ const App: React.FC = () => {
                 en_US: "More"
             },
             children: [
+                // {
+
+                //     key: `/workflow-card`,
+                //     label: {
+                //         zh_CN: "工作流",
+                //         en_US: "Workflows"
+                //     },
+                //     children: [
+                //         {
+                //             key: `/relation/workflow`,
+                //             hidden: true
+                //         }
+                //     ]
+                // }, 
                 {
+
+                    key: `/componentsV2/file`,
+                    label: {
+                        zh_CN: "文件",
+                        en_US: "Files"
+                    }
+
+                }, {
+                    key: `/container-page`,
+                    label: {
+                        zh_CN: "容器管理",
+                        en_US: "Container"
+                    },
+                }, {
+                    key: `/interactive-tools`,
+                    label: {
+                        zh_CN: "交互工具",
+                        en_US: "Interactive Tools"
+                    }
+                },{
                     key: `/tool-kit`,
                     label: {
                         zh_CN: "工具集",
@@ -351,12 +347,12 @@ const App: React.FC = () => {
                         en_US: "Literature"
                     }
                 }, {
-                    key:"/analysis-report-old",
+                    key: "/analysis-report-old",
                     label: {
-                        zh_CN: "分析报告(old)", 
+                        zh_CN: "分析报告(old)",
                         en_US: "Report(old)"
                     }
-                },{
+                }, {
                     key: `/file-card`,
                     label: {
                         zh_CN: "文件(deprecated)",

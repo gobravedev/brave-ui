@@ -20,6 +20,7 @@ import { base } from "@faker-js/faker"
 import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 import { add } from "@dnd-kit/utilities"
 import { useStickyTop } from "@/hooks/useStickyTop"
+import ToolsLLMRender from "./tools-llm-render"
 const PipelineComponentsCard: FC<any> = ({ params, map }) => {
     const { Search } = Input;
     // const [searchText, setSearchText] = useState("");
@@ -145,7 +146,7 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
         <Row
             ref={containerRef}
             gutter={[isSticky ? 16 : 0, 16]}>
-            <Col lg={21} sm={21} xs={24}
+            <Col lg={18} sm={18} xs={24}
                 style={{
 
                     display: "flex",
@@ -205,6 +206,43 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
                         />
                     </>}
                 >
+                    <div style={{marginBottom:"1rem"}}>
+                        {categoryLoading ? (
+                        <Skeleton active paragraph={{ rows: 5 }} />
+                    ) : (
+                        <List
+                            dataSource={category}
+                            split={false}
+                            renderItem={(item) => (
+                                <Tag  color={activeCategory === item ? "blue" : "default"} style={{ cursor: "pointer" }} onClick={() => setActiveCategory(item)}>
+                                    {item}
+                                </Tag>
+                                // <List.Item
+                                //     style={{
+                                //         padding: "6px 0",
+                                //         border: "none",
+                                //     }}
+                                // >
+                                //     <Button
+                                //         block
+                                //         type={activeCategory === item ? "primary" : "default"}
+                                //         onClick={() => setActiveCategory(item)}
+                                //         style={{
+                                //             textAlign: "left",
+                                //             borderRadius: "8px",
+                                //             transition: "all 0.2s",
+                                //         }}
+                                //         className="hover:shadow-md"
+                                //     >
+                                //         {item}
+                                        
+                                //     </Button>
+                                // </List.Item>
+                            )}
+                        />
+                    )}
+                    </div>
+
                     <Spin spinning={loading}>
                         {Array.isArray(pipelineComponents) && pipelineComponents.length != 0 ? <Row gutter={16} style={{ position: "relative" }}>
 
@@ -365,7 +403,7 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
                     </Flex>}
                 </Card>
             </Col>
-            <Col lg={3} sm={3} xs={24}
+            <Col lg={6} sm={6} xs={24}
                 style={isSticky ? {
                     overflow: "hidden",
                     // marginTop: "1rem",
@@ -395,53 +433,13 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
                             overflowY: "auto"
                         }
                     }}
-                    extra={<RedoOutlined style={{ cursor: "pointer" }} onClick={() => loadCateory()} />}
+                    // extra={<RedoOutlined style={{ cursor: "pointer" }} onClick={() => loadCateory()} />}
                     size="small"
                     loading={categoryLoading}
-                    title={<span style={{ fontWeight: 600 }}>Category</span>}
+                    title={<span style={{ fontWeight: 600 }}>LLM</span>}
 
                 >
-                    {categoryLoading ? (
-                        <Skeleton active paragraph={{ rows: 5 }} />
-                    ) : (
-                        <List
-                            dataSource={category}
-                            split={false}
-                            renderItem={(item) => (
-                                <List.Item
-                                    style={{
-                                        padding: "6px 0",
-                                        border: "none",
-                                    }}
-                                >
-                                    <Button
-                                        block
-                                        type={activeCategory === item ? "primary" : "default"}
-                                        onClick={() => setActiveCategory(item)}
-                                        style={{
-                                            textAlign: "left",
-                                            borderRadius: "8px",
-                                            transition: "all 0.2s",
-                                        }}
-                                        className="hover:shadow-md"
-                                    >
-                                        {item}
-                                        {/* {activeCategory === item && (
-                                            <Tag
-                                                color="blue"
-                                                style={{
-                                                    float: "right",
-                                                    marginTop: "2px",
-                                                }}
-                                            >
-                                                ✓
-                                            </Tag>
-                                        )} */}
-                                    </Button>
-                                </List.Item>
-                            )}
-                        />
-                    )}
+                    <ToolsLLMRender  view={"llm"}></ToolsLLMRender>
                 </Card>
             </Col>
         </Row>

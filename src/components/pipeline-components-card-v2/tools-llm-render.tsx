@@ -51,7 +51,7 @@ const viewMapping: {
 
     ];
 
-const DashboardRender: FC<any> = ({ view, ...rest }) => {
+const ToolsLLMRender: FC<any> = ({ view, ...rest }) => {
     if (!view) return null
     const item = viewMapping.find((v) => v.key === view);
     if (!item) return <div>Unknow component {view}</div>;
@@ -63,4 +63,4 @@ const DashboardRender: FC<any> = ({ view, ...rest }) => {
     </Suspense>
 }
 
-export default memo(DashboardRender);
+export default memo(ToolsLLMRender);
