@@ -361,7 +361,7 @@ const AnalysisList = forwardRef<any, any>(({
 
                     {/* /analysis/stop-analysis/{analysis_id} */}
 
-                    {record.image_status == "exist" ? <>
+                    {/* {record.image_status == "exist" ? <>
                         {(record.job_status == "running" || record.job_status == "stopping") ?
                             <>
                                 <Popconfirm title={"Whether or not to stop?"} onConfirm={() => {
@@ -410,11 +410,11 @@ const AnalysisList = forwardRef<any, any>(({
                             </Button>
                         </Popconfirm>
 
-                    </>}
+                    </>} */}
 
 
 
-                    {record.image_status == "exist" && <>
+                    {/* {record.image_status == "exist" && <>
                         {(record.server_status == "running" || record.server_status == "stopping") ?
                             <>
 
@@ -451,7 +451,7 @@ const AnalysisList = forwardRef<any, any>(({
                             </>
                         }
 
-                    </>}
+                    </>} */}
 
                     {/* {editParams && <Button size="small" color="cyan" variant="solid" onClick={() => editParams(record)}>编辑参数</Button>} */}
                     {

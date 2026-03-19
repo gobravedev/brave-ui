@@ -47,7 +47,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, callback
     // const { messageApi } = useOutletContext<any>()
     const message = useGlobalMessage()
     const { modals, openModals, closeModals } = useModals(["editParams", "moduleEdit", "createOrUpdatePipelineComponent"]);
-    const { containerURL, project ,baseURL} = useSelector((state: any) => state.user);
+    const { containerURL, project, baseURL } = useSelector((state: any) => state.user);
     const [runingLoading, setRuningLoading] = useState<boolean>(false)
     const [form] = Form.useForm();
     const [rightPanel, setRightPanel] = useState<string>("editParamsPanel")
@@ -172,16 +172,16 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, callback
                             <Button size="small" color="blue" variant="solid" icon={<DownloadOutlined />} >Download</Button>
                         </Popconfirm> */}
 
-                        <Button 
-                        onClick={async ()=>{
-                            // /analysis/download-results/{analysis_id}
-                            const res = await axios.post(`/analysis/download-results/${analysis_id}`);
-                            const url =`${baseURL}${res.data.download_url}`
-                            console.log(url)
-                            window.open(url, "_blank")
-                            // const blob = new Blob([res.data], { type: 'application/zip' });
-                        }}
-                        size="small" color="blue" variant="solid" icon={<DownloadOutlined />} >Download</Button>
+                        <Button
+                            onClick={async () => {
+                                // /analysis/download-results/{analysis_id}
+                                const res = await axios.post(`/analysis/download-results/${analysis_id}`);
+                                const url = `${baseURL}${res.data.download_url}`
+                                console.log(url)
+                                window.open(url, "_blank")
+                                // const blob = new Blob([res.data], { type: 'application/zip' });
+                            }}
+                            size="small" color="blue" variant="solid" icon={<DownloadOutlined />} >Download</Button>
 
                     </Tooltip>
                     {openPanel && <>
@@ -218,37 +218,37 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, callback
                         }}>
                             Edit Parameters
                         </Button> */}
-
-
-                        {analsyisResult?.job_status == "running" ?
+                        {analsyisResult?.image_status == "exist" ?
                             <>
-                                <Popconfirm title={"Whether or not to stop?"} onConfirm={async () => {
-                                    await stopAnalysisApi(analsyisResult.analysis_id, "job")
-                                    message.success("Stop Success")
+                                {analsyisResult?.job_status == "running" ?
+                                    <>
+                                        <Popconfirm title={"Whether or not to stop?"} onConfirm={async () => {
+                                            await stopAnalysisApi(analsyisResult.analysis_id, "job")
+                                            message.success("Stop Success")
 
-                                }}>
-                                    <Button size="small" color="red" variant="solid">
-                                        Stop
-                                    </Button>
-                                </Popconfirm>
+                                        }}>
+                                            <Button size="small" color="red" variant="solid">
+                                                Stop
+                                            </Button>
+                                        </Popconfirm>
 
-                            </> : <>
-                                <Popconfirm title={"Whether or not to run?"} onConfirm={async () => {
-                                    await runAnalysisApi(analsyisResult.analysis_id, "job")
-                                    message.success("run successfully")
+                                    </> : <>
+                                        <Popconfirm title={"Whether or not to run?"} onConfirm={async () => {
+                                            await runAnalysisApi(analsyisResult.analysis_id, "job")
+                                            message.success("run successfully")
 
 
-                                }}>
-                                    <Button size="small" color="cyan" variant="solid">
-                                        {analsyisResult.job_status == "created" ? "Run" : "Re-Run"}
-                                    </Button>
-                                </Popconfirm>
+                                        }}>
+                                            <Button size="small" color="cyan" variant="solid">
+                                                {analsyisResult.job_status == "created" ? "Run" : "Re-Run"}
+                                            </Button>
+                                        </Popconfirm>
 
-                            </>
-                        }
-                        {analsyisResult?.server_status == "running" ?
-                            <>
-                                {/* 
+                                    </>
+                                }
+                                {analsyisResult?.server_status == "running" ?
+                                    <>
+                                        {/* 
                                 <Tooltip title={<>
                                     {`${containerURL}/container/${analsyisResult.analysis_id}/`}
                                 </>}>
@@ -258,33 +258,49 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, callback
                                         window.open(`${containerURL}/container/${analsyisResult.analysis_id}/`, "_blank")
                                     }}>Open URL</Button>
                                 </Tooltip> */}
-                                <Popconfirm title={"Whether or not to stop?"} onConfirm={async () => {
-                                    // stopAnalysis(record, "server")
-                                    await stopAnalysisApi(analsyisResult.analysis_id, "server")
+                                        <Popconfirm title={"Whether or not to stop?"} onConfirm={async () => {
+                                            // stopAnalysis(record, "server")
+                                            await stopAnalysisApi(analsyisResult.analysis_id, "server")
+                                        }}>
+                                            <Button size="small" color="red" variant="solid">
+                                                Stop Server
+                                            </Button>
+                                        </Popconfirm>
+                                        <Tooltip title={<>
+                                            {`${containerURL}/container/server-${analsyisResult.analysis_id}/`}
+                                        </>}>
+                                            <ExportOutlined style={{ cursor: "pointer" }} onClick={() => {
+
+                                                window.open(`${containerURL}/container/server-${analsyisResult.analysis_id}/`, "_blank")
+                                            }} />
+                                        </Tooltip>
+
+
+                                    </> : <>
+                                        <Popconfirm title="Whether to start the server?" onConfirm={async () => {
+                                            await runAnalysisApi(analsyisResult.analysis_id, "server")
+                                        }}>
+                                            <Button size="small" color="cyan" variant="solid">Run Server</Button>
+                                        </Popconfirm>
+
+                                    </>
+                                }
+                            </>
+
+                            :
+                            <>
+                                <Popconfirm title="Pull?" onConfirm={async () => {
+                                    await axios.post(`/container/pull-image/${analsyisResult.container_id}`)
+                                    loadData(analsyisResult.analysis_id)
+
                                 }}>
-                                    <Button size="small" color="red" variant="solid">
-                                        Stop Server
+                                    <Button size="small" color="cyan" variant="solid"  >
+                                        {analsyisResult.image_status == "pulling" ? "pulling" : "Pull"}
                                     </Button>
                                 </Popconfirm>
-                                <Tooltip title={<>
-                                    {`${containerURL}/container/server-${analsyisResult.analysis_id}/`}
-                                </>}>
-                                    <ExportOutlined style={{ cursor: "pointer" }} onClick={() => {
-
-                                        window.open(`${containerURL}/container/server-${analsyisResult.analysis_id}/`, "_blank")
-                                    }} />
-                                </Tooltip>
+                            </>}
 
 
-                            </> : <>
-                                <Popconfirm title="Whether to start the server?" onConfirm={async () => {
-                                    await runAnalysisApi(analsyisResult.analysis_id, "server")
-                                }}>
-                                    <Button size="small" color="cyan" variant="solid">Run Server</Button>
-                                </Popconfirm>
-
-                            </>
-                        }
                         <Popconfirm title={analsyisResult?.is_report ? "Whether to cancel the report?" : "Reported or not?"} onConfirm={async () => {
                             await axios.post(`/analysis/update-report/${analsyisResult?.analysis_id}`)
                             message.success("operate successfully!")
@@ -338,6 +354,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, callback
                 dew<br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
 
             </div> */}
+            {/* {JSON.stringify(analsyisResult)} */}
             {/* {analysis_id} */}
             <Spin spinning={loading} tip="loading..." style={{ minHeight: "5rem", }}>
 
