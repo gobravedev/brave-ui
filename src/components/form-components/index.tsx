@@ -771,11 +771,17 @@ export const CollectedGroupSelectSampleButton2: FC<any> = ({ label, name, rules,
 
     </>
 }
-export const CollectedSampleSelect: FC<any> = ({ label, modes = [], columns, name, columns_rules = [], rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
+export const CollectedSampleSelect: FC<any> = ({ label, modes = [], columns, name:name_, columns_rules = [], rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
     const [sampleGrouped, setSampleGrouped] = useState<any>()
     const [options, setOptions] = useState<any>([])
     const [collectFiles, setCollectFiles] = useState<any>([])
     const { addColumns } = useStoreForm()
+    let name = name_
+    if(name_ instanceof Array && name_.length > 1){
+        name = name_[1]
+    }else{
+        name_ = [name_]
+    }
     // const {  project } = useOutletContext<any>()
 
     // const [sampleGroupedOptions, setSampleGroupedOptions] = useState<any>([])
@@ -790,7 +796,8 @@ export const CollectedSampleSelect: FC<any> = ({ label, modes = [], columns, nam
     }, form);
 
     const groupField = Form.useWatch(group, form);
-    const selectCollectFile = Form.useWatch([name, "file"], form);
+    
+    const selectCollectFile = Form.useWatch([...name_, "file"], form);
 
 
     // const calculateGroup = (sampleGroup: any, groupField: any) => {
@@ -879,6 +886,7 @@ export const CollectedSampleSelect: FC<any> = ({ label, modes = [], columns, nam
             <Select options={collectFiles} ></Select>
         </Form.Item>
 
+        {/* {JSON.stringify(name)} */}
 
         {(columns && Array.isArray(columns)) && columns.map((item: any, index: any) => (
             <div key={index}>
@@ -916,26 +924,28 @@ export const CollectedSampleSelect: FC<any> = ({ label, modes = [], columns, nam
 }
 
 
-export const NestCollectedSampleSelect: FC<any> = ({ label, modes = [], columns, name, columns_rules = [], rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
+export const NestCollectedSampleSelect: FC<any> = ({ name, ...rest }) => {
 
     return <>
-        {name}
+        {rest?.label}
         <Form.List name={name}>
             {(fields, { add, remove }) => (
                 <>
-                    {fields.map(({ key, name, ...restField }) => (
-                        <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
-                            <Form.Item
-                                {...restField}
-                                name={[name, 'first']}
-                                rules={[{ required: true, message: 'Missing first name' }]}
-                            >
-                                <Input placeholder="First Name" />
-                            </Form.Item>
-                            {/* <CollectedSampleSelect></CollectedSampleSelect> */}
+                    {fields.map(({ key, name: listIndex, ...restField }) => (
+                        <div key={key} style={{  display: 'flex', marginBottom: 4, width: '100%' }} >
 
-                            <MinusCircleOutlined onClick={() => remove(name)} />
-                        </Space>
+                            {/* <CollectedSampleSelect name={} {...rest}></CollectedSampleSelect> */}
+                            {/* {JSON.stringify(listIndex)} */}
+                            <div    style={{ flex: 1, marginBottom: 0, marginRight: 8 }}>
+                                 <CollectedSampleSelect
+
+                                name={[name,listIndex]}  //⭐ 把动态 index 传给子组件
+                                {...rest}
+                            />
+
+                            </div>
+                            <MinusCircleOutlined onClick={() => remove(listIndex)} />
+                        </div>
                     ))}
                     <Form.Item>
                         <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
@@ -954,7 +964,7 @@ export const NestCollectedColumnsSelect: FC<any> = ({ label, modes = [], columns
     const { columnsMap } = useStoreForm()
     const options = columnsMap[name] ?? []
     return <>
-        <div style={{marginBottom:8}}>{label}</div>
+        <div style={{ marginBottom: 8 }}>{label}</div>
         {/* {JSON.stringify(options)} */}
         <Form.List name={[name, "columns_attribute"]} >
             {(fields, { add, remove }) => (
@@ -967,14 +977,14 @@ export const NestCollectedColumnsSelect: FC<any> = ({ label, modes = [], columns
                                 style={{ flex: 1, marginBottom: 0, marginRight: 8 }}
                                 rules={[{ required: true, message: 'Missing column' }]}
                             >
-                                    <Select showSearch
-                                        allowClear
-                                        filterOption={(input: any, option: any) =>
-                                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
-                                        options={options}></Select>
-                                    
+                                <Select showSearch
+                                    allowClear
+                                    filterOption={(input: any, option: any) =>
+                                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+                                    options={options}></Select>
+
                             </Form.Item>
-                             <Form.Item
+                            <Form.Item
                                 {...restField}
                                 name={[name, 'value']}
                                 style={{ flex: 1, marginBottom: 0, marginRight: 8 }}
