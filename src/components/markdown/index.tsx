@@ -14,7 +14,7 @@ const Markdown: FC<any> = ({ data }) => {
   const parsedData = useMemo(() => {
     if (!data || typeof data !== 'string') return data
     return data.replace(/@report:([A-Za-z0-9-]+)/g, (_match, key) => {
-      return `[点击查看](/#/analysis-report?project=${project}&key=${key})`
+      return `[点击查看](#/analysis-report?project=${project}&key=${key})`
     })
   }, [data, baseURL, project])
 
