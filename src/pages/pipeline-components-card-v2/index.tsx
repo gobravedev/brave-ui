@@ -3,7 +3,7 @@ import Item from "antd/es/list/Item"
 import { FC, use, useEffect, useMemo, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate, useOutletContext, useParams } from "react-router"
-import { ApartmentOutlined, CopyOutlined, DeleteOutlined, DownloadOutlined, EditOutlined, RedoOutlined } from '@ant-design/icons';
+import { ApartmentOutlined, CopyOutlined, DeleteOutlined, DownloadOutlined, EditOutlined, RedoOutlined, ReloadOutlined } from '@ant-design/icons';
 
 import Meta from "antd/es/card/Meta"
 import { colors } from '@/utils/utils'
@@ -13,8 +13,8 @@ import axios from "axios"
 import { useModal } from "@/hooks/useModal"
 import { usePagination } from "@/hooks/usePagination"
 import path from "path"
-import { CreateOrUpdateNamespace, InstallNamespace } from "../namespace-operature"
-import DependComponent from "../depend-component"
+import { CreateOrUpdateNamespace, InstallNamespace } from "../../components/namespace-operature"
+import DependComponent from "../../components/depend-component"
 import "./index.css"
 import { base } from "@faker-js/faker"
 import { useGlobalMessage } from "@/hooks/useGlobalMessage"
@@ -31,7 +31,26 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
     const [activeCategory, setActiveCategory] = useState<string | null>("all");
     const { ref: containerRef, top, isSticky } = useStickyTop(576);
 
+    // "action": "create_analysis_tools",
+    // "target": "analysis_tools_card",
+    // "value":"",
+    // "message": f"分析工具{name}创建成功"
+    const sseData = useSelector((state: any) => state.global.sseData)
+    useEffect(() => {
+        // debugger
+        if (sseData && sseData?.action && sseData?.target == "analysis_tools_card") {
+            switch (sseData.action) {
+                case "create_analysis_tools":
+                    reload()
+                    messageApi.success(sseData?.message || "Component relation updated!")
+                    break;
+                case "update_component_relation":
+                case "delete_component_relation":
+                
+            }
+        }
 
+    }, [sseData])
     // const [pipelineComponents, setPipelineComponents] = useState<any>([])
     const { relation_type } = params
     // const params = {relation_type:"tools"}
@@ -192,7 +211,7 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
                             {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                     openModal("modalC")
                 }}>Install namespace</Button> */}
-                            <Button size="small" color="primary" variant="solid" onClick={reload}>Refresh</Button>
+                            <Button icon={<ReloadOutlined />} size="small" color="primary" variant="solid" onClick={reload}>Refresh</Button>
                         </Flex>
                     </>}
                     title={<>
@@ -206,41 +225,41 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
                         />
                     </>}
                 >
-                    <div style={{marginBottom:"1rem"}}>
+                    <div style={{ marginBottom: "1rem" }}>
                         {categoryLoading ? (
-                        <Skeleton active paragraph={{ rows: 5 }} />
-                    ) : (
-                        <List
-                            dataSource={category}
-                            split={false}
-                            renderItem={(item) => (
-                                <Tag  color={activeCategory === item ? "blue" : "default"} style={{ cursor: "pointer" }} onClick={() => setActiveCategory(item)}>
-                                    {item}
-                                </Tag>
-                                // <List.Item
-                                //     style={{
-                                //         padding: "6px 0",
-                                //         border: "none",
-                                //     }}
-                                // >
-                                //     <Button
-                                //         block
-                                //         type={activeCategory === item ? "primary" : "default"}
-                                //         onClick={() => setActiveCategory(item)}
-                                //         style={{
-                                //             textAlign: "left",
-                                //             borderRadius: "8px",
-                                //             transition: "all 0.2s",
-                                //         }}
-                                //         className="hover:shadow-md"
-                                //     >
-                                //         {item}
-                                        
-                                //     </Button>
-                                // </List.Item>
-                            )}
-                        />
-                    )}
+                            <Skeleton active paragraph={{ rows: 5 }} />
+                        ) : (
+                            <List
+                                dataSource={category}
+                                split={false}
+                                renderItem={(item) => (
+                                    <Tag color={activeCategory === item ? "blue" : "default"} style={{ cursor: "pointer" }} onClick={() => setActiveCategory(item)}>
+                                        {item}
+                                    </Tag>
+                                    // <List.Item
+                                    //     style={{
+                                    //         padding: "6px 0",
+                                    //         border: "none",
+                                    //     }}
+                                    // >
+                                    //     <Button
+                                    //         block
+                                    //         type={activeCategory === item ? "primary" : "default"}
+                                    //         onClick={() => setActiveCategory(item)}
+                                    //         style={{
+                                    //             textAlign: "left",
+                                    //             borderRadius: "8px",
+                                    //             transition: "all 0.2s",
+                                    //         }}
+                                    //         className="hover:shadow-md"
+                                    //     >
+                                    //         {item}
+
+                                    //     </Button>
+                                    // </List.Item>
+                                )}
+                            />
+                        )}
                     </div>
 
                     <Spin spinning={loading}>
@@ -439,7 +458,7 @@ const PipelineComponentsCard: FC<any> = ({ params, map }) => {
                     title={<span style={{ fontWeight: 600 }}>LLM</span>}
 
                 >
-                    <ToolsLLMRender  view={"llm"}></ToolsLLMRender>
+                    <ToolsLLMRender view={"llm"}></ToolsLLMRender>
                 </Card>
             </Col>
         </Row>

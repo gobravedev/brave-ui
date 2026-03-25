@@ -58,7 +58,7 @@ const Script = lazy(() => import('@/pages/pipeline-components/script'));
 const Pipeline = lazy(() => import('@/pages/pipeline-components'));
 
 const ComponentsRelation = lazy(() => import('@/pages/components-relation'));
-const ComponentsRelationCard = lazy(() => import('@/components/pipeline-components-card-v2'));
+const ComponentsRelationCard = lazy(() => import('@/pages/pipeline-components-card-v2'));
 const Components = lazy(() => import('@/pages/components-relation/components'));
 
 const PipelineComponentsCard = lazy(() => import('@/components/pipeline-components-card'));
@@ -77,6 +77,7 @@ const DigitalTwins = lazy(() => import("@/pages/digital-twins"))
 const ContainerPage = lazy(() => import('@/pages/container'));
 const Files = lazy(() => import('@/pages/files'));
 const InteractiveTools = lazy(() => import('@/pages/interactive-tools'));
+const ToolsPage = lazy(() => import('@/pages/tools-page'))
 import axios from "axios";
 import { Skeleton } from "antd";
 import { useDispatch } from "react-redux";
@@ -116,7 +117,14 @@ if (appType == "index") {
         },{
             path: "/analysis-report-old",
             element: <AnalysisReportOld />
+        },{
+            path: "/c/:component_type",
+            element: <ToolsPage />
         },
+        {
+            path: "/c/:component_type/:relation_id",
+            element: <ToolsPage />
+        }, 
         {
             path: "/pipeline-card",
             element: <PipelineComponentsCard

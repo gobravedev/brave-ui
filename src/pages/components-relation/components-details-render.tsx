@@ -19,6 +19,8 @@ const ScriptCode = lazy(()=>import("./components/script-code"))
 const ComponentStructure = lazy(()=>import("./components/component-structure"))
 const ComponentScript = lazy(()=>import("./components/component-script"))
 const PreviewRelationExample = lazy(() => import('./components/preview-example'))
+const ScriptView = lazy(() => import('./components/script-view'))
+const FileView = lazy(() => import('./components/file-view'))
 const viewMapping: {
     key: string;
     label: string;
@@ -39,6 +41,9 @@ const viewMapping: {
         { key: "llmFile", label: "llmFile", component: LLMFile },
         { key: "llmTools", label: "llmTools", component: LLMTools },
         { key: "llmScript", label: "llmScript", component: LLMScript },
+        
+        {key:"scriptView", label:"scriptView", component: ScriptView},
+        {key:"fileView", label:"fileView", component: FileView},
 
         { key: "scriptDesc", label: "scriptDesc", component: ScriptDesc },
         { key: "scriptCode", label: "scriptCode", component: ScriptCode },

@@ -219,26 +219,13 @@ const App: React.FC = () => {
         //     label: "检测样本"
         // }, 
         {
-
-            key: `/tools-card`,
+            key: "/c/tools",
             label: {
                 zh_CN: "工具",
                 en_US: "Tools"
-            },
-            children: [
-                {
-                    key: `/relation/tools`,
-                    hidden: true
-                }
-            ]
-        }, {
-
-            key: `/componentsV2/script`,
-            label: {
-                zh_CN: "脚本",
-                en_US: "Scripts"
             }
         },
+
         // {
         //     key: `/apps`,
         //     label: {
@@ -319,7 +306,7 @@ const App: React.FC = () => {
                         zh_CN: "交互工具",
                         en_US: "Interactive Tools"
                     }
-                },{
+                }, {
                     key: `/tool-kit`,
                     label: {
                         zh_CN: "工具集",
@@ -346,6 +333,26 @@ const App: React.FC = () => {
                         zh_CN: "文献资料",
                         en_US: "Literature"
                     }
+                }, {
+
+                    key: `/componentsV2/script`,
+                    label: {
+                        zh_CN: "脚本",
+                        en_US: "Scripts"
+                    }
+                }, {
+
+                    key: `/tools-card`,
+                    label: {
+                        zh_CN: "工具-old",
+                        en_US: "Tools-old"
+                    },
+                    children: [
+                        {
+                            key: `/relation/tools`,
+                            hidden: true
+                        }
+                    ]
                 }, {
                     key: "/analysis-report-old",
                     label: {
