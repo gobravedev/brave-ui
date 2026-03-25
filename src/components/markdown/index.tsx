@@ -1,4 +1,4 @@
-import { FC } from "react"
+import { FC, useMemo } from "react"
 import { Image } from "antd";
 
 import ReactMarkdown from 'react-markdown'
@@ -10,10 +10,17 @@ import { useSelector } from "react-redux";
 
 const Markdown: FC<any> = ({ data }) => {
 
-  const { baseURL } = useSelector((state: any) => state.user) 
+  const { baseURL,project } = useSelector((state: any) => state.user) 
+  const parsedData = useMemo(() => {
+    if (!data || typeof data !== 'string') return data
+    return data.replace(/@report:([A-Za-z0-9-]+)/g, (_match, key) => {
+      return `[点击查看](/#/analysis-report?project=${project}&key=${key})`
+    })
+  }, [data, baseURL, project])
+
   return <>
     <ReactMarkdown
-      children={data}
+      children={parsedData}
       rehypePlugins={[rehypeKatex]}
       remarkPlugins={[remarkGfm, remarkMath]}
       components={{

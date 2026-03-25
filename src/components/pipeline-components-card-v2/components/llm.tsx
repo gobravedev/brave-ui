@@ -8,7 +8,7 @@ import { MonacoEditor } from "@/components/react-monaco-editor";
 const LLM: FC<any> = ({ }) => {
 
     return <>
-        <AI biz_type={"file"} biz_id={"dashboard"}></AI>
+        <AI biz_type={"file"} biz_id={"analysis_tools"}></AI>
     </>
 
 }
