@@ -5,17 +5,21 @@ import globalReducer from './globalSlice'
 import graphSlice from './graphSlice'
 import userSlice from './userSlice'
 import axios from 'axios'
+import uiReducer from './ui'
 const store = configureStore({
   reducer: {
     menu: menuReducer,
     global: globalReducer,
     context: contextReducer,
     graph: graphSlice,
-    user: userSlice
+    user: userSlice,
+    ui: uiReducer
   },
 })
 
 export default store
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
 
 store.subscribe(() => {
   const currentBaseURL = store.getState().user.baseURL;

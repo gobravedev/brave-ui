@@ -10,7 +10,10 @@ import { setupGlobalMessage, useGlobalMessage } from "./hooks/useGlobalMessage";
 import { setupGlobalNotification } from "./hooks/useGlobalNotification";
 import axios from "axios";
 import { getPathname } from "./utils/utils";
+import { registerLLMActions } from "./llm/registerHandlers";
+import { SideViewProvider } from "./context/side/SideViewContext";
 
+registerLLMActions();
 const App: FC<any> = () => {
   const { locale, t } = useI18n()
   const antdLocale = locale === 'zh_CN' ? zhCN : enUS
@@ -19,7 +22,7 @@ const App: FC<any> = () => {
   const notificationHolder = setupGlobalNotification()
 
   const message = useGlobalMessage();
-  
+
   const baseURL = localStorage.getItem('baseURL') || getPathname()
   axios.defaults.baseURL = `${baseURL}/brave-api`;
   const authorization = localStorage.getItem('authorization')
@@ -86,7 +89,8 @@ const App: FC<any> = () => {
       }}
       locale={antdLocale}>
       <HashRouter>
-        <RenderRouter></RenderRouter>
+          <RenderRouter></RenderRouter>
+
       </HashRouter>
 
     </ConfigProvider>

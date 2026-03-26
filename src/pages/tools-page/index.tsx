@@ -1,7 +1,7 @@
 import { useStickyTop } from "@/hooks/useStickyTop";
 import { Button, Card, Col, Row, Segmented } from "antd";
 import { FC, useState } from "react";
-import ComponentRender from "./component-render";
+import ComponentRender from "../../layout/component-render";
 import { useParams } from "react-router";
 
 type LLMArgs = {

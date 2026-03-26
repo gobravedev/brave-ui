@@ -34,7 +34,7 @@ import ComponentsDetailsRender from "./components-details-render"
 import { AppstoreOutlined, CloseOutlined, DeleteColumnOutlined, DeleteOutlined, DownOutlined, PlusOutlined, QuestionCircleOutlined, RedoOutlined } from '@ant-design/icons'
 import { AI } from '@/components/chat'
 
-const Pipeline: FC<any> = ({relation_type, relation_id, navigateView}) => {
+const Pipeline: FC<any> = ({}) => {
 
     // const location = useLocation()
     // const queryParams = new URLSearchParams(location.search);
@@ -42,7 +42,8 @@ const Pipeline: FC<any> = ({relation_type, relation_id, navigateView}) => {
     // debugger
 
     console.log("Pipeline")
-    // const { relation_type, relation_id } = useParams()
+    const {  relation_id } = useParams()
+    const relation_type = "tools"
     const [leftPanel, setLeftPanel] = useState<any>(relation_type)
     const component_type = ""
     // console.log(pipelineId)
@@ -469,7 +470,7 @@ const Pipeline: FC<any> = ({relation_type, relation_id, navigateView}) => {
 
                     <Button size="small" color="cyan" variant="solid" onClick={loadData}>Refresh</Button>
 
-                    <Button size="small" color="primary" variant="solid" onClick={() => navigateView("tools")}>Back</Button>
+                    <Button size="small" color="primary" variant="solid" onClick={() => navigate("/c/tools")}>Back</Button>
                 </Space>
                 {/* <Flex gap="small" wrap>
                                

@@ -3,10 +3,12 @@ import { FC, lazy, memo, Suspense } from 'react';
 
 
 const LLM = lazy(() => import("./components/llm"));
-const ToolsCard = lazy(() => import("../pipeline-components-card-v2/index-component"));
-const ToolsDetail = lazy(() => import("../components-relation/index-component"));
+const LLMCard = lazy(() => import("./components/llm-card"));
+const ToolsCard = lazy(() => import("../pages/pipeline-components-card-v2/index-component"));
+const ToolsDetail = lazy(() => import("../pages/components-relation/index-component"));
 const Md = lazy(() => import("./components/md"));
-const ComponentsV3 = lazy(() => import("../components-relation/components-v3"));
+const ComponentsV3 = lazy(() => import("../pages/components-relation/components-v3"));
+const AnalysisTree = lazy(() => import("../pages/analysis-report/analysis-tree"));
 const viewMapping: {
     key: string;
     label: string;
@@ -16,8 +18,10 @@ const viewMapping: {
         { key: "markdown", label: "markdown", component: Md },
         { key: "toolsDetail", label: "toolsDetail", component: ToolsDetail },
         { key: "llm", label: "llm", component: LLM },
+        { key: "llm-card", label: "llm-card", component: LLMCard },
         { key: "script", label: "componentsV3", component: ComponentsV3 },
         { key: "file", label: "componentsV3", component: ComponentsV3 },
+        { key: "analysis-tree", label: "analysis-tree", component: AnalysisTree },
 
 
     ];

@@ -59,7 +59,7 @@ const PipelineComponentsCard: FC<any> = (params) => {
 
     }, [sseData])
     // const [pipelineComponents, setPipelineComponents] = useState<any>([])
-    const { relation_type, navigateView } = params
+    const { relation_type } = params
     // debugger
     // const params = {relation_type:"tools"}
     const mapFun = (item: any) => {
@@ -73,7 +73,7 @@ const PipelineComponentsCard: FC<any> = (params) => {
         return {
             ...item,
             // id: item.id,
-            path: `/tools/${item.relation_id}`,
+            path: `/c/tools/${item.relation_id}`,
             // component_id: item.component_id,
             // name: item.component_name,
             // category: item.category,
@@ -265,10 +265,7 @@ const PipelineComponentsCard: FC<any> = (params) => {
                                 cover={<div style={{ height: "15rem" }}>
                                     <img style={{ height: "100%", width: "100%", objectFit: "cover" }} alt={item.label} src={`${baseURL}${item.img}`} />
                                 </div>}
-                                onClick={() => navigateView("toolsDetail", {
-                                    path: item.path,
-                                    relationId: item.relation_id,
-                                })}>
+                                onClick={() => navigate(item.path)}>
 
 
                                 <Meta title={<Flex gap={"small"}>

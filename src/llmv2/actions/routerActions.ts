@@ -1,0 +1,5 @@
+import { ActionRegistry } from "../ActionRegistry";
+
+ActionRegistry.register("router.go", (p: { path: string }) => {
+//   window.$history?.push(p.path);
+});

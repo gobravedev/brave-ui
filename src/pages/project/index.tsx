@@ -36,48 +36,49 @@ const Project: FC<any> = () => {
         // setQueryProject(resp.data)
         dispatch(setUserItem({ projectObj: resp.data }))
     }
-    return <div style={{ maxWidth: "1800px", margin: "1rem auto" }}>
-        <Row
+    return <div >
+        <Card
+            style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                height: " 100%",
+                boxShadow: "none"
+            }}
+            styles={{
+                body: {
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    height: " 100%",
+                    padding: 0,
+                    overflowY: "auto"
+                }
+            }}
+            variant="borderless" size="small" extra={
+                <Flex gap={"small"}>
+
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        openModal("projectForm", { project_id: project })
+                    }}>Edit</Button>
+
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        loadProject()
+                        // setProjectObj(resp.data)
+                        // dispatch(setUserItem({ projectObj: resp.data }))
+                    }}>Refresh</Button>
+                </Flex>
+
+            }>
+
+            {projectObj?.description ? <Markdown data={projectObj?.description}></Markdown> : <Empty />}
+        </Card>
+        {/* <Row
             ref={containerRef}
             gutter={[isSticky ? 16 : 0, 16]}>
             <Col lg={18} sm={18} xs={24}>
 
-                <Card
-                    style={{
-                        flex: 1,
-                        display: "flex",
-                        flexDirection: "column",
-                        height: " 100%",
-                        boxShadow: "none"
-                    }}
-                    styles={{
-                        body: {
-                            flex: 1,
-                            display: "flex",
-                            flexDirection: "column",
-                            height: " 100%",
-                            padding: 0,
-                            overflowY: "auto"
-                        }
-                    }}
-                    variant="borderless" size="small" extra={
-                        <Flex gap={"small"}>
-                     
-                            <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                openModal("projectForm", { project_id: project })
-                            }}>Edit</Button>
-
-                            <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                loadProject()
-                                // setProjectObj(resp.data)
-                                // dispatch(setUserItem({ projectObj: resp.data }))
-                            }}>Refresh</Button>
-                        </Flex>
-
-                    }>
-
-                    {projectObj?.description ? <Markdown data={projectObj?.description}></Markdown> : <Empty />}
-                </Card>
+               
             </Col>
             <Col lg={6} sm={6} xs={24}
                 style={isSticky ? {
@@ -123,16 +124,8 @@ const Project: FC<any> = () => {
                 </Card>
             </Col>
 
-            {/* <Col xs={24} sm={6} md={6} lg={6} xl={6}  >
-
-                <ContainerComp keys={["traefik", "code-server", "notebook", "rstudio"]}></ContainerComp>
-
-            </Col>
-
-            <Col xs={24} sm={6} md={6} lg={6} xl={6}  >
-                <RunningContainer></RunningContainer>
-            </Col> */}
-        </Row>
+      
+        </Row> */}
         <FormProject
             research={true}
             params={modal.params}

@@ -1,6 +1,8 @@
 // https://reactrouter.com/start/data/installation
 import { FC, lazy, useEffect, useState } from "react";
 import Layout from "@/layout";
+
+import LayoutV2 from "@/layout/indexV2";
 import MicroGraphLayout from '@/layout/psycmicrograph'
 import {
     // createBrowserRouter,
@@ -63,7 +65,7 @@ const Components = lazy(() => import('@/pages/components-relation/components'));
 
 const PipelineComponentsCard = lazy(() => import('@/components/pipeline-components-card'));
 const SoftwareAnalysisEditor = lazy(() => import('@/pages/software-analysis-editor'));
-const AnalysisReport = lazy(() => import('@/pages/analysis-report'));
+const AnalysisReport = lazy(() => import('@/pages/analysis-report/indexV2'));
 const AnalysisReportOld = lazy(() => import('@/pages/analysis-report/index-old'));
 
 const EntityPage = lazy(() => import('@/pages/entity'));
@@ -78,6 +80,12 @@ const ContainerPage = lazy(() => import('@/pages/container'));
 const Files = lazy(() => import('@/pages/files'));
 const InteractiveTools = lazy(() => import('@/pages/interactive-tools'));
 const ToolsPage = lazy(() => import('@/pages/tools-page'))
+
+const ToolsCard = lazy(() => import("../pages/pipeline-components-card-v2/index-component"));
+const ToolsDetail = lazy(() => import("../pages/components-relation/index-component"));
+
+const ComponentsV3 = lazy(() => import("../pages/components-relation/components-v3"));
+
 import axios from "axios";
 import { Skeleton } from "antd";
 import { useDispatch } from "react-redux";
@@ -114,17 +122,33 @@ if (appType == "index") {
         {
             path: "/analysis-report",
             element: <AnalysisReport />
-        },{
+        }, {
             path: "/analysis-report-old",
             element: <AnalysisReportOld />
-        },{
-            path: "/c/:component_type",
-            element: <ToolsPage />
+        },
+        // {
+        //     path: "/c/:component_type",
+        //     element: <ToolsPage />
+        // },
+        {
+            path: "/c/tools",
+            element: <ToolsCard relation_type={"tools"} />
         },
         {
-            path: "/c/:component_type/:relation_id",
-            element: <ToolsPage />
-        }, 
+            path: "/c/scripts",
+            element: <ComponentsV3 component_type={"script"} />
+        }, {
+            path: "/c/file",
+            element: <ComponentsV3 component_type={"file"} />
+        },
+        {
+            path: "/c/tools/:relation_id",
+            element: <ToolsDetail />
+        },
+        // {
+        //     path: "/c/:component_type/:relation_id",
+        //     element: <ToolsPage />
+        // },
         {
             path: "/pipeline-card",
             element: <PipelineComponentsCard
@@ -284,7 +308,7 @@ if (appType == "index") {
             element: <Doc />
         }, {
             path: "/",
-            element: <Layout />,
+            element: <LayoutV2 />,
             children: [
                 ...children,
             ]
