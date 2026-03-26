@@ -16,8 +16,10 @@ export const SideViewProvider:FC<any> = ({ children }) => {
     }));
   };
 
+  const sideView = viewMap[location.pathname] ?? "llm-card";  // 默认
+
   return (
-    <SideViewContext.Provider value={{ viewMap, setSideView }}>
+    <SideViewContext.Provider value={{ viewMap, setSideView, sideView }}>
       {children}
     </SideViewContext.Provider>
   );

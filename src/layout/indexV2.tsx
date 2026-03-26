@@ -77,9 +77,8 @@ const App: React.FC = () => {
     const isDark = theme === 'dark';
     const bgColor = isDark ? '#001529' : '#fff'; // 深色/白色
     const textColor = isDark ? '#fff' : '#000';
-    const { viewMap } = useSideViewContext();
+    const { sideView } = useSideViewContext();
 
-    const sideView = viewMap[location.pathname] ?? "llm-card";  // 默认
 
     const { ref: containerRef, top, isSticky } = useStickyTop(576);
     // const [sideView, setSideView] = useState<string>("llm-card")

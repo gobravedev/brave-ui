@@ -24,6 +24,7 @@ import BigTable from '@/components/big-table';
 import { componentMap, ImgView, UrlComp } from './components'
 import MicrobiomeSummaryCard from "./components/diff-summary-card";
 import AnalysisResultRender from "./analysis-result-render";
+import { useSideViewContext } from "@/context/side/SideViewContext";
 // import EditParamsPanel from "../edit-params/components/panel";
 
 
@@ -51,6 +52,8 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, callback
     const [runingLoading, setRuningLoading] = useState<boolean>(false)
     const [form] = Form.useForm();
     const [rightPanel, setRightPanel] = useState<string>("editParamsPanel")
+    // const [sideView, setSideView] = useState<string>("llm-card")
+    const { setSideView, sideView } = useSideViewContext();
 
     const loadData = async (analysis_id: any) => {
         setLoading(true)
@@ -160,6 +163,21 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, callback
                     {onClose && <>
                         <Button size="small" color="blue" variant="solid" onClick={() => onClose()}>Close</Button>
                     </>}
+                    {sideView == "llm-card" ?
+                        <Button size="small" color="blue" variant="solid" onClick={() => {
+                            setSideView("analysis-tree")
+                        }}>
+                            TOC
+                        </Button>
+                        :
+
+                        <Button size="small" color="blue" variant="solid" onClick={() => {
+                            setSideView("llm-card")
+                        }}>
+                            LLM
+                        </Button>
+                    }
+
                     <Tooltip title={`Download Result ${analsyisResult?.analysis_name}`}>
                         {/* <Popconfirm title={"Whether or not to download?"} onConfirm={async () => {
                             // /analysis/download-results/{analysis_id}
@@ -391,10 +409,12 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, callback
                                         {
                                             label: "Parameters",
                                             value: "editParamsPanel"
-                                        }, {
-                                            label: "LLM",
-                                            value: "llmAnalysis"
-                                        }, {
+                                        }, 
+                                        // {
+                                        //     label: "LLM",
+                                        //     value: "llmAnalysis"
+                                        // }, 
+                                        {
                                             label: "Description",
                                             value: "description"
                                         }
