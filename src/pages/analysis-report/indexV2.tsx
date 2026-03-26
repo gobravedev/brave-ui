@@ -29,6 +29,8 @@ const AnalysisReport: FC<any> = () => {
         return () => setSideView(null);  // 页面离开时清空关联
     }, []);
 
+    
+
     const { project, projectObj, baseURL } = useSelector((state: any) => state.user);
 
     const [data, setData] = useState<any>()

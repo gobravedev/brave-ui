@@ -25,6 +25,7 @@ import { componentMap, ImgView, UrlComp } from './components'
 import MicrobiomeSummaryCard from "./components/diff-summary-card";
 import AnalysisResultRender from "./analysis-result-render";
 import { useSideViewContext } from "@/context/side/SideViewContext";
+import { useSideView } from "@/hooks/useLLMARG";
 // import EditParamsPanel from "../edit-params/components/panel";
 
 
@@ -54,7 +55,10 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, callback
     const [rightPanel, setRightPanel] = useState<string>("editParamsPanel")
     // const [sideView, setSideView] = useState<string>("llm-card")
     const { setSideView, sideView } = useSideViewContext();
-
+    useSideView({
+        bizType: "analysis",
+        bizId: analysis_id,
+    })
     const loadData = async (analysis_id: any) => {
         setLoading(true)
         // const res = await axios.get(`/file-operation/visualization-results?path=${output_dir}`)

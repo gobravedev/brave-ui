@@ -32,7 +32,7 @@ const AnalysisTree: FC<any> = () => {
     // const [queryProject, setQueryProject] = useState<any>()
     const [analysisKey, setAnalysisKey] = useState<any>(key)
 
-  
+
     useEffect(() => {
         if (projectParam && projectParam != project) {
             dispatch(setUserItem({ project: projectParam }))
@@ -88,7 +88,7 @@ const AnalysisTree: FC<any> = () => {
     // }
 
     const loadData = async (first = true) => {
-        
+
         setLoading(true)
         // ?analysis_method=${analysisMethod}&project=${project}
         let resp: any = await axios.post(`/list-analysis-tree`, {
@@ -111,7 +111,7 @@ const AnalysisTree: FC<any> = () => {
                     // updateQueryParam("project", project);
                     // updateQueryParam("key", resp.data[0]?.children[0]?.key);
                     navigate(`/analysis-report?project=${project}&key=${resp.data[0]?.children[0]?.key}`)
-                    
+
                 }
             } else {
                 // debugger
@@ -132,73 +132,77 @@ const AnalysisTree: FC<any> = () => {
         loadData()
     }, [])
     return <div >
+        <Card
+            loading={loading}
+            title={projectObj?.project_name}
+            size="small"
+            style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                height: " 100%"
+            }}
+            styles={{
+                body: {
+                    height: "80vh",
+                    // flex: 1,
+                    overflowY: "auto"
+                }
+            }}
+            extra={
+                <Flex gap={"small"}>
 
-         <Card
-                    loading={loading}
-                    title={projectObj?.project_name}
-                    size="small"
-                    style={{
-                        flex: 1,
-                        display: "flex",
-                        flexDirection: "column",
-                        height: " 100%"
-                    }}
-                    styles={{
-                        body: {
-                            // height: "90%",
-                            flex: 1,
-                            overflowY: "auto"
+
+                    <Tooltip title={`Download Project ${projectObj?.project_name}`}>
+
+
+                        <Button
+                            onClick={async () => {
+                                // /analysis/download-results/{analysis_id}
+                                const res = await axios.post(`/analysis/download-project/${project}`);
+                                const url = `${baseURL}${res.data.download_url}`
+                                console.log(res)
+                                window.open(url, "_blank")
+                                // const blob = new Blob([res.data], { type: 'application/zip' });
+                            }}
+                            size="small" color="blue" variant="solid" icon={<DownloadOutlined />} >Download</Button>
+
+                    </Tooltip>
+                    <RedoOutlined style={{ cursor: "pointer" }} onClick={() => loadData()} />
+
+                    {/* <Button size="small" color="cyan" variant="solid" onClick={loadData}>Refresh</Button> */}
+                </Flex>
+            }>
+
+            <div style={{
+                // height:"50vh",
+                // overflow:"auto"
+            }}>
+                {Array.isArray(data) && data.length != 0 ? <>
+                    <LeftPanel onSelect={(val: any) => {
+                        if (val.node?.type == "analysis") {
+                            // setAnalysis(val.node)
+                            setAnalysisKey(val.node.key)
+                            // setComponentType(val.node.relation_type)
+                            // updateQueryParam("project", project);
+                            // updateQueryParam("key", val.node.key);
+                            navigate(`/analysis-report?project=${project}&key=${val.node.key}`)
+                        } else if (val.node?.type == "relation") {
+                            console.log(val.node)
+                            // loadComponents(val.node.key)
                         }
-                    }}
-                    extra={
-                        <Flex gap={"small"}>
-                      
 
-                            <Tooltip title={`Download Project ${projectObj?.project_name}`}>
+                        // console.log(val)
+                    }} defaultSelectKey={analysisKey} treeData={data}></LeftPanel>
 
+                </> : <>
+                    <Empty></Empty>
+                </>}
 
-                                <Button
-                                    onClick={async () => {
-                                        // /analysis/download-results/{analysis_id}
-                                        const res = await axios.post(`/analysis/download-project/${project}`);
-                                        const url = `${baseURL}${res.data.download_url}`
-                                        console.log(res)
-                                        window.open(url, "_blank")
-                                        // const blob = new Blob([res.data], { type: 'application/zip' });
-                                    }}
-                                    size="small" color="blue" variant="solid" icon={<DownloadOutlined />} >Download</Button>
-
-                            </Tooltip>
-                            <RedoOutlined style={{ cursor: "pointer" }} onClick={() => loadData()} />
-
-                            {/* <Button size="small" color="cyan" variant="solid" onClick={loadData}>Refresh</Button> */}
-                        </Flex>
-                    }>
-                  
-                    {Array.isArray(data) && data.length != 0 ? <>
-                        <LeftPanel onSelect={(val: any) => {
-                            if (val.node?.type == "analysis") {
-                                // setAnalysis(val.node)
-                                setAnalysisKey(val.node.key)
-                                // setComponentType(val.node.relation_type)
-                                // updateQueryParam("project", project);
-                                // updateQueryParam("key", val.node.key);
-                                navigate(`/analysis-report?project=${project}&key=${val.node.key}`)
-                            } else if (val.node?.type == "relation") {
-                                console.log(val.node)
-                                // loadComponents(val.node.key)
-                            }
-
-                            // console.log(val)
-                        }} defaultSelectKey={analysisKey} treeData={data}></LeftPanel>
-
-                    </> : <>
-                        <Empty></Empty>
-                    </>}
+            </div>
 
 
-
-                </Card>
+        </Card>
     </div>
 }
 
