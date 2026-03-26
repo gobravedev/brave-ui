@@ -4,11 +4,15 @@ import { FC, use, useEffect, useState } from "react";
 import { Card, Col, Row, Space, Tag } from "antd";
 import axios from "axios";
 import { MonacoEditor } from "@/components/react-monaco-editor";
+import { useSideViewContext } from "@/context/side/SideViewContext";
+import { useSelector } from "react-redux";
 
-const LLMCard: FC<any> = (params) => {
-    const { biz_type, biz_id } = params;
+const LLMCard: FC<any> = () => {
+    const { bizType:biz_type, bizId:biz_id  } = useSelector((state: any) => state.llm)
+
     // debugger
     return <Card size="small"
+        title={`LLM - ${biz_type}  ${biz_id}`}
         style={{
             flex: 1,
             display: "flex",

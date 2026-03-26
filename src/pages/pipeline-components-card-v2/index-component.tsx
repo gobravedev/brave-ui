@@ -21,6 +21,8 @@ import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 import { add } from "@dnd-kit/utilities"
 import { useStickyTop } from "@/hooks/useStickyTop"
 import ToolsLLMRender from "./tools-llm-render"
+import { setLLMArgs } from "@/store/llmSlice"
+import { useSideView } from "@/hooks/useLLMARG"
 const PipelineComponentsCard: FC<any> = (params) => {
     const { Search } = Input;
     // const [searchText, setSearchText] = useState("");
@@ -30,6 +32,10 @@ const PipelineComponentsCard: FC<any> = (params) => {
     const { modal, openModal, closeModal } = useModal();
     const [activeCategory, setActiveCategory] = useState<string | null>("all");
     const { ref: containerRef, top, isSticky } = useStickyTop(576);
+
+    useSideView({
+        bizType: "tools",
+    })
 
     // "action": "create_analysis_tools",
     // "target": "analysis_tools_card",
@@ -185,7 +191,7 @@ const PipelineComponentsCard: FC<any> = (params) => {
             }}
             extra={<>
                 <Flex gap="small">
-                   
+
                     <Button size="small" color="cyan" variant="solid" onClick={() => {
                         openModal("installComponents", { relation_type: "tools" })
                     }}>Intsall {relation_type} </Button>
@@ -723,3 +729,4 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
         </Spin>
     </Modal >
 }
+

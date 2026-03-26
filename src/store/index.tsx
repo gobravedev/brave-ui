@@ -6,6 +6,7 @@ import graphSlice from './graphSlice'
 import userSlice from './userSlice'
 import axios from 'axios'
 import uiReducer from './ui'
+import llmReducer from './llmSlice'
 const store = configureStore({
   reducer: {
     menu: menuReducer,
@@ -13,7 +14,8 @@ const store = configureStore({
     context: contextReducer,
     graph: graphSlice,
     user: userSlice,
-    ui: uiReducer
+    ui: uiReducer,
+    llm:llmReducer
   },
 })
 
