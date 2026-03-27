@@ -10,10 +10,9 @@ import { setupGlobalMessage, useGlobalMessage } from "./hooks/useGlobalMessage";
 import { setupGlobalNotification } from "./hooks/useGlobalNotification";
 import axios from "axios";
 import { getPathname } from "./utils/utils";
-import { registerLLMActions } from "./llm/registerHandlers";
-import { SideViewProvider } from "./context/side/SideViewContext";
+// import { sseClient } from "./sse"; // ⚡ 在 App 加载时自动创建 SSE
 
-registerLLMActions();
+// registerLLMActions();
 const App: FC<any> = () => {
   const { locale, t } = useI18n()
   const antdLocale = locale === 'zh_CN' ? zhCN : enUS

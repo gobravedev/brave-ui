@@ -1,4 +1,4 @@
-import { ActionRegistry } from "./ActionRegistry";
+import { ActionRegistry } from "./ActionRegistry.bak";
 
 type InferActionMap = {
   [K in ReturnType<typeof ActionRegistry.all> extends Map<infer N, infer H>

@@ -44,7 +44,6 @@ const InteractiveTools: FC<any> = () => {
 import { containerData } from '@/pages/container/container.ts'
 import { ContainerOpt, InspectPanel } from "../container"
 import { CloseOutlined, RedoOutlined } from '@ant-design/icons'
-import { useSSEContext } from "@/context/sse/useSSEContext"
 import { useSelector } from "react-redux"
 import { useModal } from "@/hooks/useModal"
 import { useStickyTop } from "@/hooks/useStickyTop"

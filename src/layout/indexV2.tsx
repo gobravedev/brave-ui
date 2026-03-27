@@ -12,8 +12,6 @@ import { setSetting, setSseData } from '@/store/globalSlice'
 import useMessage from 'antd/es/message/useMessage';
 import { useModal, useModals } from '@/hooks/useModal';
 import ContextModal from '@/components/context';
-import { useSSE } from '@/hooks/useSSE';
-import { useSSEContext } from '@/context/sse/useSSEContext';
 import FormProject from '@/components/form-project';
 import { deleteProjectApi } from '@/api/project';
 import { Project } from '@/type/project';
@@ -27,6 +25,7 @@ import { keyEqualTo } from '@antv/s2/esm/utils/export/method.js';
 import { useStickyTop } from '@/hooks/useStickyTop';
 import ComponentRender from './component-render';
 import { SideViewProvider, useSideViewContext } from '@/context/side/SideViewContext';
+import { useSSE } from '@/context/sse/useSSE';
 
 const { Content, Sider } = Layout;
 
@@ -119,43 +118,65 @@ const App: React.FC = () => {
         console.log(resp.data)
         dispatch(setSetting(resp.data))
     }
-    const { eventSourceRef, status, reconnect } = useSSEContext();
-    useEffect(() => {
-        console.log("layout eventSourceRef", eventSourceRef)
-        if (!eventSourceRef) return;
+    const { status, reconnect } = useSSE((data: any) => {
+        console.log("收到消息 =>", data);
+        if (data.msgType === "process_end") {
+            const analysis: any = data.analysis
+            const msg = `${analysis.analysis_name}(${analysis.analysis_id}) 分析完成`
+            openNotification({ type: "info", message: msg })
+        }
+        if (data.msgType === "analysis_result") {
 
-        const handler = (event: MessageEvent) => {
+            openNotification({ type: "info", message: `${data?.analysis_name}: Add Analsyis: ${data?.add_num}; Update Analysis: ${data?.update_num}; Complete Analysis: ${data?.complete_num}` })
+        }
 
-            const data = JSON.parse(event.data)
-            // console.log("1111111111111111",data )
-            // console.log(data)
-            if (data.msgType === "process_end") {
-                const analysis: any = data.analysis
-                const msg = `${analysis.analysis_name}(${analysis.analysis_id}) 分析完成`
-                openNotification({ type: "info", message: msg })
-            }
-            if (data.msgType === "analysis_result") {
+        if (data.msgType === "test") {
+            openNotification({ type: "info", message: data.msg })
+        }
+        if (data?.type != "ping") {
+            // console.log("layout SSE message:", event.data);
+            dispatch(setSseData(data))
 
-                openNotification({ type: "info", message: `${data?.analysis_name}: Add Analsyis: ${data?.add_num}; Update Analysis: ${data?.update_num}; Complete Analysis: ${data?.complete_num}` })
-            }
+        }
+    });
 
-            if (data.msgType === "test") {
-                openNotification({ type: "info", message: data.msg })
-            }
-            if (data?.type != "ping") {
-                console.log("layout SSE message:", event.data);
-                dispatch(setSseData(data))
+    // const { eventSourceRef, status, reconnect } = useSSEContext();
+    // useEffect(() => {
+    //     console.log("layout eventSourceRef", eventSourceRef)
+    //     if (!eventSourceRef) return;
 
-            }
-        };
+    //     const handler = (event: MessageEvent) => {
 
-        eventSourceRef.current?.addEventListener('message', handler);
+    //         const data = JSON.parse(event.data)
+    //         // console.log("1111111111111111",data )
+    //         // console.log(data)
+    //         if (data.msgType === "process_end") {
+    //             const analysis: any = data.analysis
+    //             const msg = `${analysis.analysis_name}(${analysis.analysis_id}) 分析完成`
+    //             openNotification({ type: "info", message: msg })
+    //         }
+    //         if (data.msgType === "analysis_result") {
 
-        return () => {
-            console.log("removeEventListener")
-            eventSourceRef.current?.removeEventListener('message', handler);
-        };
-    }, [eventSourceRef.current]);
+    //             openNotification({ type: "info", message: `${data?.analysis_name}: Add Analsyis: ${data?.add_num}; Update Analysis: ${data?.update_num}; Complete Analysis: ${data?.complete_num}` })
+    //         }
+
+    //         if (data.msgType === "test") {
+    //             openNotification({ type: "info", message: data.msg })
+    //         }
+    //         if (data?.type != "ping") {
+    //             console.log("layout SSE message:", event.data);
+    //             dispatch(setSseData(data))
+
+    //         }
+    //     };
+
+    //     eventSourceRef.current?.addEventListener('message', handler);
+
+    //     return () => {
+    //         console.log("removeEventListener")
+    //         eventSourceRef.current?.removeEventListener('message', handler);
+    //     };
+    // }, [eventSourceRef.current]);
 
     // const [eventSource, setEventSource] = useState<EventSource | null>(null);
 

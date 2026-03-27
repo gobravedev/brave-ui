@@ -1,4 +1,3 @@
-import { useSSEContext } from "@/context/sse/useSSEContext"
 import { SSEContextType } from "@/type/sse"
 import { Venn } from "@ant-design/plots"
 import { Alert, Button, Card, Dropdown, Empty, Flex, Form, GetProp, Input, InputNumber, Modal, Popconfirm, Popover, Select, Skeleton, Space, Spin, Table, Tabs, Tag, theme, Tooltip, Typography, Upload, UploadFile, UploadProps } from "antd"
@@ -59,7 +58,6 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
     // const [content,setContent] = useState<any>()
     const [loading, setLoading] = useState(true)
     // const { eventSource } = useOutletContext<SSEContextType>();
-    // const { eventSourceRef, status, reconnect } = useSSEContext();
     const { modal, openModal, closeModal } = useModal();
     const [tableRows, setTableRows] = useState<any[]>([])
     const [tableRowsInfo, setTableRowsInfo] = useState<any>({})

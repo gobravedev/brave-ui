@@ -11,8 +11,8 @@ import { setSetting, setSseData } from '@/store/globalSlice'
 import useMessage from 'antd/es/message/useMessage';
 import { useModal } from '@/hooks/useModal';
 import ContextModal from '@/components/context';
-import { useSSE } from '@/hooks/useSSE';
-import { useSSEContext } from '@/context/sse/useSSEContext';
+import { useSSE } from '@/hooks/useSSE.bak';
+import { useSSEContext } from '@/context/sse/useSSEContext.bak';
 import FormProject from '@/components/form-project';
 import { deleteProjectApi } from '@/api/project';
 import { Project } from '@/type/project';

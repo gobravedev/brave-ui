@@ -15,39 +15,39 @@ import { NamespaceSelect } from '@/components/create-pipeline'
 import TextArea from "antd/es/input/TextArea"
 const ContainerPage: FC<any> = ({ params, rowSelection }) => {
     // const [pipelineComponents, setPipelineComponents] = useState<any>([])
-    const { eventSourceRef, status, reconnect } = useSSEContext();
+    // const { eventSourceRef, status, reconnect } = useSSEContext();
 
-    useEffect(() => {
-        if (eventSourceRef) {
-            const handler = (event: MessageEvent) => {
-                // console.log('event', event)
-                const data = JSON.parse(event.data)
-                // console.log('analysisId', analysisIdRef.current)
-                // if (analysisIdRef.current.includes(data.analysis_id)) {
-
-
-
-                // }
-                if (data.run_type == "retry") {
-                    if (data.event == "container_pulled" || data.event == "analysis_complete" || data.event == "analysis_failed" || data.event == "analysis_started") {
-                        reload()
-                    }
-                }
-
-            };
-
-            eventSourceRef.current?.addEventListener('message', handler);
-
-            return () => {
-                console.log("removeEventListener")
-                eventSourceRef.current?.removeEventListener('message', handler);
-            };
-        }
+    // useEffect(() => {
+    //     if (eventSourceRef) {
+    //         const handler = (event: MessageEvent) => {
+    //             // console.log('event', event)
+    //             const data = JSON.parse(event.data)
+    //             // console.log('analysisId', analysisIdRef.current)
+    //             // if (analysisIdRef.current.includes(data.analysis_id)) {
 
 
 
+    //             // }
+    //             if (data.run_type == "retry") {
+    //                 if (data.event == "container_pulled" || data.event == "analysis_complete" || data.event == "analysis_failed" || data.event == "analysis_started") {
+    //                     reload()
+    //                 }
+    //             }
 
-    }, [eventSourceRef.current]);
+    //         };
+
+    //         eventSourceRef.current?.addEventListener('message', handler);
+
+    //         return () => {
+    //             console.log("removeEventListener")
+    //             eventSourceRef.current?.removeEventListener('message', handler);
+    //         };
+    //     }
+
+
+
+
+    // }, [eventSourceRef.current]);
     const params_ = params || {}
     const { namespace } = useSelector((state: any) => state.user);
     const { data, pageNumber, totalPage, loading, reload, pageSize, setPageNumber } = usePagination({
@@ -310,7 +310,7 @@ export const InspectPanel: FC<any> = ({ visible, params, onClose, callback }) =>
 }
 
 import { containerData } from './container'
-import { useSSEContext } from "@/context/sse/useSSEContext"
+// import { useSSEContext } from "@/context/sse/useSSEContext.bak"
 import { fa, tr } from "@faker-js/faker"
 const InstallContainerModal: FC<any> = ({ visible, params, onClose, callback }) => {
     // const [namespace, setNamespace] = useState<any>()

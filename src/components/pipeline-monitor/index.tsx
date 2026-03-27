@@ -12,7 +12,6 @@ import ResultParse from "../result-parse";
 import { useModal } from "@/hooks/useModal";
 import { CreateOrUpdatePipelineComponent } from "../create-pipeline";
 import React from "react";
-import { useSSEContext } from "@/context/sse/useSSEContext";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import LogFile from "../log-file";
 import { ComponentsRender as FileComponentRender } from '../analysis-result-view'
@@ -228,7 +227,6 @@ export const FileMonitor: FC<any> = memo(({ analysis, callback }) => {
     // const { eventSourceRef } = useOutletContext<SSEContextType>();
     // const { eventSourceRef, status, reconnect } = useSSEContext();
     const { messageApi } = useOutletContext<any>()
-    const { eventSourceRef, status, reconnect } = useSSEContext();
     // const offsetRef = useRef(0)
     const filekeyRef = useRef<any>(fileTabKey)
 

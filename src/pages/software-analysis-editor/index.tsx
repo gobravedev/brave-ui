@@ -9,7 +9,6 @@ import { SSEContextType } from '@/type/sse'
 import { FileMonitor } from "@/components/pipeline-monitor";
 import { CreateOrUpdatePipelineComponent } from "@/components/create-pipeline";
 import { useModal } from "@/hooks/useModal";
-import { useSSEContext } from "@/context/sse/useSSEContext";
 import axios from "axios";
 
 const SoftwareAnalysisEditor: FC<any> = () => {
@@ -24,50 +23,50 @@ const SoftwareAnalysisEditor: FC<any> = () => {
 
     const [content, setContent] = useState<any>("")
     const [currentFile, setCurrentFile] = useState<any>(null)
-    const { eventSourceRef, status, reconnect } = useSSEContext();
+    // const { eventSourceRef, status, reconnect } = useSSEContext();
 
     const [contentTabKey, setContentTabKey] = useState<any>("pipeline_script")
     const [contentFileMap, setContentFileMap] = useState<any>({})
     const [format, setFormat] = useState<any>(false)
-    useEffect(() => {
-        if (eventSourceRef) {
-            const handler = (event: MessageEvent) => {
-                // console.log('event', event)
-                const data = JSON.parse(event.data)
-                if (analysisId == data.analysis_id) {
-                    // if (fileTabKey == "workflow_log_file") {
-                    //     if (data.event_type == "workflow_log" || data.event_type == "executor_log" || data.event_type == "trace" || data.event_type == "process_end") {
-                    //         readLogFile()
-                    //         if (data.event_type == "process_end") {
-                    //             if (callback) {
-                    //                 callback()
-                    //             }
-                    //         }
-                    //     }
-                    // }else if(fileTabKey == "trace_file"){
-                    //     if(data.workflow_event == "on_process_complete"){
-                    //         readLogFile()
-                    //     }
-                    // }
-                    if (data.event == "analysis_complete" || data.event == "analysis_failed") {
-                        loadAnalysis()
-                    }
+    // useEffect(() => {
+    //     if (eventSourceRef) {
+    //         const handler = (event: MessageEvent) => {
+    //             // console.log('event', event)
+    //             const data = JSON.parse(event.data)
+    //             if (analysisId == data.analysis_id) {
+    //                 // if (fileTabKey == "workflow_log_file") {
+    //                 //     if (data.event_type == "workflow_log" || data.event_type == "executor_log" || data.event_type == "trace" || data.event_type == "process_end") {
+    //                 //         readLogFile()
+    //                 //         if (data.event_type == "process_end") {
+    //                 //             if (callback) {
+    //                 //                 callback()
+    //                 //             }
+    //                 //         }
+    //                 //     }
+    //                 // }else if(fileTabKey == "trace_file"){
+    //                 //     if(data.workflow_event == "on_process_complete"){
+    //                 //         readLogFile()
+    //                 //     }
+    //                 // }
+    //                 if (data.event == "analysis_complete" || data.event == "analysis_failed") {
+    //                     loadAnalysis()
+    //                 }
 
-                }
-            };
+    //             }
+    //         };
 
-            eventSourceRef.current?.addEventListener('message', handler);
+    //         eventSourceRef.current?.addEventListener('message', handler);
 
-            return () => {
-                console.log("removeEventListener")
-                eventSourceRef.current?.removeEventListener('message', handler);
-            };
-        }
-
-
+    //         return () => {
+    //             console.log("removeEventListener")
+    //             eventSourceRef.current?.removeEventListener('message', handler);
+    //         };
+    //     }
 
 
-    }, [eventSourceRef.current]);
+
+
+    // }, [eventSourceRef.current]);
 
 
     const readFile = async (file: string) => {

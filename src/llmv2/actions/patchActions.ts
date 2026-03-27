@@ -1,4 +1,4 @@
-import { ActionRegistry } from "../ActionRegistry";
+import { ActionRegistry } from "../ActionRegistry.bak";
 
 const uiState: any = {};
 
