@@ -1,9 +1,21 @@
 import { create } from "zustand";
-// import { createHashHistory } from "history";
+import type { NavigateFunction } from "react-router";
 
-// const history = createHashHistory();
+type RouterState = {
+  navigate: NavigateFunction | null;
+  setNavigate: (navigate: NavigateFunction) => void;
+  go: (path: string) => void;
+};
 
-export const useRouterStore = create(() => ({
-  go: (path: string) => {},
-  history,
+export const useRouterStore = create<RouterState>((set, get) => ({
+  navigate: null,
+  setNavigate: (navigate) => set({ navigate }),
+  go: (path: string) => {
+    const navigate = get().navigate;
+    if (!navigate) {
+      console.warn("[LLM] Router is not ready yet, skip navigation:", path);
+      return;
+    }
+    navigate(path);
+  },
 }));

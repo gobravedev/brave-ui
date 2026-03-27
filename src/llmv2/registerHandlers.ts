@@ -1,21 +1,20 @@
-import { useEffect } from "react";
 import { registerActions } from "./actionRegistry";
 import { ActionDispatcher } from "./dispatcher";
-import { data } from "node_modules/vis-network/declarations/index-legacy-bundle";
 
-let initialized = false;
+type SSELike = {
+  onMessage: (fn: (data: any) => void) => () => void;
+};
 
-export function registerLLMActions(sse: any) {
-    if (initialized) return;
-    initialized = true;
+let actionsInitialized = false;
 
-    // 注册 Action
-    registerActions();
+export function registerLLMActions(sse: SSELike) {
+    if (!actionsInitialized) {
+        registerActions();
+        actionsInitialized = true;
+    }
 
-    // SSE ——> LLM Action
-    sse.onMessage((data: any) => {
+    const unsubscribe = sse.onMessage((data: any) => {
         try {
-            //   const data = JSON.parse(msg.data);
             if (data?.action && data?.payload) {
                 console.log("[LLM] Received SSE message:", data);
                 ActionDispatcher.dispatch(data.action, data.payload);
@@ -23,8 +22,11 @@ export function registerLLMActions(sse: any) {
         } catch (e) {
             console.error("[LLM] SSE parse error", e);
         }
-    })
-
+    });
 
     console.log("[LLM] Actions registered");
+
+    return () => {
+        unsubscribe();
+    };
 }

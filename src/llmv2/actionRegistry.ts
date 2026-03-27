@@ -13,7 +13,6 @@ export type FormResetPayload = { form: string };
 export function registerActions() {
   // UI
   ActionDispatcher.register("ui.show_message", (payload: ShowMessagePayload) => {
-    debugger
     const ui = useUIStore.getState();
     ui.message[payload.type](payload.text);
   });

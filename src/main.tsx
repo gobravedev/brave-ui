@@ -11,9 +11,6 @@ import { SSEProvider } from './context/sse/SSEProvider.tsx'
 import { useGlobalMessage } from './hooks/useGlobalMessage.ts'
 
 console.log(import.meta.env.MODE)
-import { sseClient } from "./sse"; // ⚡ 在 App 加载时自动创建 SSE
-import { registerLLMActions } from "./llmv2/registerHandlers";
-registerLLMActions(sseClient);
 
 createRoot(document.getElementById('root')!).render(
   // <StrictMode>

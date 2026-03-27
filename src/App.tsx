@@ -10,6 +10,7 @@ import { setupGlobalMessage, useGlobalMessage } from "./hooks/useGlobalMessage";
 import { setupGlobalNotification } from "./hooks/useGlobalNotification";
 import axios from "axios";
 import { getPathname } from "./utils/utils";
+import LLMBootstrap from "./llmv2/LLMBootstrap";
 
   
 // registerLLMActions();
@@ -88,6 +89,7 @@ const App: FC<any> = () => {
       }}
       locale={antdLocale}>
       <HashRouter>
+          <LLMBootstrap />
           <RenderRouter></RenderRouter>
 
       </HashRouter>
