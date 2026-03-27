@@ -10,8 +10,8 @@ import { setupGlobalMessage, useGlobalMessage } from "./hooks/useGlobalMessage";
 import { setupGlobalNotification } from "./hooks/useGlobalNotification";
 import axios from "axios";
 import { getPathname } from "./utils/utils";
-// import { sseClient } from "./sse"; // ⚡ 在 App 加载时自动创建 SSE
 
+  
 // registerLLMActions();
 const App: FC<any> = () => {
   const { locale, t } = useI18n()

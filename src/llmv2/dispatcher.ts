@@ -11,6 +11,7 @@ export class ActionDispatcher {
 
   static dispatch(action: string, payload: any) {
     const fn = ActionDispatcher.actions[action];
+    
     if (!fn) {
       console.warn("[LLM] Unknown action:", action);
       return;
