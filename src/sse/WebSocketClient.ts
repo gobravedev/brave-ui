@@ -5,9 +5,9 @@ import {
   RealtimeTransport,
 } from "./types";
 
-export class SSEClient implements RealtimeClient {
-  private url: string = "";
-  private es: EventSource | null = null;
+export class WebSocketClient implements RealtimeClient {
+  private url = "";
+  private ws: WebSocket | null = null;
   private listeners: Set<(data: any) => void> = new Set();
   private status: RealtimeStatus = "closed";
 
@@ -19,27 +19,21 @@ export class SSEClient implements RealtimeClient {
   private heartbeatTimer: any = null;
   private retryTimer: any = null;
 
-  constructor(
-    retryInterval = 5000,
-    heartbeatTimeout = 15000
-  ) {
+  constructor(retryInterval = 5000, heartbeatTimeout = 15000) {
     this.retryInterval = retryInterval;
     this.heartbeatTimeout = heartbeatTimeout;
   }
 
-  /** =============================
-   *  对外 API
-   * ============================= */
   getStatus() {
     return this.status;
   }
 
   getTransport(): RealtimeTransport {
-    return "sse";
+    return "websocket";
   }
 
   setTransport() {
-    // SSE client transport is fixed.
+    // WebSocket client transport is fixed.
   }
 
   configure(config: Partial<RealtimeClientConfig>) {
@@ -59,8 +53,6 @@ export class SSEClient implements RealtimeClient {
 
   onMessage(fn: (data: any) => void) {
     this.listeners.add(fn);
-
-    // 返回取消订阅函数
     return () => {
       this.listeners.delete(fn);
     };
@@ -69,9 +61,9 @@ export class SSEClient implements RealtimeClient {
   close() {
     this.clearTimers();
 
-    if (this.es) {
-      this.es.close();
-      this.es = null;
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
     }
 
     this.status = "closed";
@@ -82,35 +74,36 @@ export class SSEClient implements RealtimeClient {
     this.connect(this.url);
   }
 
-  /** =============================
-   *  内部：连接逻辑
-   * ============================= */
-  public connect(url: string) {
+  connect(url: string) {
     this.url = url;
     this.clearTimers();
 
-    if (this.es) {
-      this.es.close();
-      this.es = null;
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
     }
 
     this.status = "connecting";
-    this.es = new EventSource(this.url);
+    this.ws = new WebSocket(this.url);
 
-    this.es.onopen = () => {
+    this.ws.onopen = () => {
       this.status = "open";
       this.lastReceived = Date.now();
-      console.log("🟢 SSE connected:", this.url);
-
       this.startHeartbeatCheck();
+      console.log("🟢 WebSocket connected:", this.url);
     };
 
-    this.es.onerror = () => {
-      console.warn("🔴 SSE error, scheduling reconnect...");
+    this.ws.onclose = () => {
+      console.warn("🔴 WebSocket closed, scheduling reconnect...");
       this.scheduleReconnect();
     };
 
-    this.es.onmessage = (event) => {
+    this.ws.onerror = () => {
+      console.warn("🔴 WebSocket error, scheduling reconnect...");
+      this.scheduleReconnect();
+    };
+
+    this.ws.onmessage = (event) => {
       this.lastReceived = Date.now();
 
       let data: any;
@@ -120,31 +113,26 @@ export class SSEClient implements RealtimeClient {
         return;
       }
 
-      console.log("📨 SSE message:", data, "listeners:", this.listeners.size);
-      if (data.type !== "ping") {
-        this.listeners.forEach((fn) => fn(data));
-        this.tryAck(data);
+      if (data?.type === "ping") {
+        return;
       }
+
+      this.listeners.forEach((fn) => fn(data));
+      this.tryAck(data);
     };
   }
 
-  /** =============================
-   *  心跳检测
-   * ============================= */
   private startHeartbeatCheck() {
     this.clearTimers();
 
     this.heartbeatTimer = setInterval(() => {
       if (Date.now() - this.lastReceived > this.heartbeatTimeout) {
-        console.warn("⚠ SSE heartbeat timeout, reconnecting...");
+        console.warn("⚠ WebSocket heartbeat timeout, reconnecting...");
         this.scheduleReconnect();
       }
     }, 5000);
   }
 
-  /** =============================
-   *  重连机制
-   * ============================= */
   private scheduleReconnect() {
     this.status = "closed";
 
@@ -167,7 +155,7 @@ export class SSEClient implements RealtimeClient {
   }
 
   private tryAck(data: any) {
-    if (!this.ackEnabled || !this.ackHandler) {
+    if (!this.ackEnabled) {
       return;
     }
 
@@ -176,11 +164,18 @@ export class SSEClient implements RealtimeClient {
       return;
     }
 
-    Promise.resolve(
-      this.ackHandler({ seq, raw: data, transport: "sse" })
-    ).catch((error) => {
-      console.warn("⚠ SSE ACK failed:", error);
-    });
+    if (this.ackHandler) {
+      Promise.resolve(
+        this.ackHandler({ seq, raw: data, transport: "websocket" })
+      ).catch((error) => {
+        console.warn("⚠ WebSocket ACK failed:", error);
+      });
+      return;
+    }
+
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({ type: "ack", seq }));
+    }
   }
 
   private extractSeq(data: any) {

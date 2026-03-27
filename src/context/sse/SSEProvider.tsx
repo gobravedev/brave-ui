@@ -1,5 +1,5 @@
 import React, { createContext, useEffect, useState } from "react";
-import { sseClient } from "../../sse";
+import { RealtimeTransport, sseClient } from "../../sse";
 import { useSelector } from "react-redux";
 
 export const SSEContext = createContext<{
@@ -15,12 +15,41 @@ export const SSEProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (!baseURL) return;
 
-    const url = authorization
-      ? `${baseURL}/brave-api/sse-group?authorization=${authorization}`
-      : `${baseURL}/brave-api/sse-group`;
+    // const transport = sseClient.getTransport();
+    // const ackEnabled =
+    //   String(import.meta.env.VITE_REALTIME_ACK_ENABLED ?? "true") !== "false";
+    // const ackEndpoint = import.meta.env.VITE_REALTIME_ACK_ENDPOINT as
+    //   | string
+    //   | undefined;
 
-    // console.log("SSE 重新连接:", url);
-    sseClient.connect(url);
+    sseClient.configure({
+      // ackEnabled,
+      // ackHandler: ackEndpoint
+      //   ? async ({ seq, raw, transport: currentTransport }) => {
+      //     if (currentTransport !== "sse") {
+      //       return;
+      //     }
+
+      //     const endpoint = ackEndpoint.startsWith("/")
+      //       ? ackEndpoint
+      //       : `/${ackEndpoint}`;
+
+      //     await fetch(`${baseURL}${endpoint}`, {
+      //       method: "POST",
+      //       headers: {
+      //         "Content-Type": "application/json",
+      //         ...(authorization ? { authorization } : {}),
+      //       },
+      //       body: JSON.stringify({ seq, raw }),
+      //     });
+      //   }
+      //   : undefined,
+    });
+
+    // const url = buildRealtimeUrl(baseURL, transport, authorization);
+
+    // console.log("Realtime 重新连接:", url, "transport:", transport);
+    sseClient.connect(`${baseURL}/brave-api/sse-group?authorization=${authorization}`);
 
     return () => sseClient.close();
   }, [baseURL, authorization]);
@@ -33,13 +62,41 @@ export const SSEProvider = ({ children }: { children: React.ReactNode }) => {
     return () => clearInterval(timer);
   }, []);
 
-  const subscribe = (fn: (data: any) => void) :()=>{}=> {
+  const subscribe = (fn: (data: any) => void): (() => void) => {
     return sseClient.onMessage(fn) as any; // onMessage 已经返回了取消订阅函数
   };
 
   return (
-    <SSEContext.Provider value={{ status, subscribe, reconnect:()=>sseClient.reconnect() }}>
+    <SSEContext.Provider value={{ status, subscribe, reconnect: () => sseClient.reconnect() }}>
       {children}
     </SSEContext.Provider>
   );
 };
+
+// function buildRealtimeUrl(
+//   baseURL: string,
+//   transport: RealtimeTransport,
+//   authorization?: string
+// ) {
+//   const pathname =
+//     transport === "websocket" ? "/brave-api/ws-group" : "/brave-api/sse-group";
+//   const normalizedBase =
+//     transport === "websocket" ? toWebSocketBase(baseURL) : baseURL;
+
+//   return authorization
+//     ? `${normalizedBase}${pathname}?authorization=${authorization}`
+//     : `${normalizedBase}${pathname}`;
+// }
+
+// function toWebSocketBase(baseURL: string) {
+//   if (baseURL.startsWith("https://")) {
+//     return `wss://${baseURL.slice("https://".length)}`;
+//   }
+//   if (baseURL.startsWith("http://")) {
+//     return `ws://${baseURL.slice("http://".length)}`;
+//   }
+//   if (baseURL.startsWith("wss://") || baseURL.startsWith("ws://")) {
+//     return baseURL;
+//   }
+//   return `ws://${baseURL}`;
+// }
