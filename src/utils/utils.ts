@@ -9,7 +9,7 @@ export const colors = ["magenta", "red", "volcano", "orange", "gold", "lime", "g
 ]
 
 export function getPathname() {
-    const path = window.location.pathname;
+    const path = `${window.location.origin}${window.location.pathname}`;
     if (path.endsWith('/')) {
         return path.slice(0, -1);
     }
