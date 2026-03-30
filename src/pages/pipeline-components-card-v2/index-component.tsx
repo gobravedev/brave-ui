@@ -394,7 +394,7 @@ const PipelineComponentsCard: FC<any> = (params) => {
                 </Row> : <Empty></Empty>}
             </Spin>
             {totalPage != 0 && <Flex style={{ marginTop: "1rem" }} align="center">
-                A total of {totalPage}records &nbsp;
+                A total of {totalPage} records &nbsp;
                 <Pagination
                     current={pageNumber}
                     pageSize={pageSize}

@@ -26,5 +26,5 @@ export * from "./types";
 
 // export const realtimeClient = createRealtimeClient(resolveTransport());
 // Keep backward compatibility for existing imports.
-export const sseClient = new SSEClient();
-// export const websocketClient = new WebSocketClient();
+// export const sseClient = new SSEClient();
+export const sseClient = new WebSocketClient();
