@@ -18,6 +18,11 @@ export function registerLLMActions(sse: SSELike) {
             if (data?.action && data?.payload) {
                 console.log("[LLM] Received SSE message:", data);
                 ActionDispatcher.dispatch(data.action, data.payload);
+            }else if (data?.actions) {
+                console.log("[LLM] Received SSE batch actions:", data);
+                ActionDispatcher.dispatchList(data.actions);
+            } else {
+                console.warn("[LLM] Unrecognized SSE message format:", data);
             }
         } catch (e) {
             console.error("[LLM] SSE parse error", e);

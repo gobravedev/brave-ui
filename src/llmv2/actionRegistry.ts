@@ -2,11 +2,13 @@ import { ActionDispatcher } from "./dispatcher";
 import { useUIStore } from "@/store-zustand/ui";
 import { useFormStore } from "@/store-zustand/form";
 import { useRouterStore } from "@/store-zustand/router";
+import { useComponentStore } from "@/store-zustand/components";
+
 
 // 定义各 Action payload 类型
 export type ShowMessagePayload = { type: "success" | "error" | "info" | "warning"; text: string };
 export type ShowNotificationPayload = { type: "success" | "error" | "info" | "warning"; message: string; description?: string };
-export type RouterGoPayload = { path: string };
+export type RouterGoPayload = { path: string, state?: any };
 export type FormSetValuePayload = { form: string; field: string; value: any };
 export type FormResetPayload = { form: string };
 
@@ -14,20 +16,34 @@ export function registerActions() {
   // UI
   ActionDispatcher.register("ui.show_message", (payload: ShowMessagePayload) => {
     const ui = useUIStore.getState();
-    ui.message[payload.type](payload.text);
+    if (!ui.messageApi) {
+      console.warn("[LLM] Message API is not ready yet, skip message action");
+      return;
+    }
+    ui.messageApi[payload.type](payload.text);
   });
 
   ActionDispatcher.register("ui.show_notification", (payload: ShowNotificationPayload) => {
     const ui = useUIStore.getState();
-    ui.notification[payload.type]({
+    if (!ui.notificationApi) {
+      console.warn("[LLM] Notification API is not ready yet, skip notification action");
+      return;
+    }
+    ui.notificationApi[payload.type]({
       message: payload.message,
       description: payload.description,
     });
   });
+  ActionDispatcher.register(
+    "component.invoke",
+    ({ category, id, method, args }:any) => {
+      useComponentStore.getState().invoke(category, id, method, args);
+    }
+  );
 
   // Router
   ActionDispatcher.register("router.go", (payload: RouterGoPayload) => {
-    useRouterStore.getState().go(payload.path);
+    useRouterStore.getState().go(payload.path, payload.state);
   });
 
   // Form

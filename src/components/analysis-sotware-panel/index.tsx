@@ -446,19 +446,23 @@ export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeli
                             {/* {JSON.stringify(inputFileList)} */}
                             {/* <Spin spinning={loading}> */}
 
-                            <div style={{maxWidth:"40rem",margin:"0 auto"}}>
-                                <CreateOrUpdateParsms
-                                    // analysisResultId={analysisResultId}
-                                    form={upstreamForm}
-                                    requestParam={buildRequestParams()}
-                                    dataMap={resultTableList ? resultTableList : {}}
-                                    formJson={rest.formJson}
-                                    databases={rest.databases}
-                                    callback={() => {
-                                        if (tableRef.current) {
-                                            tableRef.current.reload()
-                                        }
-                                    }} ></CreateOrUpdateParsms>
+                            <div style={{ maxWidth: "40rem", margin: "0 auto" }}>
+                                {rest.component_id ?
+                                    <CreateOrUpdateParsms
+                                        // analysisResultId={analysisResultId}
+                                        form={upstreamForm}
+                                        requestParam={buildRequestParams()}
+                                        dataMap={resultTableList ? resultTableList : {}}
+                                        formJson={rest.formJson}
+                                        databases={rest.databases}
+                                        callback={() => {
+                                            if (tableRef.current) {
+                                                tableRef.current.reload()
+                                            }
+                                        }} ></CreateOrUpdateParsms> :
+                                    <Empty description="Please select a script!"></Empty>
+
+                                }
                             </div>
 
 

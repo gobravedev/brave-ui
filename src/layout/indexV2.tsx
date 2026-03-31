@@ -26,6 +26,7 @@ import { useStickyTop } from '@/hooks/useStickyTop';
 import ComponentRender from './component-render';
 import { SideViewProvider, useSideViewContext } from '@/context/side/SideViewContext';
 import { useSSE } from '@/context/sse/useSSE';
+import { ActionDispatcher } from '@/llmv2/dispatcher';
 
 const { Content, Sider } = Layout;
 
@@ -838,7 +839,17 @@ const SettingDrawer: FC<any> = ({ visible, onClose, project_id, openModal: openM
         </>}
         open={visible} onClose={onClose} >
         <Flex vertical gap={"small"}>
-
+            <Button onClick={() => {
+                const data = {
+                    action: "component.invoke",
+                    payload: {
+                        category: "tables",
+                        id:"tools-details",
+                        method: "reload",
+                    }
+                }
+                ActionDispatcher.dispatch(data.action, data.payload);
+            }}>Test ActionDispatcher</Button>
             <div>
                 Language: <LanguageSelector></LanguageSelector>
             </div>

@@ -9,6 +9,7 @@ const ScriptV2Component = lazy(() => import('./script/indexV2'))
 const FileComponent = lazy(() => import('./file'))
 const FileV2Component = lazy(() => import('./components/create-or-update-component'))
 const CreateOrUpdateComponent = lazy(() => import('./components/create-or-update-component'))
+const CreateOrUpdateRelation = lazy(() => import('./components/create-or-update-relation'))
 const AnalysisResultPageAdapter = lazy(() => import('./components/analysis-result-page'))
 const PipelineInputComponent = lazy(() => import('./pipeline/components/pipeline-input'))
 const LLMFile = lazy(()=>import("./components/llm-file"))
@@ -36,6 +37,7 @@ const viewMapping: {
 
         { key: "scriptV2", label: "script", component: ScriptV2Component },
         { key: "createOrUpdateComponent", label: "CreateOrUpdateComponent", component: CreateOrUpdateComponent },
+        { key: "createOrUpdateRelation", label: "CreateOrUpdateRelation", component: CreateOrUpdateRelation },
         { key: "analysisResult", label: "analysisResult", component: AnalysisResultPageAdapter },
         
         { key: "llmFile", label: "llmFile", component: LLMFile },

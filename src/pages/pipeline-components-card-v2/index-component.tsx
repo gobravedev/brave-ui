@@ -41,29 +41,29 @@ const PipelineComponentsCard: FC<any> = (params) => {
     // "target": "analysis_tools_card",
     // "value":"",
     // "message": f"分析工具{name}创建成功"
-    const sseData = useSelector((state: any) => state.global.sseData)
-    useEffect(() => {
-        // debugger
-        if (sseData && sseData?.action && sseData?.target == "analysis_tools_card") {
-            switch (sseData.action) {
-                case "create_analysis_tools":
-                    // reload()
-                    // 定位到最后一页
-                    const lastPage = Math.ceil(totalPage / pageSize);
-                    if (pageNumber != lastPage) {
-                        setPageNumber(lastPage)
-                    } else {
-                        reload()
-                    }
-                    messageApi.success(sseData?.message || "Component relation updated!")
-                    break;
-                case "update_component_relation":
-                case "delete_component_relation":
+    // const sseData = useSelector((state: any) => state.global.sseData)
+    // useEffect(() => {
+    //     // debugger
+    //     if (sseData && sseData?.action && sseData?.target == "analysis_tools_card") {
+    //         switch (sseData.action) {
+    //             case "create_analysis_tools":
+    //                 // reload()
+    //                 // 定位到最后一页
+                    // const lastPage = Math.ceil(totalPage / pageSize);
+                    // if (pageNumber != lastPage) {
+                    //     setPageNumber(lastPage)
+                    // } else {
+                    //     reload()
+                    // }
+    //                 messageApi.success(sseData?.message || "Component relation updated!")
+    //                 break;
+    //             case "update_component_relation":
+    //             case "delete_component_relation":
 
-            }
-        }
+    //         }
+    //     }
 
-    }, [sseData])
+    // }, [sseData])
     // const [pipelineComponents, setPipelineComponents] = useState<any>([])
     const { relation_type } = params
     // debugger
@@ -100,6 +100,7 @@ const PipelineComponentsCard: FC<any> = (params) => {
 
     // }
     const { data: pipelineComponents, pageNumber, totalPage, loading, reload, pageSize, setPageNumber, search } = usePagination({
+        id :"tools-card",
         pageApi: pageComponentsRelation,
         params: { category: activeCategory, ...params },
         map: mapFun,

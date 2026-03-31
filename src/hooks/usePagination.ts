@@ -1,23 +1,28 @@
+import { useComponentStore } from '@/store-zustand/components';
 import axios from 'axios';
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router';
 
 // 自定义 hook：分页逻辑
-export const usePagination = ({ url, pageApi, params, map, initialPageSize = 10 }: any) => {
+export const usePagination = ({ id, url, pageApi, params, map, initialPageSize = 10 }: any) => {
     const [data, setData] = useState<any[]>([]);  // 存储数据
     const [pageNumber, setPageNumber] = useState(1); // 当前页码
     const [totalPage, setTotalPage] = useState(0); // 总页数
     const [loading, setLoading] = useState(false); // 加载状态
-    const [pageSize,setPageSize] = useState(initialPageSize); // 每页显示条数
+    const [pageSize, setPageSize] = useState(initialPageSize); // 每页显示条数
     const [keywords, setKeywords] = useState<string>(""); // 搜索关键词
+    const { register, unregister } = useComponentStore();
+    const { state } = useLocation();
+    console.log("usePagination state from location:", state);
+    const [lastPage] = useState(state?.last || false); // 是否最后一页
 
-    // const fetchDataRef = useRef<(page: number) => void>(() => {});
 
-    const search = (kw: string) => {
+    const search = useCallback((kw: string) => {
         setKeywords(kw);   // 更新关键词
         setPageNumber(1);  // 搜索时回到第一页
-    };
+    }, []);
     // 模拟异步数据获取
-    const fetchData = async (page: number) => {
+    const fetchData = useCallback(async (page: number) => {
         setLoading(true);
         try {
             // 模拟 API 请求（这里用 setTimeout 来模拟延迟）
@@ -41,6 +46,7 @@ export const usePagination = ({ url, pageApi, params, map, initialPageSize = 10 
                     {
                         ...params,
                         page_number: page,
+                        is_last: lastPage,
                         page_size: pageSize,
                         keywords: keywords || undefined, // 如果 keywords 有值才传
                     })
@@ -49,6 +55,7 @@ export const usePagination = ({ url, pageApi, params, map, initialPageSize = 10 
                     ...params,
                     page_number: page,
                     page_size: pageSize,
+                    is_last: lastPage,
                     keywords: keywords || undefined, // 如果 keywords 有值才传
                 })
             }
@@ -69,22 +76,42 @@ export const usePagination = ({ url, pageApi, params, map, initialPageSize = 10 
 
             // 设置数据
             // setTotalPage(Math.ceil(response.total / pageSize)); // 计算总页数\
-            setTotalPage(total)
+            setTotalPage(total || 0)
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
             setLoading(false);
         }
-    };
-    const reload = () => {
+    }, [url, pageApi, JSON.stringify(params), pageSize, keywords, lastPage]);
+
+    const reload = useCallback(() => {
         fetchData(pageNumber)
-    }
+    }, [fetchData, pageNumber]);
+
+    const loadLast = useCallback(() => {
+        // totalPage 在当前实现中表示总记录数
+        const lastPage = Math.max(1, Math.ceil((totalPage || 0) / pageSize));
+        if (pageNumber !== lastPage) {
+            setPageNumber(lastPage)
+        } else {
+            reload()
+        }
+    }, [totalPage, pageSize, pageNumber, reload]);
+
+    useEffect(() => {
+        if (!id) return;
+        register("tables", id, { reload, loadLast, search });
+        return () => {
+            unregister("tables", id);
+        }
+    }, [id]);
+
     // useEffect(() => {
     //     setPageNumber(1);
     // }, [url, JSON.stringify(params)]);
     useEffect(() => {
         fetchData(pageNumber); // 获取数据
-    }, [pageNumber, keywords,pageSize,url,JSON.stringify(params)]);
+    }, [fetchData, pageNumber]);
 
     return {
         data,
