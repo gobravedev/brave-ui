@@ -441,7 +441,7 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
 
     useEffect(() => {
         loadHistoryMessage();
-    }, [project, biz_id])
+    }, [project])
 
     useImperativeHandle(ref, () => ({
         loadHistoryMessage

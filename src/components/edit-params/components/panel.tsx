@@ -106,7 +106,7 @@ const EditParamsPanel: FC<any> = ({  callback,analysisId }) => {
     return <>
         {/* {JSON.stringify(relation)} */}
         {params ? <>
-            <Space>
+            <Space wrap>
                 <Tag>{data?.component_name}</Tag>
                 {data?.analysis_id && <>
                     <Tag color="success">{data?.analysis_name}</Tag>

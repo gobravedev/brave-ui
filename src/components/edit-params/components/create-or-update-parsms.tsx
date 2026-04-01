@@ -16,6 +16,7 @@ import BioDatabaseForm from "@/components/bio-database-form";
 import BioDatabases from "@/components/bio-databases";
 import { useSelector } from "react-redux";
 import { useStoreRender } from "@/context/render/RenderProvider";
+import { ActionDispatcher } from "@/llmv2/dispatcher";
 const RenderFromJson = lazy(() => import("./render-form-json"));
 
 
@@ -90,9 +91,17 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                 if (resp.data.analysis_id) {
                     setAnalysisId(resp.data.analysis_id)
                 }
+                const data = {
+                    action: "component.invoke",
+                    payload: {
+                        category: "tables",
+                        id: "analysis-list",
+                        method: "reload",
+                    }
+                }
+                ActionDispatcher.dispatch(data.action, data.payload);
                 if (callback) {
                     callback()
-
                 }
             } else {
                 openModals("paramsView", resp.data)

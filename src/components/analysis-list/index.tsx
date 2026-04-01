@@ -28,6 +28,7 @@ const AnalysisList = forwardRef<any, any>(({
 
 }, ref) => {
     const { data, pageNumber, totalPage, loading, reload: loadData, pageSize, setPageNumber, search } = usePagination({
+        id:"analysis-list",
         url: `/list-analysis`,
         params: {
             component_id: component_id,
@@ -614,6 +615,7 @@ const AnalysisList = forwardRef<any, any>(({
                                 label: (<> <Popconfirm title={"Delete or not?"} onConfirm={async () => {
                                     await deleteById(record.analysis_id)
                                     loadData()
+                                    setAnalysisId(null)
                                 }}>
                                     <a style={{ color: 'red' }}>Delete</a>
                                 </Popconfirm></>)

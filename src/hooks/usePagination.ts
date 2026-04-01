@@ -99,6 +99,7 @@ export const usePagination = ({ id, url, pageApi, params, map, initialPageSize =
     }, [totalPage, pageSize, pageNumber, reload]);
 
     useEffect(() => {
+        // console.log("Registering pagination with id:", id);
         if (!id) return;
         register("tables", id, { reload, loadLast, search });
         return () => {
