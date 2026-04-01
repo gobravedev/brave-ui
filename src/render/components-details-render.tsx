@@ -28,12 +28,15 @@ const InputFileComponent = lazy(() => import('@/components/result-list/input-fil
 const OutputFileComponent = lazy(() => import('@/components/result-list/output-file-component'))
 const AnalysisResultView = lazy(() => import('@/components/analysis-result-view/analysis-reuslt-view'))
 const AnalysisList = lazy(() => import('@/components/analysis-list'))
+const WorkflowComponent = lazy(() => import('../pages/components-relation/workflow'))
+const RelationDefinitionDAG = lazy(() => import('../pages/components-relation/components/relation-definition-dag')) 
 const viewMapping: {
     key: string;
     label: string;
     component: React.ComponentType<any>;
 }[] = [
         { key: "workflow2", label: "workflow", component: PipelineFlowComponent },
+        { key: "workflowComponent", label: "workflowComponent", component: WorkflowComponent },
         { key: "software", label: "software", component: SoftwareComponent },
         { key: "tools", label: "software", component: SoftwareComponent },
         { key: "analysisTools", label: "analysisTools", component: AnalysisTools },
@@ -66,7 +69,7 @@ const viewMapping: {
         {key : "outputFileComponent", label: "outputFileComponent", component: OutputFileComponent},
         {key: "analysisResultView", label: "analysisResultView", component: AnalysisResultView},
         {key: "analysisList", label: "analysisList", component: AnalysisList},
-
+        {key: "relationDefinitionDAG", label: "relationDefinitionDAG", component: RelationDefinitionDAG},
 
         { key: "workflow-input", label: "workflow-input", component: PipelineInputComponent },
 

@@ -254,7 +254,7 @@ const Pipeline: FC<any> = ({ }) => {
     //         setOpenKeys([]);
     //     }
     // };
-    const { toolsPanelView, setToolsPanelView,clear } = useStoreRender()
+    const { toolsPanelView, setToolsPanelView, clear } = useStoreRender()
 
     useEffect(() => {
         loadData()
@@ -263,10 +263,10 @@ const Pipeline: FC<any> = ({ }) => {
         }
     }, [])
 
-    const isToolsExist = () => {
-        if (component?.component_id && component?.component_id != "") return true
-        return false
-    }
+    // const isToolsExist = () => {
+    //     if (component?.component_id && component?.component_id != "") return true
+    //     return false
+    // }
 
 
     return <div >
@@ -339,6 +339,15 @@ const Pipeline: FC<any> = ({ }) => {
                                 value: "outputFileComponent"
                             }
                         ]} />
+
+                    {(leftPanel != "workflowComponent") ? <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        setLeftPanel("workflowComponent")
+                    }}>Workflow</Button> : <>
+                        <Button size="small" color="blue" variant="solid" icon={<CloseOutlined />} onClick={() => {
+                            setLeftPanel("analysisTools")
+                        }}>Close</Button>
+                    </>}
+
                     <Button size="small" color="cyan" variant="solid" onClick={() => {
                         openModal("publishModal", { ...component, relation_type: relation_type })
                     }}>Publish</Button>
@@ -386,18 +395,7 @@ const Pipeline: FC<any> = ({ }) => {
                     </>}
 
 
-                    {(leftPanel != "createOrUpdateComponent") ? <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        setLeftPanel("createOrUpdateComponent")
-                        setParams({
-                            structure: {
-                                component_type: "script",
-                            }
-                        })
-                    }}>{isToolsExist() ? "Update" : "Create"} Script</Button> : <>
-                        <Button size="small" color="blue" variant="solid" icon={<CloseOutlined />} onClick={() => {
-                            setLeftPanel("analysisTools")
-                        }}>Close</Button>
-                    </>}
+
                     {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                         // openModal("createOrUpdatePipelineComponent", {
                         //     data: { component_id: component?.component_id }, structure: {
@@ -429,54 +427,6 @@ const Pipeline: FC<any> = ({ }) => {
                                     })
                                 }}>Component Code</Button> */}
 
-                    {isToolsExist() && <>
-                        {(leftPanel != "component-script") ? <Button size="small" color="cyan" variant="solid" onClick={() => {
-                            setLeftPanel("component-script")
-                        }}>Code</Button> : <>
-                            {/* <Dropdown.Button   size="small"  menu={{items:[
-
-                                    ]}} onClick={()=>   setLeftPanel(relation_type)}>
-                                        Return
-                                    </Dropdown.Button> */}
-                            <Space.Compact>
-                                <Button size="small" color="blue" variant="solid" icon={<CloseOutlined />} onClick={() => {
-                                    setLeftPanel("analysisTools")
-                                }}></Button>
-
-                                <Popconfirm title="Whether to generate scripts?" onConfirm={async () => {
-                                    leftRef.current?.generateScript()
-                                }}>
-                                    <Button size="small" color="blue" variant="solid" icon={<PlusOutlined />}></Button>
-
-                                </Popconfirm>
-
-                                <Button size="small" color="blue" variant="solid" icon={<RedoOutlined />}
-                                    onClick={() => { leftRef.current?.loadData() }}></Button>
-                                <Button size="small" color="blue" variant="solid" onClick={() => {
-                                    leftRef.current?.save()
-                                }}>Save</Button>
-                            </Space.Compact>
-
-                        </>}
-
-                        {(leftPanel != "component-structure") ? <Button size="small" color="cyan" variant="solid" onClick={() => {
-                            setLeftPanel("component-structure")
-                        }}>Structure</Button> : <>
-                            <Space.Compact>
-                                <Button size="small" color="blue" variant="solid" icon={<CloseOutlined />} onClick={() => {
-                                    setLeftPanel("analysisTools")
-                                }}></Button>
-                                <Button size="small" color="blue" variant="solid" icon={<RedoOutlined />}
-                                    onClick={() => { leftRef.current?.loadData() }}></Button>
-                                <Button size="small" color="blue" variant="solid" onClick={() => {
-                                    leftRef.current?.save()
-                                }}>Save</Button>
-                            </Space.Compact>
-
-                        </>}
-
-
-                    </>}
 
                     {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                                     setLeftPanel("component-structure")

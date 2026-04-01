@@ -4,10 +4,7 @@ import axios from "axios"
 import { FC, lazy, memo, Suspense, use, useEffect, useRef, useState } from "react"
 import { listPipelineComponents as listPipelineComponentsApi } from '@/api/pipeline'
 import { useModal } from "@/hooks/useModal"
-import { data } from "react-router"
-import { useForm } from "antd/es/form/Form"
 import { MonacoEditor } from "../react-monaco-editor"
-import { el, es, tr } from "@faker-js/faker"
 import { PlusOutlined } from '@ant-design/icons'
 
 
@@ -152,6 +149,7 @@ import { softwareTemplete, scriptTemplete, fileTemplete } from './templete'
 import ContainerPage from "@/pages/container"
 import { useSelector } from "react-redux"
 import { useGlobalMessage } from "@/hooks/useGlobalMessage"
+import { json } from "stream/consumers"
 const SoftwareContent: FC<any> = ({ data, form }) => {
     const [templete, setTemplete] = useState<any>()
     const [containers, setContainers] = useState<any>([])
@@ -611,6 +609,259 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
         </Drawer>
     </>
 }
+export const CreateOrUpdatePipelineV2: FC<any> = ({ component_id, structure, callback }) => {
+    // if (!visible) return null;
+
+    // const { data, structure } = params
+    const [form] = Form.useForm()
+    const [component, setComponent] = useState<any>()
+    const { namespace } = useSelector((state: any) => state.user);
+
+    const [loading, setLoading] = useState<any>(false)
+
+    const content = Form.useWatch((values: any) => values?.content, form);
+
+
+    const getPipeleine = async (componentId: any) => {
+        const resp = await axios.post("/find-pipeline", { component_id: componentId })
+
+        const data = resp.data
+        // data['content'] = JSON.parse(data['content']) //JSON.stringify(JSON.parse(data['content']), null, 2)
+        if (data['tags']) {
+            data['tags'] = JSON.parse(data['tags'])
+        }
+        if (data["component_ids"]) {
+            data["component_ids"] = JSON.parse(data["component_ids"])
+        }
+        if (data["tools_container_id"]) {
+            data["tools_container_id"] = JSON.parse(data["tools_container_id"])
+        }
+
+        setComponent(data)
+        console.log(data)
+        if (structure.component_type == "pipeline") {
+            data['content'] = JSON.parse(data['content'])
+            form.setFieldsValue(data)
+        } else {
+            form.setFieldsValue(data)
+        }
+
+    }
+
+
+
+    useEffect(() => {
+        if (component_id) {
+            getPipeleine(component_id)
+        } else {
+            setComponent({})
+            form.resetFields()
+        }
+    }, [component_id])
+    const getParams = (values: any) => {
+        const params = {
+            ...values,
+            ...structure,
+
+        }
+        if (component_id) {
+            // params['relation_id'] = pipelineRelation.relation_id
+            // params['parent_component_id'] = pipelineRelation.parent_component_id
+            params['component_id'] = component_id
+
+
+        }
+
+
+        return params
+    }
+    const getParamsFormat = (values: any) => {
+        const params = getParams(values)
+        if (typeof params['content'] == 'string') {
+            try {
+                params['content'] = JSON.parse(params['content'])
+
+            } catch (error) {
+
+            }
+        }
+
+        return params
+    }
+    const savePipeline = async () => {
+        setLoading(true)
+        const values = await form.validateFields()
+        const params = getParams(values)
+        if (typeof params['content'] != 'string') {
+            params['content'] = JSON.stringify(params['content'])
+        }
+        if (typeof params['tags'] != 'string') {
+            params['tags'] = JSON.stringify(params['tags'])
+        }
+        if (!params['content']) {
+            params['content'] = "{}"
+        }
+        // for file component
+        if (params["component_ids"]) {
+            params["component_ids"] = JSON.stringify(params["component_ids"])
+        }
+        if (params["tools_container_id"]) {
+            params["tools_container_id"] = JSON.stringify(params["tools_container_id"])
+        }
+        // if (data["relation_id"]) {
+        //     params["relation_id"] = data["relation_id"]
+        // }
+
+        console.log(params)
+        try {
+            const resp = await axios.post("/save-pipeline", params)
+            console.log(resp)
+            setLoading(false)
+            if (callback) {
+                callback()
+                // await axios.get("/get-pipeline-v2/d9830ebd-240e-4758-adab-dd3a9d17e414")
+            }
+            // onClose()
+        } catch (error) {
+            setLoading(false)
+        }
+
+    }
+
+    useEffect(() => {
+        form.setFieldValue("namespace", namespace)
+    }, [namespace])
+    const normFile = (e: any) => {
+        console.log(e)
+        if (Array.isArray(e)) {
+            return e;
+        }
+        return [{
+            uid: '-4',
+            name: 'image.png',
+            status: 'done',
+            url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
+        }];
+    };
+    return <>
+        {/* {JSON.stringify(data)} */}
+        {/* <Drawer
+            loading={loading}
+            title={`${data ? "Update" : "Create"} Component(${structure?.component_type})`}
+            // okText={data ? "Update" : "Create"}
+            // onCancel={() => onClose()}
+            // onOk={savePipeline}
+            forceRender={true}
+
+            open={visible}
+            width={"80%"}
+            extra={<>
+
+            </>}
+            onClose={() => onClose()}
+
+        > */}
+        {/* {namespace} */}
+
+        <Spin spinning={loading}>
+            {/* {JSON.stringify(component)} */}
+
+            <Form form={form} >
+                <Tabs
+                    tabBarExtraContent={<Space>
+                        {component_id &&
+                            <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                getPipeleine(component_id)
+                            }}>
+                                Refresh
+                            </Button>
+                        }
+
+                        <Button size="small" color="cyan" variant="solid" onClick={savePipeline}>
+                            {component_id ? "Update" : "Create"}
+                        </Button>
+                    </Space>
+                    }
+                    items={[
+                        {
+                            label: "Component Info",
+                            key: "1",
+                            children: <>
+                                {/* <Form.Item name={"namespace"} label="Namespace"   >
+                                <Input disabled></Input>
+                            </Form.Item> */}
+
+                                <Form.Item name={"component_name"} label="Component Name" rules={[{ required: true, message: 'Please input component name!' }]}>
+                                    <Input ></Input>
+                                </Form.Item>
+
+
+
+                                <ComponentsRender structure={structure} {...structure} data={component} form={form}></ComponentsRender>
+
+                            </>
+                        }, {
+                            label: "Component Description",
+                            key: "2",
+                            children: <>
+
+                                <Form.Item name={"prompt"} label="Prompt" >
+                                    <TextArea rows={4}></TextArea>
+                                </Form.Item>
+
+                                <Form.Item name={"tags"} label="Tags">
+                                    <Select
+                                        mode="tags"
+                                        style={{ width: '100%' }}
+                                    />
+                                </Form.Item>
+                                <Form.Item name={"category"} label="Category">
+                                    <Input ></Input>
+                                </Form.Item>
+                                {/* valuePropName="fileList"  getValueFromEvent={normFile}*/}
+                                {component_id && <Form.Item label="Upload" name={"img"}  >
+                                    <UploadComp component_id={component_id}></UploadComp>
+                                </Form.Item>}
+                                <Form.Item label="Order" name={"order_index"} initialValue={0}>
+                                    <InputNumber ></InputNumber >
+                                </Form.Item>
+
+                                <Form.Item name={"description"} label="Description">
+                                    <TextAreaComp templete={""}></TextAreaComp>
+
+                                </Form.Item>
+
+                            </>
+                        }
+                    ]}>
+                </Tabs>
+
+                <Collapse ghost items={[
+                    {
+                        key: "1",
+                        label: "More",
+                        children: <>
+                            <Form.Item noStyle shouldUpdate>
+                                {() => (
+                                    <Typography>
+                                        <pre>{JSON.stringify(getParamsFormat(form.getFieldsValue()), null, 2)}</pre>
+                                    </Typography>
+                                )}
+                            </Form.Item>
+                        </>
+                    }
+                ]} />
+
+            </Form>
+            <PreviewJsonForm value={content}></PreviewJsonForm>
+
+        </Spin>
+
+
+
+        {/* </Drawer> */}
+    </>
+}
 
 
 export const CreateOrUpdatePipeline: FC<any> = ({ data, structure, callback }) => {
@@ -640,7 +891,7 @@ export const CreateOrUpdatePipeline: FC<any> = ({ data, structure, callback }) =
         if (data["tools_container_id"]) {
             data["tools_container_id"] = JSON.parse(data["tools_container_id"])
         }
-    
+
         setComponent(data)
         console.log(data)
         if (structure.component_type == "pipeline") {
@@ -712,7 +963,7 @@ export const CreateOrUpdatePipeline: FC<any> = ({ data, structure, callback }) =
         if (params["tools_container_id"]) {
             params["tools_container_id"] = JSON.stringify(params["tools_container_id"])
         }
-        if (data["relation_id"]){
+        if (data["relation_id"]) {
             params["relation_id"] = data["relation_id"]
         }
 
@@ -748,7 +999,7 @@ export const CreateOrUpdatePipeline: FC<any> = ({ data, structure, callback }) =
         }];
     };
     return <>
-    {/* {JSON.stringify(data)} */}
+        {/* {JSON.stringify(data)} */}
         {/* <Drawer
             loading={loading}
             title={`${data ? "Update" : "Create"} Component(${structure?.component_type})`}
@@ -808,9 +1059,11 @@ export const CreateOrUpdatePipeline: FC<any> = ({ data, structure, callback }) =
                             label: "Component Description",
                             key: "2",
                             children: <>
+
                                 <Form.Item name={"prompt"} label="Prompt" >
                                     <TextArea rows={4}></TextArea>
                                 </Form.Item>
+
                                 <Form.Item name={"tags"} label="Tags">
                                     <Select
                                         mode="tags"
@@ -888,6 +1141,7 @@ export const CreateORUpdateRelationComp: FC<any> = (params) => {
     const [pipelineRelation, setPipelineRelation] = useState<any>()
     const [components, setComponents] = useState<any>([])
     const [loading, setLoaidng] = useState<any>(false)
+    const message = useGlobalMessage()
 
     const listPipelineComponents = async (componentType: any) => {
         const resp = await listPipelineComponentsApi({
@@ -961,8 +1215,8 @@ export const CreateORUpdateRelationComp: FC<any> = (params) => {
         // if (data?.input_component_ids) {
         //     data['input_component_ids'] = JSON.parse(data['input_component_ids'])
         // }
-        // if (data?.output_component_ids) {
-        //     data['output_component_ids'] = JSON.parse(data['output_component_ids'])
+        // if (data?.dag_definition) {
+        //     data['dag_definition'] = JSON.stringify(data['dag_definition'], null, 2)
         // }
         setPipelineRelation(data)
         form.setFieldsValue(data)
@@ -1013,6 +1267,9 @@ export const CreateORUpdateRelationComp: FC<any> = (params) => {
         if (typeof params['content'] != 'string') {
             params['content'] = JSON.stringify(params['content'])
         }
+        // if (typeof params['dag_definition'] != 'object') {
+        //     params['dag_definition'] = JSON.parse(params['dag_definition'])
+        // }
 
         console.log(params)
         try {
@@ -1022,67 +1279,79 @@ export const CreateORUpdateRelationComp: FC<any> = (params) => {
             if (callback) {
                 callback()
             }
+            message.success("Save relation success!")
         } catch (error) {
             setLoaidng(false)
         }
 
 
     }
-    return <>
+    return <Spin spinning={loading}>
+        <Card size="small"
+            extra={<Space>
+                <Button size="small" color="cyan" variant="solid" onClick={savePipeline}>
+                    {data ? "Update" : "Create"}
+                </Button>
+
+            </Space>}
+        >
+
+
+            <Form form={form}>
+                <Form.Item name={"name"} label="Name" rules={[{ required: true, message: 'Please input name!' }]}>
+                    <Input ></Input>
+                </Form.Item>
+                <Form.Item name={"dag_definition"} label="DAG Definition" >
+                    <TextArea rows={4}></TextArea>
+                </Form.Item>
+                <ComponentsRelationRender components={components} {...pipelineStructure} data={pipeline} form={form}></ComponentsRelationRender>
+
+                <Form.Item name={"tags"} label="Tags">
+                    <Select
+                        mode="tags"
+                        style={{ width: '100%' }}
+                    />
+                </Form.Item>
+                <Form.Item name={"category"} label="Category">
+                    <Input ></Input>
+                </Form.Item>
+                {/* valuePropName="fileList"  getValueFromEvent={normFile}*/}
+                {/* {JSON.stringify(data)} */}
+                {data?.relation_id && <Form.Item label="Upload" name={"img"}  >
+                    {/* {data?.relation_id} */}
+                    <UploadRelationComp relation_id={data?.relation_id}></UploadRelationComp>
+                </Form.Item>}
+                <Form.Item label="Order" name={"order_index"} initialValue={0}>
+                    <InputNumber ></InputNumber >
+                </Form.Item>
+
+                <Form.Item name={"description"} label="Description">
+                    <TextArea></TextArea>
+                </Form.Item>
+
+                <Collapse ghost items={[
+                    {
+                        key: "1",
+                        label: "More",
+                        children: <>
+                            <Form.Item noStyle shouldUpdate>
+                                {() => (
+                                    <Typography>
+                                        <pre>{JSON.stringify(getParams(form.getFieldsValue()), null, 2)}</pre>
+                                    </Typography>
+                                )}
+                            </Form.Item>
+                        </>
+                    }
+                ]} />
+
+            </Form>
+        </Card>
         {/* savePipeline */}
 
-        <Button size="small" color="cyan" variant="solid" onClick={savePipeline}>
-            {data ? "Update" : "Create"}
-        </Button>
 
-        <Form form={form}>
-            <Form.Item name={"name"} label="Name" rules={[{ required: true, message: 'Please input name!' }]}>
-                <Input ></Input>
-            </Form.Item>
-            <ComponentsRelationRender components={components} {...pipelineStructure} data={pipeline} form={form}></ComponentsRelationRender>
 
-            <Form.Item name={"tags"} label="Tags">
-                <Select
-                    mode="tags"
-                    style={{ width: '100%' }}
-                />
-            </Form.Item>
-            <Form.Item name={"category"} label="Category">
-                <Input ></Input>
-            </Form.Item>
-            {/* valuePropName="fileList"  getValueFromEvent={normFile}*/}
-            {/* {JSON.stringify(data)} */}
-            {data?.relation_id && <Form.Item label="Upload" name={"img"}  >
-                {/* {data?.relation_id} */}
-                <UploadRelationComp relation_id={data?.relation_id}></UploadRelationComp>
-            </Form.Item>}
-            <Form.Item label="Order" name={"order_index"} initialValue={0}>
-                <InputNumber ></InputNumber >
-            </Form.Item>
-
-            <Form.Item name={"description"} label="Description">
-                <TextArea></TextArea>
-            </Form.Item>
-
-            <Collapse ghost items={[
-                {
-                    key: "1",
-                    label: "More",
-                    children: <>
-                        <Form.Item noStyle shouldUpdate>
-                            {() => (
-                                <Typography>
-                                    <pre>{JSON.stringify(getParams(form.getFieldsValue()), null, 2)}</pre>
-                                </Typography>
-                            )}
-                        </Form.Item>
-                    </>
-                }
-            ]} />
-
-        </Form>
-
-    </>
+    </Spin>
 }
 
 export const CreateORUpdatePipelineCompnentRelation: FC<any> = ({ visible, onClose, params, callback }) => {

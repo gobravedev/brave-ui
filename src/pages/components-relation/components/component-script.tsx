@@ -1,15 +1,16 @@
 import AI from "@/components/chat/ai";
 import { FC, forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import AnalysisResultPage from "./analysis-result-page";
-import { Card, Col, Row } from "antd";
+import { Button, Card, Col, Popconfirm, Row, Space } from "antd";
 import Code from "@/components/module-edit/code";
 import { MonacoEditor } from "@/components/react-monaco-editor";
 import axios from "axios";
 import { useGlobalMessage } from "@/hooks/useGlobalMessage";
+import { AppstoreOutlined, CloseOutlined, DeleteColumnOutlined, DeleteOutlined, DownOutlined, PlusOutlined, QuestionCircleOutlined, RedoOutlined } from '@ant-design/icons'
 
 const ComponentScript = forwardRef<any, any>(
 
-    ({ component_id, component }, ref) => {
+    ({ component_id }, ref) => {
         const [data, setData] = useState<any>()
         const [scriptName, setScriptName] = useState("main")
         const editorRef = useRef<any>(null)
@@ -52,10 +53,27 @@ const ComponentScript = forwardRef<any, any>(
             }
 
         }, [component_id, scriptName])
-        return <>
+        return <Card size="small"
+            extra={<Space  size={"small"}>
+                <Popconfirm title="Whether to generate scripts?" onConfirm={async () => {
+                    generateScript()
+                }}>
+                    <Button size="small" color="blue" variant="solid" icon={<PlusOutlined />}></Button>
+
+                </Popconfirm>
+
+                <Button size="small" color="blue" variant="solid" icon={<RedoOutlined />}
+                    onClick={() => { getModuleContent() }}></Button>
+                <Button size="small" color="blue" variant="solid" onClick={() => {
+                    save()
+                }}>Save</Button>
+
+            </Space>}
+        >
+            {/* {component_id} */}
             <MonacoEditor height={"85vh"} value={content} onChange={setContent} defaultLanguage="python" ></MonacoEditor>
 
-        </>
+        </Card>
 
     }
 
