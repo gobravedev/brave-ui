@@ -144,6 +144,9 @@ if (appType == "index") {
         {
             path: "/c/tools/:relation_id",
             element: <ToolsDetail />
+        },{
+            path: "/c/tools/:relation_id/:analysis_id",
+            element: <ToolsDetail />
         },
         // {
         //     path: "/c/:component_type/:relation_id",

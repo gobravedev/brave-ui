@@ -1,27 +1,36 @@
-import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Tooltip } from "antd";
+import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Tooltip, Space } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { FC, forwardRef, lazy, Suspense, useEffect, useImperativeHandle, useRef, useState } from "react";
 import axios from "axios";
 import { useNavigate, useOutletContext } from "react-router";
 import CreateOrUpdateParsms from "./create-or-update-parsms";
-import { RedoOutlined } from "@ant-design/icons";
+import { ClearOutlined, RedoOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 const RenderFromJson = lazy(() => import("./render-form-json"));
-
-const EditParamsPanel: FC<any> = ({ analysis_id, runBtn, callback }) => {
+import { useStoreRender } from "@/context/render/RenderProvider";
+const EditParamsPanel: FC<any> = ({  callback,analysisId }) => {
     const [form] = Form.useForm()
-    const { messageApi, project } = useOutletContext<any>()
+    const { requestParam, relation,setAnalysisId } = useStoreRender()
+
     // const addedProject = Form.useWatch((values: any) => values?.addedProject, form);
     const jobStatus = useRef<any>(null)
+    const [params, setParsms] = useState<any>(requestParam)
+    // const { requestParam, dataMap, formJson, databases } = params
+    const [data, setData] = useState<any>()
 
     useEffect(() => {
-        if (analysis_id) {
-            analysisIdRef.current = analysis_id
+        // form.resetFields()
+        if (analysisId) {
+            analysisIdRef.current = analysisId
             loadData()
+        } else {
+            setParsms(requestParam)
+            setData({
+                component_name: relation?.name,
+            })
         }
-    }, [analysis_id])
+    }, [analysisId, requestParam])
     // form.()
-    const [data, setData] = useState<any>()
     const [resultData, setResultData] = useState<any>()
 
     // const navigate = useNavigate()
@@ -37,10 +46,17 @@ const EditParamsPanel: FC<any> = ({ analysis_id, runBtn, callback }) => {
     // }
     const loadData = async () => {
         setLoading(true)
-        const resp = await axios.post(`/analysis/edit-params/${analysis_id}`)
+        const resp = await axios.post(`/analysis/edit-params/${analysisId}`)
         jobStatus.current = resp.data?.job_status
 
         setData(resp.data)
+        setParsms({
+            requestParam: resp.data.request_param,
+            dataMap: { ...resp.data.analysis_result, first_data_key: getFirstKey(resp.data.analysis_result) },
+            formJson: resp.data.formJson,
+            databases: resp.data.databases,
+            upstreamFormJson: resp.data.upstreamFormJson,
+        })
 
         // await loadAnalysisResult(JSON.parse(resp.data.request_param.data_component_ids))
         setResultData(resp.data.analysis_result)
@@ -60,7 +76,7 @@ const EditParamsPanel: FC<any> = ({ analysis_id, runBtn, callback }) => {
 
 
     const sseData = useSelector((state: any) => state.global.sseData)
-    const analysisIdRef = useRef<any>(analysis_id)
+    const analysisIdRef = useRef<any>(analysisId)
 
     useEffect(() => {
         const data = sseData
@@ -84,91 +100,49 @@ const EditParamsPanel: FC<any> = ({ analysis_id, runBtn, callback }) => {
         }
     }
 
-    const buildFormJson = () => {
-        // if (data?.content?.reInputFile) {
-        //     if (data?.component_type == "software") {
-        //         formJson.push({
-        //             "name": "group_field",
-        //             "label": "Group Field",
-        //             "rules": [
-        //                 {
-        //                     "required": true,
-        //                     "message": "该字段不能为空!"
-        //                 }
-        //             ],
-        //             "type": "GroupFieldSelect"
-        //         })
-        //     }
-        //     return formJson
-        //     // data?.component_type == "software" ? {
-        //     //     "name": "group_field",
-        //     //     "label": "Group Field",
-        //     //     "rules": [
-        //     //         {
-        //     //             "required": true,
-        //     //             "message": "该字段不能为空!"
-        //     //         }
-        //     //     ],
-        //     //     "type": "GroupFieldSelect"
-        //     // } : []
-        //     // ]
-        // } else {
-        //     const formJson = [...data?.inputFormJson || [], ...data.content?.formJson || [], ...data.content?.upstreamFormJson || []]
-        //     if (data?.component_type == "software") {
-        //         formJson.push({
-        //             "name": "group_field",
-        //             "label": "Group Field",
-        //             "rules": [
-        //                 {
-        //                     "required": true,
-        //                     "message": "该字段不能为空!"
-        //                 }
-        //             ],
-        //             "type": "GroupFieldSelect"
-        //         })
-        //     }
-        //     return formJson
-        // }
 
-        return [...data.formJson || []]
 
-    }
 
-    // useEffect(() => {
-    //     if (data?.request_param) {
-    //         form.setFieldsValue(data.request_param)
-
-    //     }
-    // }, [form])
     return <>
-        {data ? <>
-            <div>
+        {/* {JSON.stringify(relation)} */}
+        {params ? <>
+            <Space>
                 <Tag>{data?.component_name}</Tag>
-                <Tag color="success">{data?.analysis_name}</Tag>
-                <Tooltip title={data?.analysis_id}>
-                    <Tag>{String(analysisIdRef.current).slice(0, 8)}</Tag>
+                {data?.analysis_id && <>
+                    <Tag color="success">{data?.analysis_name}</Tag>
+                    <Tooltip title={data?.analysis_id}>
+                        <Tag>{String(analysisIdRef.current).slice(0, 8)}</Tag>
+                    </Tooltip>
+                    <Tag>{jobStatus.current}</Tag>
+                    <Button onClick={loadData} size="small" icon={<RedoOutlined></RedoOutlined>}></Button>
+
+                    {/* <RedoOutlined style={{ cursor: "pointer" }} onClick={loadData} /> */}
+                </>}
+                <Tooltip title="Reset form">
+                    <Button onClick={() => {
+                        setAnalysisId(null)
+                        form.resetFields()
+                    }} size="small" icon={<ClearOutlined></ClearOutlined>}></Button>
+
                 </Tooltip>
-                <Tag>{jobStatus.current}</Tag>
-                <RedoOutlined style={{ cursor: "pointer" }} onClick={loadData} />
 
 
-            </div>
+
+
+            </Space>
 
             <CreateOrUpdateParsms
                 showCreate={true}
                 form={form}
-                requestParam={{ ...data.request_param, analysis_id: data?.analysis_id }}
-                dataMap={{ ...resultData, first_data_key: getFirstKey(resultData) }}
-                formJson={buildFormJson()}
-                databases={data?.databases}
-                jobStatus={jobStatus}
-                // inputFormJson={data?.inputFormJson}
-                // onChangeAddProject={(value:any)=>{
-                //     // loadData(value)
-                //     // console.log(value)
 
-                // }}
-                upstreamFormJson={data?.upstreamFormJson}
+                // requestParam={{ ...data.request_param, analysis_id: data?.analysis_id }}
+                // dataMap={{ ...resultData, first_data_key: getFirstKey(resultData) }}
+                // formJson={data.formJson}
+                // databases={data?.databases}
+                // upstreamFormJson={data?.upstreamFormJson}
+                {...params}
+
+                jobStatus={jobStatus}
                 callback={() => {
                     // loadData()
                     callback && callback()

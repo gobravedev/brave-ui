@@ -12,6 +12,7 @@ import { useStickyTop } from "@/hooks/useStickyTop"
 import { AI } from "@/components/chat"
 import { useSideView } from "@/context/side/useSideView"
 import { useSideViewContext } from "@/context/side/SideViewContext"
+import AnalysisReportContent from "../components-relation/tools/analysis-report-content"
 
 const ResultParse = lazy(() => import("@/components/result-parse"))
 // import AnalysisResultPanel from '@/components/analysis-result-view/panel'
@@ -29,7 +30,7 @@ const AnalysisReport: FC<any> = () => {
         return () => setSideView(null);  // 页面离开时清空关联
     }, []);
 
-    
+
 
     const { project, projectObj, baseURL } = useSelector((state: any) => state.user);
 
@@ -179,13 +180,17 @@ const AnalysisReport: FC<any> = () => {
             }}
         >
             {analysisKey ? <Suspense fallback={<Skeleton active></Skeleton>}>
-                <AnalysisResultView
+
+                <AnalysisReportContent
+                    analysisId={analysisKey}
+                ></AnalysisReportContent>
+                {/* <AnalysisResultView
                     overflowY="auto"
                     showDesc={true}
                     openPanel={setPanel}
                     callback={() => {
                         // loadData(false)
-                    }} analysis_id={analysisKey}></AnalysisResultView>
+                    }} analysis_id={analysisKey}></AnalysisResultView> */}
             </Suspense> : <>
                 <Card size="small" variant="borderless">
                     <Empty description="Please select an analysis" image={Empty.PRESENTED_IMAGE_SIMPLE} >
@@ -242,7 +247,7 @@ const AnalysisReport: FC<any> = () => {
             </Card>
         </div>}
 
-    
+
 
 
         <FormProject

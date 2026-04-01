@@ -30,10 +30,11 @@ import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 import { useStickyTop } from "@/hooks/useStickyTop"
 import Markdown from "@/components/markdown"
 import PipelineComponent from './pipeline'
-import ComponentsDetailsRender from "./components-details-render"
+import ComponentsDetailsRender from "../../render/components-details-render"
 import { AppstoreOutlined, CloseOutlined, DeleteColumnOutlined, DeleteOutlined, DownOutlined, PlusOutlined, QuestionCircleOutlined, RedoOutlined } from '@ant-design/icons'
 import { AI } from '@/components/chat'
 import { useComponentStore } from "@/store-zustand/components"
+import { useStoreRender } from "@/context/render/RenderProvider"
 
 const Pipeline: FC<any> = ({ }) => {
 
@@ -45,7 +46,7 @@ const Pipeline: FC<any> = ({ }) => {
     console.log("Pipeline")
     const { relation_id } = useParams()
     const relation_type = "tools"
-    const [leftPanel, setLeftPanel] = useState<any>(relation_type)
+    const [leftPanel, setLeftPanel] = useState<any>("analysisTools")
     const component_type = ""
     // console.log(pipelineId)
     const [pipeline, setPipeline] = useState<any>()
@@ -206,7 +207,7 @@ const Pipeline: FC<any> = ({ }) => {
 
     }
     const { register, unregister } = useComponentStore();
-    const id= "tools-details"
+    const id = "tools-details"
     useEffect(() => {
         if (!id) return;
         register("tables", id, { reload: loadData });
@@ -253,8 +254,13 @@ const Pipeline: FC<any> = ({ }) => {
     //         setOpenKeys([]);
     //     }
     // };
+    const { toolsPanelView, setToolsPanelView,clear } = useStoreRender()
+
     useEffect(() => {
         loadData()
+        return () => {
+            clear()
+        }
     }, [])
 
     const isToolsExist = () => {
@@ -316,13 +322,30 @@ const Pipeline: FC<any> = ({ }) => {
                                         </Popconfirm>
                                     </>
                                 } */}
+
+                    <Segmented size="small" value={toolsPanelView}
+                        onChange={(val: any) => setToolsPanelView(val)}
+                        options={[
+                            {
+                                label: "Input",
+                                value: "inputFileComponent"
+                            }, {
+                                label: "Analysis",
+                                value: "analysisList"
+                            },
+
+                            {
+                                label: "Output",
+                                value: "outputFileComponent"
+                            }
+                        ]} />
                     <Button size="small" color="cyan" variant="solid" onClick={() => {
                         openModal("publishModal", { ...component, relation_type: relation_type })
                     }}>Publish</Button>
 
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                         openModal("preview-relation-example", { ...component, relation_type: relation_type })
-                    }}>Example</Button>
+                    }}>Example</Button> */}
 
                     <Button size="small" color="cyan" variant="solid" onClick={() => {
                         operatePipeline.openModal("projectForm", { project_id: project_id })
@@ -358,7 +381,7 @@ const Pipeline: FC<any> = ({ }) => {
                         })
                     }}>Edit Tools</Button> : <>
                         <Button size="small" color="blue" variant="solid" icon={<CloseOutlined />} onClick={() => {
-                            setLeftPanel(relation_type)
+                            setLeftPanel("analysisTools")
                         }}>Close</Button>
                     </>}
 
@@ -372,7 +395,7 @@ const Pipeline: FC<any> = ({ }) => {
                         })
                     }}>{isToolsExist() ? "Update" : "Create"} Script</Button> : <>
                         <Button size="small" color="blue" variant="solid" icon={<CloseOutlined />} onClick={() => {
-                            setLeftPanel(relation_type)
+                            setLeftPanel("analysisTools")
                         }}>Close</Button>
                     </>}
                     {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
@@ -417,7 +440,7 @@ const Pipeline: FC<any> = ({ }) => {
                                     </Dropdown.Button> */}
                             <Space.Compact>
                                 <Button size="small" color="blue" variant="solid" icon={<CloseOutlined />} onClick={() => {
-                                    setLeftPanel(relation_type)
+                                    setLeftPanel("analysisTools")
                                 }}></Button>
 
                                 <Popconfirm title="Whether to generate scripts?" onConfirm={async () => {
@@ -441,7 +464,7 @@ const Pipeline: FC<any> = ({ }) => {
                         }}>Structure</Button> : <>
                             <Space.Compact>
                                 <Button size="small" color="blue" variant="solid" icon={<CloseOutlined />} onClick={() => {
-                                    setLeftPanel(relation_type)
+                                    setLeftPanel("analysisTools")
                                 }}></Button>
                                 <Button size="small" color="blue" variant="solid" icon={<RedoOutlined />}
                                     onClick={() => { leftRef.current?.loadData() }}></Button>

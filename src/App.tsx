@@ -11,8 +11,9 @@ import { setupGlobalNotification } from "./hooks/useGlobalNotification";
 import axios from "axios";
 import { getPathname } from "./utils/utils";
 import LLMBootstrap from "./llmv2/LLMBootstrap";
+import { RenderProvider } from "./context/render/RenderProvider";
 
-  
+
 // registerLLMActions();
 const App: FC<any> = () => {
   const { locale, t } = useI18n()
@@ -89,8 +90,13 @@ const App: FC<any> = () => {
       }}
       locale={antdLocale}>
       <HashRouter>
-          <LLMBootstrap />
+        <LLMBootstrap />
+        <RenderProvider>
+
           <RenderRouter></RenderRouter>
+
+        </RenderProvider>
+
 
       </HashRouter>
 

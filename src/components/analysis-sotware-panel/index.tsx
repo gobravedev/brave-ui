@@ -272,6 +272,147 @@ const AnalysisSoftwarePanel: FC<AnalysisSoftware> = ({
 export default AnalysisSoftwarePanel
 
 
+export const CreateAnalysisComp: FC<any> = ({ pipeline, operatePipeline, markdown, analysisPipline, upstreamFormJson, inputFile, onClickItem, cardExtra, ...rest }) => {
+    const [upstreamForm] = Form.useForm();
+    const [resultTableList, setResultTableList] = useState<any>()
+    const [messageApi, contextHolder] = message.useMessage();
+    // const [loading, setLoading] = useState<boolean>(false)
+    const formId = Form.useWatch((values) => values?.analysis_id, upstreamForm);
+    // const [currentAnalysisMethod, setCurrentAnalysisMethod] = useState<any>(analysisMethod[0].value[0])
+    // const [currentAnalysisMethod, setCurrentAnalysisMethod] = useState<any>(analysisPipline ? analysisPipline : "")
+    // const [activeTabKey, setActiveTabKey] = useState<any>()
+    // const [currentAnalysisMethod, setCurrentAnalysisMethod] = useState<any>()
+    // const [analysisParams, setAnalysisParams] = useState<any>()
+    const [modal, modalContextHolder] = Modal.useModal();
+    const [inputFileList, setInputFileList] = useState<any>([])
+    const { project } = useOutletContext<any>()
+
+    useEffect(() => {
+        if (inputFile) {
+            const inputFileList = inputFile.map((item: any) => {
+                if (item.component_id in rest) {
+                    const replaceData = rest[item.component_id]
+                    return {
+                        ...item,
+                        ...replaceData
+                    }
+                }
+                return item
+            })
+            setInputFileList(inputFileList)
+
+        }
+    }, [inputFile])
+
+    // const {    setPipelineStructure,setOperateOpen,setPipelineRecord,datelePipeline} = operatePipeline
+    const tableRef = useRef<any>(null)
+
+    const buildRequestParams = () => {
+        let dataComponentIds: any = []
+        if (inputFile) {
+            dataComponentIds = inputFile.map((item: any) => item.component_id)
+
+        }
+        const requestParams = {
+            // ...values,
+            project: project,
+            // inputFormJson: inputAnalysisMethod,
+            // analysis_pipline: analysisPipline,
+            // parse_analysis_module: rest.parse_analysis_module,
+            component_id: rest.component_id,
+            data_component_ids: JSON.stringify(dataComponentIds),
+            component_parent_ids_map: componentParentIdsMap,
+            relation_id: rest.relation_id,
+
+        }
+        return requestParams
+
+    }
+
+    const checkAvailable = (analysisMethod: any) => {
+        return analysisMethod && Array.isArray(analysisMethod) && analysisMethod.length > 0
+    }
+
+    const [componentParentIdsMap, setComponentParentIdsMap] = useState<any>({})
+    return <>
+        {contextHolder}
+        {modalContextHolder}
+
+
+        {!rest?.hiddenUpstreamAnalysis && <>
+
+
+
+            <div style={{ marginBottom: "1rem" }}></div>
+
+            <>
+
+                {/* {JSON.stringify(componentParentIdsMap)} */}
+
+                {checkAvailable(inputFile) ? <ResultList
+                    {...rest}
+                    componentParentIdsMap={componentParentIdsMap}
+                    setComponentParentIdsMap={setComponentParentIdsMap}
+                    pipeline={pipeline}
+                    software={rest}
+                    // currentAnalysisMethod={currentAnalysisMethod}
+                    // setCurrentAnalysisMethod={setCurrentAnalysisMethod}
+                    operatePipeline={operatePipeline}
+                    relationType="software_input_file"
+                    cardExtra={cardExtra}
+                    title={`Input File ${inputFile.length > 0 ? "" : inputFile.map((it: any) => it.label)}`}
+                    // activeTabKey={activeTabKey}
+                    // setActiveTabKey={setActiveTabKey}
+                    shouldTrigger={true}
+                    analysisType={"sample"}
+                    analysisMethod={inputFile}
+                    setResultTableList={setResultTableList}></ResultList> : <>
+
+
+                </>
+                }
+
+
+
+                <div style={{ maxWidth: "40rem", margin: "0 auto" }}>
+                    {rest.component_id ?
+                        <CreateOrUpdateParsms
+                            // analysisResultId={analysisResultId}
+                            form={upstreamForm}
+                            requestParam={buildRequestParams()}
+                            dataMap={resultTableList ? resultTableList : {}}
+                            formJson={rest.formJson}
+                            databases={rest.databases}
+                            callback={() => {
+                                if (tableRef.current) {
+                                    tableRef.current.reload()
+                                }
+                            }} ></CreateOrUpdateParsms> :
+                        <Empty description="Please select a script!"></Empty>
+
+                    }
+                </div>
+
+
+
+
+            </>
+
+            {/* <div style={{ marginBottom: "1rem" }}></div>
+
+            <AnalysisList
+                ref={tableRef}
+                project={project}
+                relation_id={rest?.relation_id}
+            ></AnalysisList>
+
+            <div style={{ marginBottom: "1rem" }}></div> */}
+        </>}
+    </>
+}
+
+
+
 export const UpstreamAnalysisInput: FC<any> = ({ record, pipeline, operatePipeline, project, markdown, analysisPipline, upstreamFormJson, inputAnalysisMethod, onClickItem, cardExtra, ...rest }) => {
     const [upstreamForm] = Form.useForm();
     const [resultTableList, setResultTableList] = useState<any>()

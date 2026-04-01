@@ -14,6 +14,8 @@ import ParamsView from "@/components/params-view";
 import Project from "@/pages/project";
 import BioDatabaseForm from "@/components/bio-database-form";
 import BioDatabases from "@/components/bio-databases";
+import { useSelector } from "react-redux";
+import { useStoreRender } from "@/context/render/RenderProvider";
 const RenderFromJson = lazy(() => import("./render-form-json"));
 
 
@@ -23,6 +25,9 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
     const { modals, openModals, closeModals } = useModals(["paramsView", "bioDatabases"]);
     const [loading, setLoading] = useState<boolean>(false)
     const { messageApi } = useOutletContext<any>()
+    const { project } = useSelector((state: any) => state.user);
+    const { setToolsPanelView, setAnalysisId } = useStoreRender()
+
     // const [jobStatus, setJobStatus] = useState<string>(job_status )
     // useEffect(() => {
     //     // setJobStatus(job_status)
@@ -38,7 +43,8 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
     const getRequestParams = (values: any) => {
         const requestParams = {
             ...requestParam,
-            ...values
+            ...values,
+            project: project,
         }
         return requestParams
     }
@@ -80,6 +86,10 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
             }
             if (save) {
                 messageApi.success("save successful!")
+                setToolsPanelView("analysisList")
+                if (resp.data.analysis_id) {
+                    setAnalysisId(resp.data.analysis_id)
+                }
                 if (callback) {
                     callback()
 
@@ -93,6 +103,8 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                 messageApi.error(error.response.data.detail)
             }
         }
+
+        // setAnalysisId()
         setLoading(false)
     }
 

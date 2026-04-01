@@ -5,6 +5,8 @@ import { FC, lazy, Suspense } from 'react';
 const FileBrowser = lazy(() => import('@/components/file-browser'));
 const LogFile = lazy(() => import('@/components/log-file'));
 const RunningContainer = lazy(() => import('@/components/container'));
+const AnalysisResultView = lazy(() => import('@/components/analysis-result-view/analysis-reuslt-view'))
+
 const viewMapping: {
     key: string;
     label: string;
@@ -13,6 +15,7 @@ const viewMapping: {
         { key: "fileBrowser", label: "fileBrowser", component:FileBrowser },
         {key:"logFile",label:"logFile",component:LogFile},
         {key:"runningContainer",label:"runningContainer",component:RunningContainer},
+        {key:"analysisResultView", label:"analysisResultView", component: AnalysisResultView}
         // {key:"script",label:"script",component:ScriptComponent},
         // {key:"file",label:"file",component:FileComponent},
         // {key:"workflow-input",label:"workflow-input",component:PipelineInputComponent},

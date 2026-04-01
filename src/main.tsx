@@ -9,6 +9,7 @@ import { Provider } from 'react-redux'
 import { ConfigProvider, message } from 'antd'
 import { SSEProvider } from './context/sse/SSEProvider.tsx'
 import { useGlobalMessage } from './hooks/useGlobalMessage.ts'
+import { RenderProvider } from './context/render/RenderProvider.tsx'
 
 console.log(import.meta.env.MODE)
 
@@ -20,6 +21,7 @@ createRoot(document.getElementById('root')!).render(
   <Provider store={store}>
     <SSEProvider>
         <App />
+
 
     </SSEProvider>
   </Provider>

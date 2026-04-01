@@ -17,6 +17,8 @@ import AnalysisTaskPanel from "../analysis-task/panel"
 import AnalysisResultPanel from "../analysis-result-view/panel"
 import ComponentsRender from "./components"
 import { useGlobalMessage } from "@/hooks/useGlobalMessage"
+import { useStoreRender } from "@/context/render/RenderProvider"
+import ComponentsDetailsRender from "@/render/components-details-render"
 
 const AnalysisList = forwardRef<any, any>(({
     project,
@@ -67,6 +69,7 @@ const AnalysisList = forwardRef<any, any>(({
     // const [loading, setLoading] = useState(true)
     const [currentAnalysis, setCurrentAnalysis] = useState<any>()
     const { containerURL } = useSelector((state: any) => state.user);
+    const { setAnalysisId, analysisId } = useStoreRender()
 
     useEffect(() => {
         if (data && Array.isArray(data) && data.length > 0) {
@@ -198,6 +201,16 @@ const AnalysisList = forwardRef<any, any>(({
         message.success("Stop Success")
         loadData()
     }
+    // useEffect(() => {
+    //     if (analysisId) {
+    //         // debugger
+    //         openModal("componentsRender", {
+    //             view: "analysisResultView", analysis_id: analysisId,
+    //         })
+    //     }else{
+    //          closeModal()
+    //     }
+    // }, [analysisId])
     let columns: any = [
         {
             title: 'Project Name',
@@ -247,7 +260,7 @@ const AnalysisList = forwardRef<any, any>(({
         //         </Tooltip>
         //     }
         // },
-         {
+        {
             title: "Analysis Name",
             dataIndex: 'analysis_name',
             key: 'analysis_name',
@@ -455,9 +468,10 @@ const AnalysisList = forwardRef<any, any>(({
 
                     {/* {editParams && <Button size="small" color="cyan" variant="solid" onClick={() => editParams(record)}>编辑参数</Button>} */}
                     {
-                        isSelected(record, ["modalA"]) ?
+                        analysisId == record.analysis_id ?
                             <Button size="small" color={"blue"} variant="solid" onClick={() => {
-                                closeModal()
+                                // closeModal()
+                                setAnalysisId(null)
                             }}>Close</Button> :
                             <Tooltip title={record.component_type}>
                                 <Button size="small" color={"cyan"} variant="solid" onClick={() => {
@@ -466,7 +480,12 @@ const AnalysisList = forwardRef<any, any>(({
                                     // } else if (record.component_type == "script") {
 
                                     // }
-                                    openModal("modalA", record)
+                                    // navigate(`/c/tools/${record.relation_id}/${record.analysis_id}`)
+                                    // openModal("componentsRender", {
+                                    //     view: "analysisResultView", analysis_id: record.analysis_id,
+                                    // })
+                                    // openModal("modalA", record)
+                                    setAnalysisId(record.analysis_id)
                                     //
 
                                     // setRecord(record)
@@ -672,7 +691,7 @@ const AnalysisList = forwardRef<any, any>(({
                         placeholder="Search..."
                         allowClear
                         enterButton
-                        onSearch={(e:any) => {
+                        onSearch={(e: any) => {
                             // console.log(e)
                             search(e)
                         }}
@@ -741,13 +760,20 @@ const AnalysisList = forwardRef<any, any>(({
 
         </Card>
         <div style={{ marginBottom: "1rem" }}></div>
+        {analysisId && <>
+            <ComponentsDetailsRender
+                analysis_id={analysisId}
+                // analysis_id={analysisId}
+                view={"analysisResultView"}
+            />
+        </>}
 
-        <AnalysisResultPanel
+        {/* <AnalysisResultPanel
             // ref={analysisResultRef}
             callback={loadData}
             visible={modal.key == "modalA" && modal.visible}
             params={modal.params}
-            onClose={closeModal}></AnalysisResultPanel>
+            onClose={closeModal}></AnalysisResultPanel> */}
 
         <ResultParsePanel
             visible={modal.key == "resultParsePanel" && modal.visible}
