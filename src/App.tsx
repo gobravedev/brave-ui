@@ -31,7 +31,7 @@ const App: FC<any> = () => {
     axios.defaults.headers.common['Authorization'] = `Bearer ${authorization}`;
 
   }
-  axios.defaults.timeout = 5000;
+  axios.defaults.timeout = 20000;
 
   axios.interceptors.response.use(
     (response) => response,
