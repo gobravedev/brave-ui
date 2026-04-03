@@ -1311,7 +1311,7 @@ export const GroupSelectSampleButton: FC<any> = ({ label, projParameter, name, r
     return <>
         {/* {JSON.stringify(data)} */}
         <Form.Item label={label} name={[name, "sample"]} rules={rules}>
-            <GroupSelectSample sampleGrouped={sampleGrouped} sampleGroup={options} watch={[name, "group"]}></GroupSelectSample>
+            <GroupSelectSample mode='multiple' sampleGrouped={sampleGrouped} sampleGroup={options} watch={[name, "group"]}></GroupSelectSample>
         </Form.Item>
         <Flex gap="small">
             <Form.Item label={label} name={[name, "group"]} noStyle >

@@ -13,7 +13,7 @@ import { AI } from "@/components/chat"
 
 const ResultParse = lazy(() => import("@/components/result-parse"))
 // import AnalysisResultPanel from '@/components/analysis-result-view/panel'
-const AnalysisResultView = lazy(() => import('@/components/analysis-result-view'))
+const AnalysisResultView = lazy(() => import('@/components/analysis-result-view/index.tsx'))
 const AnalysisReport: FC<any> = () => {
     const [loading, setLoading] = useState<boolean>(false)
     // const { project, projectObj } = useOutletContext<any>()

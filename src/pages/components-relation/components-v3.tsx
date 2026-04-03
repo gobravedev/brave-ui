@@ -2,7 +2,7 @@ import { Button, Card, Col, Empty, Modal, Popconfirm, Row, Segmented, Skeleton, 
 import { FC, use, useEffect, useRef, useState } from "react"
 import ComponentsPage from "./components/page"
 import { useParams } from "react-router"
-import ComponentsDetailsRender from "../../render/components-details-render"
+import ComponentsDetailsRender from "../../core/ui-renderer/ComponentsDetailsRender"
 import { CreateOrUpdatePipelineComponent } from "@/components/create-pipeline"
 import { useModal } from "@/hooks/useModal"
 import axios from "axios"
@@ -166,13 +166,16 @@ const ComponentsV3: FC<any> = ({ component_type, navigateView }) => {
 
                     >
                         {panel ? <>
-
                             <ComponentsDetailsRender
                                 callback={loadTable}
                                 view={panel}
+                                component_id={component.component_id}
                                 component={component}
                                 openModal={openModal}
-                                component_type={component_type}
+                                structure={{
+                                    component_type: component_type,
+                                }}
+                                // component_type={component_type}
                             ></ComponentsDetailsRender>
 
                         </> : <Skeleton active></Skeleton>}

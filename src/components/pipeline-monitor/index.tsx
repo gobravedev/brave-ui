@@ -14,7 +14,7 @@ import { CreateOrUpdatePipelineComponent } from "../create-pipeline";
 import React from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import LogFile from "../log-file";
-import { ComponentsRender as FileComponentRender } from '../analysis-result-view'
+import { ComponentsRender as FileComponentRender } from '../analysis-result-view/index.tsx'
 import { Bar, Column } from "@ant-design/plots";
 import OpenFile from "../open-file";
 import { on } from "events";

@@ -4,7 +4,7 @@ import axios from "axios";
 import { FC, useEffect, useState } from "react"
 import { MonacoEditor } from "../react-monaco-editor";
 import Markdown from "../markdown";
-import { ComponentsRender } from '../analysis-result-view'
+import { ComponentsRender } from '../analysis-result-view/index.tsx'
 import { useSelector } from "react-redux";
 const OpenFile: FC<any> = ({ visible, onClose, params }) => {
     const [fileContent, setFileContent] = useState<any>()

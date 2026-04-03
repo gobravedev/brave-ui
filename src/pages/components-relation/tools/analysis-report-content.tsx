@@ -1,9 +1,8 @@
 import AnalysisList from '@/components/analysis-list';
-import AnalysisResultViewComp from '@/components/analysis-result-view';
 import AnalysisPanel, { CreateAnalysisComp, UpstreamAnalysisInput, UpstreamAnalysisOutput } from '@/components/analysis-sotware-panel'
 import { useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router';
-import ComponentsDetailsRender from '../../../render/components-details-render';
+import ComponentsDetailsRender from '../../../core/ui-renderer/ComponentsDetailsRender';
 import { Card, Col, Row, Segmented } from 'antd';
 import ResultList from '@/components/result-list';
 import { useStoreRender } from '@/context/render/RenderProvider';

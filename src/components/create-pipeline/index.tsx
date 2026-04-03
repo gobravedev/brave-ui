@@ -795,7 +795,9 @@ export const CreateOrUpdatePipelineV2: FC<any> = ({ component_id, structure, cal
                                     <Input ></Input>
                                 </Form.Item>
 
-
+                                <Form.Item name={"io_schema"} label="io_schema" >
+                                    <TextArea rows={4}></TextArea>
+                                </Form.Item>
 
                                 <ComponentsRender structure={structure} {...structure} data={component} form={form}></ComponentsRender>
 

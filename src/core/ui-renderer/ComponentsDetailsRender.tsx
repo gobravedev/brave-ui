@@ -1,35 +1,36 @@
 import { Skeleton } from 'antd';
 import { FC, lazy, memo, Suspense } from 'react';
 
-const PipelineFlowComponent = lazy(() => import('../pages/components-relation/pipeline/components/pipeline-flow'))
-const SoftwareComponent = lazy(() => import('../pages/components-relation/tools'))
-const ScriptComponent = lazy(() => import('../pages/components-relation/script'))
-const ScriptV2Component = lazy(() => import('../pages/components-relation/script/indexV2'))
+const PipelineFlowComponent = lazy(() => import('../../pages/components-relation/pipeline/components/pipeline-flow'))
+const SoftwareComponent = lazy(() => import('../../pages/components-relation/tools'))
+const ScriptComponent = lazy(() => import('../../pages/components-relation/script'))
+const ScriptV2Component = lazy(() => import('../../pages/components-relation/script/indexV2'))
 const EditParamsPanel = lazy(() => import('@/components/edit-params/components/panel'));
 
-const FileComponent = lazy(() => import('../pages/components-relation/file'))
-const FileV2Component = lazy(() => import('../pages/components-relation/components/create-or-update-component'))
-const CreateOrUpdateComponent = lazy(() => import('../pages/components-relation/components/create-or-update-component'))
-const CreateOrUpdateRelation = lazy(() => import('../pages/components-relation/components/create-or-update-relation'))
-const AnalysisResultPageAdapter = lazy(() => import('../pages/components-relation/components/analysis-result-page'))
-const PipelineInputComponent = lazy(() => import('../pages/components-relation/pipeline/components/pipeline-input'))
-const LLMFile = lazy(()=>import("../pages/components-relation/components/llm-file"))
-const LLMTools = lazy(()=>import("../pages/components-relation/components/llm-tools"))
-const ScriptDesc = lazy(()=>import("../pages/components-relation/components/script-desc"))
-const LLMScript = lazy(()=>import("../pages/components-relation/components/llm-script"))
-const ScriptCode = lazy(()=>import("../pages/components-relation/components/script-code"))
-const ComponentStructure = lazy(()=>import("../pages/components-relation/components/component-structure"))
-const ComponentScript = lazy(()=>import("../pages/components-relation/components/component-script"))
-const PreviewRelationExample = lazy(() => import('../pages/components-relation/components/preview-example'))
-const ScriptView = lazy(() => import('../pages/components-relation/components/script-view'))
-const FileView = lazy(() => import('../pages/components-relation/components/file-view'))
-const AnalysisTools = lazy(() => import('../pages/components-relation/tools/analysis-tools'))
+const FileComponent = lazy(() => import('../../pages/components-relation/file'))
+const FileV2Component = lazy(() => import('../../pages/components-relation/components/create-or-update-component'))
+const CreateOrUpdateComponent = lazy(() => import('../../pages/components-relation/components/create-or-update-component'))
+const CreateOrUpdateRelation = lazy(() => import('../../pages/components-relation/components/create-or-update-relation'))
+const AnalysisResultPageAdapter = lazy(() => import('../../pages/components-relation/components/analysis-result-page'))
+const PipelineInputComponent = lazy(() => import('../../pages/components-relation/pipeline/components/pipeline-input'))
+const LLMFile = lazy(()=>import("../../pages/components-relation/components/llm-file"))
+const LLMTools = lazy(()=>import("../../pages/components-relation/components/llm-tools"))
+const ScriptDesc = lazy(()=>import("../../pages/components-relation/components/script-desc"))
+const LLMScript = lazy(()=>import("../../pages/components-relation/components/llm-script"))
+const ScriptCode = lazy(()=>import("../../pages/components-relation/components/script-code"))
+const ComponentStructure = lazy(()=>import("../../pages/components-relation/components/component-structure"))
+const ComponentScript = lazy(()=>import("../../pages/components-relation/components/component-script"))
+const PreviewRelationExample = lazy(() => import('../../pages/components-relation/components/preview-example'))
+const ScriptView = lazy(() => import('../../pages/components-relation/components/script-view'))
+const FileView = lazy(() => import('../../pages/components-relation/components/file-view'))
+const AnalysisTools = lazy(() => import('../../pages/components-relation/tools/analysis-tools'))
 const InputFileComponent = lazy(() => import('@/components/result-list/input-file-component'))
 const OutputFileComponent = lazy(() => import('@/components/result-list/output-file-component'))
 const AnalysisResultView = lazy(() => import('@/components/analysis-result-view/analysis-reuslt-view'))
 const AnalysisList = lazy(() => import('@/components/analysis-list'))
-const WorkflowComponent = lazy(() => import('../pages/components-relation/workflow'))
-const RelationDefinitionDAG = lazy(() => import('../pages/components-relation/components/relation-definition-dag')) 
+const WorkflowComponent = lazy(() => import('../../pages/components-relation/workflow'))
+const RelationDefinitionDAG = lazy(() => import('../../pages/components-relation/components/relation-definition-dag')) 
+const WorkflowVisComponent = lazy(() => import('../../pages/components-relation/workflow/workflow-vis-component'))
 const viewMapping: {
     key: string;
     label: string;
@@ -72,6 +73,8 @@ const viewMapping: {
         {key: "relationDefinitionDAG", label: "relationDefinitionDAG", component: RelationDefinitionDAG},
 
         { key: "workflow-input", label: "workflow-input", component: PipelineInputComponent },
+
+        {key: "workflow-vis", label: "workflow-vis", component: WorkflowVisComponent},
 
     ];
 

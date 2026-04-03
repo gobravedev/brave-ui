@@ -16,7 +16,6 @@ import AnalysisReportContent from "../components-relation/tools/analysis-report-
 
 const ResultParse = lazy(() => import("@/components/result-parse"))
 // import AnalysisResultPanel from '@/components/analysis-result-view/panel'
-const AnalysisResultView = lazy(() => import('@/components/analysis-result-view'))
 const AnalysisReport: FC<any> = () => {
     const [loading, setLoading] = useState<boolean>(false)
     // setSideView("analysis-tree")

@@ -15,12 +15,16 @@ import { useDispatch, useSelector } from "react-redux"
 import { setUserItem } from "@/store/userSlice"
 import { useModal } from "@/hooks/useModal"
 import FormProject from "@/components/form-project"
+import { useComponentRegistry } from "@/core/component-registry/registry-context"
 const Project: FC<any> = () => {
     const [data, setData] = useState<any>(introduction)
     const { ref: containerRef, top, isSticky } = useStickyTop(576);
     const { project, projectObj, baseURL } = useSelector((state: any) => state.user);
     const { modal, openModal, closeModal } = useModal();
-
+    const registry = useComponentRegistry();
+    useEffect(() => {
+        console.log("registry", registry)
+    }, [])
     const onChange = (value: any) => {
         if (value == "chinese") {
             setData(chinese)

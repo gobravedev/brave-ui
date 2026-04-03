@@ -8,10 +8,10 @@ import { useGlobalMessage } from "@/hooks/useGlobalMessage";
 import { RedoOutlined } from '@ant-design/icons'
 const RelationDefinitionDAG = forwardRef<any, any>(
 
-    ({ dag_definition,relation_id, callback }, ref) => {
+    ({ relation_id, callback }, ref) => {
 
         const message = useGlobalMessage()
-        const [content, setContent] = useState<string>(dag_definition)
+        const [content, setContent] = useState<string>("")
         const loadData = async () => {
             const resp = await axios.post(`/find-pipeline-relation/${relation_id}`)
             const data = resp.data
@@ -29,7 +29,9 @@ const RelationDefinitionDAG = forwardRef<any, any>(
             callback && callback()
 
         }
-
+        useEffect(() => {
+            loadData()
+        }, [])
 
         return <Card size="small"
             extra={<Space size={"small"}>

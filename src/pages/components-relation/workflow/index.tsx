@@ -1,10 +1,10 @@
-import ComponentsDetailsRender from "@/render/components-details-render"
+import ComponentsDetailsRender from "@/core/ui-renderer/ComponentsDetailsRender"
 import { Button, Card, Popconfirm, Space } from "antd"
 import { FC, useState } from "react"
 import { AppstoreOutlined, CloseOutlined, DeleteColumnOutlined, DeleteOutlined, DownOutlined, PlusOutlined, QuestionCircleOutlined, RedoOutlined } from '@ant-design/icons'
 
 const WorkflowComponent: FC<any> = ({component}) => {
-    const defaultView = "sss"
+    const defaultView = "workflow-vis"
     const [view, setView] = useState<any>(defaultView)
     const [params, setParams] = useState<any>({})
     const isToolsExist = () => {

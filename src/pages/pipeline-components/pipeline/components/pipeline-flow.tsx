@@ -7,6 +7,7 @@ const PipelineFlowComponent: FC<any> = ({component }) => {
         const softwareList = component.software
         if (!softwareList) return []
         const position = JSON.parse(component.position) || []
+        console.log(position)
         const positionMap = position.reduce((acc: any, item: any) => {
             acc[item.component_id] = item.position
             return acc
@@ -37,6 +38,8 @@ const PipelineFlowComponent: FC<any> = ({component }) => {
     }
     const getInitialEdges = (component: any) => {
         const edges = JSON.parse(component.edges)
+                
+
         return edges || []
     }
     return <PipelineFlow

@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { AnalysisResultViewCompV2 } from ".";
+import { AnalysisResultViewCompV2 } from "./index.tsx";
 
 const AnalysisResultView:FC<any>  =(rest)=>{
 

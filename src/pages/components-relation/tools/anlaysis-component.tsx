@@ -1,9 +1,8 @@
 import AnalysisList from '@/components/analysis-list';
-import AnalysisResultViewComp from '@/components/analysis-result-view';
 import AnalysisPanel, { CreateAnalysisComp, UpstreamAnalysisInput, UpstreamAnalysisOutput } from '@/components/analysis-sotware-panel'
 import { FC, useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router';
-import ComponentsDetailsRender from '../../../render/components-details-render';
+import ComponentsDetailsRender from '../../../core/ui-renderer/ComponentsDetailsRender';
 import { Card, Col, Row, Segmented } from 'antd';
 
 const AnalysisToolsComp = ({ operatePipeline, analysisId,component,panelView }: any) => {

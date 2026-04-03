@@ -10,6 +10,7 @@ import { ConfigProvider, message } from 'antd'
 import { SSEProvider } from './context/sse/SSEProvider.tsx'
 import { useGlobalMessage } from './hooks/useGlobalMessage.ts'
 import { RenderProvider } from './context/render/RenderProvider.tsx'
+import { RegistryProvider } from './core/component-registry/registry-context.tsx'
 
 console.log(import.meta.env.MODE)
 
@@ -20,9 +21,9 @@ createRoot(document.getElementById('root')!).render(
   // <ConfigProvider>
   <Provider store={store}>
     <SSEProvider>
+      <RegistryProvider>
         <App />
-
-
+      </RegistryProvider>
     </SSEProvider>
   </Provider>
   // </ConfigProvider>

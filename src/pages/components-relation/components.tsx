@@ -2,7 +2,7 @@ import { Button, Card, Col, Empty, Modal, Popconfirm, Row, Segmented, Skeleton, 
 import { FC, use, useEffect, useRef, useState } from "react"
 import ComponentsPage from "./components/page"
 import { useParams } from "react-router"
-import ComponentsDetailsRender from "../../render/components-details-render"
+import ComponentsDetailsRender from "../../core/ui-renderer/ComponentsDetailsRender"
 import { CreateOrUpdatePipelineComponent } from "@/components/create-pipeline"
 import { useModal } from "@/hooks/useModal"
 import axios from "axios"

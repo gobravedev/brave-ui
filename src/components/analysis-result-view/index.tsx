@@ -26,6 +26,8 @@ import AnalysisResultRender from "./analysis-result-render";
 import { useSideViewContext } from "@/context/side/SideViewContext";
 import { useSideView } from "@/hooks/useLLMARG";
 import { useStoreRender } from "@/context/render/RenderProvider";
+import ComponentsDetailsRender from "@/core/ui-renderer/ComponentsDetailsRender";
+import ViewResolver from "@/core/ui-renderer/ViewResolver";
 // import EditParamsPanel from "../edit-params/components/panel";
 
 
@@ -351,6 +353,8 @@ export const AnalysisResultViewCompV2: FC<any> = ({ analysis_id, onClose, callba
                             navigate(`/analysis-report?key=${analsyisResult?.analysis_id}&project=${project}`)
                         }>Go Report</Button>}
 
+
+
                         <Popconfirm title={`Delete ${analysis_id}?`} onConfirm={async () => {
                             await axios.delete(`/fast-api/analysis/${analysis_id}`)
                             message.success("Deleted Successfully!")
@@ -359,37 +363,24 @@ export const AnalysisResultViewCompV2: FC<any> = ({ analysis_id, onClose, callba
                             }
                             onClose()
                         }}>
-                            <DeleteOutlined style={{ cursor: "pointer", color: "red" }} />
+                            <Button
+                                color="red" variant="solid"
+                                icon={<DeleteOutlined />} size="small" ></Button>
+                            {/* <DeleteOutlined style={{ cursor: "pointer", color: "red" }} /> */}
                         </Popconfirm>
                     </>}
 
 
-                    {/* <Button
-                        type="link" // 可选：primary / default / text / link
-                        color="cyan"
-                        icon={<RedoOutlined color="cyan" />}
-                        onClick={() => loadData(analysis_id)}
 
-             
-                    >
-
-                    </Button> */}
-
-                    <RedoOutlined
-
-                        style={{ cursor: "pointer" }} onClick={() => loadData(analysis_id)} />
-
+                    <Button
+                        color="cyan" variant="solid"
+                        icon={<RedoOutlined />} onClick={() => loadData(analysis_id)} size="small" ></Button>
                     {/* <Button size="small" color="cyan" variant="solid" onClick={() => loadData(analysis_id)}>Refresh</Button> */}
 
                 </Flex>
             }>
 
-            {/* <div >
-                dew<br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
 
-            </div> */}
-            {/* {JSON.stringify(analsyisResult)} */}
-            {/* {analysis_id} */}
             <Spin spinning={loading} tip="loading..." style={{ minHeight: "5rem", }}>
 
 
@@ -406,7 +397,21 @@ export const AnalysisResultViewCompV2: FC<any> = ({ analysis_id, onClose, callba
                     </>
                     }
                 </>}
+                {analsyisResult?.analysis_id &&
+                    <>
+                    
+                        <ViewResolver
+                            analysis_id={analsyisResult?.analysis_id}
+                            view="analysisNodes">
+                        </ViewResolver>
+                        <ViewResolver
+                            analysis_id={analsyisResult?.analysis_id}
+                            view="analysisEdges">
+                        </ViewResolver>
+                    </>
 
+
+                }
 
             </Spin >
 

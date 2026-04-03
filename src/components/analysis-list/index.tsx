@@ -18,7 +18,7 @@ import AnalysisResultPanel from "../analysis-result-view/panel"
 import ComponentsRender from "./components"
 import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 import { useStoreRender } from "@/context/render/RenderProvider"
-import ComponentsDetailsRender from "@/render/components-details-render"
+import ComponentsDetailsRender from "@/core/ui-renderer/ComponentsDetailsRender"
 
 const AnalysisList = forwardRef<any, any>(({
     project,

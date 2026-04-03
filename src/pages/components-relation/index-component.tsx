@@ -30,8 +30,8 @@ import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 import { useStickyTop } from "@/hooks/useStickyTop"
 import Markdown from "@/components/markdown"
 import PipelineComponent from './pipeline'
-import ComponentsDetailsRender from "../../render/components-details-render"
-import { AppstoreOutlined, CloseOutlined, DeleteColumnOutlined, DeleteOutlined, DownOutlined, PlusOutlined, QuestionCircleOutlined, RedoOutlined } from '@ant-design/icons'
+import ComponentsDetailsRender from "../../core/ui-renderer/ComponentsDetailsRender"
+import { AppstoreOutlined, ArrowLeftOutlined, CloseOutlined, DeleteColumnOutlined, DeleteOutlined, DownOutlined, PlusOutlined, QuestionCircleOutlined, RedoOutlined } from '@ant-design/icons'
 import { AI } from '@/components/chat'
 import { useComponentStore } from "@/store-zustand/components"
 import { useStoreRender } from "@/context/render/RenderProvider"
@@ -494,9 +494,9 @@ const Pipeline: FC<any> = ({ }) => {
                                     </Dropdown>
                                 </>} */}
 
-                    <Button size="small" color="cyan" variant="solid" onClick={loadData}>Refresh</Button>
+                    <Button size="small" color="cyan" variant="solid"  icon={<RedoOutlined />} onClick={loadData}></Button>
 
-                    <Button size="small" color="primary" variant="solid" onClick={() => navigate("/c/tools")}>Back</Button>
+                    <Button icon={<ArrowLeftOutlined />} size="small" color="primary" variant="solid" onClick={() => navigate("/c/tools")}>Back</Button>
                 </Space>
                 {/* <Flex gap="small" wrap>
                                

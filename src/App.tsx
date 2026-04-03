@@ -12,7 +12,7 @@ import axios from "axios";
 import { getPathname } from "./utils/utils";
 import LLMBootstrap from "./llmv2/LLMBootstrap";
 import { RenderProvider } from "./context/render/RenderProvider";
-
+import "@/core/component-registry/module-auto-loader";
 
 // registerLLMActions();
 const App: FC<any> = () => {
@@ -92,7 +92,7 @@ const App: FC<any> = () => {
       <HashRouter>
         <LLMBootstrap />
         <RenderProvider>
-
+          
           <RenderRouter></RenderRouter>
 
         </RenderProvider>
