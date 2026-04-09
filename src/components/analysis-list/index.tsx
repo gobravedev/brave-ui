@@ -19,6 +19,7 @@ import ComponentsRender from "./components"
 import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 import { useStoreRender } from "@/context/render/RenderProvider"
 import ComponentsDetailsRender from "@/core/ui-renderer/ComponentsDetailsRender"
+import ViewResolver from "@/core/ui-renderer/ViewResolver"
 
 const AnalysisList = forwardRef<any, any>(({
     project,
@@ -28,7 +29,7 @@ const AnalysisList = forwardRef<any, any>(({
 
 }, ref) => {
     const { data, pageNumber, totalPage, loading, reload: loadData, pageSize, setPageNumber, search } = usePagination({
-        id:"analysis-list",
+        id: "analysis-list",
         url: `/list-analysis`,
         params: {
             component_id: component_id,
@@ -763,11 +764,16 @@ const AnalysisList = forwardRef<any, any>(({
         </Card>
         <div style={{ marginBottom: "1rem" }}></div>
         {analysisId && <>
-            <ComponentsDetailsRender
+            {/* <ComponentsDetailsRender
                 analysis_id={analysisId}
                 // analysis_id={analysisId}
                 view={"analysisResultView"}
             />
+             */}
+            <ViewResolver
+                analysis_id={analysisId}
+                view="analysisNodePanel">
+            </ViewResolver>
         </>}
 
         {/* <AnalysisResultPanel

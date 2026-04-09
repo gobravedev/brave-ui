@@ -18,7 +18,7 @@ import { FC, lazy, memo, Suspense } from 'react';
 // const ScriptCode = lazy(()=>import("./components/script-code"))
 
 const EditParamsPanel = lazy(() => import("../edit-params/components/panel"));
-const ComponentDescription = lazy(() => import("./components/component-description"));
+const ComponentDescription = lazy(() => import("../analysis-node-view/components/result-render/components/component-description"));
 const LLMAnalysis = lazy(() => import("../edit-params/components/llm-result"));
 
 const viewMapping: {

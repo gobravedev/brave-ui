@@ -149,7 +149,6 @@ import { softwareTemplete, scriptTemplete, fileTemplete } from './templete'
 import ContainerPage from "@/pages/container"
 import { useSelector } from "react-redux"
 import { useGlobalMessage } from "@/hooks/useGlobalMessage"
-import { json } from "stream/consumers"
 const SoftwareContent: FC<any> = ({ data, form }) => {
     const [templete, setTemplete] = useState<any>()
     const [containers, setContainers] = useState<any>([])
@@ -591,7 +590,7 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
             forceRender={true}
 
             open={visible}
-            width={"80%"}
+            width={"50%"}
             extra={<>
 
             </>}

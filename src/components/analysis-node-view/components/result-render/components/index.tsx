@@ -2,24 +2,24 @@
 import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Alert, Modal, Tooltip, Divider } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { FC, forwardRef, memo, use, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
-import Markdown from '../../markdown'
+import Markdown from '../../../../markdown'
 import axios from "axios";
-import LogFile from "../../log-file";
+import LogFile from "../../../../log-file";
 import { DeleteOutlined, DownloadOutlined, QuestionCircleOutlined, RedoOutlined } from "@ant-design/icons"
-import { MonacoEditor } from "../../react-monaco-editor";
+import { MonacoEditor } from "../../../../react-monaco-editor";
 import { useNavigate, useOutletContext } from "react-router";
 import { findAnalysisById, runAnalysisApi, stopAnalysisApi } from "@/api/analysis";
 import { useModal, useModals } from "@/hooks/useModal";
-import FormJsonComp from "../../form-components";
-import ParamsView from "../../params-view";
+import FormJsonComp from "../../../../form-components";
+import ParamsView from "../../../../params-view";
 import Project from "@/pages/project";
-import EditParams from '../../edit-params'
-import { KGMLMapSVG } from "../../databases/kegg";
+import EditParams from '../../../../edit-params'
+import { KGMLMapSVG } from "../../../../databases/kegg";
 import { download } from "@antv/s2";
 import { useSelector } from "react-redux";
-import ModuleEdit from "../../module-edit";
+import ModuleEdit from "../../../../module-edit";
 import { useGlobalMessage } from "@/hooks/useGlobalMessage";
-import { CreateOrUpdatePipelineComponent } from "../../create-pipeline";
+import { CreateOrUpdatePipelineComponent } from "../../../../create-pipeline";
 import BigTable from '@/components/big-table';
 import DiffSummaryCard from "./diff-summary-card";
 

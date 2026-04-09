@@ -1,9 +1,15 @@
 import { usePagination } from "@/hooks/usePagination";
-import { Button, Card, Empty, Flex, Pagination, Table, Tag, Tooltip, Typography } from "antd";
+import { Button, Card, Empty, Flex, Pagination, Popconfirm, Table, Tag, Tooltip, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { FC, useMemo } from "react";
-import { RedoOutlined } from '@ant-design/icons'
+import { ExportOutlined, RedoOutlined } from '@ant-design/icons'
 import axios from "axios";
+import { useGlobalMessage } from "@/hooks/useGlobalMessage";
+import { useSelector } from "react-redux";
+import { CreateOrUpdatePipelineComponent } from "@/components/create-pipeline";
+import { useModals } from "@/hooks/useModal";
+import ModuleEdit from "@/components/module-edit";
+import { findAnalysisById, runAnalysisApi, runAnalysisNodeApi, stopAnalysisApi, stopAnalysisNodeApi } from "@/api/analysis";
 
 type JsonValue = string | number | boolean | null | undefined | JsonValue[] | { [key: string]: JsonValue };
 
@@ -129,7 +135,11 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
         initialPageSize: 10
     })
 
+    const { containerURL, project, baseURL } = useSelector((state: any) => state.user);
+
+    const message = useGlobalMessage()
     const nodeLevels = useMemo(() => calcNodeLevels(data as AnalysisNode[]), [data]);
+    const { modals, openModals, closeModals } = useModals(["editParams", "moduleEdit", "createOrUpdatePipelineComponent"]);
 
     const columns: ColumnsType<AnalysisNode> = [
         {
@@ -142,24 +152,31 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
                 <Flex vertical gap={4}>
                     <Typography.Text strong>{record.node_id}</Typography.Text>
                     <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                        {record.sample_id || "global"}
+                        sample_id: {record.sample_id || "global"}
+                    </Typography.Text>
+                      <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                       script_id: {record.script_id}
                     </Typography.Text>
                 </Flex>
             )
         },
-        {
-            title: 'script_id',
-            dataIndex: 'script_id',
-            key: 'script_id',
-            width: 160,
-            ellipsis: true,
-        },
+
         {
             title: 'status',
             dataIndex: 'status',
             key: 'status',
             width: 120,
             render: (value: string) => <Tag color={statusColorMap[value] || "default"}>{value || "unknown"}</Tag>,
+        }, {
+            title: 'container_image',
+            dataIndex: 'container_image',
+            key: 'container_image',
+            ellipsis: true,
+        }, {
+            title: 'workspace_dir',
+            dataIndex: 'workspace_dir',
+            key: 'workspace_dir',
+            ellipsis: true,
         },
         {
             title: 'upstream',
@@ -199,6 +216,22 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
                     </Typography.Text>
                 </Tooltip>
             )
+        }, {
+            title: 'error_message',
+            dataIndex: 'error_message',
+            key: 'error_message',
+            width: 220,
+            ellipsis: true,
+            render: (value: JsonValue) => (
+                <Tooltip
+                    title={<pre style={{ margin: 0, whiteSpace: "pre-wrap", maxWidth: 520 }}>{stringifyJson(value)}</pre>}
+                    placement="topLeft"
+                >
+                    <Typography.Text ellipsis style={{ maxWidth: 200 }}>
+                        {JSON.stringify(value)}
+                    </Typography.Text>
+                </Tooltip>
+            )
         },
         {
             title: 'resolved_inputs',
@@ -212,7 +245,7 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
                     placement="topLeft"
                 >
                     <Typography.Text ellipsis style={{ maxWidth: 200 }}>
-                        {summarizeJson(value)}
+                        {JSON.stringify(value)}
                     </Typography.Text>
                 </Tooltip>
             )
@@ -245,7 +278,23 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
                     placement="topLeft"
                 >
                     <Typography.Text ellipsis style={{ maxWidth: 200 }}>
-                      {JSON.stringify(value)}
+                        {JSON.stringify(value)}
+                    </Typography.Text>
+                </Tooltip>
+            )
+        },{
+            title: 'output_validation_errors',
+            dataIndex: 'output_validation_errors',
+            key: 'output_validation_errors',
+            width: 220,
+            ellipsis: true,
+            render: (value: JsonValue) => (
+                <Tooltip
+                    title={<pre style={{ margin: 0, whiteSpace: "pre-wrap", maxWidth: 520 }}>{stringifyJson(value)}</pre>}
+                    placement="topLeft"
+                >
+                    <Typography.Text ellipsis style={{ maxWidth: 200 }}>
+                        {JSON.stringify(value)}
                     </Typography.Text>
                 </Tooltip>
             )
@@ -264,18 +313,134 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
             width: 190,
             ellipsis: true,
             render: (value: string | null) => value || '-',
+        }, {
+            title: 'actions',
+            key: 'actions',
+            width: 120,
+            fixed: "right",
+            ellipsis: true,
+            render: (_, record: any) => (
+                <Flex gap={8}>
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+
+                    }}>Params</Button>
+                    <Tooltip title={`Edit Script ${record?.script_id}`}>
+                        <Button size="small" color="cyan" variant="solid" onClick={() => {
+                            openModals("createOrUpdatePipelineComponent", {
+                                data: {
+                                    component_id: record?.script_id,
+                                }, structure: {
+                                    component_type: "script",
+                                }
+                            })
+                        }}>Edit</Button>
+                    </Tooltip>
+                    <Tooltip title={`Script Code ${record?.script_id}`}>
+                        <Button size="small" color="cyan" variant="solid" onClick={() => {
+                            openModals("moduleEdit", {
+                                component_id: record?.script_id,
+                            })
+                        }}>Code</Button>
+                    </Tooltip>
+                    {record?.status != "pending" && <>
+                        {record?.image_status == "exist" ?
+                            <>
+                                {record?.status == "running" ?
+                                    <>
+                                        <Popconfirm title={"Whether or not to stop?"} onConfirm={async () => {
+                                            await stopAnalysisNodeApi(record.analysis_node_id, "node")
+                                            message.success("Stop Success")
+
+                                        }}>
+                                            <Button size="small" color="red" variant="solid">
+                                                Stop
+                                            </Button>
+                                        </Popconfirm>
+
+                                    </> : <>
+                                        <Popconfirm title={"Whether or not to run?"} onConfirm={async () => {
+                                            await runAnalysisNodeApi(record.analysis_node_id, "node")
+                                            message.success("run successfully")
+
+
+                                        }}>
+                                            <Button size="small" color="cyan" variant="solid">
+                                                {record.status == "ready" ? "Run" : "Re-Run"}
+                                            </Button>
+                                        </Popconfirm>
+
+                                    </>
+                                }
+                                {record?.server_status == "running" ?
+                                    <>
+
+                                        <Popconfirm title={"Whether or not to stop?"} onConfirm={async () => {
+                                            // stopAnalysis(record, "server")
+                                            await stopAnalysisNodeApi(record.analysis_node_id, "nserver")
+                                        }}>
+                                            <Button size="small" color="red" variant="solid">
+                                                Stop Server
+                                            </Button>
+                                        </Popconfirm>
+                                        <Tooltip title={<>
+                                            {`${containerURL}/container/nserver-${record.analysis_node_id}/`}
+                                        </>}>
+                                            <ExportOutlined style={{ cursor: "pointer" }} onClick={() => {
+
+                                                window.open(`${containerURL}/container/nserver-${record.analysis_node_id}/`, "_blank")
+                                            }} />
+                                        </Tooltip>
+
+
+                                    </> : <>
+                                        <Popconfirm title="Whether to start the nserver?" onConfirm={async () => {
+                                            await runAnalysisNodeApi(record.analysis_node_id, "nserver")
+                                        }}>
+                                            <Button size="small" color="cyan" variant="solid">Run Server</Button>
+                                        </Popconfirm>
+
+                                    </>
+                                }
+                            </>
+
+                            :
+                            <>
+                                <Popconfirm title="Pull?" onConfirm={async () => {
+                                    await axios.post(`/container/pull-image/${record.container_id}`)
+                                    // loadData(record.analysis_id)
+                                    reload()
+
+                                }}>
+                                    <Button size="small" color="cyan" variant="solid"  >
+                                        {record.image_status == "pulling" ? "pulling" : "Pull"}
+                                    </Button>
+                                </Popconfirm>
+                            </>}
+
+                    </>}
+
+                </Flex>
+            )
         }
     ]
     return <>
-        <Button onClick={async ()=>{
+        <Button onClick={async () => {
+            await axios.post(`/analysis-runtime/invalidate-cache/${analysis_id}`)
+            reload()
+        }}>invalidate-cache</Button>
+        <Button onClick={async () => {
             await axios.post(`/analysis-runtime/snapshot`, { analysis_id })
         }}>snapshot</Button>
-
-        <Button onClick={async ()=>{
+        <Button onClick={async () => {
             await axios.post(`/analysis-runtime/schedule-next`, { analysis_id })
             // reload()
         }}>schedule-next</Button>
-        
+
+        <Button onClick={async () => {
+            await axios.post(`/analysis-runtime/auto-run`, { analysis_id })
+            // reload()
+        }}>auto-run</Button>
+
         {/* <Card size="small" title="Analysis DAG" style={{ marginBottom: 12 }}>
             {nodeLevels.length === 0 ? (
                 <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No nodes" />
@@ -330,11 +495,11 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
         </Card> */}
 
         <Table
-            title={() => 
-            // 右对齐刷新按钮和搜索框
-            <Flex gap={"small"} wrap justify="end" align="center">
-                {/* <Button size="small" onClick={() => setComponent(undefined)}>Clear</Button> */}
-                {/* <Search
+            title={() =>
+                // 右对齐刷新按钮和搜索框
+                <Flex gap={"small"} wrap justify="end" align="center">
+                    {/* <Button size="small" onClick={() => setComponent(undefined)}>Clear</Button> */}
+                    {/* <Search
                     size="small"
                     placeholder="Search Components"
                     allowClear
@@ -342,9 +507,9 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
                     onSearch={(value) => { search(value) }}
                     style={{ width: 200 }}
                 /> */}
-                {/* 修改为button */}
-                <Button size="small" icon={<RedoOutlined />} onClick={reload}></Button>
-            </Flex>}
+                    {/* 修改为button */}
+                    <Button size="small" icon={<RedoOutlined />} onClick={reload}></Button>
+                </Flex>}
             rowKey={(record: AnalysisNode) => `${record.id || ""}-${record.node_id}-${record.sample_id || 'global'}`}
             size="small"
             // bordered
@@ -366,6 +531,20 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
                 </Flex>}
             </>}
             dataSource={data} />
+
+        <ModuleEdit
+            visible={modals.moduleEdit.visible}
+            onClose={() => closeModals("moduleEdit")}
+            callback={() => reload()}
+            params={modals.moduleEdit.params}
+        ></ModuleEdit>
+        <CreateOrUpdatePipelineComponent
+            callback={() => reload()}
+            // pipelineStructure={pipelineStructure}
+            // data={record}
+            visible={modals.createOrUpdatePipelineComponent.visible}
+            onClose={() => closeModals("createOrUpdatePipelineComponent")}
+            params={modals.createOrUpdatePipelineComponent.params}></CreateOrUpdatePipelineComponent>
 
     </>
 }
