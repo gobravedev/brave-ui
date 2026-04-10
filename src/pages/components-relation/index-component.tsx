@@ -1,4 +1,4 @@
-import { Breadcrumb, Button, Card, message, Empty, Flex, Modal, Popconfirm, Skeleton, Switch, Tabs, Tag, Tooltip, Row, Col, Spin, Menu, Dropdown, Space, Collapse, Typography, Segmented } from "antd"
+import { Breadcrumb, Button, Card, message, Empty, Flex, Modal, Popconfirm, Skeleton, Switch, Tabs, Tag, Tooltip, Row, Col, Spin, Menu, Dropdown, Space, Collapse, Typography, Segmented, Divider } from "antd"
 import { FC, lazy, Suspense, useEffect, useRef, useState } from "react"
 import AnalysisPanel, { UpstreamAnalysisInput, UpstreamAnalysisOutput } from '../../components/analysis-sotware-panel'
 import Meta from "antd/es/card/Meta"
@@ -35,6 +35,9 @@ import { AppstoreOutlined, ArrowLeftOutlined, CloseOutlined, DeleteColumnOutline
 import { AI } from '@/components/chat'
 import { useComponentStore } from "@/store-zustand/components"
 import { useStoreRender } from "@/context/render/RenderProvider"
+import { renderCloseViewButton, renderViewButton } from "@/utils/render-view-btn"
+import { useSideViewContext } from "@/context/side/SideViewContext"
+import ViewResolver from "@/core/ui-renderer/ViewResolver"
 
 const Pipeline: FC<any> = ({ }) => {
 
@@ -46,7 +49,7 @@ const Pipeline: FC<any> = ({ }) => {
     console.log("Pipeline")
     const { relation_id } = useParams()
     const relation_type = "tools"
-    const [leftPanel, setLeftPanel] = useState<any>("analysisTools")
+    // const [leftPanel, setLeftPanel] = useState<any>("analysisTools")
     const component_type = ""
     // console.log(pipelineId)
     const [pipeline, setPipeline] = useState<any>()
@@ -82,7 +85,7 @@ const Pipeline: FC<any> = ({ }) => {
 
     const [menus, setMenus] = useState<any[]>([])
     // const [menuKey, setMenuKey] = useState<string | null>(key)
-    const [view, setView] = useState<string | null>()
+    const [view, setView] = useState<string>("inputFileComponent")
     const [openKeys, setOpenKeys] = useState<string[]>([]);
 
     const [componentMap, setComponentMap] = useState<any>({})
@@ -184,7 +187,7 @@ const Pipeline: FC<any> = ({ }) => {
         // if (component_type == "script") {
         //     api = `/get-component-parent/${name}?component_type=${component_type}`
         // }
-        const resp = await axios.get(`/component/get-components/${relation_id}`)
+        const resp = await axios.get(`/component/get-components-v2/${relation_id}`)
         // console.log(resp.data)
         let pipeline = resp.data
         if ("content" in pipeline) {
@@ -254,14 +257,40 @@ const Pipeline: FC<any> = ({ }) => {
     //         setOpenKeys([]);
     //     }
     // };
-    const { toolsPanelView, setToolsPanelView, clear } = useStoreRender()
+    const { openAnalysis, analysisId, setAnalysisId, clear, toolsPanelView, setRelation, setToolsPanelView, closeAnalysis, setFormParam } = useStoreRender()
+
+    const { setSideView, sideView, sideOptions, setSideOptions } = useSideViewContext();
+
+
 
     useEffect(() => {
         loadData()
+        setSideOptions([
+            {
+                label: "LLM",
+                value: "llm-card"
+            },
+            {
+                label: "Parameters",
+                value: "editParamsPanel"
+            }
+        ])
+        // setSideView("analysis-tools")
+        return () => {
+            setSideOptions([])
+            setSideView("llm-card")
+        }
+    }, [])
+
+    useEffect(() => {
+        if (component) {
+            setRelation(component)
+
+        }
         return () => {
             clear()
         }
-    }, [])
+    }, [component])
 
     // const isToolsExist = () => {
     //     if (component?.component_id && component?.component_id != "") return true
@@ -323,32 +352,30 @@ const Pipeline: FC<any> = ({ }) => {
                                     </>
                                 } */}
 
-                    <Segmented size="small" value={toolsPanelView}
-                        onChange={(val: any) => setToolsPanelView(val)}
-                        options={[
-                            {
-                                label: "Input",
-                                value: "inputFileComponent"
-                            }, {
-                                label: "Analysis",
-                                value: "analysisList"
-                            },
+                    {renderViewButton(view, setView, "inputFileComponent", "Input")}
+                    {renderViewButton(view, setView, "analysisList", "Analysis")}
+                    {renderViewButton(view, setView, "outputFileComponent", "Output")}
 
-                            {
-                                label: "Output",
-                                value: "outputFileComponent"
+                    {/* {renderViewButton(view, setView, "analysisTools", "Tools Panel")} */}
+
+                    {renderViewButton(view, setView, "workflowComponent", "Workflow")}
+                    {renderViewButton(view, (view) => {
+                        setView(view)
+                        setParams({
+                            structure: {
+                                relation_type: relation_type,
                             }
-                        ]} />
-
-                    {(leftPanel != "workflowComponent") ? <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        })
+                    }, "createOrUpdateRelation", "Edit Tools")}
+                    {/* {(leftPanel != "workflowComponent") ? <Button size="small" color="cyan" variant="solid" onClick={() => {
                         setLeftPanel("workflowComponent")
                     }}>Workflow</Button> : <>
                         <Button size="small" color="blue" variant="solid" icon={<CloseOutlined />} onClick={() => {
                             setLeftPanel("analysisTools")
                         }}>Close</Button>
-                    </>}
+                    </>} */}
 
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                    <Button size="small" color="cyan" variant="outlined" onClick={() => {
                         openModal("publishModal", { ...component, relation_type: relation_type })
                     }}>Publish</Button>
 
@@ -356,14 +383,14 @@ const Pipeline: FC<any> = ({ }) => {
                         openModal("preview-relation-example", { ...component, relation_type: relation_type })
                     }}>Example</Button> */}
 
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                    <Button size="small" color="cyan" variant="outlined" onClick={() => {
                         operatePipeline.openModal("projectForm", { project_id: project_id })
                     }}>Edit Project</Button>
 
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                    <Button size="small" color="cyan" variant="outlined" onClick={() => {
                         operatePipeline.openModal("modalG", pipeline)
                     }}>Dependencies</Button>
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                    <Button size="small" color="cyan" variant="outlined" onClick={() => {
                         openModals("metadataModal", { ...component, operatePipeline: operatePipeline })
                     }}>Metadata</Button>
 
@@ -381,7 +408,8 @@ const Pipeline: FC<any> = ({ }) => {
 
                     }}>Edit {component?.relation_type}</Button> */}
 
-                    {(leftPanel != "createOrUpdateRelation") ? <Button size="small" color="cyan" variant="solid" onClick={() => {
+
+                    {/* {(leftPanel != "createOrUpdateRelation") ? <Button size="small" color="cyan" variant="solid" onClick={() => {
                         setLeftPanel("createOrUpdateRelation")
                         setParams({
                             structure: {
@@ -392,7 +420,7 @@ const Pipeline: FC<any> = ({ }) => {
                         <Button size="small" color="blue" variant="solid" icon={<CloseOutlined />} onClick={() => {
                             setLeftPanel("analysisTools")
                         }}>Close</Button>
-                    </>}
+                    </>} */}
 
 
 
@@ -417,7 +445,7 @@ const Pipeline: FC<any> = ({ }) => {
 
 
                     {component?.databases && <>
-                        <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        <Button size="small" color="cyan" variant="outlined" onClick={() => {
                             operatePipeline.openModal("modalE", component.databases)
                         }}>Database</Button>
                     </>}
@@ -494,9 +522,9 @@ const Pipeline: FC<any> = ({ }) => {
                                     </Dropdown>
                                 </>} */}
 
-                    <Button size="small" color="cyan" variant="solid"  icon={<RedoOutlined />} onClick={loadData}></Button>
+                    <Button size="small" color="cyan" variant="outlined" icon={<RedoOutlined />} onClick={loadData}></Button>
 
-                    <Button icon={<ArrowLeftOutlined />} size="small" color="primary" variant="solid" onClick={() => navigate("/c/tools")}>Back</Button>
+                    <Button icon={<ArrowLeftOutlined />} size="small" color="primary" variant="outlined" onClick={() => navigate("/c/tools")}>Back</Button>
                 </Space>
                 {/* <Flex gap="small" wrap>
                                
@@ -506,16 +534,45 @@ const Pipeline: FC<any> = ({ }) => {
         >
             {/* {JSON.stringify(component)} */}
 
+
+            {openAnalysis && openAnalysis.length > 0 &&
+                <>
+
+                    <Flex style={{ marginTop: "0.5rem", marginLeft: "0.5rem" }} >
+
+                        <Space>
+                            {openAnalysis.map((item: any) => (
+                                renderCloseViewButton(`${view}-${analysisId}`, (view) => {
+                                    setView("analysisNodePanel")
+                                    setAnalysisId(item.analysis_id)
+                                }, `${view}-${item.analysis_id}`, item.analysis_name ? item.analysis_name : "Analysis",
+                                    () => {
+                                        closeAnalysis(item.analysis_id)
+                                        setView("analysisList")
+
+                                    })
+
+                            ))}
+                        </Space>
+                    </Flex>
+                    <Divider></Divider>
+
+                </>
+
+            }
+
             {(component) ? <>
-                <ComponentsDetailsRender
+                <ViewResolver
+                    setView={setView}
                     ref={leftRef}
+                    relation_id={component?.relation_id}
                     callback={loadData}
                     component_id={component?.component_id}
                     component={component}
                     operatePipeline={operatePipeline}
                     project={project_id}
                     componentLayout={componentLayout}
-                    view={leftPanel}
+                    view={view}
                     {...parsms}
                 />
             </> : <Skeleton active></Skeleton>}

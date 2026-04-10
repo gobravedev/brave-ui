@@ -13,6 +13,8 @@ import { AI } from "@/components/chat"
 import { useSideView } from "@/context/side/useSideView"
 import { useSideViewContext } from "@/context/side/SideViewContext"
 import AnalysisReportContent from "../components-relation/tools/analysis-report-content"
+import AnalysisToolsComp from "../components-relation/tools/anlaysis-component"
+import { useStoreRender } from "@/context/render/RenderProvider"
 
 const ResultParse = lazy(() => import("@/components/result-parse"))
 // import AnalysisResultPanel from '@/components/analysis-result-view/panel'
@@ -21,13 +23,34 @@ const AnalysisReport: FC<any> = () => {
     // setSideView("analysis-tree")
     // const { project, projectObj } = useOutletContext<any>()
     // useSideView("analysis-tree")
-    const { setSideView } = useSideViewContext();
+    const { setSideView, setSideOptions } = useSideViewContext();
 
     useEffect(() => {
-        // debugger
+        setSideOptions([
+            {
+                label: "LLM",
+                value: "llm-card"
+            }, {
+                label: "Parameters",
+                value: "editParamsPanel"
+            },
+            {
+                label: "analysis-tree",
+                value: "analysis-tree"
+            }
+        ])
+        // setSideView("analysis-tools")
         setSideView("analysis-tree");
-        return () => setSideView(null);  // 页面离开时清空关联
-    }, []);
+        return () => {
+            setSideOptions([])
+            setSideView("llm-card")
+        }
+    }, [])
+    // useEffect(() => {
+    //     // debugger
+    //     setSideView("analysis-tree");
+    //     return () => setSideView(null);  // 页面离开时清空关联
+    // }, []);
 
 
 
@@ -43,6 +66,13 @@ const AnalysisReport: FC<any> = () => {
     const { modal, openModal, closeModal } = useModal();
     const [componentType, setComponentType] = useState<any>()
     const [rightPanel, setRightPanel] = useState<any>("toc");
+
+    const { setAnalysisId} = useStoreRender()
+    useEffect(() => {
+        if (key) {
+            setAnalysisId(key)
+        }
+    }, [key])
 
     // const [queryProject, setQueryProject] = useState<any>()
     const [analysisKey, setAnalysisKey] = useState<any>(key)
@@ -180,9 +210,18 @@ const AnalysisReport: FC<any> = () => {
         >
             {analysisKey ? <Suspense fallback={<Skeleton active></Skeleton>}>
 
-                <AnalysisReportContent
+                {/* <AnalysisReportContent
                     analysisId={analysisKey}
-                ></AnalysisReportContent>
+                ></AnalysisReportContent> */}
+                <Card size='small'>
+                    <AnalysisToolsComp
+                        analysisId={analysisKey}
+                        panelView={"analysisNodePanel"}
+                    ></AnalysisToolsComp>
+
+
+                </Card>
+
                 {/* <AnalysisResultView
                     overflowY="auto"
                     showDesc={true}

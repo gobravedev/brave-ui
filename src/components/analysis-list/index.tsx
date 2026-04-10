@@ -26,6 +26,7 @@ const AnalysisList = forwardRef<any, any>(({
     component_id,
     component_ids,
     relation_id,
+    setView,
 
 }, ref) => {
     const { data, pageNumber, totalPage, loading, reload: loadData, pageSize, setPageNumber, search } = usePagination({
@@ -71,7 +72,7 @@ const AnalysisList = forwardRef<any, any>(({
     // const [loading, setLoading] = useState(true)
     const [currentAnalysis, setCurrentAnalysis] = useState<any>()
     const { containerURL } = useSelector((state: any) => state.user);
-    const { setAnalysisId, analysisId } = useStoreRender()
+    const { setAnalysisId, analysisId,setToolsPanelView,addOpenAnalysis,checkIsOpen,closeAnalysis } = useStoreRender()
 
     useEffect(() => {
         if (data && Array.isArray(data) && data.length > 0) {
@@ -470,10 +471,11 @@ const AnalysisList = forwardRef<any, any>(({
 
                     {/* {editParams && <Button size="small" color="cyan" variant="solid" onClick={() => editParams(record)}>编辑参数</Button>} */}
                     {
-                        analysisId == record.analysis_id ?
+                        checkIsOpen(record.analysis_id) ?
                             <Button size="small" color={"blue"} variant="solid" onClick={() => {
                                 // closeModal()
-                                setAnalysisId(null)
+                                // setAnalysisId(null)
+                                closeAnalysis(record.analysis_id)
                             }}>Close</Button> :
                             <Tooltip title={record.component_type}>
                                 <Button size="small" color={"cyan"} variant="solid" onClick={() => {
@@ -488,6 +490,12 @@ const AnalysisList = forwardRef<any, any>(({
                                     // })
                                     // openModal("modalA", record)
                                     setAnalysisId(record.analysis_id)
+                                    // analysisNodePanel
+                                    setView("analysisNodePanel")
+                                    addOpenAnalysis({
+                                        analysis_id: record.analysis_id, 
+                                        analysis_name: record.analysis_name
+                                    })
                                     //
 
                                     // setRecord(record)
@@ -770,10 +778,10 @@ const AnalysisList = forwardRef<any, any>(({
                 view={"analysisResultView"}
             />
              */}
-            <ViewResolver
+            {/* <ViewResolver
                 analysis_id={analysisId}
                 view="analysisNodePanel">
-            </ViewResolver>
+            </ViewResolver> */}
         </>}
 
         {/* <AnalysisResultPanel

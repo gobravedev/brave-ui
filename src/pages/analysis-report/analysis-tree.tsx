@@ -1,4 +1,4 @@
-import { Button, Card, Col, Empty, Flex, Row, Segmented, Skeleton, Tabs, Tag, Tooltip, Tree, TreeDataNode, TreeProps } from "antd"
+import { Button, Card, Col, Empty, Flex, Row, Segmented, Skeleton, Space, Tabs, Tag, Tooltip, Tree, TreeDataNode, TreeProps } from "antd"
 import axios from "axios"
 import { FC, lazy, Suspense, use, useEffect, useRef, useState } from "react"
 import { useLocation, useNavigate, useOutletContext, useParams } from "react-router"
@@ -10,6 +10,7 @@ import FormProject from "@/components/form-project"
 import Markdown from "@/components/markdown"
 import { useStickyTop } from "@/hooks/useStickyTop"
 import { AI } from "@/components/chat"
+import { useStoreRender } from "@/context/render/RenderProvider"
 
 const ResultParse = lazy(() => import("@/components/result-parse"))
 // import AnalysisResultPanel from '@/components/analysis-result-view/panel'
@@ -132,77 +133,60 @@ const AnalysisTree: FC<any> = () => {
         loadData()
     }, [])
     return <div >
-        <Card
-            loading={loading}
-            title={projectObj?.project_name}
-            size="small"
-            style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                height: " 100%"
-            }}
-            styles={{
-                body: {
-                    height: "80vh",
-                    // flex: 1,
-                    overflowY: "auto"
-                }
-            }}
-            extra={
-                <Flex gap={"small"}>
+
+        <Flex justify="end">
 
 
-                    <Tooltip title={`Download Project ${projectObj?.project_name}`}>
+            <Space>
+                <Tooltip title={`Download Project ${projectObj?.project_name}`}>
 
 
-                        <Button
-                            onClick={async () => {
-                                // /analysis/download-results/{analysis_id}
-                                const res = await axios.post(`/analysis/download-project/${project}`);
-                                const url = `${baseURL}${res.data.download_url}`
-                                console.log(res)
-                                window.open(url, "_blank")
-                                // const blob = new Blob([res.data], { type: 'application/zip' });
-                            }}
-                            size="small" color="blue" variant="solid" icon={<DownloadOutlined />} >Download</Button>
+                    <Button
+                        onClick={async () => {
+                            // /analysis/download-results/{analysis_id}
+                            const res = await axios.post(`/analysis/download-project/${project}`);
+                            const url = `${baseURL}${res.data.download_url}`
+                            console.log(res)
+                            window.open(url, "_blank")
+                            // const blob = new Blob([res.data], { type: 'application/zip' });
+                        }}
+                        size="small" color="blue" variant="solid" icon={<DownloadOutlined />} >Download</Button>
 
-                    </Tooltip>
-                    <RedoOutlined style={{ cursor: "pointer" }} onClick={() => loadData()} />
+                </Tooltip>
+                <RedoOutlined style={{ cursor: "pointer" }} onClick={() => loadData()} />
+            </Space>
 
-                    {/* <Button size="small" color="cyan" variant="solid" onClick={loadData}>Refresh</Button> */}
-                </Flex>
-            }>
+            {/* <Button size="small" color="cyan" variant="solid" onClick={loadData}>Refresh</Button> */}
+        </Flex>
+        <div style={{
+            // height:"50vh",
+            // overflow:"auto"
+        }}>
+            {Array.isArray(data) && data.length != 0 ? <>
+                <LeftPanel onSelect={(val: any) => {
+                    if (val.node?.type == "analysis") {
+                        // setAnalysis(val.node)
+                        setAnalysisKey(val.node.key)
+                        // setComponentType(val.node.relation_type)
+                        // updateQueryParam("project", project);
+                        // updateQueryParam("key", val.node.key);
+                        
+                        navigate(`/analysis-report?project=${project}&key=${val.node.key}`)
+                    } else if (val.node?.type == "relation") {
+                        console.log(val.node)
+                        // loadComponents(val.node.key)
+                    }
 
-            <div style={{
-                // height:"50vh",
-                // overflow:"auto"
-            }}>
-                {Array.isArray(data) && data.length != 0 ? <>
-                    <LeftPanel onSelect={(val: any) => {
-                        if (val.node?.type == "analysis") {
-                            // setAnalysis(val.node)
-                            setAnalysisKey(val.node.key)
-                            // setComponentType(val.node.relation_type)
-                            // updateQueryParam("project", project);
-                            // updateQueryParam("key", val.node.key);
-                            navigate(`/analysis-report?project=${project}&key=${val.node.key}`)
-                        } else if (val.node?.type == "relation") {
-                            console.log(val.node)
-                            // loadComponents(val.node.key)
-                        }
+                    // console.log(val)
+                }} defaultSelectKey={analysisKey} treeData={data}></LeftPanel>
 
-                        // console.log(val)
-                    }} defaultSelectKey={analysisKey} treeData={data}></LeftPanel>
+            </> : <>
+                <Empty></Empty>
+            </>}
 
-                </> : <>
-                    <Empty></Empty>
-                </>}
-
-            </div>
+        </div>
 
 
-        </Card>
     </div>
 }
 

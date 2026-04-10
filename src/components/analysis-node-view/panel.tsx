@@ -1,40 +1,36 @@
+import { useStoreRender } from "@/context/render/RenderProvider";
 import ViewResolver from "@/core/ui-renderer/ViewResolver";
-import { Button, Card, Space } from "antd";
+import { renderCloseViewButton, renderViewButton } from "@/utils/render-view-btn";
+import { Button, Card, Divider, Flex, Space } from "antd";
 import axios from "axios";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 
-const AnalysisNodePanel: FC<any> = ({ analysis_id }) => {
+const AnalysisNodePanel: FC<any> = () => {
+    const { openAnalysis, analysisId, setAnalysisId, clear,  setRelation, closeAnalysis, setFormParam } = useStoreRender()
 
-    const [view, setView] = useState("analysisNodesReport");
+    const [view, setView] = useState("analysisNodes");
 
     const [title, setTitle] = useState("")
-
-    const renderViewButton = (viewName: string, label: string) => {
-        const isActive = view === viewName;
-        return (
-            <Button
-                size="small"
-                color="cyan"
-                variant={isActive ? "solid" : "outlined"}
-                onClick={() => setView(viewName)}
-            >
-                {label}
-            </Button>
-        );
-    }
+    useEffect(() => {
+        return () => {
+            setAnalysisId(null)
+        }
+    }, [])
     return <Card size="small"
         variant="borderless"
         title={title}
         extra={<Space>
-            {renderViewButton("analysisNodesReport", "Report")}
-            {renderViewButton("analysisNodes", "Nodes")}
-            {renderViewButton("analysisEdges", "Edges")}
+            {renderViewButton(view, setView, "analysisNodes", "Nodes")}
+            {renderViewButton(view, setView, "analysisNodesReport", "Report")}
+
+            {renderViewButton(view, setView, "analysisEdges", "Edges")}
         </Space>}
 
     >
+
         <ViewResolver
             setTitle={setTitle}
-            analysis_id={analysis_id}
+            analysis_id={analysisId}
             view={view}>
         </ViewResolver>
     </Card>

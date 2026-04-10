@@ -8,9 +8,9 @@ import { ClearOutlined, RedoOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 const RenderFromJson = lazy(() => import("./render-form-json"));
 import { useStoreRender } from "@/context/render/RenderProvider";
-const EditParamsPanel: FC<any> = ({  callback,analysisId }) => {
+const EditParamsPanel: FC<any> = () => {
     const [form] = Form.useForm()
-    const { requestParam, relation,setAnalysisId } = useStoreRender()
+    const { requestParam, relation, setAnalysisId, loadParams } = useStoreRender()
 
     // const addedProject = Form.useWatch((values: any) => values?.addedProject, form);
     const jobStatus = useRef<any>(null)
@@ -19,23 +19,40 @@ const EditParamsPanel: FC<any> = ({  callback,analysisId }) => {
     const [data, setData] = useState<any>()
 
     useEffect(() => {
-        // form.resetFields()
-        if (analysisId) {
-            analysisIdRef.current = analysisId
-            loadData()
-        } else {
-            setParsms(requestParam)
-            setData({
-                component_name: relation?.name,
-            })
+        setParsms(requestParam)
+        if (requestParam?.type && requestParam?.type=="analysis") {
+            form.resetFields()
+            // console.log(resp.data.request_param)
+            form.setFieldsValue(requestParam.requestParam)
         }
-    }, [analysisId, requestParam])
+        // form.resetFields()
+        // if (analysisId) {
+        //     analysisIdRef.current = analysisId
+        //     loadData()
+        // } else {
+        //     setParsms(requestParam)
+        //     setData({
+        //         component_name: relation?.name,
+        //     })
+        // }
+        // loadData()
+
+    }, [requestParam])
     // form.()
     const [resultData, setResultData] = useState<any>()
 
     // const navigate = useNavigate()
     const [loading, setLoading] = useState<any>()
 
+    // const loadData = async () => {
+    //     // if (type && bizKey) {
+    //     //     switch (type) {
+    //     //         case "tools":
+    //     //             loadToolsForm(bizKey)
+    //     //             break;
+    //     //     }
+    //     // }
+    // }
 
     // const loadAnalysisResult = async (componentIdList: any) => {
     //     let resp: any = await axios.post(`/analysis-result/list-analysis-result-grouped`, {
@@ -44,7 +61,7 @@ const EditParamsPanel: FC<any> = ({  callback,analysisId }) => {
     //     })
     //     setResultData(resp.data)
     // }
-    const loadData = async () => {
+    const loadAnalysis = async (analysisId: any) => {
         setLoading(true)
         const resp = await axios.post(`/analysis/edit-params/${analysisId}`)
         jobStatus.current = resp.data?.job_status
@@ -75,8 +92,10 @@ const EditParamsPanel: FC<any> = ({  callback,analysisId }) => {
     }
 
 
+
+
     const sseData = useSelector((state: any) => state.global.sseData)
-    const analysisIdRef = useRef<any>(analysisId)
+    const analysisIdRef = useRef<any>(null)
 
     useEffect(() => {
         const data = sseData
@@ -85,7 +104,7 @@ const EditParamsPanel: FC<any> = ({  callback,analysisId }) => {
         if (analysisIdRef.current == data.analysis_id) {
             //  || data.event == "analysis_started"
             if (data.event == "analysis_complete" || data.event == "analysis_failed") {
-                loadData()
+                // loadData()
             } else if (data.event == "analysis_started") {
                 jobStatus.current = "running"
             }
@@ -105,16 +124,23 @@ const EditParamsPanel: FC<any> = ({  callback,analysisId }) => {
 
     return <>
         {/* {JSON.stringify(relation)} */}
+        {/* {relationId} */}
+        {/* {JSON.stringify(params.formJson)} */}
+        {/* {type} - {bizKey} */}
         {params ? <>
             <Space wrap>
-                <Tag>{data?.component_name}</Tag>
-                {data?.analysis_id && <>
-                    <Tag color="success">{data?.analysis_name}</Tag>
+
+                {/* <Tooltip title={bizKey}>
+                    <Tag>{type}</Tag>
+                </Tooltip> */}
+                {true && <>
+                    <Button onClick={()=>loadParams(true)} size="small" icon={<RedoOutlined></RedoOutlined>}></Button>
+
+                    {/* <Tag color="success">{data?.analysis_name}</Tag>
                     <Tooltip title={data?.analysis_id}>
                         <Tag>{String(analysisIdRef.current).slice(0, 8)}</Tag>
                     </Tooltip>
-                    <Tag>{jobStatus.current}</Tag>
-                    <Button onClick={loadData} size="small" icon={<RedoOutlined></RedoOutlined>}></Button>
+                    <Tag>{jobStatus.current}</Tag> */}
 
                     {/* <RedoOutlined style={{ cursor: "pointer" }} onClick={loadData} /> */}
                 </>}
@@ -125,10 +151,6 @@ const EditParamsPanel: FC<any> = ({  callback,analysisId }) => {
                     }} size="small" icon={<ClearOutlined></ClearOutlined>}></Button>
 
                 </Tooltip>
-
-
-
-
             </Space>
 
             <CreateOrUpdateParsms
@@ -145,7 +167,7 @@ const EditParamsPanel: FC<any> = ({  callback,analysisId }) => {
                 jobStatus={jobStatus}
                 callback={() => {
                     // loadData()
-                    callback && callback()
+                    // callback && callback()
                 }} ></CreateOrUpdateParsms>
 
         </> : <Skeleton active></Skeleton>}

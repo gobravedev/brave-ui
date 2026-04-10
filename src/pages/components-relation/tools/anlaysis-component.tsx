@@ -4,6 +4,7 @@ import { FC, useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router';
 import ComponentsDetailsRender from '../../../core/ui-renderer/ComponentsDetailsRender';
 import { Card, Col, Row, Segmented } from 'antd';
+import ViewResolver from '@/core/ui-renderer/ViewResolver';
 
 const AnalysisToolsComp = ({ operatePipeline, analysisId,component,panelView }: any) => {
     const { project } = useOutletContext<any>()
@@ -17,10 +18,7 @@ const AnalysisToolsComp = ({ operatePipeline, analysisId,component,panelView }: 
 
     return <div style={{ marginTop: "0.5rem", marginBottom: "0.5rem" }}>
         {/* {JSON.stringify(requestParam)} */}
-        <Row  >
-            <Col lg={16} sm={16} xs={24} style={{ paddingRight: "0.5rem" }}>
-                {/* <div style={{height:"2rem",width:"100%", background:"red"}}></div> */}
-                <ComponentsDetailsRender
+        <ViewResolver
                     analysis_id={analysisId}
                     relation_id={component?.relation_id}
                     operatePipeline={operatePipeline}
@@ -28,10 +26,17 @@ const AnalysisToolsComp = ({ operatePipeline, analysisId,component,panelView }: 
                     component={component}
                     view={panelView}
                 />
-                {/* analysisResultView
-                analysisList
-inputFileComponent */}
-
+        {/* <Row  >
+            <Col lg={16} sm={16} xs={24} style={{ paddingRight: "0.5rem" }}>
+                <ViewResolver
+                    analysis_id={analysisId}
+                    relation_id={component?.relation_id}
+                    operatePipeline={operatePipeline}
+                    project={project}
+                    component={component}
+                    view={panelView}
+                />
+           
             </Col>
             <Col lg={8} sm={8} xs={24}>
                 <Card
@@ -45,10 +50,7 @@ inputFileComponent */}
                                     label: "Parameters",
                                     value: "editParamsPanel"
                                 },
-                                // {
-                                //     label: "LLM",
-                                //     value: "llmAnalysis"
-                                // }, 
+                           
                                 {
                                     label: "Description",
                                     value: "description"
@@ -56,15 +58,14 @@ inputFileComponent */}
                             ]} />
                     </>}
                 >
-                    {/* "6a36e07a-6bff-4995-854e-7260982e2d5d" */}
-                    <ComponentsDetailsRender
+                    <ViewResolver
                         analysisId={analysisId}
                         view={rightPanel}
                     />
                 </Card>
 
             </Col>
-        </Row>
+        </Row> */}
       
     </div>
 

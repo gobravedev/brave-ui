@@ -13,6 +13,7 @@ import { getPathname } from "./utils/utils";
 import LLMBootstrap from "./llmv2/LLMBootstrap";
 import { RenderProvider } from "./context/render/RenderProvider";
 import "@/core/component-registry/module-auto-loader";
+import { SideViewProvider } from "./context/side/SideViewContext";
 
 // registerLLMActions();
 const App: FC<any> = () => {
@@ -91,11 +92,14 @@ const App: FC<any> = () => {
       locale={antdLocale}>
       <HashRouter>
         <LLMBootstrap />
-        <RenderProvider>
-          
-          <RenderRouter></RenderRouter>
+        <SideViewProvider>
+          <RenderProvider>
 
-        </RenderProvider>
+            <RenderRouter></RenderRouter>
+
+          </RenderProvider>
+        </SideViewProvider>
+
 
 
       </HashRouter>

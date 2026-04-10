@@ -418,7 +418,6 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
                         {({ getFieldValue }) => {
                             if (!it.depends) {
                                 return <Col span={it?.col ? it?.col : 24} key={index} >
-
                                     <ComponentsRender projParameter={parameter} analysisResultId={analysisResultId} key={index} {...it} dataMap={dataMap} componentMap={componentMap} constDataMap={constDataMap}></ComponentsRender>
                                 </Col>
                             }
@@ -434,6 +433,7 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => 
                             if (!show) return null
 
                             return <Col span={it?.col ? it?.col : 24} key={index} >
+                                
                                 <ComponentsRender projParameter={parameter} analysisResultId={analysisResultId} key={index} {...it} dataMap={dataMap} componentMap={componentMap} constDataMap={constDataMap}></ComponentsRender>
                             </Col>
                         }}

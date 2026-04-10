@@ -500,8 +500,6 @@ if (appType == "index") {
     ]
 }
 
-import { listPipeline } from '@/api/pipeline'
-import path from "path";
 const RenderRouter: FC = () => {
     // const [routes, setRoutes] = useState<RouteObject[] | null>([]);
     // const dispatch = useDispatch()

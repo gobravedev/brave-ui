@@ -1,5 +1,5 @@
-import { Skeleton } from 'antd';
-import { FC, lazy, memo, Suspense } from 'react';
+import { registerView } from '@/core/component-registry';
+import { lazy } from 'react';
 
 const PipelineFlowComponent = lazy(() => import('../../pages/components-relation/pipeline/components/pipeline-flow'))
 const SoftwareComponent = lazy(() => import('../../pages/components-relation/tools'))
@@ -13,13 +13,13 @@ const CreateOrUpdateComponent = lazy(() => import('../../pages/components-relati
 const CreateOrUpdateRelation = lazy(() => import('../../pages/components-relation/components/create-or-update-relation'))
 const AnalysisResultPageAdapter = lazy(() => import('../../pages/components-relation/components/analysis-result-page'))
 const PipelineInputComponent = lazy(() => import('../../pages/components-relation/pipeline/components/pipeline-input'))
-const LLMFile = lazy(()=>import("../../pages/components-relation/components/llm-file"))
-const LLMTools = lazy(()=>import("../../pages/components-relation/components/llm-tools"))
-const ScriptDesc = lazy(()=>import("../../pages/components-relation/components/script-desc"))
-const LLMScript = lazy(()=>import("../../pages/components-relation/components/llm-script"))
-const ScriptCode = lazy(()=>import("../../pages/components-relation/components/script-code"))
-const ComponentStructure = lazy(()=>import("../../pages/components-relation/components/component-structure"))
-const ComponentScript = lazy(()=>import("../../pages/components-relation/components/component-script"))
+const LLMFile = lazy(() => import("../../pages/components-relation/components/llm-file"))
+const LLMTools = lazy(() => import("../../pages/components-relation/components/llm-tools"))
+const ScriptDesc = lazy(() => import("../../pages/components-relation/components/script-desc"))
+const LLMScript = lazy(() => import("../../pages/components-relation/components/llm-script"))
+const ScriptCode = lazy(() => import("../../pages/components-relation/components/script-code"))
+const ComponentStructure = lazy(() => import("../../pages/components-relation/components/component-structure"))
+const ComponentScript = lazy(() => import("../../pages/components-relation/components/component-script"))
 const PreviewRelationExample = lazy(() => import('../../pages/components-relation/components/preview-example'))
 const ScriptView = lazy(() => import('../../pages/components-relation/components/script-view'))
 const FileView = lazy(() => import('../../pages/components-relation/components/file-view'))
@@ -29,8 +29,12 @@ const OutputFileComponent = lazy(() => import('@/components/result-list/output-f
 const AnalysisResultView = lazy(() => import('@/components/analysis-result-view/analysis-reuslt-view'))
 const AnalysisList = lazy(() => import('@/components/analysis-list'))
 const WorkflowComponent = lazy(() => import('../../pages/components-relation/workflow'))
-const RelationDefinitionDAG = lazy(() => import('../../pages/components-relation/components/relation-definition-dag')) 
+const RelationDefinitionDAG = lazy(() => import('../../pages/components-relation/components/relation-definition-dag'))
 const WorkflowVisComponent = lazy(() => import('../../pages/components-relation/workflow/workflow-vis-component'))
+const LLMCard = lazy(() => import('../../layout/components/llm-card'))
+const EditParamsPanelWithAnalysisId = lazy(() => import('@/components/edit-params/components/edit-params-panel-with-analysis-id'))
+const Md = lazy(() => import('../../layout/components/md'))
+const AnalysisTree = lazy(() => import("../../pages/analysis-report/analysis-tree"))
 const viewMapping: {
     key: string;
     label: string;
@@ -50,13 +54,13 @@ const viewMapping: {
         { key: "createOrUpdateComponent", label: "CreateOrUpdateComponent", component: CreateOrUpdateComponent },
         { key: "createOrUpdateRelation", label: "CreateOrUpdateRelation", component: CreateOrUpdateRelation },
         { key: "analysisResult", label: "analysisResult", component: AnalysisResultPageAdapter },
-        
+
         { key: "llmFile", label: "llmFile", component: LLMFile },
         { key: "llmTools", label: "llmTools", component: LLMTools },
         { key: "llmScript", label: "llmScript", component: LLMScript },
-        
-        {key:"scriptView", label:"scriptView", component: ScriptView},
-        {key:"fileView", label:"fileView", component: FileView},
+
+        { key: "scriptView", label: "scriptView", component: ScriptView },
+        { key: "fileView", label: "fileView", component: FileView },
 
         { key: "scriptDesc", label: "scriptDesc", component: ScriptDesc },
         { key: "scriptCode", label: "scriptCode", component: ScriptCode },
@@ -65,29 +69,23 @@ const viewMapping: {
         { key: "component-script", label: "component-script", component: ComponentScript },
 
         { key: "preview-relation-example", label: "preview-relation-example", component: PreviewRelationExample },
-        {key: "editParamsPanel", label: "editParamsPanel", component: EditParamsPanel},
-        {key : "inputFileComponent", label: "inputFileComponent", component: InputFileComponent},
-        {key : "outputFileComponent", label: "outputFileComponent", component: OutputFileComponent},
-        {key: "analysisResultView", label: "analysisResultView", component: AnalysisResultView},
-        {key: "analysisList", label: "analysisList", component: AnalysisList},
-        {key: "relationDefinitionDAG", label: "relationDefinitionDAG", component: RelationDefinitionDAG},
+        { key: "editParamsPanel", label: "editParamsPanel", component: EditParamsPanel },
+        { key: "inputFileComponent", label: "inputFileComponent", component: InputFileComponent },
+        { key: "outputFileComponent", label: "outputFileComponent", component: OutputFileComponent },
+        { key: "analysisResultView", label: "analysisResultView", component: AnalysisResultView },
+        { key: "analysisList", label: "analysisList", component: AnalysisList },
+        { key: "relationDefinitionDAG", label: "relationDefinitionDAG", component: RelationDefinitionDAG },
 
         { key: "workflow-input", label: "workflow-input", component: PipelineInputComponent },
 
-        {key: "workflow-vis", label: "workflow-vis", component: WorkflowVisComponent},
+        { key: "workflow-vis", label: "workflow-vis", component: WorkflowVisComponent },
+        { key: "llm-card", label: "llm-card", component: LLMCard },
+        { key: "editParamsPanelWithAnalysisId", label: "editParamsPanelWithAnalysisId", component: EditParamsPanelWithAnalysisId },
+        { key: "markdown", label: "markdown", component: Md },
+        { key: "analysis-tree", label: "analysis-tree", component: AnalysisTree },
 
     ];
 
-const ComponentsDetailsRender: FC<any> = ({ view, ...rest }) => {
-    if (!view) return null
-    const item = viewMapping.find((v) => v.key === view);
-    if (!item) return <div>Unknow component {view}</div>;
-    const { component: Component, key } = item
-    // const Component = item.component;
-
-    return <Suspense fallback={<Skeleton active></Skeleton>} >
-        <Component  {...rest} />
-    </Suspense>
+for (const view of viewMapping) {
+    registerView(view.key, view.component)
 }
-
-export default memo(ComponentsDetailsRender);

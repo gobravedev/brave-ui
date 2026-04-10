@@ -1,9 +1,16 @@
+import axios from "axios"
 import { createContext, FC, useContext, useEffect, useMemo, useRef, useState } from "react"
+import { useSideViewContext } from "../side/SideViewContext"
 
 export const RenderContext = createContext<any>(null)
 
 export const useStoreRender = () => {
     return useContext(RenderContext)
+}
+
+type FromParamType = {
+    type: string,
+    bizKey: string
 }
 
 export const RenderProvider: FC<any> = ({ children }) => {
@@ -12,8 +19,13 @@ export const RenderProvider: FC<any> = ({ children }) => {
     const [resultTableList, setResultTableList] = useState<any>()
     const [toolsPanelView, setToolsPanelView] = useState<any>("inputFileComponent")
     const [analysisId, setAnalysisId] = useState<any>(null)
+    // const [formParam, setFormParam] = useState<FromParamType | null>(null)
+    const [openAnalysis, setOpenAnalysis] = useState<any>([])
     const [relation, setRelation] = useState<any>(null)
     const [requestParam, setRequestParam] = useState<any>(null)
+    const [formData, setFormData] = useState<any>(null)
+    const { setSideView, sideView, sideOptions, setSideOptions } = useSideViewContext();
+
 
     const clear = () => {
         // setComponentParentIdsMap({})
@@ -21,7 +33,10 @@ export const RenderProvider: FC<any> = ({ children }) => {
         setToolsPanelView("inputFileComponent")
         setAnalysisId(null)
         setRelation(null)
+        // setFormParam(null)
         setRequestParam(null)
+        setOpenAnalysis([])
+        setFormData(null)
     }
     const buildRequestParams = () => {
         let dataComponentIds: any = []
@@ -44,14 +59,70 @@ export const RenderProvider: FC<any> = ({ children }) => {
             databases: relation.databases
         }
     }
-    useEffect(() => {
-        if (relation) {
-            const params = buildRequestParams()
-            setRequestParam(params)
+    const loadToolsForm = async (tools_id: any) => {
+        const resp = await axios.get(`/tools/get-from-json/${tools_id}`)
+        return resp.data
+    }
+    const loadAnalysis = async (analysisId: any) => {
+        // setLoading(true)
+        const resp = await axios.post(`/analysis/edit-params-v2/${analysisId}`)
+        return {
+            requestParam: resp.data.request_param,
+            dataMap: { ...resp.data.analysis_result },
+            formJson: resp.data.formJson,
+            databases: resp.data.databases,
+            upstreamFormJson: resp.data.upstreamFormJson,
         }
-    }, [resultTableList, relation])
+    }
 
-  
+    const loadParams = async (force=false) => {
+        console.log("sideView", sideView)
+        if (sideView == "editParamsPanel") {
+            if (analysisId) {
+                const data = await loadAnalysis(analysisId)
+                setRequestParam({
+                    ...data,
+                    type: "analysis",
+                })
+            } else if (relation) {
+                let data = formData;
+                if (!data || force) {
+                    data = await loadToolsForm(relation.relation_id)
+                    setFormData(data)
+                    
+                }
+                 const params = buildRequestParams()
+                    setRequestParam({
+                        ...params,
+                        ...data,
+
+                    })
+
+
+            }
+        }
+
+    }
+
+    useEffect(() => {
+        loadParams()
+    }, [relation, sideView, analysisId])
+
+    const addOpenAnalysis = (analysis: any) => {
+        if (openAnalysis.find((item: any) => item.analysis_id === analysis.analysis_id)) {
+            return
+        }
+        setOpenAnalysis((prev: any) => [...prev, analysis])
+    }
+
+    const checkIsOpen = (analysis_id: string) => {
+        return openAnalysis.find((item: any) => item.analysis_id === analysis_id)
+    }
+
+    const closeAnalysis = (analysis_id: string) => {
+
+        setOpenAnalysis((prev: any) => prev.filter((item: any) => item.analysis_id !== analysis_id))
+    }
     return (
         <RenderContext.Provider
             value={{
@@ -66,7 +137,13 @@ export const RenderProvider: FC<any> = ({ children }) => {
                 relation,
                 setRelation,
                 requestParam,
-                clear
+                clear,
+                openAnalysis,
+                addOpenAnalysis,
+                checkIsOpen,
+                closeAnalysis,
+                loadParams
+
             }}
         >
             {children}

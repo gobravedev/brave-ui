@@ -8,6 +8,7 @@ export const SideViewProvider:FC<any> = ({ children }) => {
   const location = useLocation();
 
   const [viewMap, setViewMap] = useState<Record<string, string | null>>({});
+  const [sideOptions, setSideOptions] = useState<any>([])
 
   const setSideView = (view: string | null) => {
     setViewMap(prev => ({
@@ -19,7 +20,7 @@ export const SideViewProvider:FC<any> = ({ children }) => {
   const sideView = viewMap[location.pathname] ?? "llm-card";  // 默认
 
   return (
-    <SideViewContext.Provider value={{ viewMap, setSideView, sideView }}>
+    <SideViewContext.Provider value={{ viewMap, setSideView, sideView, sideOptions, setSideOptions }}>
       {children}
     </SideViewContext.Provider>
   );

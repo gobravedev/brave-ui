@@ -1,7 +1,7 @@
 import type { BubbleItemType, BubbleListProps, ThoughtChainItemType, ThoughtChainProps } from '@ant-design/x';
 import { Bubble, Sender, ThoughtChain } from '@ant-design/x';
 import { AbstractChatProvider, DefaultMessageInfo, useXChat, XRequest, XRequestOptions } from '@ant-design/x-sdk';
-import { Button, Card, Flex, GetProp, Popconfirm, Space, Typography } from 'antd';
+import { Button, Card, Flex, GetProp, Popconfirm, Space, Tag, Typography } from 'antd';
 import React, { FC, forwardRef, useEffect, useImperativeHandle } from 'react';
 import { useSelector } from 'react-redux';
 import XMarkdown from '@ant-design/x-markdown';
@@ -455,6 +455,7 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
         //     </Space>}>
         <>
             <Flex justify='end'>
+                <Tag>{`LLM - ${biz_type}  ${biz_id}`}</Tag>
                 <Button size='small' icon={<RedoOutlined />} onClick={loadHistoryMessage} >
                 </Button>
                 <Popconfirm title="Are you sure to clear chat history?" onConfirm={async () => {

@@ -1,7 +1,7 @@
 import React, { FC, Suspense, useEffect, useState, lazy } from 'react';
 import { ApiOutlined, BookOutlined, LaptopOutlined, NotificationOutlined, PlusOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Breadcrumb, Button, Card, Col, Divider, Drawer, Empty, Flex, Form, Input, Layout, Menu, message, Modal, notification, Popconfirm, Row, Select, Skeleton, Space, Tag, theme, Tooltip, Typography } from 'antd';
+import { Breadcrumb, Button, Card, Col, Divider, Drawer, Empty, Flex, Form, Input, Layout, Menu, message, Modal, notification, Popconfirm, Row, Segmented, Select, Skeleton, Space, Tag, theme, Tooltip, Typography } from 'antd';
 import { NavLink, Outlet, useLocation, useNavigate, useParams } from 'react-router';
 import { Header } from 'antd/es/layout/layout';
 import { useDispatch, useSelector } from 'react-redux';
@@ -27,6 +27,7 @@ import ComponentRender from './component-render';
 import { SideViewProvider, useSideViewContext } from '@/context/side/SideViewContext';
 import { useSSE } from '@/context/sse/useSSE';
 import { ActionDispatcher } from '@/llmv2/dispatcher';
+import ViewResolver from '@/core/ui-renderer/ViewResolver';
 
 const { Content, Sider } = Layout;
 
@@ -77,7 +78,7 @@ const App: React.FC = () => {
     const isDark = theme === 'dark';
     const bgColor = isDark ? '#001529' : '#fff'; // 深色/白色
     const textColor = isDark ? '#fff' : '#000';
-    const { sideView } = useSideViewContext();
+    const { sideView, setSideView,sideOptions, setSideOptions } = useSideViewContext();
 
 
     const { ref: containerRef, top, isSticky } = useStickyTop(576);
@@ -792,7 +793,34 @@ const App: React.FC = () => {
                                     alignSelf: "flex-start", // 避免被stretch
                                     height: `calc(100vh - ${top}px - 1rem )`, // 可选：固定高度，让内部滚动
                                 } : {}}>
-                                <ComponentRender view={sideView}></ComponentRender>
+                                <Card
+                                    size="small"
+                                    title={``}
+                                    style={{
+                                        flex: 1,
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        height: " 100%"
+                                    }}
+                                    styles={{
+                                        body: {
+                                            // height: "90%",
+                                            flex: 1,
+                                            overflowY: "auto"
+                                        }
+                                    }}
+                                    extra={
+                                        <Segmented size="small" value={sideView}
+                                            onChange={(val: any) => {
+                                                // setView("analysisTools")
+                                                setSideView(val)
+                                            }}
+                                            options={sideOptions} />
+                                    }>
+
+                                    <ViewResolver view={sideView}></ViewResolver>
+
+                                </Card>
 
                             </Col>
 
@@ -823,9 +851,7 @@ const App: React.FC = () => {
     );
 };
 const AppLayout: React.FC = () => {
-    return <SideViewProvider>
-        <App></App>
-    </SideViewProvider>
+    return <App></App>
 
 }
 export default AppLayout;
@@ -844,7 +870,7 @@ const SettingDrawer: FC<any> = ({ visible, onClose, project_id, openModal: openM
                     action: "component.invoke",
                     payload: {
                         category: "tables",
-                        id:"tools-details",
+                        id: "tools-details",
                         method: "reload",
                     }
                 }

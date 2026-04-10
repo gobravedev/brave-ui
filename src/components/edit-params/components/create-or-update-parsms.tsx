@@ -17,6 +17,7 @@ import BioDatabases from "@/components/bio-databases";
 import { useSelector } from "react-redux";
 import { useStoreRender } from "@/context/render/RenderProvider";
 import { ActionDispatcher } from "@/llmv2/dispatcher";
+import { useGlobalMessage } from "@/hooks/useGlobalMessage";
 const RenderFromJson = lazy(() => import("./render-form-json"));
 
 
@@ -25,7 +26,7 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
     databases, callback, analysisResultId, showCancal = false }) => {
     const { modals, openModals, closeModals } = useModals(["paramsView", "bioDatabases"]);
     const [loading, setLoading] = useState<boolean>(false)
-    const { messageApi } = useOutletContext<any>()
+    const messageApi = useGlobalMessage()
     const { project } = useSelector((state: any) => state.user);
     const { setToolsPanelView, setAnalysisId } = useStoreRender()
 
@@ -118,6 +119,7 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
     }
 
     return <Suspense fallback={<Skeleton active></Skeleton>}>
+        {/* {JSON.stringify(formJson)} */}
         <Spin spinning={loading}>
             <Form size="small" form={form}
                 // labelCol={{ span: 8 }}

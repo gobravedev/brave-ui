@@ -34,7 +34,7 @@ const RenderFromJson: FC<any> = ({ formJson: formJson_, dataMap, databases, anal
                         label: "Required Parameters",
                         forceRender: true,
                         children: <>
-
+                            {/* {JSON.stringify(dbFormJson)} */}
                             <FormJsonComp analysisResultId={analysisResultId} formJson={[...dbFormJson]} dataMap={dataMap} ></FormJsonComp>
                             {(databases && Array.isArray(databases) && databases.length > 0) && <BioDatabaseForm openModal={() => {
                                 openModals("bioDatabases", databases)
