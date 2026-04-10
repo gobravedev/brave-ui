@@ -144,7 +144,7 @@ const extractDependsNames = (depends: any): string[] => {
 
     return []
 }
-const FormJsonComp: FC<any> = memo(({ formJson, dataMap, analysisResultId }) => {
+const FormJsonComp: FC<any> = memo(({ formJson, dataMap={}, analysisResultId }) => {
     if (!formJson) return null
     // const { projectObj } = useOutletContext<any>()
     const { projectObj } = useSelector((state: any) => state.user);

@@ -1,5 +1,5 @@
 import { usePagination } from "@/hooks/usePagination";
-import { Button, Card, Empty, Flex, Pagination, Popconfirm, Table, Tag, Tooltip, Typography } from "antd";
+import { Button, Card, Col, Empty, Flex, Pagination, Popconfirm, Row, Statistic, Table, Tag, Tooltip, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { FC, useMemo } from "react";
 import { ExportOutlined, RedoOutlined } from '@ant-design/icons'
@@ -18,6 +18,7 @@ interface AnalysisNode {
     node_id: string;
     sample_id: string | null;
     script_id: string;
+    analysis_node_id: string,
     status: string;
     upstream_ids?: string[];
     downstream_ids?: string[];
@@ -152,10 +153,13 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
                 <Flex vertical gap={4}>
                     <Typography.Text strong>{record.node_id}</Typography.Text>
                     <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                        script_id: {record.script_id}
+                    </Typography.Text>
+                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                         sample_id: {record.sample_id || "global"}
                     </Typography.Text>
-                      <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                       script_id: {record.script_id}
+                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                        analysis_node_id: {record.analysis_node_id}
                     </Typography.Text>
                 </Flex>
             )
@@ -282,7 +286,7 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
                     </Typography.Text>
                 </Tooltip>
             )
-        },{
+        }, {
             title: 'output_validation_errors',
             dataIndex: 'output_validation_errors',
             key: 'output_validation_errors',
@@ -423,7 +427,31 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
             )
         }
     ]
+    const summary = {
+        nodeCount: data.length,
+        sampleCount: new Set(data.map((node) => node.sample_id || "global")).size,
+        doneCount: data.filter((node) => node.status === "success").length,
+        failedCount: data.filter((node) => node.status === "failed").length,
+
+    }
     return <>
+
+        <Row gutter={[12, 12]} style={{ marginBottom: 12 }}>
+            <Col xs={12} sm={8} lg={6}>
+                <Card size="small"><Statistic title="Nodes" value={summary.nodeCount} /></Card>
+            </Col>
+            <Col xs={12} sm={8} lg={6}>
+                <Card size="small"><Statistic title="Samples" value={summary.sampleCount} /></Card>
+            </Col>
+            <Col xs={12} sm={8} lg={6}>
+                <Card size="small"><Statistic title="Done" value={summary.doneCount} /></Card>
+            </Col>
+            <Col xs={12} sm={8} lg={6}>
+                <Card size="small"><Statistic title="Failed" value={summary.failedCount} /></Card>
+            </Col>
+
+        </Row>
+
         <Button onClick={async () => {
             await axios.post(`/analysis-runtime/invalidate-cache/${analysis_id}`)
             reload()

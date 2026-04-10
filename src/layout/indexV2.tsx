@@ -28,6 +28,7 @@ import { SideViewProvider, useSideViewContext } from '@/context/side/SideViewCon
 import { useSSE } from '@/context/sse/useSSE';
 import { ActionDispatcher } from '@/llmv2/dispatcher';
 import ViewResolver from '@/core/ui-renderer/ViewResolver';
+import { useComponentStore } from '@/store-zustand/components';
 
 const { Content, Sider } = Layout;
 
@@ -858,6 +859,7 @@ export default AppLayout;
 
 const SettingDrawer: FC<any> = ({ visible, onClose, project_id, openModal: openModal_ }) => {
     const { modal, openModal, closeModal } = useModal();
+    const { analysis } = useComponentStore();
 
     return <Drawer title="Setting"
         extra={<>
@@ -865,13 +867,25 @@ const SettingDrawer: FC<any> = ({ visible, onClose, project_id, openModal: openM
         </>}
         open={visible} onClose={onClose} >
         <Flex vertical gap={"small"}>
+            {JSON.stringify(analysis)}
             <Button onClick={() => {
+                // const data = {
+                //     action: "component.invoke",
+                //     payload: {
+                //         category: "tables",
+                //         id: "tools-details",
+                //         method: "reload",
+                //     }
+                // }
                 const data = {
                     action: "component.invoke",
                     payload: {
-                        category: "tables",
-                        id: "tools-details",
-                        method: "reload",
+                        category: "analysis",
+                        id: "params-form",
+                        method: "updateFormStatus",
+                        args: {
+                            status: "done"
+                        }
                     }
                 }
                 ActionDispatcher.dispatch(data.action, data.payload);

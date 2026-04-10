@@ -311,7 +311,7 @@ const Pipeline: FC<any> = ({ }) => {
                     padding: 0,
                     // height: "90%",
                     flex: 1,
-                    overflowY: "auto"
+                    // overflowY: "auto"
                 }
             }}
             title={<>

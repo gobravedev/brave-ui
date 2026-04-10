@@ -1,9 +1,10 @@
 import { Button, Card, Col, Empty, Flex, Menu, Row, Segmented, Skeleton, Space, Statistic, Tag, Tooltip, Typography } from "antd";
 import axios from "axios"
 import { FC, useEffect, useMemo, useState } from "react";
-import { RedoOutlined } from '@ant-design/icons'
+import { CloseOutlined, EditOutlined, RedoOutlined } from '@ant-design/icons'
 import ViewResolver from "@/core/ui-renderer/ViewResolver";
 import { useStoreRender } from "@/context/render/RenderProvider";
+import { useSideViewContext } from "@/context/side/SideViewContext";
 
 type NodeResultAsset = {
     images?: any[];
@@ -20,7 +21,9 @@ type AnalysisNodeSample = {
     sample_id?: string;
     output_dir?: string;
     script_name?: string;
+
     result?: NodeResultAsset;
+    node?: any;
 };
 
 type AnalysisNodeGroup = {
@@ -83,24 +86,80 @@ const countAssets = (samples: AnalysisNodeSample[]) => {
 
 const AnalysisNodesReport: FC<any> = ({ analysis_id }) => {
     const [loading, setLoading] = useState(false);
+    const [detailLoading, setDetailLoading] = useState(false);
     const [data, setData] = useState<AnalysisNodeGroup[]>([]);
     const [selectedNodeId, setSelectedNodeId] = useState<string>();
     const [selectedSampleId, setSelectedSampleId] = useState<string>();
     const [openMenuKeys, setOpenMenuKeys] = useState<string[]>([]);
+    const [sampleDetailMap, setSampleDetailMap] = useState<Record<string, Partial<AnalysisNodeSample>>>({});
+    const { analysisNodeId, setAnalysisNodeId } = useStoreRender()
+    const { setSideView} = useSideViewContext();
+
+    // const normalizeSampleDetail = (rawData: any): Partial<AnalysisNodeSample> => {
+    //     const payload = rawData?.result ?? rawData;
+    //     if (!payload || typeof payload !== "object") {
+    //         return {};
+    //     }
+
+    //     if (payload.result) {
+    //         return payload as Partial<AnalysisNodeSample>;
+    //     }
+
+    //     if (Array.isArray(payload.images) || Array.isArray(payload.tables) || Array.isArray(payload.htmls)) {
+    //         return {
+    //             result: {
+    //                 images: payload.images,
+    //                 tables: payload.tables,
+    //                 htmls: payload.htmls,
+    //             },
+    //         };
+    //     }
+
+    //     return payload as Partial<AnalysisNodeSample>;
+    // };
 
     const loadData = async () => {
+        if (!analysis_id) {
+            return;
+        }
         setLoading(true)
-        const res = await axios.get(`/analysis/visualization-node-tree/${analysis_id}`)
-        const nextData = Array.isArray(res.data?.result) ? res.data.result : [];
-        setData(nextData)
-        // setTitle(res.data.analysis_name + " - Report")
-        setLoading(false)
+        try {
+            const res = await axios.get(`/analysis/visualization-node-tree/${analysis_id}`)
+            const nextData = Array.isArray(res.data?.result) ? res.data.result : [];
+            setData(nextData)
+            setSampleDetailMap({})
+            // setTitle(res.data.analysis_name + " - Report")
+        } finally {
+            setLoading(false)
+        }
     }
 
-  
+    const loadSampleDetail = async (analysisNodeId?: string, force = false) => {
+        if (!analysisNodeId || (sampleDetailMap[analysisNodeId] && !force)) {
+            return;
+        }
+
+        setDetailLoading(true)
+        try {
+            const res = await axios.get(`/analysis/visualization-node-file/${analysisNodeId}`)
+
+            // const nextDetail = normalizeSampleDetail(res.data.result)
+            setSampleDetailMap((prev) => ({
+                ...prev,
+                [analysisNodeId]: res.data,
+            }))
+        } finally {
+            setDetailLoading(false)
+        }
+    }
+
+
 
     useEffect(() => {
-        loadData()
+        if (analysis_id) {
+            loadData()
+        }
+
     }, [analysis_id])
 
     const selectedNode = useMemo(() => {
@@ -118,6 +177,17 @@ const AnalysisNodesReport: FC<any> = ({ analysis_id }) => {
         }
         return selectedNodeSamples.find((item) => item.analysis_node_id === selectedSampleId) || selectedNodeSamples[0];
     }, [selectedNodeSamples, selectedSampleId]);
+
+    const selectedSampleDetail = selectedSample?.analysis_node_id
+        ? sampleDetailMap[selectedSample.analysis_node_id]
+        : undefined;
+
+    const selectedSampleResolved = useMemo(() => {
+        return {
+            ...selectedSample,
+            ...selectedSampleDetail,
+        };
+    }, [selectedSampleDetail]);
 
     useEffect(() => {
         if (!selectedNode && data.length) {
@@ -138,6 +208,10 @@ const AnalysisNodesReport: FC<any> = ({ analysis_id }) => {
             setSelectedSampleId(selectedSample.analysis_node_id);
         }
     }, [selectedNodeSamples, selectedSample, selectedSampleId]);
+
+    useEffect(() => {
+        loadSampleDetail(selectedSample?.analysis_node_id)
+    }, [selectedSample?.analysis_node_id]);
 
     const summary = useMemo(() => {
         const samples = data.flatMap((item) => item.children || []);
@@ -239,6 +313,9 @@ const AnalysisNodesReport: FC<any> = ({ analysis_id }) => {
             return;
         }
         setOpenMenuKeys([makeNodeKey(selectedNodeId)]);
+        return () => {
+            setAnalysisNodeId(null)
+        }
     }, [selectedNodeId, reportTreeData]);
 
     const selectedTreeKey = selectedSample?.analysis_node_id
@@ -251,6 +328,9 @@ const AnalysisNodesReport: FC<any> = ({ analysis_id }) => {
         return <Skeleton active></Skeleton>
     }
 
+    if (!analysis_id) {
+        return <Skeleton active></Skeleton>
+    }
     return <>
         <Flex justify="space-between" align="center" style={{ marginBottom: 12 }}>
             <Typography.Title level={5} style={{ margin: 0 }}>
@@ -258,27 +338,6 @@ const AnalysisNodesReport: FC<any> = ({ analysis_id }) => {
             </Typography.Title>
             <Button loading={loading} onClick={loadData} icon={<RedoOutlined />} size="small"></Button>
         </Flex>
-
-        <Row gutter={[12, 12]} style={{ marginBottom: 12 }}>
-            <Col xs={12} sm={8} lg={4}>
-                <Card size="small"><Statistic title="Nodes" value={summary.nodeCount} /></Card>
-            </Col>
-            <Col xs={12} sm={8} lg={4}>
-                <Card size="small"><Statistic title="Samples" value={summary.sampleCount} /></Card>
-            </Col>
-            <Col xs={12} sm={8} lg={4}>
-                <Card size="small"><Statistic title="Done" value={summary.doneCount} /></Card>
-            </Col>
-            <Col xs={12} sm={8} lg={4}>
-                <Card size="small"><Statistic title="Failed" value={summary.failedCount} /></Card>
-            </Col>
-            <Col xs={12} sm={8} lg={4}>
-                <Card size="small"><Statistic title="Images" value={summary.images} /></Card>
-            </Col>
-            <Col xs={12} sm={8} lg={4}>
-                <Card size="small"><Statistic title="Tables / HTML" value={`${summary.tables} / ${summary.htmls}`} /></Card>
-            </Col>
-        </Row>
 
         {!data.length ? <Empty description="No node report data" /> :
             <Row gutter={[12, 12]} align="top">
@@ -325,47 +384,70 @@ const AnalysisNodesReport: FC<any> = ({ analysis_id }) => {
                     <Card
                         size="small"
                         title={selectedNode?.script_name || "Result Report"}
-                        extra={selectedNodeSamples.length > 1 ?
-                            <Segmented
-                                size="small"
-                                value={selectedSample?.analysis_node_id}
-                                onChange={(value) => setSelectedSampleId(String(value))}
-                                options={selectedNodeSamples.map((sample, index) => ({
-                                    label: getSampleLabel(sample, index),
-                                    value: sample.analysis_node_id,
-                                }))}
-                            /> : undefined}
+                        extra={<Space>
+
+                            {/* {selectedNodeSamples.length > 1 ?
+                                <Segmented
+                                    size="small"
+                                    value={selectedSampleResolved?.analysis_node_id}
+                                    onChange={(value) => setSelectedSampleId(String(value))}
+                                    options={selectedNodeSamples.map((sample, index) => ({
+                                        label: getSampleLabel(sample, index),
+                                        value: sample.analysis_node_id,
+                                    }))}
+                                /> : undefined} */}
+                            {analysisNodeId == selectedSampleResolved?.analysis_node_id ?
+                                <>
+                                    <Tooltip title={`Close ${selectedSampleResolved?.analysis_node_id}`}>
+                                        <Button size="small" onClick={()=>{
+                                            setAnalysisNodeId(null)
+                                        }}  icon={<CloseOutlined/>}></Button>
+                                    </Tooltip>
+                                </> :
+                                <Tooltip title={`${selectedSampleResolved?.analysis_node_id}`}>
+                                    <Button size="small" onClick={() => {
+                                        setAnalysisNodeId(selectedSampleResolved?.analysis_node_id)
+                                        setSideView("editParamsPanel")
+                                    }} icon={<EditOutlined />} />
+                                </Tooltip>
+                            }
+
+                            <Button onClick={() => loadSampleDetail(selectedSample?.analysis_node_id, true)} size="small" icon={<RedoOutlined />} />
+                        </Space>}
                     >
-                        {!selectedSample ? <Empty description="No sample result" /> :
+                        {!selectedSampleResolved?.node ? <Skeleton active paragraph={{ rows: 2 }} /> :
                             <Flex vertical gap={12}>
                                 <Card size="small" styles={{ body: { padding: 12 } }}>
                                     <Flex justify="space-between" align="flex-start" gap={12} wrap>
                                         <Flex vertical gap={4}>
-                                            <Typography.Text strong>
-                                                {selectedSample.script_name || selectedSample.node_id}
+
+                                            <Typography.Text type="secondary">
+                                                node: {selectedSampleResolved.node?.node_id}
                                             </Typography.Text>
                                             <Typography.Text type="secondary">
-                                                node: {selectedSample.node_id}
+                                                analysis_node_id: {selectedSampleResolved.node?.analysis_node_id}
                                             </Typography.Text>
                                             <Typography.Text type="secondary">
-                                                sample: {selectedSample.sample_id || "global"}
+                                                sample: {selectedSampleResolved.node?.sample_id || "global"}
                                             </Typography.Text>
-                                            {selectedSample.output_dir &&
+                                            {selectedSampleResolved.node?.output_dir &&
                                                 <Typography.Paragraph type="secondary" style={{ marginBottom: 0, wordBreak: "break-all" }}>
-                                                    output: {selectedSample.output_dir}
+                                                    output: {selectedSampleResolved.node?.output_dir}
                                                 </Typography.Paragraph>}
                                         </Flex>
                                         <Space wrap>
-                                            <Tag color={statusColorMap[selectedSample.status] || "default"}>{selectedSample.status}</Tag>
-                                            <Tag color="blue">{selectedSample.result?.images?.length || 0} images</Tag>
-                                            <Tag color="purple">{selectedSample.result?.tables?.length || 0} tables</Tag>
-                                            <Tag color="gold">{selectedSample.result?.htmls?.length || 0} htmls</Tag>
+                                            <Tag color={statusColorMap[selectedSampleResolved.node.status] || "default"}>{selectedSampleResolved.node?.status}</Tag>
+                                            {/* <Tag color="blue">{selectedSampleResolved.result?.images?.length || 0} images</Tag>
+                                            <Tag color="purple">{selectedSampleResolved.result?.tables?.length || 0} tables</Tag>
+                                            <Tag color="gold">{selectedSampleResolved.result?.htmls?.length || 0} htmls</Tag> */}
                                         </Space>
                                     </Flex>
                                 </Card>
 
+                                {/* {detailLoading && !selectedSampleDetail ? <Skeleton active paragraph={{ rows: 2 }} /> : null} */}
+
                                 <ViewResolver
-                                    analsyisResult={selectedSample.result || { images: [], tables: [], htmls: [] }}
+                                    analsyisResult={selectedSampleResolved.result || { images: [], tables: [], htmls: [] }}
                                     view={"analysisResultDisplay"}>
                                 </ViewResolver>
                             </Flex>}

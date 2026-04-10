@@ -10,7 +10,7 @@ const RenderFromJson = lazy(() => import("./render-form-json"));
 import { useStoreRender } from "@/context/render/RenderProvider";
 const EditParamsPanel: FC<any> = () => {
     const [form] = Form.useForm()
-    const { requestParam, relation, setAnalysisId, loadParams } = useStoreRender()
+    const { requestParam, analysisNodeId, formStatus, setAnalysisNodeId, relation, setAnalysisId, loadParams, analysisId } = useStoreRender()
 
     // const addedProject = Form.useWatch((values: any) => values?.addedProject, form);
     const jobStatus = useRef<any>(null)
@@ -20,7 +20,7 @@ const EditParamsPanel: FC<any> = () => {
 
     useEffect(() => {
         setParsms(requestParam)
-        if (requestParam?.type && requestParam?.type=="analysis") {
+        if (requestParam?.type && requestParam?.type == "analysis") {
             form.resetFields()
             // console.log(resp.data.request_param)
             form.setFieldsValue(requestParam.requestParam)
@@ -73,6 +73,7 @@ const EditParamsPanel: FC<any> = () => {
             formJson: resp.data.formJson,
             databases: resp.data.databases,
             upstreamFormJson: resp.data.upstreamFormJson,
+            status: resp.data.status,
         })
 
         // await loadAnalysisResult(JSON.parse(resp.data.request_param.data_component_ids))
@@ -133,9 +134,22 @@ const EditParamsPanel: FC<any> = () => {
                 {/* <Tooltip title={bizKey}>
                     <Tag>{type}</Tag>
                 </Tooltip> */}
-                {true && <>
-                    <Button onClick={()=>loadParams(true)} size="small" icon={<RedoOutlined></RedoOutlined>}></Button>
 
+                {analysisId && <Tooltip title={analysisId}>
+                    <Tag color="green" closable onClose={() => {
+                        setAnalysisId(null)
+                        form.resetFields()
+                    }}>Analysis</Tag>
+                </Tooltip>}
+                {analysisNodeId && <Tooltip title={analysisNodeId}>
+                    <Tag color="blue" closable onClose={() => {
+                        setAnalysisNodeId(null)
+                    }} >Node Analysis</Tag>
+                </Tooltip>}
+                {params && <>
+                    <Button onClick={() => loadParams(true)} size="small" icon={<RedoOutlined></RedoOutlined>}></Button>
+
+                    <Tag>{formStatus}</Tag>
                     {/* <Tag color="success">{data?.analysis_name}</Tag>
                     <Tooltip title={data?.analysis_id}>
                         <Tag>{String(analysisIdRef.current).slice(0, 8)}</Tag>
@@ -152,6 +166,7 @@ const EditParamsPanel: FC<any> = () => {
 
                 </Tooltip>
             </Space>
+            {/* {JSON.stringify(requestParam)} */}
 
             <CreateOrUpdateParsms
                 showCreate={true}

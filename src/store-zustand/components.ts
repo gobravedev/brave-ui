@@ -4,7 +4,7 @@ import { create } from "zustand";
 export type TableInstance = { reload: () => void; loadLastPage: () => void; search: (kw: string) => void };
 export type DrawerInstance = { open: () => void; close: () => void };
 export type ModalInstance = { open: () => void; close: () => void; setLoading: (v: boolean) => void };
-export type FormInstance = { setValue: (name: string, v: any) => void; reset: () => void };
+export type FormInstance = { setValue: (name: string, v: any) => void; reset: () => void, updateFormStatus: () => void };
 export type ChartInstance = { refresh: () => void };
 
 // 统一的组件 store
@@ -14,6 +14,7 @@ export type ComponentStore = {
     modals: Record<string, ModalInstance>;
     forms: Record<string, FormInstance>;
     charts: Record<string, ChartInstance>;
+    analysis: Record<string, any>; // 这里可以根据实际情况定义更具体的类型
 
     register: <T>(category: keyof ComponentStore, id: string, instance: T) => void;
     unregister: (category: keyof ComponentStore, id: string) => void;
@@ -27,6 +28,7 @@ export const useComponentStore = create<ComponentStore>((set, get) => ({
     modals: {},
     forms: {},
     charts: {},
+    analysis: {},
 
     register: (category, id, instance) => {
         console.log(`Registering component - Category: ${category}, ID: ${id}`);
@@ -48,7 +50,12 @@ export const useComponentStore = create<ComponentStore>((set, get) => ({
         console.log(`Invoking method on component - Category: ${category}, ID: ${id}, Method: ${method}, Args: ${JSON.stringify(args)}`);
         const comp = (get() as any)[category]?.[id];
         if (comp && typeof comp[method] === "function") {
-            comp[method](...args);
+            if( args instanceof Array){
+                comp[method](...args);
+            } else {
+                comp[method](args);
+            }
+            // comp[method](...args);
         }
     },
 }));

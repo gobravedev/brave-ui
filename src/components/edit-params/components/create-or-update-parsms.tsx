@@ -28,7 +28,7 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
     const [loading, setLoading] = useState<boolean>(false)
     const messageApi = useGlobalMessage()
     const { project } = useSelector((state: any) => state.user);
-    const { setToolsPanelView, setAnalysisId } = useStoreRender()
+    const { setAnalysisId ,analysisNodeId,formStatus,setFormStatus} = useStoreRender()
 
     // const [jobStatus, setJobStatus] = useState<string>(job_status )
     // useEffect(() => {
@@ -57,7 +57,13 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
         console.log(requestParams)
         try {
             setLoading(true)
-            const resp: any = await axios.post(`/fast-api/analysis-controller?save=true&is_submit=false&is_report=true`, requestParams)
+            
+            const resp: any = await axios.post(`/fast-api/analysis-controller`,{
+                request_param: requestParams,
+                is_report: true,
+                save: true,
+                is_submit: false,
+            })
             setLoading(false)
             // setFilePlot(resp.data)
             // setAnalysisParams(resp.data)
@@ -79,16 +85,34 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
         const requestParams = getRequestParams(values)
         setLoading(true)
         try {
-            const resp: any = await axios.post(`/fast-api/analysis-controller?save=${save}&is_submit=${is_submit}`, requestParams)
+            // let url = `/fast-api/analysis-controller?save=${save}&is_submit=${is_submit}`
+            // if (analysisNodeId){
+            //     url = `/fast-api/analysis-node-controller?save=${save}&is_submit=${is_submit}&analysis_node_id=${analysisNodeId}`
+            // }
+    //             request_param: Dict[str, Any]
+    // save: Optional[bool] = False
+    // is_submit: Optional[bool] = False
+    // is_report: Optional[bool] = None
+    // analysis_node_id: Optional[str] = None
+            const resp: any = await axios.post(`/fast-api/analysis-controller`, {
+                request_param: requestParams,
+                save: save,
+                is_submit: is_submit,
+                analysis_node_id: analysisNodeId
+            })
             // setFilePlot(resp.data)
             // setAnalysisParams(resp.data)
             // console.log(resp)
-            if (jobStatus && is_submit) {
-                jobStatus.current = "running"
+            // if (jobStatus && is_submit) {
+            //     // jobStatus.current = "running"
+
+            // }
+            if(is_submit){
+                setFormStatus("running")
             }
             if (save) {
                 messageApi.success("save successful!")
-                setToolsPanelView("analysisList")
+                // setToolsPanelView("analysisList")
                 if (resp.data.analysis_id) {
                     setAnalysisId(resp.data.analysis_id)
                 }
@@ -144,17 +168,17 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                     <Input></Input>
                 </Form.Item>
                 <Flex gap={"small"} justify="space-between">
-                    <Button disabled={jobStatus?.current == "running"} size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true, true)}>
+                    <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true, true)}>
                         Submit
                     </Button>
                     <Space>
 
-                        <Button disabled={jobStatus?.current == "running"} size="small" color="cyan" variant="solid" onClick={() => {
+                        <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid" onClick={() => {
                             saveUpstreamAnalysis(false)
                         }}>Parameters</Button>
 
                         {/* Analysis({requestParam.analysis_name})({String(requestParam.analysis_id).slice(0, 8)}) */}
-                        <Button disabled={jobStatus?.current == "running"} size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>
+                        <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>
                             {requestParam?.analysis_id ? <>Update </> : <>Create</>}</Button>
                         {(requestParam?.analysis_id && showCancal) && <Button size="small" color="cyan" onClick={() => form.setFieldValue("analysis_id", undefined)}>Cancel</Button>}
                         {/* <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>更新分析</Button> */}
@@ -163,7 +187,7 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                             <Popconfirm title="Are you sure to create a new analysis?"
                                 onConfirm={createAnalysis}
                             >
-                                <Button disabled={jobStatus?.current == "running"} size="small" color="orange" variant="solid" onClick={() => form.setFieldValue("analysis_id", undefined)}>Copy</Button>
+                                <Button disabled={formStatus == "running"} size="small" color="orange" variant="solid" onClick={() => form.setFieldValue("analysis_id", undefined)}>Copy</Button>
                             </Popconfirm>
                         }
                     </Space>

@@ -1,6 +1,7 @@
 import axios from "axios"
 import { createContext, FC, useContext, useEffect, useMemo, useRef, useState } from "react"
 import { useSideViewContext } from "../side/SideViewContext"
+import { useComponentStore } from "@/store-zustand/components"
 
 export const RenderContext = createContext<any>(null)
 
@@ -19,13 +20,43 @@ export const RenderProvider: FC<any> = ({ children }) => {
     const [resultTableList, setResultTableList] = useState<any>()
     const [toolsPanelView, setToolsPanelView] = useState<any>("inputFileComponent")
     const [analysisId, setAnalysisId] = useState<any>(null)
+    const [analysisNodeId, setAnalysisNodeId] = useState<any>(null)
+
     // const [formParam, setFormParam] = useState<FromParamType | null>(null)
     const [openAnalysis, setOpenAnalysis] = useState<any>([])
     const [relation, setRelation] = useState<any>(null)
     const [requestParam, setRequestParam] = useState<any>(null)
     const [formData, setFormData] = useState<any>(null)
+    const [formStatus, setFormStatus] = useState<any>(null)
     const { setSideView, sideView, sideOptions, setSideOptions } = useSideViewContext();
 
+    const updateFormStatus = (args: any) => {
+        // debugger
+        if(args?.status){
+            setFormStatus(args.status)
+        }
+        // setFormStatus("running");
+    }
+    const { register, unregister } = useComponentStore();
+    useEffect(() => {
+        if (analysisId) {
+            register("analysis", analysisId, { updateFormStatus });
+            return () => {
+                // debugger
+                unregister("analysis", analysisId);
+            }
+        }
+
+    }, [analysisId]);
+    useEffect(() => {
+        if (analysisNodeId) {
+            register("analysis", analysisNodeId, { updateFormStatus });
+            return () => {
+                unregister("analysis", analysisNodeId);
+            }
+        }
+
+    }, [analysisNodeId]);
 
     const clear = () => {
         // setComponentParentIdsMap({})
@@ -49,8 +80,6 @@ export const RenderProvider: FC<any> = ({ children }) => {
             data_component_ids: JSON.stringify(dataComponentIds),
             // component_parent_ids_map: componentParentIdsMap,
             relation_id: relation.relation_id,
-
-
         }
         return {
             requestParam: requestParams,
@@ -72,31 +101,52 @@ export const RenderProvider: FC<any> = ({ children }) => {
             formJson: resp.data.formJson,
             databases: resp.data.databases,
             upstreamFormJson: resp.data.upstreamFormJson,
+            status: resp.data.status,
         }
     }
-
-    const loadParams = async (force=false) => {
+    const loadNodeAnalysis = async (nodeAnalysisId: any) => {
+        // /analysis/edit-node-params/{analysis_node_id}
+        const resp = await axios.post(`/analysis/edit-node-params/${nodeAnalysisId}`)
+        return {
+            requestParam: resp.data.request_param,
+            formJson: resp.data.formJson,
+            databases: resp.data.databases,
+            status: resp.data.status,
+        }
+    }
+    const loadParams = async (force = false) => {
         console.log("sideView", sideView)
         if (sideView == "editParamsPanel") {
-            if (analysisId) {
+            if (analysisNodeId) {
+                const data = await loadNodeAnalysis(analysisNodeId)
+                setFormStatus(data.status)
+                setRequestParam({
+                    ...data,
+                    type: "nodeAnalysis",
+                })
+            } else if (analysisId) {
+
                 const data = await loadAnalysis(analysisId)
+                // debugger
+                setFormStatus(data.status)
                 setRequestParam({
                     ...data,
                     type: "analysis",
                 })
             } else if (relation) {
+                setFormStatus(null)
                 let data = formData;
                 if (!data || force) {
                     data = await loadToolsForm(relation.relation_id)
                     setFormData(data)
-                    
-                }
-                 const params = buildRequestParams()
-                    setRequestParam({
-                        ...params,
-                        ...data,
 
-                    })
+                }
+                const params = buildRequestParams()
+                setRequestParam({
+                    ...params,
+                    ...data,
+
+                })
 
 
             }
@@ -106,7 +156,7 @@ export const RenderProvider: FC<any> = ({ children }) => {
 
     useEffect(() => {
         loadParams()
-    }, [relation, sideView, analysisId])
+    }, [relation, sideView, analysisId, analysisNodeId])
 
     const addOpenAnalysis = (analysis: any) => {
         if (openAnalysis.find((item: any) => item.analysis_id === analysis.analysis_id)) {
@@ -142,7 +192,11 @@ export const RenderProvider: FC<any> = ({ children }) => {
                 addOpenAnalysis,
                 checkIsOpen,
                 closeAnalysis,
-                loadParams
+                loadParams,
+                setAnalysisNodeId,
+                analysisNodeId,
+                formStatus,
+                setFormStatus
 
             }}
         >
