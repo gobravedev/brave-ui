@@ -14,10 +14,10 @@ export type ComponentStore = {
     modals: Record<string, ModalInstance>;
     forms: Record<string, FormInstance>;
     charts: Record<string, ChartInstance>;
-    analysis: Record<string, any>; // 这里可以根据实际情况定义更具体的类型
+    analysis: Record<string, Set<any>>; // 这里可以根据实际情况定义更具体的类型
 
     register: <T>(category: keyof ComponentStore, id: string, instance: T) => void;
-    unregister: (category: keyof ComponentStore, id: string) => void;
+    unregister: <T>(category: keyof ComponentStore, id: string, instance?: T) => void;
 
     invoke: (category: keyof ComponentStore, id: string, method: string, args?: any[]) => void;
 };
@@ -32,30 +32,99 @@ export const useComponentStore = create<ComponentStore>((set, get) => ({
 
     register: (category, id, instance) => {
         console.log(`Registering component - Category: ${category}, ID: ${id}`);
-        set((state) => ({
-            [category]: { ...(state as any)[category], [id]: instance },
-        }))
-    },
+        // set((state) => ({
+        //     [category]: { ...(state as any)[category], [id]: instance },
+        // }))
 
-    unregister: (category, id) => {
-        console.log(`Unregistering component - Category: ${category}, ID: ${id}`);  
         set((state) => {
             const map = { ...(state as any)[category] };
-            delete map[id];
+
+            // ⭐ multi
+            if (category === "analysis") {
+                // debugger
+                if (!map[id]) {
+                    map[id] = new Set();
+                }
+                map[id].add(instance);
+            } else {
+                // ⭐ single
+                map[id] = instance;
+            }
+
             return { [category]: map };
-        })
+        });
+    },
+
+    unregister: (category, id, instance = undefined) => {
+        console.log(`Unregistering component - Category: ${category}, ID: ${id}`);
+        // set((state) => {
+        //     const map = { ...(state as any)[category] };
+        //     delete map[id];
+        //     return { [category]: map };
+        // })
+
+        set((state) => {
+            const map = { ...(state as any)[category] };
+
+            if (category === "analysis") {
+                const setInst = map[id];
+                if (setInst) {
+                    if (instance) {
+                        setInst.delete(instance);
+                    }
+                    if (!instance || setInst.size === 0) {
+                        delete map[id];
+                    }
+                }
+            } else {
+                delete map[id];
+            }
+
+            return { [category]: map };
+        });
     },
 
     invoke: (category, id, method, args = []) => {
         console.log(`Invoking method on component - Category: ${category}, ID: ${id}, Method: ${method}, Args: ${JSON.stringify(args)}`);
-        const comp = (get() as any)[category]?.[id];
-        if (comp && typeof comp[method] === "function") {
-            if( args instanceof Array){
-                comp[method](...args);
-            } else {
-                comp[method](args);
+        // const comp = (get() as any)[category]?.[id];
+        // if (comp && typeof comp[method] === "function") {
+        // if (args instanceof Array) {
+        //     comp[method](...args);
+        // } else {
+        //     comp[method](args);
+        // }
+        //     // comp[method](...args);
+        // }
+
+        const target = (get() as any)[category]?.[id];
+        if (!target) return;
+        // console.log(`Found target for invocation - Category: ${category}, ID: ${id}`, target);
+        // ⭐ 核心：if 判断 single / multi
+        if (target instanceof Set) {
+            console.log(`Invoking method on multiple instances - Count: ${target.size}`);
+            for (const inst of target) {
+                // debugger
+                const fn = inst[method];
+                if (typeof fn === "function") {
+                    // fn(...args);
+                    if (args instanceof Array) {
+                        fn(...args);
+                    } else {
+                        fn(args);
+                    }
+                }
             }
-            // comp[method](...args);
+        } else {
+            const fn = target[method];
+            if (typeof fn === "function") {
+                // fn(...args);
+                if (args instanceof Array) {
+                    fn(...args);
+                } else {
+                    fn(args);
+                }
+
+            }
         }
     },
 }));

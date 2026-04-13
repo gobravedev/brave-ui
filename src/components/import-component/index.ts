@@ -1,5 +1,47 @@
 import { registerView } from '@/core/component-registry';
+import type { RegisteredViewComponent, ViewRegistry } from '@/core/component-registry/registry-types';
 import { lazy } from 'react';
+
+declare module '@/core/component-registry/registry-types' {
+    interface ViewRegistry {
+        workflow2: RegisteredViewComponent;
+        workflowComponent: RegisteredViewComponent;
+        software: RegisteredViewComponent;
+        tools: RegisteredViewComponent;
+        analysisTools: RegisteredViewComponent;
+        script: RegisteredViewComponent;
+        file: RegisteredViewComponent;
+        fileV2: RegisteredViewComponent;
+        scriptV2: RegisteredViewComponent;
+        createOrUpdateComponent: RegisteredViewComponent;
+        createOrUpdateRelation: RegisteredViewComponent;
+        analysisResult: RegisteredViewComponent;
+        llmFile: RegisteredViewComponent;
+        llmTools: RegisteredViewComponent;
+        llmScript: RegisteredViewComponent;
+        scriptView: RegisteredViewComponent;
+        fileView: RegisteredViewComponent;
+        scriptDesc: RegisteredViewComponent;
+        scriptCode: RegisteredViewComponent;
+        "component-structure": RegisteredViewComponent;
+        "component-script": RegisteredViewComponent;
+        "preview-relation-example": RegisteredViewComponent;
+        editParamsPanel: RegisteredViewComponent;
+        inputFileComponent: RegisteredViewComponent;
+        outputFileComponent: RegisteredViewComponent;
+        analysisResultView: RegisteredViewComponent;
+        analysisList: RegisteredViewComponent;
+        relationDefinitionDAG: RegisteredViewComponent;
+        "workflow-input": RegisteredViewComponent;
+        "workflow-vis": RegisteredViewComponent;
+        "llm-card": RegisteredViewComponent;
+        editParamsPanelWithAnalysisId: RegisteredViewComponent;
+        markdown: RegisteredViewComponent;
+        "analysis-tree": RegisteredViewComponent;
+        "module-edit": RegisteredViewComponent;
+        "create-or-update-component-drawer": RegisteredViewComponent;
+    }
+}
 
 const PipelineFlowComponent = lazy(() => import('../../pages/components-relation/pipeline/components/pipeline-flow'))
 const SoftwareComponent = lazy(() => import('../../pages/components-relation/tools'))
@@ -35,10 +77,14 @@ const LLMCard = lazy(() => import('../../layout/components/llm-card'))
 const EditParamsPanelWithAnalysisId = lazy(() => import('@/components/edit-params/components/edit-params-panel-with-analysis-id'))
 const Md = lazy(() => import('../../layout/components/md'))
 const AnalysisTree = lazy(() => import("../../pages/analysis-report/analysis-tree"))
+
+const ModuleEdit = lazy(() => import('../../components/module-edit'))
+const CreateOrUpdateComponentDrawer = lazy(() => import('@/components/create-pipeline/create-or-update-component-drawer'))
+
 const viewMapping: {
-    key: string;
+    key: keyof ViewRegistry;
     label: string;
-    component: React.ComponentType<any>;
+    component: RegisteredViewComponent;
 }[] = [
         { key: "workflow2", label: "workflow", component: PipelineFlowComponent },
         { key: "workflowComponent", label: "workflowComponent", component: WorkflowComponent },
@@ -83,9 +129,13 @@ const viewMapping: {
         { key: "editParamsPanelWithAnalysisId", label: "editParamsPanelWithAnalysisId", component: EditParamsPanelWithAnalysisId },
         { key: "markdown", label: "markdown", component: Md },
         { key: "analysis-tree", label: "analysis-tree", component: AnalysisTree },
+        {key: "module-edit", label: "module-edit", component: ModuleEdit},
+        {key: "create-or-update-component-drawer", label: "create-or-update-component-drawer", component: CreateOrUpdateComponentDrawer}
 
     ];
 
 for (const view of viewMapping) {
     registerView(view.key, view.component)
 }
+
+

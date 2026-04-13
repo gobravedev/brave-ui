@@ -8,9 +8,11 @@ import { ClearOutlined, RedoOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 const RenderFromJson = lazy(() => import("./render-form-json"));
 import { useStoreRender } from "@/context/render/RenderProvider";
+import { useSideViewContext } from "@/context/side/SideViewContext";
 const EditParamsPanel: FC<any> = () => {
     const [form] = Form.useForm()
     const { requestParam, analysisNodeId, formStatus, setAnalysisNodeId, relation, setAnalysisId, loadParams, analysisId } = useStoreRender()
+    const { setSideView, sideView, sideOptions, setSideOptions } = useSideViewContext();
 
     // const addedProject = Form.useWatch((values: any) => values?.addedProject, form);
     const jobStatus = useRef<any>(null)
@@ -20,7 +22,8 @@ const EditParamsPanel: FC<any> = () => {
 
     useEffect(() => {
         setParsms(requestParam)
-        if (requestParam?.type && requestParam?.type == "analysis") {
+        // debugger
+        if (requestParam?.type && (requestParam?.type == "analysis" || requestParam?.type == "nodeAnalysis")) {
             form.resetFields()
             // console.log(resp.data.request_param)
             form.setFieldsValue(requestParam.requestParam)
@@ -37,7 +40,7 @@ const EditParamsPanel: FC<any> = () => {
         // }
         // loadData()
 
-    }, [requestParam])
+    }, [requestParam,sideView])
     // form.()
     const [resultData, setResultData] = useState<any>()
 
@@ -128,6 +131,11 @@ const EditParamsPanel: FC<any> = () => {
         {/* {relationId} */}
         {/* {JSON.stringify(params.formJson)} */}
         {/* {type} - {bizKey} */}
+        {/* <Button onClick={()=>{
+            form.resetFields()
+            form.setFieldsValue(requestParam.requestParam)
+        
+        }}>test</Button> */}
         {params ? <>
             <Space wrap>
 

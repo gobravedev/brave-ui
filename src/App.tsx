@@ -14,6 +14,7 @@ import LLMBootstrap from "./llmv2/LLMBootstrap";
 import { RenderProvider } from "./context/render/RenderProvider";
 import "@/core/component-registry/module-auto-loader";
 import { SideViewProvider } from "./context/side/SideViewContext";
+import { UIContainer } from "@/core/ui-system/UIContainer";
 
 // registerLLMActions();
 const App: FC<any> = () => {
@@ -96,6 +97,7 @@ const App: FC<any> = () => {
           <RenderProvider>
 
             <RenderRouter></RenderRouter>
+            <UIContainer />
 
           </RenderProvider>
         </SideViewProvider>

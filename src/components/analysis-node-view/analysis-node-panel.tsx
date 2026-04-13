@@ -6,9 +6,9 @@ import axios from "axios";
 import { FC, useEffect, useState } from "react";
 
 const AnalysisNodePanel: FC<any> = () => {
-    const { openAnalysis, analysisId, setAnalysisId, clear,  setRelation, closeAnalysis, setFormParam } = useStoreRender()
+    const { openAnalysis, analysisId, setAnalysisId, clear, setRelation, closeAnalysis, setFormParam } = useStoreRender()
 
-    const [view, setView] = useState("analysisNodes");
+    const [view, setView] = useState("analysisNodesReport");
 
     const [title, setTitle] = useState("")
     useEffect(() => {
@@ -20,8 +20,9 @@ const AnalysisNodePanel: FC<any> = () => {
         variant="borderless"
         title={title}
         extra={<Space>
-            {renderViewButton(view, setView, "analysisNodes", "Nodes")}
             {renderViewButton(view, setView, "analysisNodesReport", "Report")}
+
+            {renderViewButton(view, setView, "analysisNodes", "Nodes")}
 
             {renderViewButton(view, setView, "analysisEdges", "Edges")}
         </Space>}

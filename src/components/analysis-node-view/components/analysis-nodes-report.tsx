@@ -1,10 +1,11 @@
-import { Button, Card, Col, Empty, Flex, Menu, Row, Segmented, Skeleton, Space, Statistic, Tag, Tooltip, Typography } from "antd";
+import { Button, Card, Col, Empty, Flex, Menu, Row, Segmented, Skeleton, Space, Spin, Statistic, Tag, Tooltip, Typography } from "antd";
 import axios from "axios"
 import { FC, useEffect, useMemo, useState } from "react";
 import { CloseOutlined, EditOutlined, RedoOutlined } from '@ant-design/icons'
 import ViewResolver from "@/core/ui-renderer/ViewResolver";
 import { useStoreRender } from "@/context/render/RenderProvider";
 import { useSideViewContext } from "@/context/side/SideViewContext";
+import { useComponentStore } from "@/store-zustand/components";
 
 type NodeResultAsset = {
     images?: any[];
@@ -24,6 +25,7 @@ type AnalysisNodeSample = {
 
     result?: NodeResultAsset;
     node?: any;
+    server_status: string;
 };
 
 type AnalysisNodeGroup = {
@@ -93,7 +95,7 @@ const AnalysisNodesReport: FC<any> = ({ analysis_id }) => {
     const [openMenuKeys, setOpenMenuKeys] = useState<string[]>([]);
     const [sampleDetailMap, setSampleDetailMap] = useState<Record<string, Partial<AnalysisNodeSample>>>({});
     const { analysisNodeId, setAnalysisNodeId } = useStoreRender()
-    const { setSideView} = useSideViewContext();
+    const { setSideView } = useSideViewContext();
 
     // const normalizeSampleDetail = (rawData: any): Partial<AnalysisNodeSample> => {
     //     const payload = rawData?.result ?? rawData;
@@ -127,7 +129,7 @@ const AnalysisNodesReport: FC<any> = ({ analysis_id }) => {
             const res = await axios.get(`/analysis/visualization-node-tree/${analysis_id}`)
             const nextData = Array.isArray(res.data?.result) ? res.data.result : [];
             setData(nextData)
-            setSampleDetailMap({})
+            // setSampleDetailMap({})
             // setTitle(res.data.analysis_name + " - Report")
         } finally {
             setLoading(false)
@@ -135,9 +137,11 @@ const AnalysisNodesReport: FC<any> = ({ analysis_id }) => {
     }
 
     const loadSampleDetail = async (analysisNodeId?: string, force = false) => {
+        // debugger
         if (!analysisNodeId || (sampleDetailMap[analysisNodeId] && !force)) {
             return;
         }
+        // debugger
 
         setDetailLoading(true)
         try {
@@ -152,6 +156,7 @@ const AnalysisNodesReport: FC<any> = ({ analysis_id }) => {
             setDetailLoading(false)
         }
     }
+
 
 
 
@@ -211,6 +216,36 @@ const AnalysisNodesReport: FC<any> = ({ analysis_id }) => {
 
     useEffect(() => {
         loadSampleDetail(selectedSample?.analysis_node_id)
+    }, [selectedSample?.analysis_node_id]);
+
+    const { register, unregister } = useComponentStore();
+
+    const instance = useMemo(() => {
+        const analysis_node_id = selectedSample?.analysis_node_id
+
+        return {
+            analysisDone: () => {
+                // debugger
+                loadSampleDetail(analysis_node_id, true)
+            },
+            analysisStarted: () => {
+                // debugger
+                // setDetailLoading(true)
+                loadSampleDetail(analysis_node_id, true)
+                // selectedSampleDetail.status = "running"
+            }
+        }
+    }, [selectedSample?.analysis_node_id])
+
+    useEffect(() => {
+
+        if (selectedSample?.analysis_node_id) {
+            // debugger
+            register("analysis", selectedSample?.analysis_node_id, instance);
+            return () => {
+                unregister("analysis", selectedSample?.analysis_node_id, instance);
+            }
+        }
     }, [selectedSample?.analysis_node_id]);
 
     const summary = useMemo(() => {
@@ -298,9 +333,9 @@ const AnalysisNodesReport: FC<any> = ({ analysis_id }) => {
                                 {child.title}
                             </Typography.Text>
                         </Tooltip>
-                        <Tag color={statusColorMap[child.status || ""] || "default"}>
+                        {/* <Tag color={statusColorMap[child.status || ""] || "default"}>
                             {child.status || "unknown"}
-                        </Tag>
+                        </Tag> */}
                     </Flex>
                 ),
             })),
@@ -332,12 +367,11 @@ const AnalysisNodesReport: FC<any> = ({ analysis_id }) => {
         return <Skeleton active></Skeleton>
     }
     return <>
-        <Flex justify="space-between" align="center" style={{ marginBottom: 12 }}>
+        {/* <Flex justify="space-between" align="center" style={{ marginBottom: 12 }}>
             <Typography.Title level={5} style={{ margin: 0 }}>
-                DAG Analysis Report
+                DAG Analysis Report {selectedSampleId}
             </Typography.Title>
-            <Button loading={loading} onClick={loadData} icon={<RedoOutlined />} size="small"></Button>
-        </Flex>
+        </Flex> */}
 
         {!data.length ? <Empty description="No node report data" /> :
             <Row gutter={[12, 12]} align="top">
@@ -346,6 +380,10 @@ const AnalysisNodesReport: FC<any> = ({ analysis_id }) => {
                         size="small"
                         title="Analysis Menu"
                         styles={{ body: { padding: "8px" } }}
+                        extra={<Space>
+                            <Button loading={loading} onClick={loadData} icon={<RedoOutlined />} size="small"></Button>
+
+                        </Space>}
                     >
                         <Menu
                             mode="inline"
@@ -399,9 +437,9 @@ const AnalysisNodesReport: FC<any> = ({ analysis_id }) => {
                             {analysisNodeId == selectedSampleResolved?.analysis_node_id ?
                                 <>
                                     <Tooltip title={`Close ${selectedSampleResolved?.analysis_node_id}`}>
-                                        <Button size="small" onClick={()=>{
+                                        <Button size="small" onClick={() => {
                                             setAnalysisNodeId(null)
-                                        }}  icon={<CloseOutlined/>}></Button>
+                                        }} icon={<CloseOutlined />}></Button>
                                     </Tooltip>
                                 </> :
                                 <Tooltip title={`${selectedSampleResolved?.analysis_node_id}`}>
@@ -412,44 +450,58 @@ const AnalysisNodesReport: FC<any> = ({ analysis_id }) => {
                                 </Tooltip>
                             }
 
-                            <Button onClick={() => loadSampleDetail(selectedSample?.analysis_node_id, true)} size="small" icon={<RedoOutlined />} />
+                            <Button loading={detailLoading} onClick={() => loadSampleDetail(selectedSample?.analysis_node_id, true)} size="small" icon={<RedoOutlined />} />
                         </Space>}
                     >
-                        {!selectedSampleResolved?.node ? <Skeleton active paragraph={{ rows: 2 }} /> :
+                        {!selectedSampleDetail ? <Skeleton active paragraph={{ rows: 2 }} /> :
                             <Flex vertical gap={12}>
                                 <Card size="small" styles={{ body: { padding: 12 } }}>
                                     <Flex justify="space-between" align="flex-start" gap={12} wrap>
                                         <Flex vertical gap={4}>
 
                                             <Typography.Text type="secondary">
-                                                node: {selectedSampleResolved.node?.node_id}
+                                                node: {selectedSampleDetail.node?.node_id}
                                             </Typography.Text>
                                             <Typography.Text type="secondary">
-                                                analysis_node_id: {selectedSampleResolved.node?.analysis_node_id}
+                                                analysis_node_id: {selectedSampleDetail.node?.analysis_node_id}
                                             </Typography.Text>
-                                            <Typography.Text type="secondary">
-                                                sample: {selectedSampleResolved.node?.sample_id || "global"}
-                                            </Typography.Text>
-                                            {selectedSampleResolved.node?.output_dir &&
+                                            {selectedSampleDetail.node?.sample_id &&
+                                                <Typography.Text type="secondary">
+                                                    sample: {selectedSampleDetail.node?.sample_id}
+                                                </Typography.Text>
+                                            }
+
+                                            {selectedSampleDetail.node?.output_dir &&
                                                 <Typography.Paragraph type="secondary" style={{ marginBottom: 0, wordBreak: "break-all" }}>
-                                                    output: {selectedSampleResolved.node?.output_dir}
+                                                    output: {selectedSampleDetail.node?.output_dir}
                                                 </Typography.Paragraph>}
                                         </Flex>
                                         <Space wrap>
-                                            <Tag color={statusColorMap[selectedSampleResolved.node.status] || "default"}>{selectedSampleResolved.node?.status}</Tag>
-                                            {/* <Tag color="blue">{selectedSampleResolved.result?.images?.length || 0} images</Tag>
-                                            <Tag color="purple">{selectedSampleResolved.result?.tables?.length || 0} tables</Tag>
-                                            <Tag color="gold">{selectedSampleResolved.result?.htmls?.length || 0} htmls</Tag> */}
+                                            {selectedSampleDetail.status &&
+                                                <Tag color={statusColorMap[selectedSampleDetail.status]}>{selectedSampleDetail.status}</Tag>
+                                            }
+                                            {selectedSampleDetail.server_status &&
+                                                <Tag color={statusColorMap[selectedSampleDetail.server_status]}>{selectedSampleDetail.server_status}</Tag>
+                                            }
+
+                                            
+
+                                            {/* <Tag color="blue">{selectedSampleDetail.result?.images?.length || 0} images</Tag>
+                                            <Tag color="purple">{selectedSampleDetail.result?.tables?.length || 0} tables</Tag>
+                                            <Tag color="gold">{selectedSampleDetail.result?.htmls?.length || 0} htmls</Tag> */}
                                         </Space>
                                     </Flex>
                                 </Card>
 
                                 {/* {detailLoading && !selectedSampleDetail ? <Skeleton active paragraph={{ rows: 2 }} /> : null} */}
+                                {selectedSampleDetail.status == "running" || detailLoading ? <Skeleton active paragraph={{ rows: 6 }} /> :
+                                    <ViewResolver
+                                        analsyisResult={selectedSampleDetail.result || { images: [], tables: [], htmls: [] }}
+                                        view={"analysisResultDisplay"}>
+                                    </ViewResolver>
+                                }
 
-                                <ViewResolver
-                                    analsyisResult={selectedSampleResolved.result || { images: [], tables: [], htmls: [] }}
-                                    view={"analysisResultDisplay"}>
-                                </ViewResolver>
+
                             </Flex>}
                     </Card>
                 </Col>

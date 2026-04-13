@@ -29,6 +29,7 @@ import { useSSE } from '@/context/sse/useSSE';
 import { ActionDispatcher } from '@/llmv2/dispatcher';
 import ViewResolver from '@/core/ui-renderer/ViewResolver';
 import { useComponentStore } from '@/store-zustand/components';
+import { useUI } from '@/core/ui-system/useUI';
 
 const { Content, Sider } = Layout;
 
@@ -79,7 +80,7 @@ const App: React.FC = () => {
     const isDark = theme === 'dark';
     const bgColor = isDark ? '#001529' : '#fff'; // 深色/白色
     const textColor = isDark ? '#fff' : '#000';
-    const { sideView, setSideView,sideOptions, setSideOptions } = useSideViewContext();
+    const { sideView, setSideView, sideOptions, setSideOptions } = useSideViewContext();
 
 
     const { ref: containerRef, top, isSticky } = useStickyTop(576);
@@ -860,7 +861,7 @@ export default AppLayout;
 const SettingDrawer: FC<any> = ({ visible, onClose, project_id, openModal: openModal_ }) => {
     const { modal, openModal, closeModal } = useModal();
     const { analysis } = useComponentStore();
-
+    const { openAsync } = useUI();
     return <Drawer title="Setting"
         extra={<>
             Version: 0.1.2
@@ -868,6 +869,7 @@ const SettingDrawer: FC<any> = ({ visible, onClose, project_id, openModal: openM
         open={visible} onClose={onClose} >
         <Flex vertical gap={"small"}>
             {JSON.stringify(analysis)}
+            <Button onClick={() => { console.log(analysis) }}>analysis</Button>
             <Button onClick={() => {
                 // const data = {
                 //     action: "component.invoke",
@@ -881,8 +883,8 @@ const SettingDrawer: FC<any> = ({ visible, onClose, project_id, openModal: openM
                     action: "component.invoke",
                     payload: {
                         category: "analysis",
-                        id: "params-form",
-                        method: "updateFormStatus",
+                        id: "node-5362d706-3006-46d8-94f5-652209d366cc",
+                        method: "analysisDone",
                         args: {
                             status: "done"
                         }
@@ -890,6 +892,20 @@ const SettingDrawer: FC<any> = ({ visible, onClose, project_id, openModal: openM
                 }
                 ActionDispatcher.dispatch(data.action, data.payload);
             }}>Test ActionDispatcher</Button>
+            <Button onClick={async () => {
+                try {
+                    await openAsync({
+                        type: "drawer",
+                        view: "confirmDialog",
+                        params: { id: 1 },
+                    })
+                    console.log("confirm result")
+                
+                } catch (error) {
+                    console.log("confirm cancel")
+                }
+
+            }}>confirm</Button>
             <div>
                 Language: <LanguageSelector></LanguageSelector>
             </div>

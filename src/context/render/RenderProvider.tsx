@@ -37,22 +37,28 @@ export const RenderProvider: FC<any> = ({ children }) => {
         }
         // setFormStatus("running");
     }
+    const instance = useMemo(() => {
+        return {
+            analysisDone: updateFormStatus,
+        }
+    }, [])
     const { register, unregister } = useComponentStore();
     useEffect(() => {
         if (analysisId) {
-            register("analysis", analysisId, { updateFormStatus });
+            register("analysis", analysisId, instance);
             return () => {
                 // debugger
-                unregister("analysis", analysisId);
+                unregister("analysis", analysisId, instance);
             }
         }
 
     }, [analysisId]);
+    
     useEffect(() => {
         if (analysisNodeId) {
-            register("analysis", analysisNodeId, { updateFormStatus });
+            register("analysis", analysisNodeId,instance);
             return () => {
-                unregister("analysis", analysisNodeId);
+                unregister("analysis", analysisNodeId, instance);
             }
         }
 

@@ -1,0 +1,87 @@
+// src/core/ui-system/ui.store.ts
+import { create } from "zustand";
+import { nanoid } from "nanoid";
+
+export type UIType = "modal" | "drawer";
+
+export type UIItem = {
+  id: string;
+  view: string;
+  type: UIType;
+  visible: boolean;
+  params?: any;
+};
+
+type UIStore = {
+  stack: UIItem[];
+
+  open: (config: {
+    view: string;
+    type?: UIType;
+    params?: any;
+  }) => string;
+
+  close: (id: string) => void;
+  remove: (id: string) => void;
+
+  // 可选增强
+  openSingle: (config: {
+    view: string;
+    type?: UIType;
+    params?: any;
+  }) => void;
+};
+
+export const useUIStore = create<UIStore>((set) => ({
+  stack: [],
+
+  open: ({ view, type = "modal", params }) => {
+    const id = nanoid();
+
+    set((state) => ({
+      stack: [
+        ...state.stack,
+        {
+          id,
+          view,
+          type,
+          visible: true,
+          params,
+        },
+      ],
+    }));
+
+    return id;
+  },
+
+  close: (id) => {
+    set((state) => ({
+      stack: state.stack.map((item) =>
+        item.id === id ? { ...item, visible: false } : item
+      ),
+    }));
+  },
+
+  remove: (id) => {
+    set((state) => ({
+      stack: state.stack.filter((item) => item.id !== id),
+    }));
+  },
+
+  // 替代 useModal
+  openSingle: ({ view, type = "modal", params }) => {
+    const id = nanoid();
+
+    set({
+      stack: [
+        {
+          id,
+          view,
+          type,
+          visible: true,
+          params,
+        },
+      ],
+    });
+  },
+}));

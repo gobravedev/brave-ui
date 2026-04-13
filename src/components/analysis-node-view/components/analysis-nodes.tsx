@@ -10,6 +10,9 @@ import { CreateOrUpdatePipelineComponent } from "@/components/create-pipeline";
 import { useModals } from "@/hooks/useModal";
 import ModuleEdit from "@/components/module-edit";
 import { findAnalysisById, runAnalysisApi, runAnalysisNodeApi, stopAnalysisApi, stopAnalysisNodeApi } from "@/api/analysis";
+import ViewResolver from "@/core/ui-renderer/ViewResolver";
+import { useUI } from "@/core/ui-system/useUI";
+import { invoke } from "@/core/ui-system/invokeV2";
 
 type JsonValue = string | number | boolean | null | undefined | JsonValue[] | { [key: string]: JsonValue };
 
@@ -141,6 +144,7 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
     const message = useGlobalMessage()
     const nodeLevels = useMemo(() => calcNodeLevels(data as AnalysisNode[]), [data]);
     const { modals, openModals, closeModals } = useModals(["editParams", "moduleEdit", "createOrUpdatePipelineComponent"]);
+    const { open } = useUI();
 
     const columns: ColumnsType<AnalysisNode> = [
         {
@@ -327,6 +331,12 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
                 <Flex gap={8}>
                     <Button size="small" color="cyan" variant="solid" onClick={() => {
 
+                        invoke.nodeParams.drawer({id:1})
+                        // open({
+                        //     type: "drawer",
+                        //     view: "nodeParams",
+                        //     params: { id: 1 },
+                        // })
                     }}>Params</Button>
                     <Tooltip title={`Edit Script ${record?.script_id}`}>
                         <Button size="small" color="cyan" variant="solid" onClick={() => {
@@ -560,19 +570,21 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
             </>}
             dataSource={data} />
 
-        <ModuleEdit
+        <ViewResolver
             visible={modals.moduleEdit.visible}
             onClose={() => closeModals("moduleEdit")}
             callback={() => reload()}
             params={modals.moduleEdit.params}
-        ></ModuleEdit>
-        <CreateOrUpdatePipelineComponent
+            view="module-edit"
+        ></ViewResolver>
+        <ViewResolver
             callback={() => reload()}
             // pipelineStructure={pipelineStructure}
             // data={record}
             visible={modals.createOrUpdatePipelineComponent.visible}
             onClose={() => closeModals("createOrUpdatePipelineComponent")}
-            params={modals.createOrUpdatePipelineComponent.params}></CreateOrUpdatePipelineComponent>
+            view="create-or-update-component-drawer"
+            params={modals.createOrUpdatePipelineComponent.params}></ViewResolver>
 
     </>
 }
