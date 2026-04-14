@@ -38,6 +38,7 @@ export const useComponentStore = create<ComponentStore>((set, get) => ({
 
         set((state) => {
             const map = { ...(state as any)[category] };
+            
 
             // ⭐ multi
             if (category === "analysis") {

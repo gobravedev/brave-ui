@@ -358,18 +358,24 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
                                         component_type: "script",
                                     }
                                 },
-                            {
-                                width: 960,
-                                title: `Edit - ${record.node_id}`,
+                                {
+                                    width: 960,
+                                    title: `Edit - ${record.node_id}`,
 
-                            }
+                                }
                             )
                         }}>Edit</Button>
                     </Tooltip>
                     <Tooltip title={`Script Code ${record?.script_id}`}>
                         <Button size="small" color="cyan" variant="solid" onClick={() => {
-                            openModals("moduleEdit", {
-                                component_id: record?.script_id,
+                            // openModals("moduleEdit", {
+                            //     component_id: record?.script_id,
+                            // })
+                            invoke.scriptCodeEdit.drawer({
+                                component_id: record?.script_id
+                            }, {
+                                width: 960,
+                                title: `Code - ${record.node_id}`,
                             })
                         }}>Code</Button>
                     </Tooltip>

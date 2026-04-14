@@ -1,12 +1,15 @@
-import { Button, Card, Col, Empty, Flex, Menu, Row, Segmented, Skeleton, Space, Spin, Statistic, Tag, Tooltip, Typography } from "antd";
+import { Button, Card, Col, Empty, Flex, Menu, Popconfirm, Row, Segmented, Skeleton, Space, Spin, Statistic, Tag, Tooltip, Typography } from "antd";
 import axios from "axios"
 import { FC, useEffect, useMemo, useState } from "react";
-import { CloseOutlined, EditOutlined, RedoOutlined } from '@ant-design/icons'
+import { CloseOutlined, EditOutlined, ExportOutlined, RedoOutlined } from '@ant-design/icons'
 import ViewResolver from "@/core/ui-renderer/ViewResolver";
 import { useStoreRender } from "@/context/render/RenderProvider";
 import { useSideViewContext } from "@/context/side/SideViewContext";
 import { useComponentStore } from "@/store-zustand/components";
 import { invoke } from "@/core/ui-system/invokeV2";
+import { runAnalysisNodeApi, stopAnalysisNodeApi } from "@/api/analysis";
+import { useGlobalMessage } from "@/hooks/useGlobalMessage";
+import { useSelector } from "react-redux";
 
 type NodeResultAsset = {
     images?: any[];
@@ -100,6 +103,8 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
     const [sampleDetailMap, setSampleDetailMap] = useState<Record<string, Partial<AnalysisNodeSample>>>({});
     const { analysisNodeId, setAnalysisNodeId } = useStoreRender()
     const { setSideView } = useSideViewContext();
+    const message = useGlobalMessage()
+    const { containerURL } = useSelector((state: any) => state.user);
 
     // const normalizeSampleDetail = (rawData: any): Partial<AnalysisNodeSample> => {
     //     const payload = rawData?.result ?? rawData;
@@ -468,7 +473,100 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
                                         )
                                     }}>Edit</Button>
                                 </Tooltip>
+
+                                <Tooltip title={`Script Code ${selectedSampleDetail.node?.script_id}`}>
+                                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+
+                                        invoke.scriptCodeEdit.drawer({
+                                            component_id: selectedSampleDetail.node?.script_id
+                                        }, {
+                                            width: 960,
+                                            title: `Code - ${selectedSampleDetail.node?.node_id}`,
+                                        })
+                                    }}>Code</Button>
+                                </Tooltip>
+
+
+                                {selectedSampleDetail.node?.status != "pending" && <>
+                                    {selectedSampleDetail.node?.image_status == "exist" ?
+                                        <>
+                                            {selectedSampleDetail.node?.status == "running" ?
+                                                <>
+                                                    <Popconfirm title={"Whether or not to stop?"} onConfirm={async () => {
+                                                        await stopAnalysisNodeApi(selectedSampleDetail.node?.analysis_node_id, "node")
+                                                        message.success("Stop Success")
+
+                                                    }}>
+                                                        <Button size="small" color="red" variant="solid">
+                                                            Stop
+                                                        </Button>
+                                                    </Popconfirm>
+
+                                                </> : <>
+                                                    <Popconfirm title={"Whether or not to run?"} onConfirm={async () => {
+                                                        await runAnalysisNodeApi(selectedSampleDetail.node?.analysis_node_id, "node")
+                                                        message.success("run successfully")
+
+
+                                                    }}>
+                                                        <Button size="small" color="cyan" variant="solid">
+                                                            {selectedSampleDetail.node?.status == "ready" ? "Run" : "Re-Run"}
+                                                        </Button>
+                                                    </Popconfirm>
+
+                                                </>
+                                            }
+                                            {selectedSampleDetail.node?.server_status == "running" ?
+                                                <>
+
+                                                    <Popconfirm title={"Whether or not to stop?"} onConfirm={async () => {
+                                                        // stopAnalysis(selectedSampleDetail.node, "server")
+                                                        await stopAnalysisNodeApi(selectedSampleDetail.node?.analysis_node_id, "nserver")
+                                                    }}>
+                                                        <Button size="small" color="red" variant="solid">
+                                                            Stop Server
+                                                        </Button>
+                                                    </Popconfirm>
+                                                    <Tooltip title={<>
+                                                        {`${containerURL}/container/nserver-${selectedSampleDetail.node?.analysis_node_id}/`}
+                                                    </>}>
+                                                        <ExportOutlined style={{ cursor: "pointer" }} onClick={() => {
+
+                                                            window.open(`${containerURL}/container/nserver-${selectedSampleDetail.node?.analysis_node_id}/`, "_blank")
+                                                        }} />
+                                                    </Tooltip>
+
+
+                                                </> : <>
+                                                    <Popconfirm title="Whether to start the nserver?" onConfirm={async () => {
+                                                        await runAnalysisNodeApi(selectedSampleDetail.node?.analysis_node_id, "nserver")
+                                                    }}>
+                                                        <Button size="small" color="cyan" variant="solid">Run Server</Button>
+                                                    </Popconfirm>
+
+                                                </>
+                                            }
+                                        </>
+
+                                        :
+                                        <>
+                                            <Popconfirm title="Pull?" onConfirm={async () => {
+                                                await axios.post(`/container/pull-image/${selectedSampleDetail.node?.container_id}`)
+                                                // loadData(record.analysis_id)
+                                                // reload()
+
+                                            }}>
+                                                <Button size="small" color="cyan" variant="solid"  >
+                                                    {selectedSampleDetail.node?.image_status == "pulling" ? "pulling" : "Pull"}
+                                                </Button>
+                                            </Popconfirm>
+                                        </>}
+
+                                </>}
+
                             </Space>}
+
+
 
                             {analysisNodeId == selectedSampleResolved?.analysis_node_id ?
                                 <>
@@ -486,6 +584,8 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
                                 </Tooltip>
                             }
 
+
+
                             <Button loading={detailLoading} onClick={() => loadSampleDetail(selectedSample?.analysis_node_id, true)} size="small" icon={<RedoOutlined />} />
                         </Space>}
                     >
@@ -501,6 +601,10 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
                                             <Typography.Text type="secondary">
                                                 analysis_node_id: {selectedSampleDetail.node?.analysis_node_id}
                                             </Typography.Text>
+                                            <Typography.Text type="secondary">
+                                                container_image: {selectedSampleDetail.node?.container_image}
+                                            </Typography.Text>
+
                                             {selectedSampleDetail.node?.sample_id &&
                                                 <Typography.Text type="secondary">
                                                     sample: {selectedSampleDetail.node?.sample_id}

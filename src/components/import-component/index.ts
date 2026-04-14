@@ -1,48 +1,7 @@
 import { registerLazyViews } from '@/core/component-registry';
-import type { RegisteredViewComponent } from '@/core/component-registry/registry-types';
+import type { InferViewRegistryFromLoaders } from '@/core/component-registry/registry-types';
 
-declare module '@/core/component-registry/registry-types' {
-    interface ViewRegistry {
-        workflow2: RegisteredViewComponent;
-        workflowComponent: RegisteredViewComponent;
-        software: RegisteredViewComponent;
-        tools: RegisteredViewComponent;
-        analysisTools: RegisteredViewComponent;
-        script: RegisteredViewComponent;
-        file: RegisteredViewComponent;
-        fileV2: RegisteredViewComponent;
-        scriptV2: RegisteredViewComponent;
-        createOrUpdateComponent: RegisteredViewComponent;
-        createOrUpdateRelation: RegisteredViewComponent;
-        analysisResult: RegisteredViewComponent;
-        llmFile: RegisteredViewComponent;
-        llmTools: RegisteredViewComponent;
-        llmScript: RegisteredViewComponent;
-        scriptView: RegisteredViewComponent;
-        fileView: RegisteredViewComponent;
-        scriptDesc: RegisteredViewComponent;
-        scriptCode: RegisteredViewComponent;
-        "component-structure": RegisteredViewComponent;
-        "component-script": RegisteredViewComponent;
-        "preview-relation-example": RegisteredViewComponent;
-        editParamsPanel: RegisteredViewComponent;
-        inputFileComponent: RegisteredViewComponent;
-        outputFileComponent: RegisteredViewComponent;
-        analysisResultView: RegisteredViewComponent;
-        analysisList: RegisteredViewComponent;
-        relationDefinitionDAG: RegisteredViewComponent;
-        "workflow-input": RegisteredViewComponent;
-        "workflow-vis": RegisteredViewComponent;
-        "llm-card": RegisteredViewComponent;
-        editParamsPanelWithAnalysisId: RegisteredViewComponent;
-        markdown: RegisteredViewComponent;
-        "analysis-tree": RegisteredViewComponent;
-        "module-edit": RegisteredViewComponent;
-        "create-or-update-component-drawer": RegisteredViewComponent;
-    }
-}
-
-registerLazyViews({
+const importComponentLoaders = {
     workflow2: () => import('../../pages/components-relation/pipeline/components/pipeline-flow'),
     workflowComponent: () => import('../../pages/components-relation/workflow'),
     software: () => import('../../pages/components-relation/tools'),
@@ -85,7 +44,14 @@ registerLazyViews({
     markdown: () => import('../../layout/components/md'),
     'analysis-tree': () => import('../../pages/analysis-report/analysis-tree'),
     'module-edit': () => import('../../components/module-edit'),
+    scriptCodeEdit: () => import('@/components/module-edit/code'),
     'create-or-update-component-drawer': () => import('@/components/create-pipeline/create-or-update-component-drawer'),
-});
+};
+
+declare module '@/core/component-registry/registry-types' {
+    interface ViewRegistry extends InferViewRegistryFromLoaders<typeof importComponentLoaders> {}
+}
+
+registerLazyViews(importComponentLoaders);
 
 
