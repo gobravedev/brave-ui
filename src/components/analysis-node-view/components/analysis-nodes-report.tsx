@@ -85,8 +85,11 @@ const countAssets = (samples: AnalysisNodeSample[]) => {
         { images: 0, tables: 0, htmls: 0 }
     );
 };
+export interface AnalysisNodesReportProps {
+        analysis_id: string;
+}
 
-const AnalysisNodesReport: FC<any> = ({ analysis_id }) => {
+const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
     const [loading, setLoading] = useState(false);
     const [detailLoading, setDetailLoading] = useState(false);
     const [data, setData] = useState<AnalysisNodeGroup[]>([]);

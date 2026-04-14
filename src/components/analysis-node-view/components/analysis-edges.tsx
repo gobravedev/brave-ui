@@ -2,7 +2,12 @@ import { usePagination } from "@/hooks/usePagination";
 import { Button, Flex, Pagination, Table, Tag } from "antd";
 import { FC } from "react";
 import { RedoOutlined } from '@ant-design/icons'
-const AnalysisEdges: FC<any> = ({ analysis_id }) => {
+
+export interface AnalysisEdgesProps {
+        analysis_id: string;
+}
+
+const AnalysisEdges: FC<AnalysisEdgesProps> = ({ analysis_id }) => {
 
     const { data, pageNumber, totalPage, loading, reload, pageSize, setPageNumber } = usePagination({
         url: `/analysis-runtime/edges/page`,

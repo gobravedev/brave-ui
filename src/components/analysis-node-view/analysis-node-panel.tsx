@@ -1,14 +1,18 @@
 import { useStoreRender } from "@/context/render/RenderProvider";
+import { ViewRegistry } from "@/core/component-registry/registry-types";
 import ViewResolver from "@/core/ui-renderer/ViewResolver";
 import { renderCloseViewButton, renderViewButton } from "@/utils/render-view-btn";
 import { Button, Card, Divider, Flex, Space } from "antd";
 import axios from "axios";
 import { FC, useEffect, useState } from "react";
 
+type AnalysisNodePanelView = "analysisNodesReport" | "analysisNodes" | "analysisEdges";
+
 const AnalysisNodePanel: FC<any> = () => {
     const { openAnalysis, analysisId, setAnalysisId, clear, setRelation, closeAnalysis, setFormParam } = useStoreRender()
 
-    const [view, setView] = useState("analysisNodesReport");
+    const [view, setView] = useState<AnalysisNodePanelView>("analysisNodesReport");
+    const setPanelView = (nextView: string) => setView(nextView as AnalysisNodePanelView);
 
     const [title, setTitle] = useState("")
     useEffect(() => {
@@ -20,20 +24,28 @@ const AnalysisNodePanel: FC<any> = () => {
         variant="borderless"
         title={title}
         extra={<Space>
-            {renderViewButton(view, setView, "analysisNodesReport", "Report")}
+            {renderViewButton(view, setPanelView, "analysisNodesReport", "Report")}
 
-            {renderViewButton(view, setView, "analysisNodes", "Nodes")}
+            {renderViewButton(view, setPanelView, "analysisNodes", "Nodes")}
 
-            {renderViewButton(view, setView, "analysisEdges", "Edges")}
+            {renderViewButton(view, setPanelView, "analysisEdges", "Edges")}
         </Space>}
 
     >
-
+{/* 
         <ViewResolver
-            setTitle={setTitle}
-            analysis_id={analysisId}
-            view={view}>
-        </ViewResolver>
+            // setTitle={setTitle}
+            // analysis_id={analysisId}
+            view={"analysisNodesReport"}>
+        </ViewResolver> */}
+
+        {analysisId ? (
+            <ViewResolver
+                setTitle={setTitle}
+                analysis_id={analysisId}
+                view={view}
+            ></ViewResolver>
+        ) : null}
     </Card>
 
 }

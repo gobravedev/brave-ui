@@ -2,16 +2,20 @@
 import { lazy } from "react";
 import { registerView } from "@/core/component-registry";
 import type { RegisteredViewComponent } from "@/core/component-registry/registry-types";
+import type { ComponentProps } from "react";
+
+type AnalysisEdgesProps = ComponentProps<(typeof import("./components/analysis-edges"))["default"]>;
+type AnalysisNodesReportProps = ComponentProps<(typeof import("./components/analysis-nodes-report"))["default"]>;
 
 declare module "@/core/component-registry/registry-types" {
-	interface ViewRegistry {
-		analysisNodes: RegisteredViewComponent;
-		analysisEdges: RegisteredViewComponent;
-		analysisNodesReport: RegisteredViewComponent;
-		analysisNodePanel: RegisteredViewComponent;
-		analysisResultDisplay: RegisteredViewComponent;
-		nodeParams: RegisteredViewComponent;
-	}
+    interface ViewRegistry {
+        analysisNodes: RegisteredViewComponent;
+        analysisEdges: RegisteredViewComponent<AnalysisEdgesProps>;
+        analysisNodesReport: RegisteredViewComponent<AnalysisNodesReportProps>;
+        analysisNodePanel: RegisteredViewComponent;
+        analysisResultDisplay: RegisteredViewComponent;
+        nodeParams: RegisteredViewComponent;
+    }
 }
 
 const AnalysisEdges = lazy(() => import("./components/analysis-edges"));
