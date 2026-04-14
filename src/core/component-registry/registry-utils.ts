@@ -2,7 +2,7 @@
 
 import { lazy } from "react";
 import type { ComponentType, LazyExoticComponent } from "react";
-import { ViewRegistry } from "./registry-types";
+import { LazyLoader, ViewRegistry } from "./registry-types";
 import { componentRegistry } from "./ComponentRegistry";
 
 type ResolveRegisteredView<T> = T extends LazyExoticComponent<infer C>
@@ -11,7 +11,7 @@ type ResolveRegisteredView<T> = T extends LazyExoticComponent<infer C>
     ? T
     : never;
 
-type LazyViewLoader<K extends keyof ViewRegistry> = () => Promise<{ default: ResolveRegisteredView<ViewRegistry[K]> }>;
+type LazyViewLoader<K extends keyof ViewRegistry> = LazyLoader<ResolveRegisteredView<ViewRegistry[K]>>;
 
 export function registerView<K extends keyof ViewRegistry>(key: K, component: ViewRegistry[K]) {
   componentRegistry.register(key, component);
@@ -27,13 +27,19 @@ export function registerLazyView<K extends keyof ViewRegistry>(
 ) {
   const component = lazy(loader);
   registerView(key, component as ViewRegistry[K]);
-  return component as ViewRegistry[K];
+  return component;
 }
 
 export function registerLazyViews<const K extends keyof ViewRegistry>(views: {
   [P in K]: LazyViewLoader<P>;
 }) {
+  const result = {} as {
+    [P in K]: LazyExoticComponent<ResolveRegisteredView<ViewRegistry[P]>>;
+  };
+
   for (const key of Object.keys(views) as K[]) {
-    registerLazyView(key, views[key]);
+    result[key] = registerLazyView(key, views[key]);
   }
+
+  return result;
 }

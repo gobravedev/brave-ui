@@ -1,26 +1,26 @@
 // src/core/ui-system/invoke.ts
 
 import { useUIStore } from "./ui.store";
-import type { ViewRegistry } from "../component-registry/registry-types";
+import type { ViewProps, ViewRegistry } from "../component-registry/registry-types";
 
-export type ExtractProps<T> =
-  T extends React.ComponentType<infer P>
-    ? Omit<P, "close" | "onOk" | "onCancel">
-    : never;
+type ExtractProps<K extends keyof ViewRegistry> = Omit<
+  ViewProps<K>,
+  "close" | "onOk" | "onCancel"
+>;
 type Params<T> = keyof T extends never ? void : T;
 
 type InvokeAPI = {
   [K in keyof ViewRegistry]: {
     open: (
-      params: Params<ExtractProps<ViewRegistry[K]>>
+      params: Params<ExtractProps<K>>
     ) => string;
 
     drawer: (
-      params: Params<ExtractProps<ViewRegistry[K]>>
+      params: Params<ExtractProps<K>>
     ) => string;
 
     openAsync: (
-      params: Params<ExtractProps<ViewRegistry[K]>>
+      params: Params<ExtractProps<K>>
     ) => Promise<any>;
   };
 };

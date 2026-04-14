@@ -5,6 +5,10 @@ export type RegisteredViewComponent<Props = any> =
   | ComponentType<Props>
   | LazyExoticComponent<ComponentType<Props>>;
 
+export type LazyLoader<T extends ComponentType<any>> = () => Promise<{
+  default: T;
+}>;
+
 export interface ViewRegistry {}
 
 type ResolveRegisteredView<T> = T extends LazyExoticComponent<infer C>
@@ -24,3 +28,12 @@ export type ViewProps<K extends keyof ViewRegistry> = NormalizeViewProps<Compone
 export type ViewRenderProps = {
   [K in keyof ViewRegistry]: { view: K } & ViewProps<K>;
 }[keyof ViewRegistry];
+
+export type InferRegisteredViewComponent<TLoader extends LazyLoader<any>> =
+  RegisteredViewComponent<ComponentProps<Awaited<ReturnType<TLoader>>["default"]>>;
+
+export type InferViewRegistryFromLoaders<
+  TLoaders extends Record<string, LazyLoader<any>>,
+> = {
+  [K in keyof TLoaders]: InferRegisteredViewComponent<TLoaders[K]>;
+};
