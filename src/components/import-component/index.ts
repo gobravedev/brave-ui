@@ -1,6 +1,5 @@
-import { registerView } from '@/core/component-registry';
-import type { RegisteredViewComponent, ViewRegistry } from '@/core/component-registry/registry-types';
-import { lazy } from 'react';
+import { registerLazyViews } from '@/core/component-registry';
+import type { RegisteredViewComponent } from '@/core/component-registry/registry-types';
 
 declare module '@/core/component-registry/registry-types' {
     interface ViewRegistry {
@@ -43,99 +42,50 @@ declare module '@/core/component-registry/registry-types' {
     }
 }
 
-const PipelineFlowComponent = lazy(() => import('../../pages/components-relation/pipeline/components/pipeline-flow'))
-const SoftwareComponent = lazy(() => import('../../pages/components-relation/tools'))
-const ScriptComponent = lazy(() => import('../../pages/components-relation/script'))
-const ScriptV2Component = lazy(() => import('../../pages/components-relation/script/indexV2'))
-const EditParamsPanel = lazy(() => import('@/components/edit-params/components/edit-params'));
+registerLazyViews({
+    workflow2: () => import('../../pages/components-relation/pipeline/components/pipeline-flow'),
+    workflowComponent: () => import('../../pages/components-relation/workflow'),
+    software: () => import('../../pages/components-relation/tools'),
+    tools: () => import('../../pages/components-relation/tools'),
+    analysisTools: () => import('../../pages/components-relation/tools/analysis-tools'),
 
-const FileComponent = lazy(() => import('../../pages/components-relation/file'))
-const FileV2Component = lazy(() => import('../../pages/components-relation/components/create-or-update-component'))
-const CreateOrUpdateComponent = lazy(() => import('../../pages/components-relation/components/create-or-update-component'))
-const CreateOrUpdateRelation = lazy(() => import('../../pages/components-relation/components/create-or-update-relation'))
-const AnalysisResultPageAdapter = lazy(() => import('../../pages/components-relation/components/analysis-result-page'))
-const PipelineInputComponent = lazy(() => import('../../pages/components-relation/pipeline/components/pipeline-input'))
-const LLMFile = lazy(() => import("../../pages/components-relation/components/llm-file"))
-const LLMTools = lazy(() => import("../../pages/components-relation/components/llm-tools"))
-const ScriptDesc = lazy(() => import("../../pages/components-relation/components/script-desc"))
-const LLMScript = lazy(() => import("../../pages/components-relation/components/llm-script"))
-const ScriptCode = lazy(() => import("../../pages/components-relation/components/script-code"))
-const ComponentStructure = lazy(() => import("../../pages/components-relation/components/component-structure"))
-const ComponentScript = lazy(() => import("../../pages/components-relation/components/component-script"))
-const PreviewRelationExample = lazy(() => import('../../pages/components-relation/components/preview-example'))
-const ScriptView = lazy(() => import('../../pages/components-relation/components/script-view'))
-const FileView = lazy(() => import('../../pages/components-relation/components/file-view'))
-const AnalysisTools = lazy(() => import('../../pages/components-relation/tools/analysis-tools'))
-const InputFileComponent = lazy(() => import('@/components/result-list/input-file-component'))
-const OutputFileComponent = lazy(() => import('@/components/result-list/output-file-component'))
-const AnalysisResultView = lazy(() => import('@/components/analysis-result-view/analysis-reuslt-view'))
-const AnalysisList = lazy(() => import('@/components/analysis-list'))
-const WorkflowComponent = lazy(() => import('../../pages/components-relation/workflow'))
-const RelationDefinitionDAG = lazy(() => import('../../pages/components-relation/components/relation-definition-dag'))
-const WorkflowVisComponent = lazy(() => import('../../pages/components-relation/workflow/workflow-vis-component'))
-const LLMCard = lazy(() => import('../../layout/components/llm-card'))
-const EditParamsPanelWithAnalysisId = lazy(() => import('@/components/edit-params/components/edit-params-panel-with-analysis-id'))
-const Md = lazy(() => import('../../layout/components/md'))
-const AnalysisTree = lazy(() => import("../../pages/analysis-report/analysis-tree"))
+    script: () => import('../../pages/components-relation/script'),
+    file: () => import('../../pages/components-relation/file'),
+    fileV2: () => import('../../pages/components-relation/components/create-or-update-component'),
+    scriptV2: () => import('../../pages/components-relation/script/indexV2'),
+    createOrUpdateComponent: () => import('../../pages/components-relation/components/create-or-update-component'),
+    createOrUpdateRelation: () => import('../../pages/components-relation/components/create-or-update-relation'),
+    analysisResult: () => import('../../pages/components-relation/components/analysis-result-page'),
 
-const ModuleEdit = lazy(() => import('../../components/module-edit'))
-const CreateOrUpdateComponentDrawer = lazy(() => import('@/components/create-pipeline/create-or-update-component-drawer'))
+    llmFile: () => import('../../pages/components-relation/components/llm-file'),
+    llmTools: () => import('../../pages/components-relation/components/llm-tools'),
+    llmScript: () => import('../../pages/components-relation/components/llm-script'),
 
-const viewMapping: {
-    key: keyof ViewRegistry;
-    label: string;
-    component: RegisteredViewComponent;
-}[] = [
-        { key: "workflow2", label: "workflow", component: PipelineFlowComponent },
-        { key: "workflowComponent", label: "workflowComponent", component: WorkflowComponent },
-        { key: "software", label: "software", component: SoftwareComponent },
-        { key: "tools", label: "software", component: SoftwareComponent },
-        { key: "analysisTools", label: "analysisTools", component: AnalysisTools },
+    scriptView: () => import('../../pages/components-relation/components/script-view'),
+    fileView: () => import('../../pages/components-relation/components/file-view'),
 
-        { key: "script", label: "script", component: ScriptComponent },
-        { key: "file", label: "file", component: FileComponent },
-        { key: "fileV2", label: "file", component: FileV2Component },
+    scriptDesc: () => import('../../pages/components-relation/components/script-desc'),
+    scriptCode: () => import('../../pages/components-relation/components/script-code'),
 
-        { key: "scriptV2", label: "script", component: ScriptV2Component },
-        { key: "createOrUpdateComponent", label: "CreateOrUpdateComponent", component: CreateOrUpdateComponent },
-        { key: "createOrUpdateRelation", label: "CreateOrUpdateRelation", component: CreateOrUpdateRelation },
-        { key: "analysisResult", label: "analysisResult", component: AnalysisResultPageAdapter },
+    'component-structure': () => import('../../pages/components-relation/components/component-structure'),
+    'component-script': () => import('../../pages/components-relation/components/component-script'),
 
-        { key: "llmFile", label: "llmFile", component: LLMFile },
-        { key: "llmTools", label: "llmTools", component: LLMTools },
-        { key: "llmScript", label: "llmScript", component: LLMScript },
+    'preview-relation-example': () => import('../../pages/components-relation/components/preview-example'),
+    editParamsPanel: () => import('@/components/edit-params/components/edit-params'),
+    inputFileComponent: () => import('@/components/result-list/input-file-component'),
+    outputFileComponent: () => import('@/components/result-list/output-file-component'),
+    analysisResultView: () => import('@/components/analysis-result-view/analysis-reuslt-view'),
+    analysisList: () => import('@/components/analysis-list'),
+    relationDefinitionDAG: () => import('../../pages/components-relation/components/relation-definition-dag'),
 
-        { key: "scriptView", label: "scriptView", component: ScriptView },
-        { key: "fileView", label: "fileView", component: FileView },
-
-        { key: "scriptDesc", label: "scriptDesc", component: ScriptDesc },
-        { key: "scriptCode", label: "scriptCode", component: ScriptCode },
-
-        { key: "component-structure", label: "component-structure", component: ComponentStructure },
-        { key: "component-script", label: "component-script", component: ComponentScript },
-
-        { key: "preview-relation-example", label: "preview-relation-example", component: PreviewRelationExample },
-        { key: "editParamsPanel", label: "editParamsPanel", component: EditParamsPanel },
-        { key: "inputFileComponent", label: "inputFileComponent", component: InputFileComponent },
-        { key: "outputFileComponent", label: "outputFileComponent", component: OutputFileComponent },
-        { key: "analysisResultView", label: "analysisResultView", component: AnalysisResultView },
-        { key: "analysisList", label: "analysisList", component: AnalysisList },
-        { key: "relationDefinitionDAG", label: "relationDefinitionDAG", component: RelationDefinitionDAG },
-
-        { key: "workflow-input", label: "workflow-input", component: PipelineInputComponent },
-
-        { key: "workflow-vis", label: "workflow-vis", component: WorkflowVisComponent },
-        { key: "llm-card", label: "llm-card", component: LLMCard },
-        { key: "editParamsPanelWithAnalysisId", label: "editParamsPanelWithAnalysisId", component: EditParamsPanelWithAnalysisId },
-        { key: "markdown", label: "markdown", component: Md },
-        { key: "analysis-tree", label: "analysis-tree", component: AnalysisTree },
-        {key: "module-edit", label: "module-edit", component: ModuleEdit},
-        {key: "create-or-update-component-drawer", label: "create-or-update-component-drawer", component: CreateOrUpdateComponentDrawer}
-
-    ];
-
-for (const view of viewMapping) {
-    registerView(view.key, view.component)
-}
+    'workflow-input': () => import('../../pages/components-relation/pipeline/components/pipeline-input'),
+    'workflow-vis': () => import('../../pages/components-relation/workflow/workflow-vis-component'),
+    'llm-card': () => import('../../layout/components/llm-card'),
+    editParamsPanelWithAnalysisId: () => import('@/components/edit-params/components/edit-params-panel-with-analysis-id'),
+    markdown: () => import('../../layout/components/md'),
+    'analysis-tree': () => import('../../pages/analysis-report/analysis-tree'),
+    'module-edit': () => import('../../components/module-edit'),
+    'create-or-update-component-drawer': () => import('@/components/create-pipeline/create-or-update-component-drawer'),
+});
 
 

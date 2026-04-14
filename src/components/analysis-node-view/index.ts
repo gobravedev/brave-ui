@@ -1,6 +1,5 @@
 
-import { lazy } from "react";
-import { registerView } from "@/core/component-registry";
+import { registerLazyViews } from "@/core/component-registry";
 import type { RegisteredViewComponent } from "@/core/component-registry/registry-types";
 import type { ComponentProps } from "react";
 
@@ -18,19 +17,12 @@ declare module "@/core/component-registry/registry-types" {
     }
 }
 
-const AnalysisEdges = lazy(() => import("./components/analysis-edges"));
-const AnalysisNodes = lazy(() => import("./components/analysis-nodes"));
-const AnalysisNodePanel = lazy(() => import("./analysis-node-panel"));
-const AnalysisNodesReport = lazy(() => import("./components/analysis-nodes-report"));
-const AnalysisResultDisplay = lazy(() => import("./components/result-render"));
-const NodeParams = lazy(() => import("./components/node-params"));
-// 注册
-registerView("analysisNodes", AnalysisNodes);
-registerView("analysisEdges", AnalysisEdges);
-registerView("analysisNodesReport", AnalysisNodesReport);
-
-registerView("analysisNodePanel", AnalysisNodePanel);
-registerView("analysisResultDisplay", AnalysisResultDisplay);
-
-registerView("nodeParams", NodeParams);
+registerLazyViews({
+    analysisNodes: () => import("./components/analysis-nodes"),
+    analysisEdges: () => import("./components/analysis-edges"),
+    analysisNodesReport: () => import("./components/analysis-nodes-report"),
+    analysisNodePanel: () => import("./analysis-node-panel"),
+    analysisResultDisplay: () => import("./components/result-render"),
+    nodeParams: () => import("./components/node-params"),
+});
 
