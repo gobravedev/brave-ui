@@ -2,16 +2,28 @@
 
 import { useUIStore } from "./ui.store";
 import type { ViewMap } from "./view.types";
+import type { DrawerProps, ModalProps } from "antd";
 
 type UIType = "modal" | "drawer";
 
-type InvokeReturn<K extends keyof ViewMap> = {
-  open: (params: ViewMap[K]) => string;
+type ManagedModalProps = Omit<
+  ModalProps,
+  "open" | "onCancel" | "afterOpenChange" | "destroyOnClose"
+>;
 
-  drawer: (params: ViewMap[K]) => string;
+type ManagedDrawerProps = Omit<
+  DrawerProps,
+  "open" | "onClose" | "afterOpenChange" | "destroyOnClose"
+>;
+
+type InvokeReturn<K extends keyof ViewMap> = {
+  open: (params: ViewMap[K], modalProps?: Partial<ManagedModalProps>) => string;
+
+  drawer: (params: ViewMap[K], drawerProps?: Partial<ManagedDrawerProps>) => string;
 
   openAsync: (
-    params: ViewMap[K]
+    params: ViewMap[K],
+    modalProps?: Partial<ManagedModalProps>
   ) => Promise<any>;
 };
 
@@ -21,27 +33,30 @@ export function invoke<K extends keyof ViewMap>(
   const store = useUIStore.getState();
 
   return {
-    open(params) {
+    open(params, modalProps) {
       return store.open({
         view,
         type: "modal",
         params,
+        modalProps,
       });
     },
 
-    drawer(params) {
+    drawer(params, drawerProps) {
       return store.open({
         view,
         type: "drawer",
         params,
+        drawerProps,
       });
     },
 
-    openAsync(params) {
+    openAsync(params, modalProps) {
       return store.openAsync({
         view,
         type: "modal",
         params,
+        modalProps,
       });
     },
   };

@@ -2,8 +2,19 @@
 
 import { create } from "zustand";
 import { nanoid } from "nanoid";
+import type { DrawerProps, ModalProps } from "antd";
 
 export type UIType = "modal" | "drawer";
+
+type ManagedModalProps = Omit<
+    ModalProps,
+    "open" | "onCancel" | "afterOpenChange" | "destroyOnClose"
+>;
+
+type ManagedDrawerProps = Omit<
+    DrawerProps,
+    "open" | "onClose" | "afterOpenChange" | "destroyOnClose"
+>;
 
 export type UIItem = {
     id: string;
@@ -11,12 +22,16 @@ export type UIItem = {
     type: UIType;
     visible: boolean;
     params?: any;
+    modalProps?: Partial<ManagedModalProps>;
+    drawerProps?: Partial<ManagedDrawerProps>;
 };
 
 type OpenConfig = {
     view: string;
     type?: UIType;
     params?: any;
+    modalProps?: Partial<ManagedModalProps>;
+    drawerProps?: Partial<ManagedDrawerProps>;
 };
 
 type UIStore = {
@@ -35,7 +50,7 @@ type UIStore = {
 export const useUIStore = create<UIStore>((set, get) => ({
     stack: [],
 
-    open: ({ view, type = "modal", params }) => {
+    open: ({ view, type = "modal", params, modalProps, drawerProps }) => {
         const id = nanoid();
 
         set((state) => ({
@@ -47,6 +62,8 @@ export const useUIStore = create<UIStore>((set, get) => ({
                     type,
                     visible: true,
                     params,
+                    modalProps,
+                    drawerProps,
                 },
             ],
         }));
@@ -54,7 +71,7 @@ export const useUIStore = create<UIStore>((set, get) => ({
         return id;
     },
 
-    openSingle: ({ view, type = "modal", params }) => {
+    openSingle: ({ view, type = "modal", params, modalProps, drawerProps }) => {
         const id = nanoid();
 
         set({
@@ -65,6 +82,8 @@ export const useUIStore = create<UIStore>((set, get) => ({
                     type,
                     visible: true,
                     params,
+                    modalProps,
+                    drawerProps,
                 },
             ],
         });
@@ -87,7 +106,7 @@ export const useUIStore = create<UIStore>((set, get) => ({
     },
 
     // Promise 弹窗（Confirm / 表单特别好用）
-    openAsync: ({ view, type = "modal", params }) => {
+    openAsync: ({ view, type = "modal", params, modalProps, drawerProps }) => {
         return new Promise((resolve, reject) => {
             const id = nanoid();
 
@@ -99,6 +118,8 @@ export const useUIStore = create<UIStore>((set, get) => ({
                         view,
                         type,
                         visible: true,
+                        modalProps,
+                        drawerProps,
                         params: {
                             ...params,
                             onOk: (data: any) => {

@@ -36,7 +36,7 @@ export const UIContainer = () => {
 
                 if (item.type === "drawer") {
                     return (
-                        <Drawer key={item.id} {...commonProps} {...drawerProps} >
+                        <Drawer key={item.id} {...item.drawerProps} {...commonProps} {...drawerProps} >
                             {content}
                         </Drawer>
                     );
@@ -49,7 +49,7 @@ export const UIContainer = () => {
                     destroyOnClose: true,
                 }
                 return (
-                    <Modal key={item.id} {...commonProps} {...modalProps} >
+                    <Modal key={item.id} {...item.modalProps} {...commonProps} {...modalProps} >
                         {content}
                     </Modal>
                 );

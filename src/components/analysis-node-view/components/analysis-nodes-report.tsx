@@ -6,6 +6,7 @@ import ViewResolver from "@/core/ui-renderer/ViewResolver";
 import { useStoreRender } from "@/context/render/RenderProvider";
 import { useSideViewContext } from "@/context/side/SideViewContext";
 import { useComponentStore } from "@/store-zustand/components";
+import { invoke } from "@/core/ui-system/invokeV2";
 
 type NodeResultAsset = {
     images?: any[];
@@ -86,7 +87,7 @@ const countAssets = (samples: AnalysisNodeSample[]) => {
     );
 };
 export interface AnalysisNodesReportProps {
-        analysis_id: string;
+    analysis_id: string;
 }
 
 const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
@@ -437,6 +438,38 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
                                         value: sample.analysis_node_id,
                                     }))}
                                 /> : undefined} */}
+                            {selectedSampleDetail && <Space>
+                                <Button size="small" color="cyan" variant="solid" onClick={() => {
+
+                                    invoke.nodeParams.drawer(
+                                        { anaysis_node_id: selectedSampleDetail.node?.analysis_node_id },
+                                        {
+                                            width: 960,
+                                            title: `Params - ${selectedSampleDetail.node?.node_id}`,
+
+                                        }
+                                    )
+                                }}>Params</Button>
+                                <Tooltip title={`Edit Script ${selectedSampleDetail.node?.script_id}`}>
+                                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+
+                                        invoke.createOrUpdateComponent.drawer(
+                                            {
+                                                component_id: selectedSampleDetail.node?.script_id,
+                                                structure: {
+                                                    component_type: "script",
+                                                }
+                                            },
+                                            {
+                                                width: 960,
+                                                title: `Edit - ${selectedSampleDetail.node?.node_id}`,
+
+                                            }
+                                        )
+                                    }}>Edit</Button>
+                                </Tooltip>
+                            </Space>}
+
                             {analysisNodeId == selectedSampleResolved?.analysis_node_id ?
                                 <>
                                     <Tooltip title={`Close ${selectedSampleResolved?.analysis_node_id}`}>
@@ -480,6 +513,7 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
                                                 </Typography.Paragraph>}
                                         </Flex>
                                         <Space wrap>
+
                                             {selectedSampleDetail.status &&
                                                 <Tag color={statusColorMap[selectedSampleDetail.status]}>{selectedSampleDetail.status}</Tag>
                                             }
@@ -487,7 +521,7 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
                                                 <Tag color={statusColorMap[selectedSampleDetail.server_status]}>{selectedSampleDetail.server_status}</Tag>
                                             }
 
-                                            
+
 
                                             {/* <Tag color="blue">{selectedSampleDetail.result?.images?.length || 0} images</Tag>
                                             <Tag color="purple">{selectedSampleDetail.result?.tables?.length || 0} tables</Tag>

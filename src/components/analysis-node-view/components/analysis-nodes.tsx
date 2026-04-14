@@ -331,22 +331,39 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
                 <Flex gap={8}>
                     <Button size="small" color="cyan" variant="solid" onClick={() => {
 
-                        invoke.nodeParams.drawer({id:1})
-                        // open({
-                        //     type: "drawer",
-                        //     view: "nodeParams",
-                        //     params: { id: 1 },
-                        // })
+                        invoke.nodeParams.drawer(
+                            { anaysis_node_id: record?.analysis_node_id },
+                            {
+                                width: 960,
+                                title: `Params - ${record.node_id}`,
+
+                            }
+                        )
+
                     }}>Params</Button>
+
                     <Tooltip title={`Edit Script ${record?.script_id}`}>
                         <Button size="small" color="cyan" variant="solid" onClick={() => {
-                            openModals("createOrUpdatePipelineComponent", {
-                                data: {
+                            // openModals("createOrUpdatePipelineComponent", {
+                            // data: {
+                            //     component_id: record?.script_id,
+                            // }, structure: {
+                            //     component_type: "script",
+                            // }
+                            // })
+                            invoke.createOrUpdateComponent.drawer(
+                                {
                                     component_id: record?.script_id,
-                                }, structure: {
-                                    component_type: "script",
-                                }
-                            })
+                                    structure: {
+                                        component_type: "script",
+                                    }
+                                },
+                            {
+                                width: 960,
+                                title: `Edit - ${record.node_id}`,
+
+                            }
+                            )
                         }}>Edit</Button>
                     </Tooltip>
                     <Tooltip title={`Script Code ${record?.script_id}`}>
