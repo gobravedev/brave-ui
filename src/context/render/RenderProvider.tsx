@@ -60,15 +60,15 @@ export const RenderProvider: FC<any> = ({ children }) => {
 
     }, [analysisId]);
     
-    // useEffect(() => {
-    //     if (analysisNodeId) {
-    //         register("analysis", analysisNodeId,instance);
-    //         return () => {
-    //             unregister("analysis", analysisNodeId, instance);
-    //         }
-    //     }
+    useEffect(() => {
+        if (analysisNodeId) {
+            register("analysis", analysisNodeId,instance);
+            return () => {
+                unregister("analysis", analysisNodeId, instance);
+            }
+        }
 
-    // }, [analysisNodeId]);
+    }, [analysisNodeId]);
 
     const clear = () => {
         // setComponentParentIdsMap({})

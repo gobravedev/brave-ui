@@ -14,7 +14,8 @@ export type ComponentStore = {
     modals: Record<string, ModalInstance>;
     forms: Record<string, FormInstance>;
     charts: Record<string, ChartInstance>;
-    analysis: Record<string, Set<any>>; // 这里可以根据实际情况定义更具体的类型
+    analysis: Record<string, Set<any>>; 
+    graph: Record<string, any>; 
 
     register: <T>(category: keyof ComponentStore, id: string, instance: T) => void;
     unregister: <T>(category: keyof ComponentStore, id: string, instance?: T) => void;
@@ -29,6 +30,7 @@ export const useComponentStore = create<ComponentStore>((set, get) => ({
     forms: {},
     charts: {},
     analysis: {},
+    graph: {},
 
     register: (category, id, instance) => {
         console.log(`Registering component - Category: ${category}, ID: ${id}`);

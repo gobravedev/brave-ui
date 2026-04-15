@@ -169,7 +169,7 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                 </Form.Item>
                 <Flex gap={"small"} justify="space-between">
                     <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true, true)}>
-                        Submit
+                        Submit {analysisNodeId?"Node":""}
                     </Button>
                     <Space>
 

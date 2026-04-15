@@ -1,13 +1,22 @@
 import PipelineFlow from "@/components/pipeline-flow/indexV2"
 import { Button, Card, Space, Spin } from "antd"
 import axios from "axios"
-import { FC, useEffect, useState } from "react"
+import { FC, useEffect, useMemo, useState } from "react"
 import { ReloadOutlined } from '@ant-design/icons'
 import { colors } from "@/utils/utils"
 import { useGlobalMessage } from "@/hooks/useGlobalMessage"
-const WorkflowVisComponent: FC<any> = ({ relation_id }) => {
+import { useComponentStore } from "@/store-zustand/components"
+type Prop = {
+    relation_id: string
+}
+const WorkflowVisComponent: FC<Prop> = ({ relation_id }) => {
 
     // const [data, setData] = useState<any>(null)
+
+
+
+
+
     const [nodes, setNodes] = useState<any[]>([]);
     const [edges, setEdges] = useState<any[]>([]);
     const [loading, setLoading] = useState(false)
@@ -16,9 +25,12 @@ const WorkflowVisComponent: FC<any> = ({ relation_id }) => {
         setLoading(true)
         const resp = await axios.get(`/tools/get-workflow-vis/${relation_id}`)
         // setData(resp.data)
-        const nodes = getInitialNodesV2(resp.data.nodes)
-        setNodes(nodes)
-        setEdges(resp.data.edges || [])
+        if (resp.data?.nodes) {
+            const nodes = getInitialNodesV2(resp.data.nodes)
+            setNodes(nodes)
+            setEdges(resp.data.edges || [])
+        }
+
         setLoading(false)
 
     }
@@ -26,42 +38,63 @@ const WorkflowVisComponent: FC<any> = ({ relation_id }) => {
         loadData()
     }, [])
 
+    const formatNode = (node: any, index: number) => {
+        const label = node.name;
+        const position = node.position || { x: 0, y: index * 100 };
+        const color = node.color || '#' + ((1 << 24) * Math.random() | 0).toString(16) // 随机颜色
+        const inputs = Object.entries(node.inputs).map(([key, value]: [string, any]) => ({
+            id: key, // 将原本的键保存下来
+            ...value // 展开原本的值
+        }));
+        // const inputs = (|| []).map((inputs: any) => inputs);
+        const outputs = Object.entries(node.outputs).map(([key, value]: [string, any]) => ({
+            id: key, // 将原本的键保存下来
+            ...value // 展开原本的值
+        }));
+        // const outputs = (node.outputs || []).map((outputs: any) => outputs);
+
+        return {
+            id: node.id,
+            type: 'custom',
+            position: position,
+            // {
+            //     x: index * 300, // 你可以根据需要布局位置
+            //     y: 100,
+            // },
+            data: {
+                label,
+                color: color, // 随机颜色
+                inputs,
+                outputs,
+            },
+        };
+    }
+
+    const instance = useMemo(() => {
+        return {
+            addNode: (args: any) => {
+                console.log("Adding node to workflow vis", args);
+                const node = formatNode(args, 0)
+                setNodes((prevNodes) => [...prevNodes, node]);
+            }
+
+        }
+    }, [])
+    const { register, unregister } = useComponentStore();
+    useEffect(() => {
+        register("graph", relation_id, instance);
+        return () => {
+            // debugger
+            unregister("graph", relation_id, instance);
+        }
+    }, []);
     const getInitialNodesV2 = (nodes: any) => {
         // const nodes = data?.nodes
         if (!nodes) return []
 
         // console.log(positionMap) 
         const initialNodes = nodes.map((node: any, index: number) => {
-            // const id = `${index + 1}`;
-            const label = node.name;
-            const position = node.position || { x: 0, y: index * 100 };
-            const color = node.color || '#' + ((1 << 24) * Math.random() | 0).toString(16) // 随机颜色
-            const inputs = Object.entries(node.inputs).map(([key, value]: [string, any]) => ({
-                id: key, // 将原本的键保存下来
-                ...value // 展开原本的值
-            }));
-            // const inputs = (|| []).map((inputs: any) => inputs);
-            const outputs = Object.entries(node.outputs).map(([key, value]: [string, any]) => ({
-                id: key, // 将原本的键保存下来
-                ...value // 展开原本的值
-            }));
-            // const outputs = (node.outputs || []).map((outputs: any) => outputs);
-
-            return {
-                id: node.id,
-                type: 'custom',
-                position: position,
-                // {
-                //     x: index * 300, // 你可以根据需要布局位置
-                //     y: 100,
-                // },
-                data: {
-                    label,
-                    color: color, // 随机颜色
-                    inputs,
-                    outputs,
-                },
-            };
+            return formatNode(node, index)
         });
         return initialNodes || []
     }
