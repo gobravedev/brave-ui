@@ -11,6 +11,7 @@ import '@xyflow/react/dist/style.css';
 import axios from 'axios';
 import { useCallback, useEffect, useState } from 'react';
 import { Button, Card, Popover } from 'antd';
+import { CodeOutlined, EditOutlined } from '@ant-design/icons';
 
 import { memo } from 'react';
 import { savePipelineComponentsEdgesApi } from '@/api/pipeline';
@@ -108,9 +109,9 @@ export const CustomNode2 = memo(({ data, isConnectable }: any) => {
 // ];
 const nodeTypes = { custom: CustomNode };
 
-export default function App({ nodes,edges,setNodes,setEdges }: { nodes: any[],edges:any[],setNodes: any,setEdges: any }) {
+export default function App({ nodes, edges, setNodes, setEdges }: { nodes: any[], edges: any[], setNodes: any, setEdges: any }) {
 
-  const {messageApi} = useOutletContext<any>()
+  const { messageApi } = useOutletContext<any>()
 
   // useEffect(() => {
   //   setNodes(nodes)
@@ -124,13 +125,63 @@ export default function App({ nodes,edges,setNodes,setEdges }: { nodes: any[],ed
     [],
   );
   const onEdgesChange = useCallback(
-    (changes: any) => setEdges((edgesSnapshot:any) => applyEdgeChanges(changes, edgesSnapshot)),
+    (changes: any) => setEdges((edgesSnapshot: any) => applyEdgeChanges(changes, edgesSnapshot)),
     [],
   );
   const onConnect = useCallback(
     (params: any) => setEdges((edgesSnapshot: any) => addEdge(params, edgesSnapshot)),
     [],
   );
+
+  const deleteSelectedElements = useCallback(() => {
+    const selectedNodeIds = new Set(
+      nodes.filter((node: any) => node.selected).map((node: any) => node.id),
+    );
+    const selectedEdgeIds = new Set(
+      edges.filter((edge: any) => edge.selected).map((edge: any) => edge.id),
+    );
+
+    if (selectedNodeIds.size === 0 && selectedEdgeIds.size === 0) {
+      return;
+    }
+
+    setNodes((nodesSnapshot: any[]) =>
+      nodesSnapshot.filter((node: any) => !selectedNodeIds.has(node.id)),
+    );
+    setEdges((edgesSnapshot: any[]) =>
+      edgesSnapshot.filter(
+        (edge: any) =>
+          !selectedEdgeIds.has(edge.id)
+          && !selectedNodeIds.has(edge.source)
+          && !selectedNodeIds.has(edge.target),
+      ),
+    );
+
+    messageApi.success('删除成功');
+  }, [nodes, edges, setNodes, setEdges, messageApi]);
+
+  useEffect(() => {
+    const handleDeleteKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const tagName = target?.tagName?.toLowerCase();
+      const isTyping =
+        tagName === 'input'
+        || tagName === 'textarea'
+        || target?.isContentEditable;
+
+      if (isTyping) {
+        return;
+      }
+
+      if (event.key === 'Delete' || event.key === 'Backspace') {
+        event.preventDefault();
+        deleteSelectedElements();
+      }
+    };
+
+    window.addEventListener('keydown', handleDeleteKey);
+    return () => window.removeEventListener('keydown', handleDeleteKey);
+  }, [deleteSelectedElements]);
 
   // const loadData = async () => {
   //   const res = await axios.get(`/get-pipeline-dag/59bead89-13af-4956-951a-1dcef1b3b7a3`)
@@ -157,27 +208,28 @@ export default function App({ nodes,edges,setNodes,setEdges }: { nodes: any[],ed
   // }, [])
 
   return (
-      <div style={{ height: '60vh' }}>
-        {/* <Button onClick={loadData}>loadData</Button> */}
-        {/* {JSON.stringify(edges)} */}
+    <div style={{ height: '60vh' }}>
+      {/* <Button onClick={loadData}>loadData</Button> */}
+      {/* {JSON.stringify(edges)} */}
 
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          nodeTypes={nodeTypes}
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        nodeTypes={nodeTypes}
 
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          fitView
-        >
-          <Controls />
-          <MiniMap />
-          <Background gap={12} size={1} />
-        </ReactFlow>
-        {/* {JSON.stringify(initialNodes,null,2)} */}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        deleteKeyCode={null}
+        fitView
+      >
+        <Controls />
+        <MiniMap />
+        <Background gap={12} size={1} />
+      </ReactFlow>
+      {/* {JSON.stringify(initialNodes,null,2)} */}
 
-      </div>
+    </div>
   );
 }
 
@@ -186,10 +238,13 @@ export default function App({ nodes,edges,setNodes,setEdges }: { nodes: any[],ed
 import React from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { useOutletContext } from 'react-router';
+import { invoke } from '@/core/ui-system/invokeV2';
 
 export function CustomNode({ data }: any) {
   const inputs = data.inputs || [];
   const outputs = data.outputs || [];
+  const onEditDetail = data?.onEditDetail;
+  const onCodeDetail = data?.onCodeDetail;
 
   return (
     <div
@@ -229,6 +284,82 @@ export function CustomNode({ data }: any) {
         </Popover>
 
       ))}
+      <div
+        style={{
+          position: 'absolute',
+          right: 4,
+          bottom: 4,
+          display: 'flex',
+          gap: 4,
+        }}
+      >
+        <Button
+          type="text"
+          size="small"
+          icon={<CodeOutlined style={{ fontSize: 11 }} />}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            invoke.scriptCodeEdit.drawer(
+              { component_id: data.script_id },
+              {
+                width: 960,
+                title: `Code - ${data.label}`,
+              }
+            );
+          }}
+          style={{
+            color: '#fff',
+            background: 'rgba(255, 255, 255, 0.18)',
+            borderRadius: 4,
+            width: 16,
+            height: 16,
+            minWidth: 16,
+            padding: 0,
+            lineHeight: 1,
+          }}
+        />
+        <Button
+          type="text"
+          size="small"
+          icon={<EditOutlined style={{ fontSize: 11 }} />}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            // console.log("Edit details for node", data.script_id);
+            invoke.createOrUpdateComponent.drawer(
+              {
+                component_id: data.script_id,
+                structure: {
+                  component_type: "script",
+                },
+              },
+              {
+                width: 960,
+                title: `Edit - ${data.label}`,
+              }
+            );
+          }}
+          style={{
+            color: '#fff',
+            background: 'rgba(255, 255, 255, 0.18)',
+            borderRadius: 4,
+            width: 16,
+            height: 16,
+            minWidth: 16,
+            padding: 0,
+            lineHeight: 1,
+          }}
+        />
+      </div>
     </div>
   );
 }

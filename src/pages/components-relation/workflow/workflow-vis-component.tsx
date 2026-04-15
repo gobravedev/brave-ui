@@ -66,6 +66,7 @@ const WorkflowVisComponent: FC<Prop> = ({ relation_id }) => {
                 color: color, // 随机颜色
                 inputs,
                 outputs,
+                script_id: node.script_id,
             },
         };
     }
