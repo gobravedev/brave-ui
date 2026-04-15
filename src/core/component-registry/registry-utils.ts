@@ -26,7 +26,7 @@ export function registerLazyView<K extends keyof ViewRegistry>(
   loader: LazyViewLoader<K>,
 ) {
   const component = lazy(loader);
-  registerView(key, component as ViewRegistry[K]);
+  registerView(key, component as any as ViewRegistry[K]);
   return component;
 }
 
