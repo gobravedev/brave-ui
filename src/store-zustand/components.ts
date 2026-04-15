@@ -38,7 +38,7 @@ export const useComponentStore = create<ComponentStore>((set, get) => ({
 
         set((state) => {
             const map = { ...(state as any)[category] };
-            
+
 
             // ⭐ multi
             if (category === "analysis") {
@@ -97,6 +97,24 @@ export const useComponentStore = create<ComponentStore>((set, get) => ({
         //     // comp[method](...args);
         // }
 
+        const globalTarget = (get() as any)[category]?.["*"];
+        if (globalTarget) {
+            // debugger
+            if (globalTarget instanceof Set) {
+                console.log(`Invoking globalTarget method on multiple instances - Count: ${globalTarget.size}`);
+                for (const inst of globalTarget) {
+                    const fn = inst[method];
+                    if (typeof fn === "function") {
+                        if (args instanceof Array) {
+                            fn(...args);
+                        } else {
+                            fn(args);
+                        }
+                    }
+                }
+            }
+        }
+
         const target = (get() as any)[category]?.[id];
         if (!target) return;
         // console.log(`Found target for invocation - Category: ${category}, ID: ${id}`, target);
@@ -127,5 +145,8 @@ export const useComponentStore = create<ComponentStore>((set, get) => ({
 
             }
         }
+
+
+
     },
 }));

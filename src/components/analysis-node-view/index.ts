@@ -5,10 +5,11 @@ import type { InferViewRegistryFromLoaders } from "@/core/component-registry/reg
 const analysisNodeViewLoaders = {
     analysisNodes: () => import("./components/analysis-nodes"),
     analysisEdges: () => import("./components/analysis-edges"),
-    analysisNodesReport: () => import("./components/analysis-nodes-report"),
+    analysisNodesReport: () => import("./components/analysis-nodes-report/analysis-nodes-report"),
     analysisNodePanel: () => import("./analysis-node-panel"),
     analysisResultDisplay: () => import("./components/result-render"),
     nodeParams: () => import("./components/node-params"),
+    analysisNodeDetails: () => import("./components/analysis-nodes-report/analysis-node-details"),
 };
 // ;
 declare module "@/core/component-registry/registry-types" {

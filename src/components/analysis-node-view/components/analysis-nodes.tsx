@@ -1,7 +1,7 @@
 import { usePagination } from "@/hooks/usePagination";
 import { Button, Card, Col, Empty, Flex, Pagination, Popconfirm, Row, Statistic, Table, Tag, Tooltip, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { FC, useMemo } from "react";
+import { FC, useEffect, useMemo } from "react";
 import { ExportOutlined, RedoOutlined } from '@ant-design/icons'
 import axios from "axios";
 import { useGlobalMessage } from "@/hooks/useGlobalMessage";
@@ -13,6 +13,7 @@ import { findAnalysisById, runAnalysisApi, runAnalysisNodeApi, stopAnalysisApi, 
 import ViewResolver from "@/core/ui-renderer/ViewResolver";
 import { useUI } from "@/core/ui-system/useUI";
 import { invoke } from "@/core/ui-system/invokeV2";
+import { useComponentStore } from "@/store-zustand/components";
 
 type JsonValue = string | number | boolean | null | undefined | JsonValue[] | { [key: string]: JsonValue };
 
@@ -145,6 +146,48 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
     const nodeLevels = useMemo(() => calcNodeLevels(data as AnalysisNode[]), [data]);
     const { modals, openModals, closeModals } = useModals(["editParams", "moduleEdit", "createOrUpdatePipelineComponent"]);
     const { open } = useUI();
+
+    const { register, unregister } = useComponentStore();
+
+    const instance = useMemo(() => {
+        // const analysis_node_id = selectedSample?.analysis_node_id
+
+        return {
+            analysisDone: (args: any) => {
+                console.log("AnalysisNodes analysisDone", args, data)
+                if (args.id) {
+                    // 判断data 是否都是当前analysis_node_id，如果是则reload，否则不处理
+                    // const allMatch = (data as AnalysisNode[]).every(node => node.analysis_node_id === analysis_node_id);
+                    const findRecord = (data as AnalysisNode[]).find(x => x.analysis_node_id === args.id);
+                    if (findRecord) {
+                        reload()
+                    }
+                }
+
+            },
+            analysisStarted: (args: any) => {
+                console.log("AnalysisNodes analysisStarted", args, data)
+
+                if (args.id) {
+                    // 判断data 是否都是当前analysis_node_id，如果是则reload，否则不处理
+                    // const allMatch = (data as AnalysisNode[]).every(node => node.analysis_node_id === analysis_node_id);
+                    const findRecord = (data as AnalysisNode[]).find(x => x.analysis_node_id === args.id);
+                    if (findRecord) {
+                        reload()
+                    }
+                }
+            }
+        }
+    }, [data])
+
+    useEffect(() => {
+
+        register("analysis", "*", instance);
+        return () => {
+            unregister("analysis", "*", instance);
+        }
+    }, [data]);
+
 
     const columns: ColumnsType<AnalysisNode> = [
         {
@@ -330,16 +373,23 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
             render: (_, record: any) => (
                 <Flex gap={8}>
                     <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        invoke.analysisNodeDetails.drawer(
+                            { analysis_node_id: record?.analysis_node_id },
+                            {
+                                width: 960,
+                                title: `Details - ${record.node_id}`,
+                            }
+                        )
+                    }}>Report</Button>
 
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
                         invoke.nodeParams.drawer(
-                            { anaysis_node_id: record?.analysis_node_id },
+                            { analysis_node_id: record?.analysis_node_id },
                             {
                                 width: 960,
                                 title: `Params - ${record.node_id}`,
-
                             }
                         )
-
                     }}>Params</Button>
 
                     <Tooltip title={`Edit Script ${record?.script_id}`}>
@@ -569,7 +619,7 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
                     style={{ width: 200 }}
                 /> */}
                     {/* 修改为button */}
-                    <Button size="small" icon={<RedoOutlined />} onClick={reload}></Button>
+                    <Button loading={loading} size="small" icon={<RedoOutlined />} onClick={reload}></Button>
                 </Flex>}
             rowKey={(record: AnalysisNode) => `${record.id || ""}-${record.node_id}-${record.sample_id || 'global'}`}
             size="small"

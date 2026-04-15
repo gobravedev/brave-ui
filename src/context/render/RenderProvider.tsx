@@ -39,7 +39,13 @@ export const RenderProvider: FC<any> = ({ children }) => {
     }
     const instance = useMemo(() => {
         return {
-            analysisDone: updateFormStatus,
+            analysisStarted:(args: any)=>{
+                updateFormStatus(args)
+            },
+            analysisDone: (args: any)=>{
+                updateFormStatus(args)
+            },
+            
         }
     }, [])
     const { register, unregister } = useComponentStore();
@@ -54,15 +60,15 @@ export const RenderProvider: FC<any> = ({ children }) => {
 
     }, [analysisId]);
     
-    useEffect(() => {
-        if (analysisNodeId) {
-            register("analysis", analysisNodeId,instance);
-            return () => {
-                unregister("analysis", analysisNodeId, instance);
-            }
-        }
+    // useEffect(() => {
+    //     if (analysisNodeId) {
+    //         register("analysis", analysisNodeId,instance);
+    //         return () => {
+    //             unregister("analysis", analysisNodeId, instance);
+    //         }
+    //     }
 
-    }, [analysisNodeId]);
+    // }, [analysisNodeId]);
 
     const clear = () => {
         // setComponentParentIdsMap({})

@@ -98,22 +98,22 @@ const EditParamsPanel: FC<any> = () => {
 
 
 
-    const sseData = useSelector((state: any) => state.global.sseData)
-    const analysisIdRef = useRef<any>(null)
+    // const sseData = useSelector((state: any) => state.global.sseData)
+    // const analysisIdRef = useRef<any>(null)
 
-    useEffect(() => {
-        const data = sseData
-        console.log("sseData in result list:", analysisIdRef.current, data)
+    // useEffect(() => {
+    //     const data = sseData
+    //     console.log("sseData in result list:", analysisIdRef.current, data)
 
-        if (analysisIdRef.current == data.analysis_id) {
-            //  || data.event == "analysis_started"
-            if (data.event == "analysis_complete" || data.event == "analysis_failed") {
-                // loadData()
-            } else if (data.event == "analysis_started") {
-                jobStatus.current = "running"
-            }
-        }
-    }, [sseData])
+    //     if (analysisIdRef.current == data.analysis_id) {
+    //         //  || data.event == "analysis_started"
+    //         if (data.event == "analysis_complete" || data.event == "analysis_failed") {
+    //             // loadData()
+    //         } else if (data.event == "analysis_started") {
+    //             jobStatus.current = "running"
+    //         }
+    //     }
+    // }, [sseData])
 
     const getFirstKey = (resultTableList: any) => {
         if (resultTableList && Object.keys(resultTableList).length > 0) {

@@ -3,28 +3,28 @@ import axios from "axios";
 import { FC, useEffect, useState } from "react";
 
 type Props = {
-    anaysis_node_id: string;
+    analysis_node_id: string;
     close: () => void;
 };
 
-const NodeParams: FC<Props> = ({ anaysis_node_id, close }) => {
+const NodeParams: FC<Props> = ({ analysis_node_id, close }) => {
     const [data, setData] = useState<any>(null)
     const [loading, setLoading] = useState(false);
 
     const loadData = async () => {
         // /analysis/node-params/{analysis_node_id}
         setLoading(true);
-        const res = await axios.get(`/analysis/node-params/${anaysis_node_id}`);
+        const res = await axios.get(`/analysis/node-params/${analysis_node_id}`);
         setData(res.data);
         setLoading(false);
     }
     useEffect(() => {
         // debugger
-        if (anaysis_node_id) {
+        if (analysis_node_id) {
             loadData();
 
         }
-    }, [anaysis_node_id])
+    }, [analysis_node_id])
 
 
 
