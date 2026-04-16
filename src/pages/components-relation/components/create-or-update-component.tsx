@@ -5,11 +5,15 @@ import { FC, useEffect, useState } from "react"
 import AnalysisResultPage from "@/components/result-list/page";
 
 const CreateOrUpdateComponent: FC<any> = (params) => {
-      const { component_id, structure,callback } = params
+      const { component_id, structure,callback,onOk } = params
     return <>
 
         <CreateOrUpdatePipelineV2
-            callback={callback}
+        
+            callback={()=>{
+                callback && callback()
+                onOk && onOk()
+            }}
             structure={structure}
             component_id={component_id}
         ></CreateOrUpdatePipelineV2>

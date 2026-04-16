@@ -84,10 +84,10 @@ const SysFileBrowser1: FC<any> = ({ output_dir: dir }) => {
         <Card title="文件列表" extra={
             <Flex justify="space-between" align="center" gap={"small"}>
                 <Button size="small" color="cyan" variant="solid" onClick={() => loadFiles(dir)}>
-                    重置
+                    reset
                 </Button>
                 <Button size="small" color="cyan" variant="solid" onClick={() => loadFiles(currentPath)}>
-                    刷新
+                    refresh
                 </Button>
             </Flex>
         }>
@@ -166,9 +166,14 @@ const SysFileBrowser: FC<any> = ({ type,path, onSelectFile, onClose }) => {
     }
 
     const handleSelectFile = (file: FileItem) => {
+        let path =  file.name
+        if (currentPath !== "/") {
+            path = currentPath + "/" + file.name
+        }
         onSelectFile({
-            path: currentPath + "/" + file.name,
+            path: path,
             file: file.name,
+            type: type
         })
     }
 
@@ -247,7 +252,7 @@ const SysFileBrowser: FC<any> = ({ type,path, onSelectFile, onClose }) => {
                                         Download
                                     </Button>,
                                     <Button type="link" size="small" onClick={() => handleSelectFile(file)}>
-                                        Select
+                                        Add To
                                     </Button>,
                                 ]
                         }

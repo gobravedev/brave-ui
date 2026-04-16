@@ -16,6 +16,7 @@ import { setUserItem } from "@/store/userSlice"
 import { useModal } from "@/hooks/useModal"
 import FormProject from "@/components/form-project"
 import { useComponentRegistry } from "@/core/component-registry/registry-context"
+import { useSideViewContext } from "@/context/side/SideViewContext"
 const Project: FC<any> = () => {
     const [data, setData] = useState<any>(introduction)
     const { ref: containerRef, top, isSticky } = useStickyTop(576);
@@ -40,6 +41,25 @@ const Project: FC<any> = () => {
         // setQueryProject(resp.data)
         dispatch(setUserItem({ projectObj: resp.data }))
     }
+    const { setSideView, sideView, sideOptions, setSideOptions } = useSideViewContext();
+
+
+    useEffect(() => {
+        setSideOptions([
+            {
+                label: "LLM",
+                value: "llm-card"
+            }, {
+                label: "Container App",
+                value: "containerAppProject"
+            }
+        ])
+        // setSideView("analysis-tools")
+        return () => {
+            setSideOptions([])
+            setSideView("llm-card")
+        }
+    }, [])
     return <div >
         <Card
             style={{

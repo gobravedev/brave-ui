@@ -335,7 +335,7 @@ export function CustomNode({ data }: any) {
             e.preventDefault();
             e.stopPropagation();
             // console.log("Edit details for node", data.script_id);
-            invoke.createOrUpdateComponent.drawer(
+            invoke.createOrUpdateComponent.openDrawerAsync(
               {
                 component_id: data.script_id,
                 structure: {

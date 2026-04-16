@@ -1,21 +1,38 @@
-import { FC, forwardRef, use, useImperativeHandle } from "react"
+import { FC, forwardRef, use, useEffect, useImperativeHandle, useMemo } from "react"
 import { pagePipelineComponents } from "@/api/pipeline";
-import { Card, Flex, Input, Pagination, Space, Table } from "antd";
-import { RedoOutlined } from '@ant-design/icons'
+import { Button, Card, Flex, Input, Pagination, Popconfirm, Space, Table } from "antd";
+import { DeleteOutlined, RedoOutlined } from '@ant-design/icons'
 import { usePagination } from "@/hooks/usePagination";
+import { useComponentStore } from "@/store-zustand/components";
+import axios from "axios";
+import { useGlobalMessage } from "@/hooks/useGlobalMessage";
 
 const Search = Input.Search
-const ComponentsPage = forwardRef<any,any>( ({ component_type, setComponent },ref) => {
+const ComponentsPage = forwardRef<any, any>(({ component_type, setComponent }, ref) => {
     const { data, pageNumber, totalPage, loading, reload, pageSize, setPageNumber, search } = usePagination({
         pageApi: pagePipelineComponents,
         params: { component_type: component_type },
         initialPageSize: 10
     })
 
+    const message = useGlobalMessage()
     useImperativeHandle(ref, () => ({
         reload
     }));
 
+    const instance = useMemo(() => {
+        return {
+            reload
+        }
+    }, [])
+    const { register, unregister } = useComponentStore();
+    useEffect(() => {
+        register("tables", `${component_type}-table`, instance);
+        return () => {
+            // debugger
+            unregister("tables", `${component_type}-table`, instance);
+        }
+    }, []);
     const columns: any = [
         {
             title: 'Component Name',
@@ -34,6 +51,17 @@ const ComponentsPage = forwardRef<any,any>( ({ component_type, setComponent },re
                     <a onClick={() => {
                         setComponent(record)
                     }}>Select</a>
+                    <Popconfirm title="Are you sure to delete this component?" onConfirm={async (e: any) => {
+                        await axios.delete(`/delete-component/${record.component_id}`)
+                        message.success("Component deleted!")
+                        reload()
+                        // setPanel("deleted")
+                        // // reload()
+                        // loadTable()
+                    }}>
+                        <Button size="small" type="link" icon={<DeleteOutlined style={{ color: "red" }} />} ></Button>
+                    
+                    </Popconfirm>
                     {/* <a onClick={() => {
                         openModal("createOrUpdatePipelineComponent", {
                             data: record, structure: {

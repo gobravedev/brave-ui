@@ -400,9 +400,9 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                     {/* {record?.file_type == 'collected' && <>
                         
                     </>} */}
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                             openModal("llmPanel", record)
-                        } }>llm</Button>
+                        } }>llm</Button> */}
                     <Dropdown menu={{
                         items: [
                             {

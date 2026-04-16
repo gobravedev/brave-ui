@@ -2,26 +2,31 @@ import { pagePipelineComponents } from "@/api/pipeline";
 import { usePagination } from "@/hooks/usePagination";
 import { useStickyTop } from "@/hooks/useStickyTop";
 import { Button, Card, Col, Divider, Drawer, Empty, Flex, Input, Pagination, Row, Space, Table, Tabs } from "antd";
-import { FC, useMemo, useState } from "react"
+import { FC, useEffect, useMemo, useState } from "react"
 import { LineChartOutlined, RedoOutlined } from '@ant-design/icons'
-import { title } from "process";
-import AnalysisResultPage from "@/components/result-list/page";
+import AnalysisResultPage from "@/components/result-list/indexV2";
 import { useModal, useModals } from "@/hooks/useModal";
 import OpenFile from "@/components/open-file";
 import { CreateOrUpdatePipelineComponent } from "@/components/create-pipeline";
 import Sample, { BindSample } from "../sample";
 import MetadataForm from "@/components/metadata-form";
 import SysFileBrowser from "@/components/file-browser/sys-file";
+import { useSideViewContext } from "@/context/side/SideViewContext";
+import { invoke } from "@/core/ui-system/invokeV2";
+import { useSelector } from "react-redux";
+import axios from "axios";
+import { useGlobalMessage } from "@/hooks/useGlobalMessage";
 const { Search } = Input;
 
 const Files: FC<any> = () => {
 
     const { ref: containerRef, top, isSticky } = useStickyTop(576);
     const [component, setComponent] = useState<any>();
+    const { project } = useSelector((state: any) => state.user)
 
     const { modal, openModal, closeModal } = useModal();
     const { modals, openModals, closeModals } = useModals(["modalD", "metadataModal", "bindSample"])
-
+    const message = useGlobalMessage()
     // const [searchText, setSearchText] = useState("");
     // const filteredData = useMemo(() => {
     //     if (!searchText) return data;
@@ -38,6 +43,25 @@ const Files: FC<any> = () => {
         openModals: openModals
     }
 
+    const { setSideView, sideView, sideOptions, setSideOptions } = useSideViewContext();
+
+
+    useEffect(() => {
+        setSideOptions([
+            {
+                label: "LLM",
+                value: "llm-card"
+            }, {
+                label: "Container App",
+                value: "containerAppProject"
+            }
+        ])
+        // setSideView("analysis-tools")
+        return () => {
+            setSideOptions([])
+            setSideView("llm-card")
+        }
+    }, [])
     return <div style={{ maxWidth: "1500px", margin: "1rem auto", padding: `${isSticky ? '0 16px 0 16px' : '0'}` }}>
 
         <Card size="small" >
@@ -63,21 +87,42 @@ const Files: FC<any> = () => {
                             ></AnalysisResultPage>
                         </>
                     }, {
-                        key: "sample",
-                        label: "Metadata",
-                        children: <Sample operatePipeline={operatePipeline}></Sample>
-                    },{
                         key: "data_file_browser",
                         label: "Data File browser",
-                        children: <SysFileBrowser path="/"  type="data"></SysFileBrowser>
-                    },{
+                        children: <SysFileBrowser path="/" type="data" onSelectFile={async (file: any) => {
+                            console.log(file)
+                            try {
+                                const data = await invoke.fileTypePage.openDrawerAsync(file, {
+                                    width: 600,
+                                    title: "Select File Type"
+                                })
+                                // /analysis-result/add-to-file
+                                const params = {
+                                    component_id: data.component_id,
+                                    project: project,
+                                    type: "data",
+                                    path: file.path
+                                }
+                                console.log(params)
+                                const resp = await axios.post(`/analysis-result/add-to-file`, params)
+                                message.success("File added to analysis results")
+                            } catch (error) {
+                                console.log("File type selection cancelled or failed", error)
+                            }
+
+                        }} ></SysFileBrowser>
+                    }, {
                         key: "analysis_file_browser",
                         label: "Analysis File browser",
                         children: <SysFileBrowser path="/" type="analysis"></SysFileBrowser>
+                    }, {
+                        key: "sample",
+                        label: "Metadata",
+                        children: <Sample operatePipeline={operatePipeline}></Sample>
                     }
                 ]}
                 tabBarExtraContent={<>
-                    <Button size="small" color="cyan" variant="solid" onClick={()=>openModal("filesDrawer")} >Select File Type</Button>
+                    <Button size="small" color="cyan" variant="solid" onClick={() => openModal("filesDrawer")} >Select File Type</Button>
                 </>}
             ></Tabs>
         </Card>
@@ -132,7 +177,7 @@ const Files: FC<any> = () => {
 
 export default Files
 
-const FilesDrawer: FC<any> = ({visible, onClose, params,setComponent}) => {
+const FilesDrawer: FC<any> = ({ visible, onClose, params, setComponent }) => {
     const { data, pageNumber, totalPage, loading, reload, pageSize, setPageNumber, search } = usePagination({
         pageApi: pagePipelineComponents,
         params: { component_type: "file" },

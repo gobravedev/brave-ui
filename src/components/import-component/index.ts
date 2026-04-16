@@ -47,6 +47,9 @@ const importComponentLoaders = {
     scriptCodeEdit: () => import('@/components/module-edit/code'),
     'create-or-update-component-drawer': () => import('@/components/create-pipeline/create-or-update-component-drawer'),
     scriptPage: () => import('../component-page/script-page'),
+    fileTypePage: () => import('../component-page/file-type-page'),
+    containerApp: () => import('../../components/interactive-tools/components/container-app'),
+    containerAppProject: () => import('../../components/interactive-tools/components/container-app-project'),
 };
 
 declare module '@/core/component-registry/registry-types' {

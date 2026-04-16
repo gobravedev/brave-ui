@@ -713,9 +713,12 @@ const App: React.FC = () => {
 
                 {/* 右侧：项目选择 */}
                 <Flex align="center" gap={"small"}>
-                    {/* <Tag color={status === "open" ? "green" : status === "connecting" ? "blue" : "red"} style={{marginRight:"1rem"}}>
-                    {status}
-                   </Tag> */}
+                    {projectObj?.project_name && <Tooltip title={`Current Project: ${projectObj.project_id}`} placement="bottom">
+                        <Tag color={"blue"} style={{ marginRight: "0.5rem" }}>
+                        {projectObj?.project_name}
+                    </Tag>
+                        </Tooltip>}
+
                     {/* {isConnect=="NOT_CONNECT" && <>aaaaaaaaaaaa</>} */}
                     <Button size="small"
                         color={status === "open" ? "green" : status === "connecting" ? "blue" : "red"}
@@ -860,7 +863,7 @@ export default AppLayout;
 
 const SettingDrawer: FC<any> = ({ visible, onClose, project_id, openModal: openModal_ }) => {
     const { modal, openModal, closeModal } = useModal();
-    const { analysis } = useComponentStore();
+    const { analysis,tables } = useComponentStore();
     const { openAsync } = useUI();
     return <Drawer title="Setting"
         extra={<>
@@ -868,6 +871,7 @@ const SettingDrawer: FC<any> = ({ visible, onClose, project_id, openModal: openM
         </>}
         open={visible} onClose={onClose} >
         <Flex vertical gap={"small"}>
+            {JSON.stringify(tables)}
             {JSON.stringify(analysis)}
             <Button onClick={() => { console.log(analysis) }}>analysis</Button>
             <Button onClick={() => {
@@ -900,7 +904,7 @@ const SettingDrawer: FC<any> = ({ visible, onClose, project_id, openModal: openM
                         params: { id: 1 },
                     })
                     console.log("confirm result")
-                
+
                 } catch (error) {
                     console.log("confirm cancel")
                 }

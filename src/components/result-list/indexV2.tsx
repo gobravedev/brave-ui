@@ -564,7 +564,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                                 }))
 
                             } else {
-                                operatePipeline.openModal("openFile", { content: record.content, fileType: record.file_type, description: currentAnalysisMethod.description })
+                                operatePipeline.openModal("openFile", { content: record.content, fileType: record.file_type })
 
                             }
 

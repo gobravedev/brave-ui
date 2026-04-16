@@ -192,7 +192,7 @@ export const ContainerOpt: FC<any> = ({ record, reload, traefikUI = false }) => 
     }
     const { modal, openModal, closeModal } = useModal();
 
-    const { containerURL } = useSelector((state: any) => state.user); // 'light' | 'dark'
+    const { containerURL,project } = useSelector((state: any) => state.user); // 'light' | 'dark'
 
     function originWithoutPort(inputUrl: any, port: any) {
         if (!inputUrl) return "/"
@@ -242,7 +242,7 @@ export const ContainerOpt: FC<any> = ({ record, reload, traefikUI = false }) => 
             {record.image_status == "exist" ? <>
                 <Popconfirm title="Launch?" onConfirm={async () => {
                     try {
-                        await axios.post(`/container/run-container/${record.container_id}`)
+                        await axios.post(`/container/run-container/${record.container_id}?project_id=${project}`)
 
                     } catch (error) {
                         console.log(error)

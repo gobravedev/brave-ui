@@ -36,6 +36,10 @@ type InvokeAPI = {
       params: Params<ExtractProps<K>>,
       modalProps?: Partial<ManagedModalProps>
     ) => Promise<any>;
+    openDrawerAsync: (
+      params: Params<ExtractProps<K>>,
+      drawerProps?: Partial<ManagedDrawerProps>
+    ) => Promise<any>;
   };
 };
 
@@ -68,6 +72,14 @@ export const invoke = new Proxy({} as InvokeAPI, {
           type: "modal",
           params,
           modalProps,
+        });
+      },
+      openDrawerAsync(params: any, drawerProps?: Partial<ManagedDrawerProps>) {
+        return store.openAsync({
+          view: key,
+          type: "drawer",
+          params,
+          drawerProps,
         });
       },
     };
