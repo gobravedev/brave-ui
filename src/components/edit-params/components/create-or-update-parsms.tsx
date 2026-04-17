@@ -1,4 +1,4 @@
-import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Tooltip, Space } from "antd";
+import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Tooltip, Space, Switch } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { FC, forwardRef, lazy, Suspense, useEffect, useImperativeHandle, useRef, useState } from "react";
 import Markdown from '@/components/markdown'
@@ -28,7 +28,7 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
     const [loading, setLoading] = useState<boolean>(false)
     const messageApi = useGlobalMessage()
     const { project } = useSelector((state: any) => state.user);
-    const { setAnalysisId ,analysisNodeId,formStatus,setFormStatus} = useStoreRender()
+    const { setAnalysisId, analysisNodeId, formStatus, setFormStatus } = useStoreRender()
 
     // const [jobStatus, setJobStatus] = useState<string>(job_status )
     // useEffect(() => {
@@ -57,8 +57,8 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
         console.log(requestParams)
         try {
             setLoading(true)
-            
-            const resp: any = await axios.post(`/fast-api/analysis-controller`,{
+
+            const resp: any = await axios.post(`/fast-api/analysis-controller`, {
                 request_param: requestParams,
                 is_report: true,
                 save: true,
@@ -89,11 +89,11 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
             // if (analysisNodeId){
             //     url = `/fast-api/analysis-node-controller?save=${save}&is_submit=${is_submit}&analysis_node_id=${analysisNodeId}`
             // }
-    //             request_param: Dict[str, Any]
-    // save: Optional[bool] = False
-    // is_submit: Optional[bool] = False
-    // is_report: Optional[bool] = None
-    // analysis_node_id: Optional[str] = None
+            //             request_param: Dict[str, Any]
+            // save: Optional[bool] = False
+            // is_submit: Optional[bool] = False
+            // is_report: Optional[bool] = None
+            // analysis_node_id: Optional[str] = None
             const resp: any = await axios.post(`/fast-api/analysis-controller`, {
                 request_param: requestParams,
                 save: save,
@@ -107,7 +107,7 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
             //     // jobStatus.current = "running"
 
             // }
-            if(is_submit){
+            if (is_submit) {
                 setFormStatus("running")
             }
             if (save) {
@@ -169,10 +169,20 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                 </Form.Item>
                 <Flex gap={"small"} justify="space-between">
                     <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true, true)}>
-                        Submit {analysisNodeId?"Node":""}
+                        Submit {analysisNodeId ? "Node" : ""}
                     </Button>
-                    <Space>
 
+                    <Space>
+                        <Form.Item
+                        noStyle
+                            initialValue={false}
+                            label="is cache"
+                            name={`is_cache`}
+                            // tooltip="is cache"
+                            valuePropName="checked"
+                        >
+                            <Switch  size="small" checkedChildren="cache" unCheckedChildren="no-cache" disabled={formStatus == "running"}/>
+                        </Form.Item>
                         <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid" onClick={() => {
                             saveUpstreamAnalysis(false)
                         }}>Parameters</Button>

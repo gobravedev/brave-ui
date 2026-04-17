@@ -33,7 +33,7 @@ const AnalysisList = forwardRef<any, any>(({
         id: "analysis-list",
         url: `/list-analysis`,
         params: {
-            component_id: component_id,
+            // component_id: component_id,
             component_ids: component_ids,
             project: project,
             relation_id: relation_id,

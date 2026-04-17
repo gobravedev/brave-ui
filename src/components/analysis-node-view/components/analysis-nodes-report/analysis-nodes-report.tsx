@@ -23,6 +23,7 @@ type AnalysisNodeSample = {
 
     result?: NodeResultAsset;
     node?: any;
+    node_name?: string;
     server_status: string;
 };
 
@@ -206,7 +207,7 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
                 htmls: assets.htmls,
                 children: samples.map((sample, index) => ({
                     key: makeSampleKey(sample.analysis_node_id),
-                    title: sample.node_id || sample.analysis_node_id,
+                    title: sample.node_name || sample.analysis_node_id,
                     nodeType: "sample",
                     scriptId: item.script_id,
                     sampleId: sample.analysis_node_id,

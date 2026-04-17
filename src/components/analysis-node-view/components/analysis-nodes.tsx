@@ -28,6 +28,7 @@ interface AnalysisNode {
     downstream_ids?: string[];
     params?: JsonValue;
     resolved_inputs?: JsonValue;
+    node_name?: string;
     resolved_outputs?: JsonValue;
     created_at?: string | null;
     updated_at?: string | null;
@@ -190,7 +191,13 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
 
 
     const columns: ColumnsType<AnalysisNode> = [
-        {
+       {
+            title: 'status',
+            dataIndex: 'status',
+            key: 'status',
+            width: 120,
+            render: (value: string) => <Tag color={statusColorMap[value] || "default"}>{value || "unknown"}</Tag>,
+        },   {
             title: 'node_id',
             dataIndex: 'node_id',
             key: 'node_id',
@@ -198,7 +205,10 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
             ellipsis: true,
             render: (_, record) => (
                 <Flex vertical gap={4}>
-                    <Typography.Text strong>{record.node_id}</Typography.Text>
+                    <Typography.Text strong>{record.node_name}</Typography.Text>
+                     <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                        node_id: {record.node_id}
+                    </Typography.Text>
                     <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                         script_id: {record.script_id}
                     </Typography.Text>
@@ -210,15 +220,57 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
                     </Typography.Text>
                 </Flex>
             )
+        }, {
+            title: 'resolved_inputs',
+            dataIndex: 'resolved_inputs',
+            key: 'resolved_inputs',
+            width: 220,
+            ellipsis: true,
+            render: (value: JsonValue) => (
+                <Tooltip
+                    title={<pre style={{ margin: 0, whiteSpace: "pre-wrap", maxWidth: 520 }}>{stringifyJson(value)}</pre>}
+                    placement="topLeft"
+                >
+                    <Typography.Text ellipsis style={{ maxWidth: 200 }}>
+                        {JSON.stringify(value)}
+                    </Typography.Text>
+                </Tooltip>
+            )
+        },{
+            title: 'input_validation_errors',
+            dataIndex: 'input_validation_errors',
+            key: 'input_validation_errors',
+            width: 220,
+            ellipsis: true,
+            render: (value: JsonValue) => (
+                <Tooltip
+                    title={<pre style={{ margin: 0, whiteSpace: "pre-wrap", maxWidth: 520 }}>{stringifyJson(value)}</pre>}
+                    placement="topLeft"
+                >
+                    <Typography.Text ellipsis style={{ maxWidth: 200 }}>
+                        {JSON.stringify(value)}
+                    </Typography.Text>
+                </Tooltip>
+            )
+        }, {
+            title: 'output_validation_errors',
+            dataIndex: 'output_validation_errors',
+            key: 'output_validation_errors',
+            width: 220,
+            ellipsis: true,
+            render: (value: JsonValue) => (
+                <Tooltip
+                    title={<pre style={{ margin: 0, whiteSpace: "pre-wrap", maxWidth: 520 }}>{stringifyJson(value)}</pre>}
+                    placement="topLeft"
+                >
+                    <Typography.Text ellipsis style={{ maxWidth: 200 }}>
+                        {JSON.stringify(value)}
+                    </Typography.Text>
+                </Tooltip>
+            )
         },
 
-        {
-            title: 'status',
-            dataIndex: 'status',
-            key: 'status',
-            width: 120,
-            render: (value: string) => <Tag color={statusColorMap[value] || "default"}>{value || "unknown"}</Tag>,
-        }, {
+       {
             title: 'container_image',
             dataIndex: 'container_image',
             key: 'container_image',
@@ -284,23 +336,7 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
                 </Tooltip>
             )
         },
-        {
-            title: 'resolved_inputs',
-            dataIndex: 'resolved_inputs',
-            key: 'resolved_inputs',
-            width: 220,
-            ellipsis: true,
-            render: (value: JsonValue) => (
-                <Tooltip
-                    title={<pre style={{ margin: 0, whiteSpace: "pre-wrap", maxWidth: 520 }}>{stringifyJson(value)}</pre>}
-                    placement="topLeft"
-                >
-                    <Typography.Text ellipsis style={{ maxWidth: 200 }}>
-                        {JSON.stringify(value)}
-                    </Typography.Text>
-                </Tooltip>
-            )
-        },
+        
         {
             title: 'resolved_outputs',
             dataIndex: 'resolved_outputs',
@@ -314,38 +350,6 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
                 >
                     <Typography.Text ellipsis style={{ maxWidth: 200 }}>
                         {summarizeJson(value)}
-                    </Typography.Text>
-                </Tooltip>
-            )
-        }, {
-            title: 'input_validation_errors',
-            dataIndex: 'input_validation_errors',
-            key: 'input_validation_errors',
-            width: 220,
-            ellipsis: true,
-            render: (value: JsonValue) => (
-                <Tooltip
-                    title={<pre style={{ margin: 0, whiteSpace: "pre-wrap", maxWidth: 520 }}>{stringifyJson(value)}</pre>}
-                    placement="topLeft"
-                >
-                    <Typography.Text ellipsis style={{ maxWidth: 200 }}>
-                        {JSON.stringify(value)}
-                    </Typography.Text>
-                </Tooltip>
-            )
-        }, {
-            title: 'output_validation_errors',
-            dataIndex: 'output_validation_errors',
-            key: 'output_validation_errors',
-            width: 220,
-            ellipsis: true,
-            render: (value: JsonValue) => (
-                <Tooltip
-                    title={<pre style={{ margin: 0, whiteSpace: "pre-wrap", maxWidth: 520 }}>{stringifyJson(value)}</pre>}
-                    placement="topLeft"
-                >
-                    <Typography.Text ellipsis style={{ maxWidth: 200 }}>
-                        {JSON.stringify(value)}
                     </Typography.Text>
                 </Tooltip>
             )
