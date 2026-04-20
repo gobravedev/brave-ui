@@ -105,7 +105,8 @@ const AnalysisNodeSnapshot: FC<any> = ({ analysis_id }) => {
                             }}
                         >
                             <Typography.Text type="secondary">
-                                {data?.is_finished ? "Analysis Completed" : <Spin indicator={<LoadingOutlined spin />} size="small" />}
+                                {/* {data?.is_finished ? "Analysis Completed" : <Spin indicator={<LoadingOutlined spin />} size="small" />} */}
+
                             </Typography.Text>
                             <Typography.Text strong>{completionPercent}%</Typography.Text>
                         </div>

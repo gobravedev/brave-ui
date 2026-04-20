@@ -221,6 +221,9 @@ const ScriptContent: FC<any> = ({ data, form }) => {
                 { label: "shell", value: "shell" },
                 { label: "R", value: "r" }]}></Select>
         </Form.Item>
+        <Form.Item name={"io_schema"} label="io_schema" >
+            <TextAreaComp templete={""}></TextAreaComp>
+        </Form.Item>
         <Form.Item name={"content"} label="content" rules={[{ required: true, message: 'Please input content!' }]}>
             <TextAreaComp templete={templete}></TextAreaComp>
         </Form.Item>
@@ -794,9 +797,7 @@ export const CreateOrUpdatePipelineV2: FC<any> = ({ component_id, structure, cal
                                     <Input ></Input>
                                 </Form.Item>
 
-                                <Form.Item name={"io_schema"} label="io_schema" >
-                                    <TextArea rows={4}></TextArea>
-                                </Form.Item>
+
 
                                 <ComponentsRender structure={structure} {...structure} data={component} form={form}></ComponentsRender>
 
