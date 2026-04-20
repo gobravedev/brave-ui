@@ -72,7 +72,7 @@ const AnalysisList = forwardRef<any, any>(({
     // const [loading, setLoading] = useState(true)
     const [currentAnalysis, setCurrentAnalysis] = useState<any>()
     const { containerURL } = useSelector((state: any) => state.user);
-    const { setAnalysisId, analysisId,setToolsPanelView,addOpenAnalysis,checkIsOpen,closeAnalysis } = useStoreRender()
+    const { setAnalysisId, analysisId, setToolsPanelView, addOpenAnalysis, checkIsOpen, closeAnalysis } = useStoreRender()
 
     useEffect(() => {
         if (data && Array.isArray(data) && data.length > 0) {
@@ -274,7 +274,14 @@ const AnalysisList = forwardRef<any, any>(({
             key: 'is_report',
             ellipsis: true,
             render: (text: any, record: any) => {
-                return <Tag color={text ? "green" : "blue"}>{text ? "Report" : "NonReport"}</Tag>
+                return <Popconfirm title={record.is_report ? "Whether to cancel the report?" : "Whether to the report?"} onConfirm={async () => {
+                    await axios.post(`/analysis/update-report/${record.analysis_id}`)
+                    loadData()
+                }}>
+                    {/* {record.is_report ? "Cancel Report" : "Report"} */}
+                    <Tag style={{cursor:"pointer"}} color={text ? "green" : "blue"}>{text ? "Report" : "NonReport"}</Tag>
+                </Popconfirm>
+                // return 
             }
         },
         {
@@ -493,7 +500,7 @@ const AnalysisList = forwardRef<any, any>(({
                                     // analysisNodePanel
                                     setView("analysisNodePanel")
                                     addOpenAnalysis({
-                                        analysis_id: record.analysis_id, 
+                                        analysis_id: record.analysis_id,
                                         analysis_name: record.analysis_name
                                     })
                                     //

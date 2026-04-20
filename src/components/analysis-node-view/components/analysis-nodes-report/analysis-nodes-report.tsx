@@ -96,6 +96,7 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
     const [selectedSampleId, setSelectedSampleId] = useState<string>();
     const [openMenuKeys, setOpenMenuKeys] = useState<string[]>([]);
     const { setAnalysisNodeId } = useStoreRender()
+    const { setRelation} = useStoreRender()
 
     // const normalizeSampleDetail = (rawData: any): Partial<AnalysisNodeSample> => {
     //     const payload = rawData?.result ?? rawData;
@@ -129,6 +130,9 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
             const res = await axios.get(`/analysis/visualization-node-tree/${analysis_id}`)
             const nextData = Array.isArray(res.data?.result) ? res.data.result : [];
             setData(nextData)
+            setRelation({
+                relation_id: res.data?.relation_id,
+            })
             // setSampleDetailMap({})
             // setTitle(res.data.analysis_name + " - Report")
         } finally {

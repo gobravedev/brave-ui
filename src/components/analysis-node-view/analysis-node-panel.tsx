@@ -5,15 +5,17 @@ import { renderCloseViewButton, renderViewButton } from "@/utils/render-view-btn
 import { Button, Card, Divider, Flex, Space } from "antd";
 import axios from "axios";
 import { FC, useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 
 type AnalysisNodePanelView = "analysisNodesReport" | "analysisNodes" | "analysisEdges";
 
 const AnalysisNodePanel: FC<any> = () => {
-    const { openAnalysis, analysisId, setAnalysisId, clear, setRelation, closeAnalysis, setFormParam } = useStoreRender()
+    const { openAnalysis,relation, analysisId, setAnalysisId, clear, setRelation, closeAnalysis, setFormParam } = useStoreRender()
 
     const [view, setView] = useState<AnalysisNodePanelView>("analysisNodesReport");
     const setPanelView = (nextView: string) => setView(nextView as AnalysisNodePanelView);
-
+    const navigate = useNavigate()
+    
     const [title, setTitle] = useState("")
     useEffect(() => {
         return () => {
@@ -24,6 +26,9 @@ const AnalysisNodePanel: FC<any> = () => {
         variant="borderless"
         title={title}
         extra={<Space>
+            {relation?.relation_id && <Button size="small" color="primary" variant="solid" onClick={() =>
+                navigate(`/c/tools/${relation?.relation_id}`)
+            }>Go tools</Button>}
             {renderViewButton(view, setPanelView, "analysisNodesReport", "Report")}
 
             {renderViewButton(view, setPanelView, "analysisNodes", "Nodes")}
@@ -42,7 +47,7 @@ const AnalysisNodePanel: FC<any> = () => {
 
         {analysisId ? (<>
 
-            <div style={{marginBottom:"0.5rem"}}>
+            <div style={{ marginBottom: "0.5rem" }}>
                 <ViewResolver view="analysisNodeSnapshot" analysis_id={analysisId}></ViewResolver>
             </div>
             <ViewResolver
