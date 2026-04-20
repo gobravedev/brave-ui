@@ -173,7 +173,7 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                     </Button>
 
                     <Space>
-                        <Form.Item
+                        {!analysisNodeId && <Form.Item
                         noStyle
                             initialValue={false}
                             label="is cache"
@@ -182,7 +182,8 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                             valuePropName="checked"
                         >
                             <Switch  size="small" checkedChildren="cache" unCheckedChildren="no-cache" disabled={formStatus == "running"}/>
-                        </Form.Item>
+                        </Form.Item>}
+                        
                         <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid" onClick={() => {
                             saveUpstreamAnalysis(false)
                         }}>Parameters</Button>

@@ -10,6 +10,7 @@ const analysisNodeViewLoaders = {
     analysisResultDisplay: () => import("./components/result-render"),
     nodeParams: () => import("./components/node-params"),
     analysisNodeDetails: () => import("./components/analysis-nodes-report/analysis-node-details"),
+    analysisNodeSnapshot: () => import("./components/analysis-node-snapshot"),
 };
 // ;
 declare module "@/core/component-registry/registry-types" {

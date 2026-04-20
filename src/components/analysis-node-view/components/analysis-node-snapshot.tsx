@@ -1,0 +1,142 @@
+import { Button, Card, Col, Empty, Progress, Row, Space, Spin, Typography } from "antd";
+import axios from "axios";
+import { FC, useEffect, useMemo, useState } from "react";
+import { LoadingOutlined, RedoOutlined } from "@ant-design/icons";
+import { useComponentStore } from "@/store-zustand/components";
+const STATUS_ORDER = [
+    "pending",
+    "ready",
+    "submitted",
+    "running",
+    "cached",
+    "done",
+    "failed"
+    // "skipped"
+
+];
+
+
+const AnalysisNodeSnapshot: FC<any> = ({ analysis_id }) => {
+    const [data, setData] = useState<any>(null);
+    const [loading, setLoading] = useState(false);
+    const loadData = async () => {
+        // /analysis-runtime/snapshot
+        setLoading(true);
+        try {
+            const resp = await axios.post("/analysis-runtime/snapshot", {
+                analysis_id
+            })
+            setData(resp.data);
+        } finally {
+            setLoading(false);
+        }
+    }
+    useEffect(() => {
+        if (analysis_id) {
+            loadData();
+
+        }
+    }, [analysis_id])
+
+    const { register, unregister } = useComponentStore();
+
+    const instance = useMemo(() => {
+        // const analysis_node_id = selectedSample?.analysis_node_id
+        return {
+            analysisDone: (args: any) => {
+                console.log("AnalysisNodeSnapshot analysisDone", args, data)
+                loadData()
+
+            },
+            analysisStarted: (args: any) => {
+                console.log("AnalysisNodeSnapshot analysisStarted", args, data)
+                loadData()
+            }
+        }
+    }, [analysis_id])
+
+    useEffect(() => {
+
+        register("analysis", analysis_id, instance);
+        return () => {
+            unregister("analysis", analysis_id, instance);
+        }
+    }, [analysis_id]);
+
+    if (!analysis_id) {
+        return <Empty description="No analysis ID provided" />
+    }
+
+    // if (loading) {
+    //     return <Spin />;
+    // }
+
+    // if (!data) {
+    //     return <Empty description="No snapshot data" />;
+    // }
+
+
+    const statusCount = data?.status_count || {};
+    const completionPercent = Number(data?.completion_percent || 0);
+    // 按照预定义顺序展示状态，未定义状态排在后面
+    const statusItems = Object.entries(statusCount).sort(([a], [b]) => {
+        const aIndex = STATUS_ORDER.indexOf(a);
+        const bIndex = STATUS_ORDER.indexOf(b);
+        const safeA = aIndex === -1 ? Number.MAX_SAFE_INTEGER : aIndex;
+        const safeB = bIndex === -1 ? Number.MAX_SAFE_INTEGER : bIndex;
+        return safeA - safeB;
+    });
+
+    return <>
+        <Card title="Analysis Snapshot" size="small"
+            extra={<Space>
+                <Button onClick={loadData} icon={<RedoOutlined />} size="small" loading={loading}></Button>
+            </Space>}
+        >
+            <Spin spinning={loading} tip="Loading snapshot data...">
+                <Row gutter={[12, 12]}>
+                    <Col span={24}>
+                        <div
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                marginBottom: 6
+                            }}
+                        >
+                            <Typography.Text type="secondary">
+                                {data?.is_finished ? "Analysis Completed" : <Spin indicator={<LoadingOutlined spin />} size="small" />}
+                            </Typography.Text>
+                            <Typography.Text strong>{completionPercent}%</Typography.Text>
+                        </div>
+                        <Progress
+                            percent={Math.max(0, Math.min(100, completionPercent))}
+                            status={data?.is_finished ? "success" : "active"}
+                            size="small"
+                        />
+                    </Col>
+
+                    {statusItems.map(([key, value]) => (
+                        <Col xs={12} sm={8} md={4} lg={3} key={key}>
+                            <Card size="small" bordered styles={{ body: { padding: "8px 12px" } }}>
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "space-between"
+                                    }}
+                                >
+                                    <Typography.Text type="secondary">{key}</Typography.Text>
+                                    <Typography.Text strong>{Number(value || 0)}</Typography.Text>
+                                </div>
+                            </Card>
+                        </Col>
+                    ))}
+                </Row>
+            </Spin>
+
+        </Card>
+    </>
+}
+
+export default AnalysisNodeSnapshot;

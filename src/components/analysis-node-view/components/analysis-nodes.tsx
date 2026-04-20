@@ -183,9 +183,9 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
 
     useEffect(() => {
 
-        register("analysis", "*", instance);
+        register("analysis", analysis_id, instance);
         return () => {
-            unregister("analysis", "*", instance);
+            unregister("analysis", analysis_id, instance);
         }
     }, [data]);
 
@@ -523,7 +523,7 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
     }
     return <>
 
-        <Row gutter={[12, 12]} style={{ marginBottom: 12 }}>
+        {/* <Row gutter={[12, 12]} style={{ marginBottom: 12 }}>
             <Col xs={12} sm={8} lg={6}>
                 <Card size="small"><Statistic title="Nodes" value={summary.nodeCount} /></Card>
             </Col>
@@ -537,7 +537,7 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
                 <Card size="small"><Statistic title="Failed" value={summary.failedCount} /></Card>
             </Col>
 
-        </Row>
+        </Row> */}
 
         <Button onClick={async () => {
             await axios.post(`/analysis-runtime/invalidate-cache/${analysis_id}`)

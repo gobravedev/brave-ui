@@ -32,19 +32,26 @@ const AnalysisNodePanel: FC<any> = () => {
         </Space>}
 
     >
-{/* 
+        {/* 
         <ViewResolver
             // setTitle={setTitle}
             // analysis_id={analysisId}
             view={"analysisNodesReport"}>
         </ViewResolver> */}
 
-        {analysisId ? (
+
+        {analysisId ? (<>
+
+            <div style={{marginBottom:"0.5rem"}}>
+                <ViewResolver view="analysisNodeSnapshot" analysis_id={analysisId}></ViewResolver>
+            </div>
             <ViewResolver
                 setTitle={setTitle}
                 analysis_id={analysisId}
                 view={view}
             ></ViewResolver>
+        </>
+
         ) : null}
     </Card>
 

@@ -36,8 +36,12 @@ export function registerActions() {
   });
   ActionDispatcher.register(
     "component.invoke",
-    ({ category, id, method, args }:any) => {
+    ({ category, id, method, args ,parentId}:any) => {
+      // debugger
       useComponentStore.getState().invoke(category, id, method, args);
+      if(parentId){
+        useComponentStore.getState().invoke(category, parentId, method, args);
+      }
     }
   );
 

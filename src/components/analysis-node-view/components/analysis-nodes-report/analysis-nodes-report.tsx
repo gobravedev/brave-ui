@@ -4,6 +4,7 @@ import { FC, useEffect, useMemo, useState } from "react";
 import { RedoOutlined } from '@ant-design/icons'
 import { useStoreRender } from "@/context/render/RenderProvider";
 import AnalysisNodeDetails from "./analysis-node-details";
+import ViewResolver from "@/core/ui-renderer/ViewResolver";
 
 type NodeResultAsset = {
     images?: any[];
@@ -305,6 +306,8 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
 
         {!data.length ? <Empty description="No node report data" /> :
             <Row gutter={[12, 12]} align="top">
+              
+
                 <Col xs={24} lg={8} xl={7}>
                     <Card
                         size="small"
