@@ -105,14 +105,15 @@ const AnalysisNodeSnapshot: FC<any> = ({ analysis_id }) => {
                             }}
                         >
                             <Typography.Text type="secondary">
-                                {/* {data?.is_finished ? "Analysis Completed" : <Spin indicator={<LoadingOutlined spin />} size="small" />} */}
+                                {!data?.running_info ? "Analysis Completed" : <Spin indicator={<LoadingOutlined spin />} size="small" />}
 
                             </Typography.Text>
                             <Typography.Text strong>{completionPercent}%</Typography.Text>
                         </div>
                         <Progress
                             percent={Math.max(0, Math.min(100, completionPercent))}
-                            status={data?.is_finished ? "success" : "active"}
+                            status={data?.running_info ? "active" : 
+                                data?.status === "done" ? "success" : "normal"}
                             size="small"
                         />
                     </Col>

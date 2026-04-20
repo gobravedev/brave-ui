@@ -7,7 +7,7 @@ import LogFile from "@/components/log-file";
 import { DeleteColumnOutlined, DeleteOutlined, QuestionCircleOutlined } from "@ant-design/icons"
 import { MonacoEditor } from "@/components/react-monaco-editor";
 import { useNavigate, useOutletContext } from "react-router";
-import { findAnalysisById, runAnalysisApi, stopAnalysisApi } from "@/api/analysis";
+import { findAnalysisById, runAnalysisApi, stopAnalysisNodeApi } from "@/api/analysis";
 import { useModal, useModals } from "@/hooks/useModal";
 // import FormJsonComp from "@/components/form-components";
 import ParamsView from "@/components/params-view";
@@ -28,7 +28,7 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
     const [loading, setLoading] = useState<boolean>(false)
     const messageApi = useGlobalMessage()
     const { project } = useSelector((state: any) => state.user);
-    const { setAnalysisId, analysisNodeId, formStatus, setFormStatus } = useStoreRender()
+    const { setAnalysisId, analysisNodeId, formStatus, setFormStatus,analysisId } = useStoreRender()
 
     // const [jobStatus, setJobStatus] = useState<string>(job_status )
     // useEffect(() => {
@@ -168,22 +168,44 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                     <Input></Input>
                 </Form.Item>
                 <Flex gap={"small"} justify="space-between">
-                    <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true, true)}>
-                        Submit {analysisNodeId ? "Node" : ""}
-                    </Button>
+
+                    {formStatus == "running" || formStatus == "stopping" ?
+                        <Popconfirm title="Are you sure to stop the analysis?" onConfirm={async () => {
+                            setFormStatus("stopping")
+                            if(analysisNodeId){
+                                await stopAnalysisNodeApi(analysisNodeId,"node")
+                                messageApi.success("Node analysis stopped!")
+                            }else{
+                                
+                                await axios.post(`/analysis-runtime/running-dags/${analysisId}/stop`)
+                                messageApi.success("Analysis stopped!")
+                            }
+                            // 
+                        }}>
+                            <Button disabled={formStatus == "stopping"} size="small" color="cyan" variant="solid" >
+                                Stop
+                            </Button>
+
+                        </Popconfirm>
+                        :
+                        <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true, true)}>
+                            Submit {analysisNodeId ? "Node" : ""}
+                        </Button>
+                    }
+
 
                     <Space>
                         {!analysisNodeId && <Form.Item
-                        noStyle
+                            noStyle
                             initialValue={false}
                             label="is cache"
                             name={`is_cache`}
                             // tooltip="is cache"
                             valuePropName="checked"
                         >
-                            <Switch  size="small" checkedChildren="cache" unCheckedChildren="no-cache" disabled={formStatus == "running"}/>
+                            <Switch size="small" checkedChildren="cache" unCheckedChildren="no-cache" disabled={formStatus == "running"} />
                         </Form.Item>}
-                        
+
                         <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid" onClick={() => {
                             saveUpstreamAnalysis(false)
                         }}>Parameters</Button>
