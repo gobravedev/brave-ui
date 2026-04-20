@@ -45,41 +45,53 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
     const { setSideView } = useSideViewContext();
     const { register, unregister } = useComponentStore();
     const message = useGlobalMessage();
+    const [selectedSampleDetail, setSelectedSampleDetail] = useState<any>({});
     const { containerURL } = useSelector((state: any) => state.user);
 
-    const loadSampleDetail = useCallback(async (targetAnalysisNodeId?: string, force = false) => {
-        if (!targetAnalysisNodeId || (sampleDetailMap[targetAnalysisNodeId] && !force)) {
-            return;
-        }
+    // const loadSampleDetail = useCallback(async (targetAnalysisNodeId?: string, force = false) => {
+    //     if (!targetAnalysisNodeId || (sampleDetailMap[targetAnalysisNodeId] && !force)) {
+    //         return;
+    //     }
 
+    // setDetailLoading(true);
+    // try {
+    //     const res = await axios.get(`/analysis/visualization-node-file/${targetAnalysisNodeId}`);
+    //     setSampleDetailMap((prev) => ({
+    //         ...prev,
+    //         [targetAnalysisNodeId]: res.data,
+    //     }));
+    // } finally {
+    //     setDetailLoading(false);
+    // }
+    // }, [sampleDetailMap]);
+
+    // const selectedSampleDetail = analysis_node_id ? sampleDetailMap[analysis_node_id] : undefined;
+
+    const loadSampleDetail = async (targetAnalysisNodeId?: string) => {
+    
         setDetailLoading(true);
         try {
             const res = await axios.get(`/analysis/visualization-node-file/${targetAnalysisNodeId}`);
-            setSampleDetailMap((prev) => ({
-                ...prev,
-                [targetAnalysisNodeId]: res.data,
-            }));
+            setSelectedSampleDetail(res.data);
         } finally {
             setDetailLoading(false);
         }
-    }, [sampleDetailMap]);
-
-    const selectedSampleDetail = analysis_node_id ? sampleDetailMap[analysis_node_id] : undefined;
+    }
 
     const instance = useMemo(() => {
         return {
             analysisDone: () => {
-                loadSampleDetail(analysis_node_id, true);
+                loadSampleDetail(analysis_node_id);
             },
             analysisStarted: () => {
-                loadSampleDetail(analysis_node_id, true);
+                loadSampleDetail(analysis_node_id);
             },
         };
-    }, [analysis_node_id, loadSampleDetail]);
+    }, [analysis_node_id]);
 
     useEffect(() => {
         loadSampleDetail(analysis_node_id);
-    }, [analysis_node_id, loadSampleDetail]);
+    }, [analysis_node_id]);
 
     useEffect(() => {
         if (analysis_node_id) {
@@ -274,7 +286,7 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
 
                     <Button
                         loading={detailLoading}
-                        onClick={() => loadSampleDetail(analysis_node_id, true)}
+                        onClick={() => loadSampleDetail(analysis_node_id)}
                         size="small"
                         icon={<RedoOutlined />}
                     />

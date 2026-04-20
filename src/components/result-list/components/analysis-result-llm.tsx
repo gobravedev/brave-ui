@@ -9,7 +9,7 @@ const AnalysisResultLLM: FC<any> = ({ file_name, file_type, analysis_result_id, 
     const [tableRows, setTableRows] = useState<any[]>([])
     const [tableRowLoading, setTableRowLoading] = useState<boolean>(false)
     const [tableRowsInfo, setTableRowsInfo] = useState<{ nrow: number; ncol: number }>({ nrow: 0, ncol: 0 })
-    const [rowNum, setRowNum] = useState<number>(100)
+    const [rowNum, setRowNum] = useState<number>(10)
     const [leftOpen, setLeftOpen] = useState<boolean>(false)
     const loadTable = async () => {
         setTableRowLoading(true)
