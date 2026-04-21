@@ -183,7 +183,7 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                 </Form.Item>
                 <Flex gap={"small"} justify="space-between">
 
-                    {formStatus == "running" || formStatus == "stopping" ?
+                    {formStatus == "running" || formStatus == "stopping" || formStatus == "submitted" ?
                         <Popconfirm title="Are you sure to stop the analysis?" onConfirm={async () => {
                             setFormStatus("stopping")
                             if (analysisNodeId) {

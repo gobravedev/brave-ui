@@ -129,6 +129,7 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
         setLoading(true)
         try {
             const res = await axios.get(`/analysis/visualization-node-tree/${analysis_id}`)
+
             const nextData = Array.isArray(res.data?.result) ? res.data.result : [];
             setData(nextData)
             setRelation({
@@ -207,19 +208,7 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
         }
     }, [selectedNodeSamples, selectedSample, selectedSampleId]);
 
-    const summary = useMemo(() => {
-        const samples = data.flatMap((item) => item.children || []);
-        const assets = countAssets(samples);
-        const failedCount = samples.filter((item) => item.status === "failed").length;
-        const doneCount = samples.filter((item) => item.status === "done" || item.status === "success").length;
-        return {
-            nodeCount: data.length,
-            sampleCount: samples.length,
-            failedCount,
-            doneCount,
-            ...assets,
-        };
-    }, [data]);
+
 
     const reportTreeData = useMemo<ReportTreeNode[]>(() => {
         return data.map((item) => {
@@ -308,7 +297,7 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
         }
         setOpenMenuKeys([makeNodeKey(selectedNodeId)]);
         return () => {
-            setAnalysisNodeId(null)
+            // setAnalysisNodeId(null)
         }
     }, [selectedNodeId, reportTreeData]);
 
@@ -331,6 +320,7 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
                 DAG Analysis Report {selectedSampleId}
             </Typography.Title>
         </Flex> */}
+        {/* <Button onClick={()=>{setLoading(true)}}>test</Button> */}
 
         {!data.length ? <Empty description="No node report data" /> :
             <Row gutter={[12, 12]} align="top">

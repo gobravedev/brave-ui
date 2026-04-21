@@ -39,12 +39,7 @@ export const RenderProvider: FC<any> = ({ children }) => {
     }
     const instance = useMemo(() => {
         return {
-            analysisStarted: (args: any) => {
-                updateFormStatus(args)
-            },
-            analysisDone: (args: any) => {
-                updateFormStatus(args)
-            }, dagStarted: (args: any) => {
+            dagStarted: (args: any) => {
                 updateFormStatus(args)
             }, dagDone: (args: any) => {
                 updateFormStatus(args)
@@ -63,12 +58,22 @@ export const RenderProvider: FC<any> = ({ children }) => {
         }
 
     }, [analysisId]);
+    const instanceNode = useMemo(() => {
+        return {
+            analysisStarted: (args: any) => {
+                updateFormStatus(args)
+            },
+            analysisDone: (args: any) => {
+                updateFormStatus(args)
+            }
 
+        }
+    }, [])
     useEffect(() => {
         if (analysisNodeId) {
-            register("analysis", analysisNodeId, instance);
+            register("analysis", analysisNodeId, instanceNode);
             return () => {
-                unregister("analysis", analysisNodeId, instance);
+                unregister("analysis", analysisNodeId, instanceNode);
             }
         }
 
