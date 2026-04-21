@@ -11,6 +11,7 @@ const analysisNodeViewLoaders = {
     nodeParams: () => import("./components/node-params"),
     analysisNodeDetails: () => import("./components/analysis-nodes-report/analysis-node-details"),
     analysisNodeSnapshot: () => import("./components/analysis-node-snapshot"),
+    nodeError: () => import("./components/node-error"),
 };
 // ;
 declare module "@/core/component-registry/registry-types" {

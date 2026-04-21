@@ -18,6 +18,7 @@ import { useSelector } from "react-redux";
 import { useStoreRender } from "@/context/render/RenderProvider";
 import { ActionDispatcher } from "@/llmv2/dispatcher";
 import { useGlobalMessage } from "@/hooks/useGlobalMessage";
+import { invoke } from "@/core/ui-system/invokeV2";
 const RenderFromJson = lazy(() => import("./render-form-json"));
 
 
@@ -143,7 +144,14 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                     callback()
                 }
             } else {
-                openModals("paramsView", resp.data)
+                // openModals("paramsView", resp.data)
+                invoke.paramsView.drawer({
+                    data: resp.data,
+                },{
+                    width: "60%",
+                    title: "Parameters",
+                    footer: null,
+                })
             }
         } catch (error: any) {
             console.log(error)

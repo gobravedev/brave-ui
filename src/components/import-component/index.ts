@@ -50,6 +50,7 @@ const importComponentLoaders = {
     fileTypePage: () => import('../component-page/file-type-page'),
     containerApp: () => import('../../components/interactive-tools/components/container-app'),
     containerAppProject: () => import('../../components/interactive-tools/components/container-app-project'),
+    paramsView: () => import('@/components/edit-params/components/params-view'),
 };
 
 declare module '@/core/component-registry/registry-types' {

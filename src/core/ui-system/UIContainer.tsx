@@ -49,7 +49,7 @@ export const UIContainer = () => {
                     destroyOnClose: true,
                 }
                 return (
-                    <Modal key={item.id} {...item.modalProps} {...commonProps} {...modalProps} >
+                    <Modal key={item.id} {...item.modalProps} {...commonProps} {...modalProps}   >
                         {content}
                     </Modal>
                 );

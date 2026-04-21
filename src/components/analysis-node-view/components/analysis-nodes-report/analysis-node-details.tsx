@@ -320,7 +320,17 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                             </Flex>
                             <Space wrap>
                                 {selectedSampleDetail.status && (
-                                    <Tag color={statusColorMap[selectedSampleDetail.status]}>{selectedSampleDetail.status}</Tag>
+                                    <Tag 
+                                    style={{cursor:"pointer"}}
+                                    onClick={()=>{
+
+                                        invoke.nodeError.open({node:selectedSampleDetail.node}, 
+                                            {title:`Error - ${selectedSampleDetail.node?.node_name}`,
+                                        width: 800,
+                                        footer:null,
+                                        })
+                                    }}
+                                    color={statusColorMap[selectedSampleDetail.status]}>{selectedSampleDetail.status}</Tag>
                                 )}
                                 {selectedSampleDetail.server_status && (
                                     <Tag color={statusColorMap[selectedSampleDetail.server_status]}>

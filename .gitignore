@@ -24,3 +24,4 @@ dist-ssr
 *.sw?
 .history/
 a.json
+nginx/
