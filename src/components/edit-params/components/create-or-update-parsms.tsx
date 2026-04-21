@@ -28,7 +28,7 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
     const [loading, setLoading] = useState<boolean>(false)
     const messageApi = useGlobalMessage()
     const { project } = useSelector((state: any) => state.user);
-    const { setAnalysisId, analysisNodeId, formStatus, setFormStatus,analysisId } = useStoreRender()
+    const { setAnalysisId, analysisNodeId, formStatus, setFormStatus, analysisId } = useStoreRender()
 
     // const [jobStatus, setJobStatus] = useState<string>(job_status )
     // useEffect(() => {
@@ -116,15 +116,29 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                 if (resp.data.analysis_id) {
                     setAnalysisId(resp.data.analysis_id)
                 }
-                const data = {
-                    action: "component.invoke",
-                    payload: {
-                        category: "tables",
-                        id: "analysis-list",
-                        method: "reload",
+                const data = [
+                    {
+                        action: "component.invoke",
+                        payload: {
+                            category: "tables",
+                            id: "analysis-list",
+                            method: "reload",
+                        }
                     }
+                ]
+                if(analysisId ){
+                    data.push({
+                        action: "component.invoke",
+                        payload: {
+                            category: "analysis",
+                            id: analysisId,
+                            method: "reload",
+                        }
+                    })
                 }
-                ActionDispatcher.dispatch(data.action, data.payload);
+
+                ActionDispatcher.dispatchList(data);
+
                 if (callback) {
                     callback()
                 }
@@ -172,11 +186,11 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                     {formStatus == "running" || formStatus == "stopping" ?
                         <Popconfirm title="Are you sure to stop the analysis?" onConfirm={async () => {
                             setFormStatus("stopping")
-                            if(analysisNodeId){
-                                await stopAnalysisNodeApi(analysisNodeId,"node")
+                            if (analysisNodeId) {
+                                await stopAnalysisNodeApi(analysisNodeId, "node")
                                 messageApi.success("Node analysis stopped!")
-                            }else{
-                                
+                            } else {
+
                                 await axios.post(`/analysis-runtime/running-dags/${analysisId}/stop`)
                                 messageApi.success("Analysis stopped!")
                             }

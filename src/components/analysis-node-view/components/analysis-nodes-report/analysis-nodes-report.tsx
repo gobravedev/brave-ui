@@ -5,6 +5,7 @@ import { RedoOutlined } from '@ant-design/icons'
 import { useStoreRender } from "@/context/render/RenderProvider";
 import AnalysisNodeDetails from "./analysis-node-details";
 import ViewResolver from "@/core/ui-renderer/ViewResolver";
+import { useComponentStore } from "@/store-zustand/components";
 
 type NodeResultAsset = {
     images?: any[];
@@ -96,7 +97,7 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
     const [selectedSampleId, setSelectedSampleId] = useState<string>();
     const [openMenuKeys, setOpenMenuKeys] = useState<string[]>([]);
     const { setAnalysisNodeId } = useStoreRender()
-    const { setRelation} = useStoreRender()
+    const { setRelation } = useStoreRender()
 
     // const normalizeSampleDetail = (rawData: any): Partial<AnalysisNodeSample> => {
     //     const payload = rawData?.result ?? rawData;
@@ -139,6 +140,29 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
             setLoading(false)
         }
     }
+
+
+    const { register, unregister } = useComponentStore();
+
+    const instance = useMemo(() => {
+        // const analysis_node_id = selectedSample?.analysis_node_id
+        return {
+            dagStarted: (args: any) => {
+                console.log("AnalysisNodeSnapshot dagStarted", args, data)
+                loadData()
+            },reload: () => {
+                loadData()
+            }
+        }
+    }, [analysis_id])
+
+    useEffect(() => {
+
+        register("analysis", analysis_id, instance);
+        return () => {
+            unregister("analysis", analysis_id, instance);
+        }
+    }, [analysis_id]);
 
     useEffect(() => {
         if (analysis_id) {
@@ -310,7 +334,7 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
 
         {!data.length ? <Empty description="No node report data" /> :
             <Row gutter={[12, 12]} align="top">
-              
+
 
                 <Col xs={24} lg={8} xl={7}>
                     <Card

@@ -4,7 +4,7 @@ import { create } from "zustand";
 export type TableInstance = { reload: () => void; loadLastPage: () => void; search: (kw: string) => void };
 export type DrawerInstance = { open: () => void; close: () => void };
 export type ModalInstance = { open: () => void; close: () => void; setLoading: (v: boolean) => void };
-export type FormInstance = { setValue: (name: string, v: any) => void; reset: () => void, updateFormStatus: () => void };
+export type FormInstance = { reload: () => void; setValue: (name: string, v: any) => void; reset: () => void, updateFormStatus: () => void };
 export type ChartInstance = { refresh: () => void };
 
 // 统一的组件 store
@@ -19,7 +19,7 @@ export type ComponentStore = {
 
     register: <T>(category: keyof ComponentStore, id: string, instance: T) => void;
     unregister: <T>(category: keyof ComponentStore, id: string, instance?: T) => void;
-
+    print: () => ComponentStore;
     invoke: (category: keyof ComponentStore, id: string, method: string, args?: any[]) => void;
 };
 
@@ -31,7 +31,9 @@ export const useComponentStore = create<ComponentStore>((set, get) => ({
     charts: {},
     analysis: {},
     graph: {},
-
+    print:()=>{
+        return get()
+    },
     register: (category, id, instance) => {
         console.log(`Registering component - Category: ${category}, ID: ${id}`);
         // set((state) => ({

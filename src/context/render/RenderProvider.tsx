@@ -32,20 +32,24 @@ export const RenderProvider: FC<any> = ({ children }) => {
 
     const updateFormStatus = (args: any) => {
         // debugger
-        if(args?.status){
+        if (args?.status) {
             setFormStatus(args.status)
         }
         // setFormStatus("running");
     }
     const instance = useMemo(() => {
         return {
-            analysisStarted:(args: any)=>{
+            analysisStarted: (args: any) => {
                 updateFormStatus(args)
             },
-            analysisDone: (args: any)=>{
+            analysisDone: (args: any) => {
                 updateFormStatus(args)
-            },
-            
+            }, dagStarted: (args: any) => {
+                updateFormStatus(args)
+            }, dagDone: (args: any) => {
+                updateFormStatus(args)
+            }
+
         }
     }, [])
     const { register, unregister } = useComponentStore();
@@ -59,10 +63,10 @@ export const RenderProvider: FC<any> = ({ children }) => {
         }
 
     }, [analysisId]);
-    
+
     useEffect(() => {
         if (analysisNodeId) {
-            register("analysis", analysisNodeId,instance);
+            register("analysis", analysisNodeId, instance);
             return () => {
                 unregister("analysis", analysisNodeId, instance);
             }
@@ -128,6 +132,7 @@ export const RenderProvider: FC<any> = ({ children }) => {
     }
     const loadParams = async (force = false) => {
         console.log("sideView", sideView)
+        // debugger
         if (sideView == "editParamsPanel") {
             if (analysisNodeId) {
                 const data = await loadNodeAnalysis(analysisNodeId)
@@ -165,6 +170,19 @@ export const RenderProvider: FC<any> = ({ children }) => {
         }
 
     }
+    useEffect(() => {
+        register("forms", "analysis", { reload: () => {
+            // debugger
+            console.log("reload analysis form")
+            loadParams(true)
+         } });
+        return () => {
+            // debugger
+            unregister("forms", "analysis");
+        }
+
+
+    }, [analysisNodeId, analysisId, sideView,relation]);
 
     useEffect(() => {
         loadParams()

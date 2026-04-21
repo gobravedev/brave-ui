@@ -863,7 +863,7 @@ export default AppLayout;
 
 const SettingDrawer: FC<any> = ({ visible, onClose, project_id, openModal: openModal_ }) => {
     const { modal, openModal, closeModal } = useModal();
-    const { analysis,tables } = useComponentStore();
+    const { analysis,tables,forms } = useComponentStore();
     const { openAsync } = useUI();
     return <Drawer title="Setting"
         extra={<>
@@ -873,7 +873,9 @@ const SettingDrawer: FC<any> = ({ visible, onClose, project_id, openModal: openM
         <Flex vertical gap={"small"}>
             {JSON.stringify(tables)}
             {JSON.stringify(analysis)}
-            <Button onClick={() => { console.log(analysis) }}>analysis</Button>
+           forms: {JSON.stringify(forms)}
+
+            <Button onClick={() => { console.log(useComponentStore.getState().print()) }}>componentStore</Button>
             <Button onClick={() => {
                 // const data = {
                 //     action: "component.invoke",

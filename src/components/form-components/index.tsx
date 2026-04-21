@@ -1,4 +1,4 @@
-import { Button, Col, ColorPicker, ColorPickerProps, Divider, Flex, Form, Input, InputNumber, Row, Select, Space, Switch, Tooltip } from "antd";
+import { Button, Card, Col, ColorPicker, ColorPickerProps, Divider, Flex, Form, Input, InputNumber, Row, Select, Space, Switch, Tooltip } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import axios from "axios";
 import { A } from "ollama/dist/shared/ollama.d792a03f.mjs";
@@ -144,7 +144,7 @@ const extractDependsNames = (depends: any): string[] => {
 
     return []
 }
-const FormJsonComp: FC<any> = memo(({ formJson, dataMap={}, analysisResultId }) => {
+const FormJsonComp: FC<any> = memo(({ formJson, dataMap = {}, analysisResultId }) => {
     if (!formJson) return null
     // const { projectObj } = useOutletContext<any>()
     const { projectObj } = useSelector((state: any) => state.user);
@@ -433,7 +433,7 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap={}, analysisResultId }) 
                             if (!show) return null
 
                             return <Col span={it?.col ? it?.col : 24} key={index} >
-                                
+
                                 <ComponentsRender projParameter={parameter} analysisResultId={analysisResultId} key={index} {...it} dataMap={dataMap} componentMap={componentMap} constDataMap={constDataMap}></ComponentsRender>
                             </Col>
                         }}
@@ -771,21 +771,22 @@ export const CollectedGroupSelectSampleButton2: FC<any> = ({ label, name, rules,
 
     </>
 }
-export const CollectedSampleSelect: FC<any> = ({ label, modes = [], columns, name:name_, columns_rules = [], rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
+export const CollectedSampleSelect: FC<any> = ({ label, modes = [], columns, groups, name: name_, columns_rules = [], rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
     const [sampleGrouped, setSampleGrouped] = useState<any>()
     const [options, setOptions] = useState<any>([])
     const [collectFiles, setCollectFiles] = useState<any>([])
     const { addColumns } = useStoreForm()
     let name = name_
-    if(name_ instanceof Array && name_.length > 1){
+    if (name_ instanceof Array && name_.length > 1) {
         name = name_[1]
-    }else{
+    } else {
         name_ = [name_]
     }
     // const {  project } = useOutletContext<any>()
 
     // const [sampleGroupedOptions, setSampleGroupedOptions] = useState<any>([])
     const form = Form.useFormInstance();
+    const basePath = Array.isArray(name_) ? [...name_] : [name_]
     let filterName: any = []
     if (filter) {
         filterName = filter.map((it: any) => it.name)
@@ -796,7 +797,8 @@ export const CollectedSampleSelect: FC<any> = ({ label, modes = [], columns, nam
     }, form);
 
     const groupField = Form.useWatch(group, form);
-    
+    const groupFormValues = Form.useWatch(basePath, form);
+
     const selectCollectFile = Form.useWatch([...name_, "file"], form);
 
 
@@ -871,6 +873,20 @@ export const CollectedSampleSelect: FC<any> = ({ label, modes = [], columns, nam
 
     }, [data, selectCollectFile, groupField, customFilterValue])
 
+    useEffect(() => {
+        if (!Array.isArray(columns) || columns.length === 0) return
+
+        const nodeName = columns
+            .map((item: any) => groupFormValues?.[`${item}_group`])
+            .filter((value: any) => typeof value === "string" && value.trim() !== "")
+            .map((value: string) => value.trim())
+            .join("_vs_")
+
+        if ((groupFormValues?.node_name ?? "") !== nodeName) {
+            form.setFieldValue([...basePath, "node_name"], nodeName || undefined)
+        }
+    }, [columns, groupFormValues, form, basePath])
+
     // useEffect(() => {
     //     if (selectCollectFile) {
     //         // form.setFieldsValue(requestParam)
@@ -887,7 +903,9 @@ export const CollectedSampleSelect: FC<any> = ({ label, modes = [], columns, nam
         </Form.Item>
 
         {/* {JSON.stringify(name)} */}
-
+        <Form.Item style={{display:"none"}} label={`Node Name`} name={[name, `node_name`]}>
+            <Input placeholder="Auto generated from group names" />
+        </Form.Item>
         {(columns && Array.isArray(columns)) && columns.map((item: any, index: any) => (
             <div key={index}>
                 {/* {JSON.stringify()} */}
@@ -903,19 +921,21 @@ export const CollectedSampleSelect: FC<any> = ({ label, modes = [], columns, nam
                         options={options}></Select>
                 </Form.Item>
 
-                {/* <Flex gap="small">
-                    {item}
-                    <Form.Item label={item} name={[name, "group", `${item}`]} noStyle >
-                        <GroupSelectButton sampleGrouped={sampleGrouped} field={[name, item]}></GroupSelectButton>
-                    </Form.Item>
-                    <Form.Item name={[name, "group_name", `${item}`]} >
-                        <Input size="small" placeholder="Optional group name"></Input>
-                    </Form.Item>
-                    <Form.Item name={[name, "color", `${item}`]} >
-                        <ColorPickerComp projParameter={projParameter} />
-                    </Form.Item>
-                </Flex> */}
-            </div>
+                {/* {JSON.stringify(groups)} */}
+                {(groups && groups[index] != 0) && <Form.Item label={`${item} Group Name`} name={[name, `${item}_group`]}
+                // rules={[{
+                //     "required": columns_rules[index] ? true : false,
+                //     "message": "This field cannot be empty!"
+                // }]}
+                >
+                    <Input></Input>
+
+
+                </Form.Item>}
+
+
+            </div >
+
         ))}
 
 
@@ -928,22 +948,24 @@ export const NestCollectedSampleSelect: FC<any> = ({ name, ...rest }) => {
 
     return <>
         {rest?.label}
+        {/* {JSON.stringify(rest)} */}
         <Form.List name={name}>
             {(fields, { add, remove }) => (
                 <>
                     {fields.map(({ key, name: listIndex, ...restField }) => (
-                        <div key={key} style={{  display: 'flex', marginBottom: 4, width: '100%' }} >
+                        <div key={key} style={{ display: 'flex', marginBottom: 4, width: '100%' }} >
 
                             {/* <CollectedSampleSelect name={} {...rest}></CollectedSampleSelect> */}
                             {/* {JSON.stringify(listIndex)} */}
-                            <div    style={{ flex: 1, marginBottom: 0, marginRight: 8 }}>
-                                 <CollectedSampleSelect
+                            <Card style={{ flex: 1, marginBottom: "0.5rem", marginRight: "0.5rem" }} size="small"> 
 
-                                name={[name,listIndex]}  //⭐ 把动态 index 传给子组件
-                                {...rest}
-                            />
+                                <CollectedSampleSelect
 
-                            </div>
+                                    name={[name, listIndex]}  //⭐ 把动态 index 传给子组件
+                                    {...rest}
+                                />
+
+                            </Card>
                             <MinusCircleOutlined onClick={() => remove(listIndex)} />
                         </div>
                     ))}

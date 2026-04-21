@@ -149,6 +149,7 @@ import { softwareTemplete, scriptTemplete, fileTemplete } from './templete'
 import ContainerPage from "@/pages/container"
 import { useSelector } from "react-redux"
 import { useGlobalMessage } from "@/hooks/useGlobalMessage"
+import { ActionDispatcher } from "@/llmv2/dispatcher"
 const SoftwareContent: FC<any> = ({ data, form }) => {
     const [templete, setTemplete] = useState<any>()
     const [containers, setContainers] = useState<any>([])
@@ -723,6 +724,19 @@ export const CreateOrUpdatePipelineV2: FC<any> = ({ component_id, structure, cal
                 callback()
                 // await axios.get("/get-pipeline-v2/d9830ebd-240e-4758-adab-dd3a9d17e414")
             }
+
+
+            const data = {
+                action: "component.invoke",
+                payload: {
+                    category: "forms",
+                    id: "analysis",
+                    method: "reload",
+                }
+            }
+
+            ActionDispatcher.dispatch(data.action, data.payload);
+
             // onClose()
         } catch (error) {
             setLoading(false)
