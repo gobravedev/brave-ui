@@ -68,7 +68,7 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
     // const selectedSampleDetail = analysis_node_id ? sampleDetailMap[analysis_node_id] : undefined;
 
     const loadSampleDetail = async (targetAnalysisNodeId?: string) => {
-    
+
         setDetailLoading(true);
         try {
             const res = await axios.get(`/analysis/visualization-node-file/${targetAnalysisNodeId}`);
@@ -319,24 +319,101 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                 )}
                             </Flex>
                             <Space wrap>
-                                {selectedSampleDetail.status && (
-                                    <Tag 
-                                    style={{cursor:"pointer"}}
-                                    onClick={()=>{
+                                <Tag
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() => {
 
-                                        invoke.nodeError.open({node:selectedSampleDetail.node}, 
-                                            {title:`Error - ${selectedSampleDetail.node?.node_name}`,
-                                        width: 800,
-                                        footer:null,
-                                        })
-                                    }}
-                                    color={statusColorMap[selectedSampleDetail.status]}>{selectedSampleDetail.status}</Tag>
+                                        invoke.nodeResolvedIO.open({ node: selectedSampleDetail.node },
+                                            {
+                                                title: `IO - ${selectedSampleDetail.node?.node_name}`,
+                                                width: 800,
+                                                footer: null,
+                                            })
+                                    }}>IO</Tag>
+                                {selectedSampleDetail.node?.status == "running" &&
+                                    <Tag
+                                        style={{ cursor: "pointer" }}
+                                        onClick={() => {
+
+                                            invoke.containerInspect.open({
+                                                params: {
+                                                    inspect: "inspect",
+                                                    id: selectedSampleDetail.node?.analysis_node_id,
+                                                    run_type: "node"
+                                                }
+                                            },
+                                                {
+                                                    title: `Node Inspect - ${selectedSampleDetail.node?.node_name}`,
+                                                    width: 800,
+                                                    footer: null,
+                                                })
+                                        }}>Node Inspect</Tag>
+                                }
+
+                                {selectedSampleDetail.node?.server_status == "running" &&
+                                    <Tag
+                                        style={{ cursor: "pointer" }}
+                                        onClick={() => {
+
+                                            invoke.containerInspect.open({
+                                                params: {
+                                                    inspect: "inspect",
+                                                    id: selectedSampleDetail.node?.analysis_node_id,
+                                                    run_type: "nserver"
+                                                }
+                                            },
+                                                {
+                                                    title: `Server Inspect - ${selectedSampleDetail.node?.node_name}`,
+                                                    width: 800,
+                                                    footer: null,
+                                                })
+                                        }}>Server Inspect</Tag>
+                                }
+
+                                {selectedSampleDetail.node?.image_status == "exist" &&
+                                    <Tag
+                                        style={{ cursor: "pointer" }}
+                                        onClick={() => {
+
+                                            invoke.containerInspect.open({
+                                                params: {
+                                                    inspect: "image-inspect",
+                                                    id: selectedSampleDetail.node?.image_id,
+                                                }
+                                            },
+                                                {
+                                                    title: `Server Inspect - ${selectedSampleDetail.node?.node_name}`,
+                                                    width: 800,
+                                                    footer: null,
+                                                })
+                                        }}>Image Inspect</Tag>
+                                }
+
+
+
+
+
+                                {selectedSampleDetail.status && (
+                                    <Tag
+                                        style={{ cursor: "pointer" }}
+                                        onClick={() => {
+
+                                            invoke.nodeError.open({ node: selectedSampleDetail.node },
+                                                {
+                                                    title: `Error - ${selectedSampleDetail.node?.node_name}`,
+                                                    width: 800,
+                                                    footer: null,
+                                                })
+                                        }}
+                                        color={statusColorMap[selectedSampleDetail.status]}>{selectedSampleDetail.status}</Tag>
                                 )}
                                 {selectedSampleDetail.server_status && (
                                     <Tag color={statusColorMap[selectedSampleDetail.server_status]}>
                                         {selectedSampleDetail.server_status}
                                     </Tag>
                                 )}
+
+
                             </Space>
                         </Flex>
                     </Card>

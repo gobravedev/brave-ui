@@ -51,6 +51,7 @@ const importComponentLoaders = {
     containerApp: () => import('../../components/interactive-tools/components/container-app'),
     containerAppProject: () => import('../../components/interactive-tools/components/container-app-project'),
     paramsView: () => import('@/components/edit-params/components/params-view'),
+    containerInspect: () => import('@/components/container/container-inspect')
 };
 
 declare module '@/core/component-registry/registry-types' {

@@ -30,6 +30,8 @@ interface AnalysisNode {
     resolved_inputs?: JsonValue;
     node_name?: string;
     resolved_outputs?: JsonValue;
+    container_image?: string;
+    workspace_dir?: string;
     created_at?: string | null;
     updated_at?: string | null;
 }
@@ -191,13 +193,13 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
 
 
     const columns: ColumnsType<AnalysisNode> = [
-       {
+        {
             title: 'status',
             dataIndex: 'status',
             key: 'status',
             width: 120,
             render: (value: string) => <Tag color={statusColorMap[value] || "default"}>{value || "unknown"}</Tag>,
-        },   {
+        }, {
             title: 'node_id',
             dataIndex: 'node_id',
             key: 'node_id',
@@ -206,7 +208,7 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
             render: (_, record) => (
                 <Flex vertical gap={4}>
                     <Typography.Text strong>{record.node_name}</Typography.Text>
-                     <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                         node_id: {record.node_id}
                     </Typography.Text>
                     <Typography.Text type="secondary" style={{ fontSize: 12 }}>
@@ -218,69 +220,62 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
                     <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                         analysis_node_id: {record.analysis_node_id}
                     </Typography.Text>
+                     <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                        container_image: {record.container_image}
+                    </Typography.Text>
+                      <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                        workspace_dir: {record.workspace_dir}
+                    </Typography.Text>
+                    
                 </Flex>
             )
-        }, {
-            title: 'resolved_inputs',
-            dataIndex: 'resolved_inputs',
-            key: 'resolved_inputs',
-            width: 220,
-            ellipsis: true,
-            render: (value: JsonValue) => (
-                <Tooltip
-                    title={<pre style={{ margin: 0, whiteSpace: "pre-wrap", maxWidth: 520 }}>{stringifyJson(value)}</pre>}
-                    placement="topLeft"
-                >
-                    <Typography.Text ellipsis style={{ maxWidth: 200 }}>
-                        {JSON.stringify(value)}
-                    </Typography.Text>
-                </Tooltip>
-            )
-        },{
-            title: 'input_validation_errors',
-            dataIndex: 'input_validation_errors',
-            key: 'input_validation_errors',
-            width: 220,
-            ellipsis: true,
-            render: (value: JsonValue) => (
-                <Tooltip
-                    title={<pre style={{ margin: 0, whiteSpace: "pre-wrap", maxWidth: 520 }}>{stringifyJson(value)}</pre>}
-                    placement="topLeft"
-                >
-                    <Typography.Text ellipsis style={{ maxWidth: 200 }}>
-                        {JSON.stringify(value)}
-                    </Typography.Text>
-                </Tooltip>
-            )
-        }, {
-            title: 'output_validation_errors',
-            dataIndex: 'output_validation_errors',
-            key: 'output_validation_errors',
-            width: 220,
-            ellipsis: true,
-            render: (value: JsonValue) => (
-                <Tooltip
-                    title={<pre style={{ margin: 0, whiteSpace: "pre-wrap", maxWidth: 520 }}>{stringifyJson(value)}</pre>}
-                    placement="topLeft"
-                >
-                    <Typography.Text ellipsis style={{ maxWidth: 200 }}>
-                        {JSON.stringify(value)}
-                    </Typography.Text>
-                </Tooltip>
-            )
         },
+        //  {
+        //     title: 'input_validation_errors',
+        //     dataIndex: 'input_validation_errors',
+        //     key: 'input_validation_errors',
+        //     width: 220,
+        //     ellipsis: true,
+        //     render: (value: JsonValue) => (
+        //         <Tooltip
+        //             title={<pre style={{ margin: 0, whiteSpace: "pre-wrap", maxWidth: 520 }}>{stringifyJson(value)}</pre>}
+        //             placement="topLeft"
+        //         >
+        //             <Typography.Text ellipsis style={{ maxWidth: 200 }}>
+        //                 {JSON.stringify(value)}
+        //             </Typography.Text>
+        //         </Tooltip>
+        //     )
+        // }, {
+        //     title: 'output_validation_errors',
+        //     dataIndex: 'output_validation_errors',
+        //     key: 'output_validation_errors',
+        //     width: 220,
+        //     ellipsis: true,
+        //     render: (value: JsonValue) => (
+        //         <Tooltip
+        //             title={<pre style={{ margin: 0, whiteSpace: "pre-wrap", maxWidth: 520 }}>{stringifyJson(value)}</pre>}
+        //             placement="topLeft"
+        //         >
+        //             <Typography.Text ellipsis style={{ maxWidth: 200 }}>
+        //                 {JSON.stringify(value)}
+        //             </Typography.Text>
+        //         </Tooltip>
+        //     )
+        // },
 
-       {
-            title: 'container_image',
-            dataIndex: 'container_image',
-            key: 'container_image',
-            ellipsis: true,
-        }, {
-            title: 'workspace_dir',
-            dataIndex: 'workspace_dir',
-            key: 'workspace_dir',
-            ellipsis: true,
-        },
+        // {
+        //     title: 'container_image',
+        //     dataIndex: 'container_image',
+        //     key: 'container_image',
+        //     ellipsis: true,
+        // }, 
+        // {
+        //     title: 'workspace_dir',
+        //     dataIndex: 'workspace_dir',
+        //     key: 'workspace_dir',
+        //     ellipsis: true,
+        // },
         {
             title: 'upstream',
             dataIndex: 'upstream_ids',
@@ -303,57 +298,42 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
                 </Flex>
             )
         },
-        {
-            title: 'params',
-            dataIndex: 'params',
-            key: 'params',
-            width: 340,
-            ellipsis: true,
-            render: (params: JsonValue) => (
-                <Tooltip
-                    title={<pre style={{ margin: 0, whiteSpace: "pre-wrap", maxWidth: 520 }}>{stringifyJson(params)}</pre>}
-                    placement="topLeft"
-                >
-                    <Typography.Text ellipsis style={{ maxWidth: 320 }}>
-                        {summarizeJson(params)}
-                    </Typography.Text>
-                </Tooltip>
-            )
-        }, {
-            title: 'error_message',
-            dataIndex: 'error_message',
-            key: 'error_message',
-            width: 220,
-            ellipsis: true,
-            render: (value: JsonValue) => (
-                <Tooltip
-                    title={<pre style={{ margin: 0, whiteSpace: "pre-wrap", maxWidth: 520 }}>{stringifyJson(value)}</pre>}
-                    placement="topLeft"
-                >
-                    <Typography.Text ellipsis style={{ maxWidth: 200 }}>
-                        {JSON.stringify(value)}
-                    </Typography.Text>
-                </Tooltip>
-            )
-        },
-        
-        {
-            title: 'resolved_outputs',
-            dataIndex: 'resolved_outputs',
-            key: 'resolved_outputs',
-            width: 220,
-            ellipsis: true,
-            render: (value: JsonValue) => (
-                <Tooltip
-                    title={<pre style={{ margin: 0, whiteSpace: "pre-wrap", maxWidth: 520 }}>{stringifyJson(value)}</pre>}
-                    placement="topLeft"
-                >
-                    <Typography.Text ellipsis style={{ maxWidth: 200 }}>
-                        {summarizeJson(value)}
-                    </Typography.Text>
-                </Tooltip>
-            )
-        },
+        // {
+        //     title: 'params',
+        //     dataIndex: 'params',
+        //     key: 'params',
+        //     width: 340,
+        //     ellipsis: true,
+        //     render: (params: JsonValue) => (
+        //         <Tooltip
+        //             title={<pre style={{ margin: 0, whiteSpace: "pre-wrap", maxWidth: 520 }}>{stringifyJson(params)}</pre>}
+        //             placement="topLeft"
+        //         >
+        //             <Typography.Text ellipsis style={{ maxWidth: 320 }}>
+        //                 {summarizeJson(params)}
+        //             </Typography.Text>
+        //         </Tooltip>
+        //     )
+        // }, 
+        // {
+        //     title: 'error_message',
+        //     dataIndex: 'error_message',
+        //     key: 'error_message',
+        //     width: 220,
+        //     ellipsis: true,
+        //     render: (value: JsonValue) => (
+        //         <Tooltip
+        //             title={<pre style={{ margin: 0, whiteSpace: "pre-wrap", maxWidth: 520 }}>{stringifyJson(value)}</pre>}
+        //             placement="topLeft"
+        //         >
+        //             <Typography.Text ellipsis style={{ maxWidth: 200 }}>
+        //                 {JSON.stringify(value)}
+        //             </Typography.Text>
+        //         </Tooltip>
+        //     )
+        // },
+
+
         {
             title: 'created_at',
             dataIndex: 'created_at',
@@ -632,6 +612,23 @@ const AnalysisNodes: FC<any> = ({ analysis_id }) => {
             loading={loading}
             scroll={{ x: 'max-content' }}
             columns={columns}
+            expandable={{
+                expandedRowRender: (record: any) => (
+                    <Typography>
+                        <pre style={{ margin: 0, whiteSpace: "pre-wrap" }}>
+                            {JSON.stringify({
+                                error_message: record?.error_message,
+                                input_validation_errors: record?.input_validation_errors,
+                                output_validation_errors: record?.output_validation_errors,
+                                resolved_inputs: record?.resolved_inputs,
+                                resolved_outputs: record?.resolved_outputs,
+                                output_patterns: record?.output_patterns,
+                                params: record?.params,
+                            }, null, 2)}
+                        </pre>
+                    </Typography>
+                )
+            }}
             footer={() => <>
                 {totalPage != 0 && <Flex style={{ marginTop: "1rem" }} justify="space-between" align="center">
                     A total of {totalPage} records  &nbsp;

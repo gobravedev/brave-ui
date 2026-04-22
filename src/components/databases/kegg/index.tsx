@@ -191,7 +191,7 @@ interface Entry {
 }
 const { Search } = Input
 
-export const KGMLMapSVG = forwardRef<any, any>(({ pathwayId, organisms, highlightKeys = [], compound, KOList }, ref) => {
+export const KGMLMapSVG = forwardRef<any, any>(({ pathwayId, highlightKeys = [], compound, KOList }, ref) => {
   const [image, setImage] = useState("");
   const [entries, setEntries] = useState<Entry[]>([]);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -219,13 +219,13 @@ export const KGMLMapSVG = forwardRef<any, any>(({ pathwayId, organisms, highligh
   };
 
   const reload = () => {
-    if (pathwayId && organisms) {
-      loadKgml(`${organisms}${pathwayId}`);
+    if (pathwayId ) {
+      loadKgml(`${pathwayId}`);
     }
   }
   useEffect(() => {
     reload()
-  }, [pathwayId, organisms]);
+  }, [pathwayId]);
 
   // 缩放比例
   const scaleX = imgRef.current ? imgRef.current.width / imgSize.width : 1;
@@ -314,6 +314,7 @@ export const KGMLMapSVG = forwardRef<any, any>(({ pathwayId, organisms, highligh
 
 
     <Spin spinning={loading}>
+      
       {/* {JSON.stringify(currentHighlightEntries)} */}
       {currentHighlightEntries && currentHighlightEntries.map((item: any, index: any) => (
         <Tag key={index}
@@ -498,6 +499,7 @@ const KGMLMapSVGCard: FC<any> = (rest) => {
     }
     title={`${organisms}${pathwayId}`}
   >
+    
     <KGMLMapSVG ref={kGMLMapSVGRef} {...rest} highlightKeys={highlightKeys} ></KGMLMapSVG>
   </Card>
 }
@@ -561,7 +563,7 @@ const Kegg: FC<any> = () => {
       </Col>
       <Col lg={18} sm={18} xs={24} >
 
-
+                
 
         {(values?.organisms && values?.pathwayId) ? <KGMLMapSVGCard  {...values}></KGMLMapSVGCard> :
           <Card>   <Empty></Empty></Card>
