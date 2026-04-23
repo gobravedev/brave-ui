@@ -57,6 +57,7 @@ const WorkflowVisComponent: FC<Prop> = ({ relation_id }) => {
             id: node.id,
             type: 'custom',
             position: position,
+            scatter:node?.scatter,
             // {
             //     x: index * 300, // 你可以根据需要布局位置
             //     y: 100,
@@ -109,7 +110,7 @@ const WorkflowVisComponent: FC<Prop> = ({ relation_id }) => {
         // }));
         const nodesParams = nodes.map(node => ({
             script_id: node.id,
-
+            scatter: node?.scatter,
             position: node.position,
             // color: node.data.color,
         }));
