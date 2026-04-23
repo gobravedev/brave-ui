@@ -199,7 +199,8 @@ const PipelineComponentsCard: FC<any> = (params) => {
                             relation_type: "tools",
                         },{
                             width:"80%",
-                            title:`Install ${relation_type}`
+                            title:`Install ${relation_type}`,
+                            footer:null,
                         })
                         reload()
                     }}>Intsall {relation_type} </Button>
