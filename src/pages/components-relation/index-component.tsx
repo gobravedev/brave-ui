@@ -377,22 +377,24 @@ const Pipeline: FC<any> = ({ }) => {
                             setLeftPanel("analysisTools")
                         }}>Close</Button>
                     </>} */}
+                    {renderViewButton(view, setView, "publishTools", "Publish")}
 
-                    <Button size="small" color="cyan" variant="outlined" onClick={() => {
+                    {/* <Button size="small" color="cyan" variant="outlined" onClick={() => {
                         openModal("publishModal", { ...component, relation_type: relation_type })
-                    }}>Publish</Button>
+                    }}>Publish</Button> */}
 
                     {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                         openModal("preview-relation-example", { ...component, relation_type: relation_type })
                     }}>Example</Button> */}
-
+{/* 
                     <Button size="small" color="cyan" variant="outlined" onClick={() => {
                         operatePipeline.openModal("projectForm", { project_id: project_id })
-                    }}>Edit Project</Button>
+                    }}>Edit Project</Button> */}
 
-                    <Button size="small" color="cyan" variant="outlined" onClick={() => {
+                    {/* <Button size="small" color="cyan" variant="outlined" onClick={() => {
                         operatePipeline.openModal("modalG", pipeline)
-                    }}>Dependencies</Button>
+                    }}>Dependencies</Button> */}
+
                     <Button size="small" color="cyan" variant="outlined" onClick={() => {
                         openModals("metadataModal", { ...component, operatePipeline: operatePipeline })
                     }}>Metadata</Button>

@@ -12,7 +12,6 @@ import CreateORUpdatePipelineCompnentRelation, { CreateOrUpdatePipelineComponent
 import axios from "axios"
 import { useModal } from "@/hooks/useModal"
 import { usePagination } from "@/hooks/usePagination"
-import path from "path"
 import { CreateOrUpdateNamespace, InstallNamespace } from "../../components/namespace-operature"
 import DependComponent from "../../components/depend-component"
 import "./index.css"
@@ -23,6 +22,7 @@ import { useStickyTop } from "@/hooks/useStickyTop"
 import ToolsLLMRender from "./tools-llm-render"
 import { setLLMArgs } from "@/store/llmSlice"
 import { useSideView } from "@/hooks/useLLMARG"
+import { invoke } from "@/core/ui-system/invokeV2"
 const PipelineComponentsCard: FC<any> = (params) => {
     const { Search } = Input;
     // const [searchText, setSearchText] = useState("");
@@ -49,12 +49,12 @@ const PipelineComponentsCard: FC<any> = (params) => {
     //             case "create_analysis_tools":
     //                 // reload()
     //                 // 定位到最后一页
-                    // const lastPage = Math.ceil(totalPage / pageSize);
-                    // if (pageNumber != lastPage) {
-                    //     setPageNumber(lastPage)
-                    // } else {
-                    //     reload()
-                    // }
+    // const lastPage = Math.ceil(totalPage / pageSize);
+    // if (pageNumber != lastPage) {
+    //     setPageNumber(lastPage)
+    // } else {
+    //     reload()
+    // }
     //                 messageApi.success(sseData?.message || "Component relation updated!")
     //                 break;
     //             case "update_component_relation":
@@ -100,7 +100,7 @@ const PipelineComponentsCard: FC<any> = (params) => {
 
     // }
     const { data: pipelineComponents, pageNumber, totalPage, loading, reload, pageSize, setPageNumber, search } = usePagination({
-        id :"tools-card",
+        id: "tools-card",
         pageApi: pageComponentsRelation,
         params: { category: activeCategory, ...params },
         map: mapFun,
@@ -193,8 +193,15 @@ const PipelineComponentsCard: FC<any> = (params) => {
             extra={<>
                 <Flex gap="small">
 
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        openModal("installComponents", { relation_type: "tools" })
+                    <Button size="small" color="cyan" variant="solid" onClick={async () => {
+                        // openModal("installComponents", { relation_type: "tools" })
+                        await invoke.installComponents.openAsync({
+                            relation_type: "tools",
+                        },{
+                            width:"80%",
+                            title:`Install ${relation_type}`
+                        })
+                        reload()
                     }}>Intsall {relation_type} </Button>
 
                     <Button size="small" color="cyan" variant="solid" onClick={() => {

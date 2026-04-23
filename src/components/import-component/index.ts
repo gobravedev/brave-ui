@@ -1,5 +1,6 @@
 import { registerLazyViews } from '@/core/component-registry';
 import type { InferViewRegistryFromLoaders } from '@/core/component-registry/registry-types';
+import PublishTools from '../publish-tools';
 
 const importComponentLoaders = {
     workflow2: () => import('../../pages/components-relation/pipeline/components/pipeline-flow'),
@@ -51,7 +52,9 @@ const importComponentLoaders = {
     containerApp: () => import('../../components/interactive-tools/components/container-app'),
     containerAppProject: () => import('../../components/interactive-tools/components/container-app-project'),
     paramsView: () => import('@/components/edit-params/components/params-view'),
-    containerInspect: () => import('@/components/container/container-inspect')
+    containerInspect: () => import('@/components/container/container-inspect'),
+    publishTools: () => import('../publish-tools'),
+    installComponents: () => import('../install-components'),
 };
 
 declare module '@/core/component-registry/registry-types' {
