@@ -1,6 +1,6 @@
 import { Button, Card, Col, Collapse, Empty, Flex, Form, Input, message, Modal, notification, Pagination, Popconfirm, Row, Select, Space, Spin, Table, Tag, Tooltip, Typography } from "antd"
 import Item from "antd/es/list/Item"
-import { FC, useEffect, useState } from "react"
+import { FC, useEffect, useMemo, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate, useOutletContext, useParams } from "react-router"
 import { ApartmentOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
@@ -46,7 +46,6 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
 
 
 
-
     // }, [eventSourceRef.current]);
     const params_ = params || {}
     const { namespace } = useSelector((state: any) => state.user);
@@ -55,6 +54,32 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
         params: { ...params_ }
     })
 
+
+    const { register, unregister } = useComponentStore();
+
+    const instance = useMemo(() => {
+        // const analysis_node_id = selectedSample?.analysis_node_id
+
+        return {
+            analysisDone: (args: any) => {
+                console.log("ContainerPage analysisDone", args, data)
+                reload()
+            },
+            analysisStarted: (args: any) => {
+                console.log("ContainerPage analysisStarted", args, data)
+
+                reload()
+            }
+        }
+    }, [data])
+
+    useEffect(() => {
+
+        register("analysis", "container", instance);
+        return () => {
+            unregister("analysis", "container", instance);
+        }
+    }, [data]);
 
     const navigate = useNavigate();
     const { messageApi } = useOutletContext<any>()
@@ -148,7 +173,7 @@ const ContainerPage: FC<any> = ({ params, rowSelection }) => {
             rowSelection={rowSelection}
             pagination={false}
             loading={loading}
-            scroll={{ x: 'max-content'}}
+            scroll={{ x: 'max-content' }}
             columns={columns}
             dataSource={data} />
         {totalPage != 0 && <Flex style={{ marginTop: "1rem" }} align="center">
@@ -192,7 +217,7 @@ export const ContainerOpt: FC<any> = ({ record, reload, traefikUI = false }) => 
     }
     const { modal, openModal, closeModal } = useModal();
 
-    const { containerURL,project } = useSelector((state: any) => state.user); // 'light' | 'dark'
+    const { containerURL, project } = useSelector((state: any) => state.user); // 'light' | 'dark'
 
     function originWithoutPort(inputUrl: any, port: any) {
         if (!inputUrl) return "/"
@@ -312,6 +337,7 @@ export const InspectPanel: FC<any> = ({ visible, params, onClose, callback }) =>
 import { containerData } from './container'
 // import { useSSEContext } from "@/context/sse/useSSEContext.bak"
 import { fa, tr } from "@faker-js/faker"
+import { useComponentStore } from "@/store-zustand/components"
 const InstallContainerModal: FC<any> = ({ visible, params, onClose, callback }) => {
     // const [namespace, setNamespace] = useState<any>()
     const [messageApi, contextHolder] = message.useMessage();
@@ -411,6 +437,9 @@ const ContainerModal: FC<any> = ({ visible, params, onClose, callback }) => {
 
             <Form.Item name={"envionment"} label="Environment Variables">
                 <TextArea ></TextArea>
+            </Form.Item>
+            <Form.Item name={"version"} label="Version">
+                <Input ></Input>
             </Form.Item>
             <Form.Item name={"command"} label="Command">
                 <TextArea ></TextArea>
