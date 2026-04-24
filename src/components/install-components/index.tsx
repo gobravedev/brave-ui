@@ -302,9 +302,9 @@ const InstallComponents: FC<any> = ({ relation_type }) => {
                                                 await axios.post(`/install-relation`, {
                                                     path: item.file_path,
                                                     force: true,
-                                                    address: item.address,
-                                                    branch: item.branch,
-                                                    token: githubToken
+                                                    // address: item.address,
+                                                    // branch: item.branch,
+                                                    // token: githubToken
                                                     // is_remote:item.
                                                 }, {
                                                     timeout: 60000
