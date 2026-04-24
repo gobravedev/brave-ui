@@ -11,6 +11,7 @@ const namespace = localStorage.getItem('namespace')
 const project = localStorage.getItem('project')
 const githubToken = localStorage.getItem('githubToken')
 const storeRepos = localStorage.getItem('storeRepos')
+const scmOrigin = localStorage.getItem('scmOrigin')
 
 interface UserState {
     locale: string;
@@ -23,6 +24,7 @@ interface UserState {
     project:any;
     githubToken:any;
     storeRepos:any;
+    scmOrigin:any;
     componentLayout:"simple"|"complex",
     network:"UNKNOW" | "CONNECT" | "NOT_CONNECT"
 
@@ -44,7 +46,8 @@ const contextSlice = createSlice({
         githubToken:githubToken,
         storeRepos:storeRepos?storeRepos:"[]",
         componentLayout:"simple",
-        network:"UNKNOW"
+        network:"UNKNOW",
+        scmOrigin:scmOrigin?scmOrigin:"github"
     },
     reducers: {
         setUserItem(state, action: PayloadAction<Partial<UserState>>) {
@@ -78,6 +81,9 @@ const contextSlice = createSlice({
             }
             if(action.payload.componentLayout){
                 localStorage.setItem('componentLayout', action.payload.componentLayout)
+            }
+            if(action.payload.scmOrigin){
+                localStorage.setItem('scmOrigin', action.payload.scmOrigin)
             }
             // debugger
         },

@@ -11,7 +11,7 @@ const PublishTools: FC<any> = ({ relation_id }) => {
     const loadStoreList = async () => {
         try {
             setLoading(true)
-            const resp = await axios.get(`/component-store/list-stores?address=local`)
+            const resp = await axios.get(`/component-store/list-stores-directory`)
             setStoreList(resp.data)
 
             setLoading(false)
@@ -62,7 +62,7 @@ const PublishTools: FC<any> = ({ relation_id }) => {
                 message.success("Generated successfully")
             }}> Generate </Button>
             <Switch style={{ marginLeft: "1rem" }} checked={force} onChange={(checked) => { setForce(checked) }} />
-            {storeList.map((item: any, index: any) => (
+            {storeList && Array.isArray(storeList) && storeList.map((item: any, index: any) => (
                 <Tooltip title={item.store_path} key={index}>
                     <Popconfirm title={"pubpish?"} onConfirm={() => publishToStore(relation_id, item.store_path)}>
 

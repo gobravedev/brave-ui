@@ -55,6 +55,7 @@ const importComponentLoaders = {
     containerInspect: () => import('@/components/container/container-inspect'),
     publishTools: () => import('../publish-tools'),
     installComponents: () => import('../install-components'),
+    remoteStore: () => import('../install-components/components/remote-store'),
 };
 
 declare module '@/core/component-registry/registry-types' {
