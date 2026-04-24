@@ -11,7 +11,7 @@ import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 import { invoke } from "@/core/ui-system/invokeV2";
 import { el } from "@faker-js/faker";
 import { useComponentStore } from "@/store-zustand/components";
-const InstallComponents: FC<any> = ({ relation_type }) => {
+const InstallComponents: FC<any> = ({ relation_type,onOk }) => {
 
     const [storeList, setStoreList] = useState<any>([])
     const [components, setComponents] = useState<any>([])
@@ -310,7 +310,7 @@ const InstallComponents: FC<any> = ({ relation_type }) => {
                                                     timeout: 60000
                                                 })
                                                 message.success(item.installed ? `Reinstall success!` : `Install success!`)
-                                                // callback && callback()
+                                                onOk && onOk()
 
                                             }}>
                                             <Card

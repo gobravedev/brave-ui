@@ -56,6 +56,7 @@ const importComponentLoaders = {
     publishTools: () => import('../publish-tools'),
     installComponents: () => import('../install-components'),
     remoteStore: () => import('../install-components/components/remote-store'),
+    depContainer: () => import('../../pages/components-relation/workflow/dep-container'),
 };
 
 declare module '@/core/component-registry/registry-types' {
