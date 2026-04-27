@@ -131,8 +131,8 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                     size="small"
                                     color="cyan"
                                     variant="solid"
-                                    onClick={() => {
-                                        invoke.createOrUpdateComponent.drawer(
+                                    onClick={async () => {
+                                        await invoke.createOrUpdateComponent.openDrawerAsync(
                                             {
                                                 component_id: selectedSampleDetail.node?.script_id,
                                                 structure: {
@@ -144,6 +144,9 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                                 title: `Edit - ${selectedSampleDetail.node?.node_id}`,
                                             }
                                         );
+                                        if (analysis_node_id) {
+                                            loadSampleDetail(analysis_node_id);
+                                        }
                                     }}
                                 >
                                     Edit
@@ -156,7 +159,7 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                     color="cyan"
                                     variant="solid"
                                     onClick={() => {
-                                        invoke.scriptCodeEdit.drawer(
+                                        invoke.scriptCodeEdit.openDrawerAsync(
                                             {
                                                 component_id: selectedSampleDetail.node?.script_id,
                                             },
@@ -319,6 +322,7 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                 )}
                             </Flex>
                             <Space wrap>
+
                                 <Tag
                                     style={{ cursor: "pointer" }}
                                     onClick={() => {
@@ -414,6 +418,18 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                 )}
 
 
+
+                                <Tag
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() => {
+
+                                        invoke.nodeLogs.open({ analysis_node_id: selectedSampleDetail.node.analysis_node_id },
+                                            {
+                                                title: `Logs - ${selectedSampleDetail.node?.node_name}`,
+                                                width: 800,
+                                                footer: null,
+                                            })
+                                    }}>Logs</Tag>
                             </Space>
                         </Flex>
                     </Card>

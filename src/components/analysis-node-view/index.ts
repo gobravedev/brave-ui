@@ -12,7 +12,8 @@ const analysisNodeViewLoaders = {
     analysisNodeDetails: () => import("./components/analysis-nodes-report/analysis-node-details"),
     analysisNodeSnapshot: () => import("./components/analysis-node-snapshot"),
     nodeError: () => import("./components/node-error"),
-    nodeResolvedIO: () => import("./components/node-resolved-io")
+    nodeResolvedIO: () => import("./components/node-resolved-io"),
+    nodeLogs: () => import("./components/node-logs"),
 };
 // ;
 declare module "@/core/component-registry/registry-types" {
