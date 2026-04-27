@@ -269,7 +269,7 @@ const Pipeline: FC<any> = ({ }) => {
             {
                 label: "LLM",
                 value: "llm-card"
-            },{
+            }, {
                 label: "Script",
                 value: "scriptPage"
             },
@@ -362,7 +362,7 @@ const Pipeline: FC<any> = ({ }) => {
                     {/* {renderViewButton(view, setView, "analysisTools", "Tools Panel")} */}
 
                     {renderViewButton(view, setView, "workflowComponent", "Workflow")}
-                    
+
                     {renderViewButton(view, (view) => {
                         setView(view)
                         setParams({
@@ -379,6 +379,8 @@ const Pipeline: FC<any> = ({ }) => {
                         }}>Close</Button>
                     </>} */}
                     {renderViewButton(view, setView, "publishTools", "Publish")}
+                    {/* {renderViewButton(view, setView, "publishToolsComponents", "Publish")} */}
+
 
                     {/* <Button size="small" color="cyan" variant="outlined" onClick={() => {
                         openModal("publishModal", { ...component, relation_type: relation_type })
@@ -387,7 +389,7 @@ const Pipeline: FC<any> = ({ }) => {
                     {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                         openModal("preview-relation-example", { ...component, relation_type: relation_type })
                     }}>Example</Button> */}
-{/* 
+                    {/* 
                     <Button size="small" color="cyan" variant="outlined" onClick={() => {
                         operatePipeline.openModal("projectForm", { project_id: project_id })
                     }}>Edit Project</Button> */}

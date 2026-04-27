@@ -12,7 +12,6 @@ import { CreateOrUpdatePipelineComponent } from '@/components/create-pipeline'
 import axios from "axios"
 import { useModal } from "@/hooks/useModal"
 import { usePagination } from "@/hooks/usePagination"
-import path from "path"
 import { CreateOrUpdateNamespace, InstallNamespace } from "../namespace-operature"
 import DependComponent from "../depend-component"
 import "./index.css"
