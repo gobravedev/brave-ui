@@ -69,7 +69,10 @@ const StoreContent: FC<StoreContentProps> = ({
             title={
                 <>
                     {store?.store?.name && (
-                        <Tooltip title={store?.store?.url}>
+                        <Tooltip title={<>
+                        {store?.store?.url}<br></br>
+                        {store?.store?.path}
+                        </>}>
 
                             <a href={store?.store?.url} target="_blank" rel="noopener noreferrer">
                                 {store?.store?.name}
