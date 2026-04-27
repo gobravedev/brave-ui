@@ -310,6 +310,9 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                 <Typography.Text type="secondary">
                                     container_image: {selectedSampleDetail.node?.container_image}
                                 </Typography.Text>
+                                <Typography.Text type="secondary">
+                                    container_name: {selectedSampleDetail.node?.container_name}
+                                </Typography.Text>
 
                                 {selectedSampleDetail.node?.sample_id && (
                                     <Typography.Text type="secondary">sample: {selectedSampleDetail.node?.sample_id}</Typography.Text>

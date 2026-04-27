@@ -2,7 +2,7 @@ import { useStoreRender } from "@/context/render/RenderProvider";
 import { ViewRegistry } from "@/core/component-registry/registry-types";
 import ViewResolver from "@/core/ui-renderer/ViewResolver";
 import { renderCloseViewButton, renderViewButton } from "@/utils/render-view-btn";
-import { Button, Card, Divider, Flex, Space } from "antd";
+import { Button, Card, Divider, Flex, Popconfirm, Space, Switch } from "antd";
 import axios from "axios";
 import { FC, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
@@ -10,12 +10,12 @@ import { useNavigate } from "react-router";
 type AnalysisNodePanelView = "analysisNodesReport" | "analysisNodes" | "analysisEdges";
 
 const AnalysisNodePanel: FC<any> = () => {
-    const { openAnalysis,relation, analysisId, setAnalysisId, clear, setRelation, closeAnalysis, setFormParam } = useStoreRender()
+    const { openAnalysis, relation, analysisId, setAnalysisId, clear, setRelation, closeAnalysis, setFormParam } = useStoreRender()
 
     const [view, setView] = useState<AnalysisNodePanelView>("analysisNodesReport");
     const setPanelView = (nextView: string) => setView(nextView as AnalysisNodePanelView);
     const navigate = useNavigate()
-    
+
     const [title, setTitle] = useState("")
     useEffect(() => {
         return () => {
@@ -29,6 +29,8 @@ const AnalysisNodePanel: FC<any> = () => {
             {relation?.relation_id && <Button size="small" color="primary" variant="solid" onClick={() =>
                 navigate(`/c/tools/${relation?.relation_id}`)
             }>Go tools</Button>}
+            
+        
             {renderViewButton(view, setPanelView, "analysisNodesReport", "Report")}
 
             {renderViewButton(view, setPanelView, "analysisNodes", "Nodes")}

@@ -129,9 +129,25 @@ const DefaultComponentRelation: FC<any> = ({ data, form, components }) => {
     </>
 }
 const Tools: FC<any> = ({ components }) => {
+    const [containers, setContainers] = useState<any>([])
+
+    const loadData = async () => {
+        const resp = await axios.get(`/container/list-all`)
+        const opentions = resp.data.map((item: any) => ({ label: `${item.name}`, value: item.container_id }))
+        setContainers(opentions)
+    }
+
+
+    useEffect(() => {
+        loadData()
+
+    }, [])
     return <>
-        <Form.Item name={"component_id"} label="Script" >
+        {/* <Form.Item name={"component_id"} label="Script" >
             <Select showSearch optionFilterProp="label" options={components?.scripts} ></Select>
+        </Form.Item> */}
+        <Form.Item name={"container_id"} label="Container" rules={[{ required: true, message: 'Please select container!' }]}>
+            <SelectContainer mode="none" containers={containers}></SelectContainer>
         </Form.Item>
         <Form.Item name={"input_component_ids"} label="Input File">
             <Select showSearch optionFilterProp="label" options={components?.files} mode="multiple"></Select>

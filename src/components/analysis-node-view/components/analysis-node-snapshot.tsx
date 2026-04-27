@@ -1,8 +1,11 @@
-import { Button, Card, Col, Empty, Progress, Row, Space, Spin, Typography } from "antd";
+import { Button, Card, Col, Empty, Popconfirm, Progress, Row, Space, Spin, Switch, Tooltip, Typography } from "antd";
 import axios from "axios";
 import { FC, useEffect, useMemo, useState } from "react";
-import { LoadingOutlined, RedoOutlined } from "@ant-design/icons";
+import { ExportOutlined, LoadingOutlined, RedoOutlined } from "@ant-design/icons";
 import { useComponentStore } from "@/store-zustand/components";
+import { useGlobalMessage } from "@/hooks/useGlobalMessage";
+import { useSelector } from "react-redux";
+import { stopAnalysisApi } from "@/api/analysis";
 const STATUS_ORDER = [
     "pending",
     "ready",
@@ -19,6 +22,10 @@ const STATUS_ORDER = [
 const AnalysisNodeSnapshot: FC<any> = ({ analysis_id }) => {
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(false);
+    const message = useGlobalMessage()
+    const [isCache, setIsCache] = useState(false);
+    const { containerURL } = useSelector((state: any) => state.user);
+
     const loadData = async () => {
         // /analysis-runtime/snapshot
         setLoading(true);
@@ -27,6 +34,7 @@ const AnalysisNodeSnapshot: FC<any> = ({ analysis_id }) => {
                 analysis_id
             })
             setData(resp.data);
+            setIsCache(resp.data.is_cache)
         } finally {
             setLoading(false);
         }
@@ -51,12 +59,12 @@ const AnalysisNodeSnapshot: FC<any> = ({ analysis_id }) => {
             analysisStarted: (args: any) => {
                 console.log("AnalysisNodeSnapshot analysisStarted", args, data)
                 loadData()
-            },dagStarted: (args: any)=>{
+            }, dagStarted: (args: any) => {
                 console.log("AnalysisNodeSnapshot dagStarted", args, data)
                 loadData()
-            },dagDone: (args: any)=>{
+            }, dagDone: (args: any) => {
                 console.log("AnalysisNodeSnapshot dagDone", args, data)
-                loadData()  
+                loadData()
             }
         }
     }, [analysis_id])
@@ -96,6 +104,65 @@ const AnalysisNodeSnapshot: FC<any> = ({ analysis_id }) => {
     return <>
         <Card title="Analysis Snapshot" size="small"
             extra={<Space>
+                {data?.server_status == "running" ?
+
+                    <>
+
+                        <Button size="small" color="red" variant="solid" onClick={async () => {
+                            // /run-dag-server/{analysis_id}
+                            // await axios.post(`/run-dag-server/${analysis_id}`)
+                            await stopAnalysisApi(analysis_id, "server")
+
+                        }}>Stop Dag Server</Button>
+                        <Tooltip title={<>
+                            {`${containerURL}/container/server-${analysis_id}/`}
+                        </>}>
+                            <ExportOutlined style={{ cursor: "pointer" }} onClick={() => {
+
+                                window.open(`${containerURL}/container/server-${analysis_id}/`, "_blank")
+                            }} />
+                        </Tooltip>
+                    </>
+
+                    :
+                    <Button size="small" color="cyan" variant="solid" onClick={async () => {
+                        // /run-dag-server/{analysis_id}
+                        await axios.post(`/run-dag-server/${analysis_id}`)
+                    }}>Dag Server</Button>
+
+
+                }
+
+
+
+
+
+                {data?.status != "running" ?
+                    <Popconfirm title="Are you sure to run the entire DAG again?"
+                        onConfirm={async () => {
+                            // /run-dag/{analysis_id}
+                            await axios.post(`/run-dag/${analysis_id}?is_cache=${isCache}`)
+                        }}
+                    >
+                        <Button size="small" color="cyan" variant="solid">Run Dag</Button>
+
+                    </Popconfirm> :
+                    <>
+                        <Popconfirm title="Are you sure to stop the analysis?" onConfirm={async () => {
+                            await axios.post(`/analysis-runtime/running-dags/${analysis_id}/stop`)
+                            message.success("Analysis stopped!")
+                        }}>
+                            <Button size="small" color="red" variant="solid" >
+                                Stop
+                            </Button>
+                        </Popconfirm>
+
+
+                    </>
+
+                }
+                <Switch size="small" checkedChildren="cache" unCheckedChildren="no-cache" disabled={data?.status == "running"} checked={isCache} onChange={setIsCache} />
+
                 <Button onClick={loadData} icon={<RedoOutlined />} size="small" loading={loading}></Button>
             </Space>}
         >
@@ -118,7 +185,7 @@ const AnalysisNodeSnapshot: FC<any> = ({ analysis_id }) => {
                         </div>
                         <Progress
                             percent={Math.max(0, Math.min(100, completionPercent))}
-                            status={data?.running_info ? "active" : 
+                            status={data?.running_info ? "active" :
                                 data?.status === "done" ? "success" : "normal"}
                             size="small"
                         />
