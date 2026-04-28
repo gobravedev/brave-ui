@@ -1333,6 +1333,9 @@ export const CreateORUpdateRelationComp: FC<any> = (params) => {
                 <Form.Item name={"name"} label="Name" rules={[{ required: true, message: 'Please input name!' }]}>
                     <Input ></Input>
                 </Form.Item>
+                <Form.Item name={"version"} label="Version"  rules={[{ required: true, message: 'Please input version!' }]}>
+                    <Input ></Input>
+                </Form.Item>
                 <Form.Item name={"dag_definition"} label="DAG Definition" >
                     <TextArea rows={4}></TextArea>
                 </Form.Item>
@@ -1347,6 +1350,7 @@ export const CreateORUpdateRelationComp: FC<any> = (params) => {
                 <Form.Item name={"category"} label="Category">
                     <Input ></Input>
                 </Form.Item>
+
                 {/* valuePropName="fileList"  getValueFromEvent={normFile}*/}
                 {/* {JSON.stringify(data)} */}
                 {data?.relation_id && <Form.Item label="Upload" name={"img"}  >

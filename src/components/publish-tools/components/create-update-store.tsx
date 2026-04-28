@@ -110,8 +110,8 @@ const CreateUpdateStore: FC<CreateUpdateStoreProps> = ({ onOk, onCancel, store_i
                 <Form.Item label="Category" name="category">
                     <Input placeholder="Category" />
                 </Form.Item>
-                <Form.Item label="Version" name="version">
-                    <Input placeholder="Version" />
+                <Form.Item label="Version" name="version" >
+                    <Input placeholder="Version" disabled />
                 </Form.Item>
                 <Form.Item label="Update Info" name="update_info">
                     <TextArea placeholder="Update Info" />

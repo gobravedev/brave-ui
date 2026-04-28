@@ -5,7 +5,7 @@ import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 import { RedoOutlined } from '@ant-design/icons'
 import { invoke } from "@/core/ui-system/invokeV2"
 import ViewResolver from "@/core/ui-renderer/ViewResolver"
-const PublishTools: FC<any> = ({ relation_id, store_id }) => {
+const PublishTools: FC<any> = ({ relation_id, store_id,callback }) => {
 
     const [storeList, setStoreList] = useState<any>([])
     const [loading, setLoading] = useState(false)
@@ -180,6 +180,7 @@ const PublishTools: FC<any> = ({ relation_id, store_id }) => {
 
                             <Button size="small" color="cyan" variant="solid" onClick={() => {
                                 publishToStore(relation_id, record.store_id)
+                                callback && callback()
                             }}>Copy To Store</Button>
                             <Button size="small" color="cyan" variant="solid" onClick={() => {
                                 invoke.publishStore.open(record, {
