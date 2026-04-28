@@ -1,5 +1,5 @@
 import { DownloadOutlined, RedoOutlined } from "@ant-design/icons";
-import { Button, Card, Col, Empty, Flex, Popconfirm, Row, Space, Spin, Tag, Tooltip, Typography } from "antd";
+import { Button, Card, Col, Empty, Flex, Popconfirm, Row, Skeleton, Space, Spin, Tag, Tooltip, Typography } from "antd";
 import Meta from "antd/es/card/Meta";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { colors } from "@/utils/utils";
@@ -15,7 +15,7 @@ interface StoreContentProps {
     onStoreDeleted?: () => void;
     onOk?: () => void;
     onCancel?: () => void;
-    
+
 }
 
 const StoreContent: FC<StoreContentProps> = ({
@@ -141,7 +141,7 @@ const StoreContent: FC<StoreContentProps> = ({
                     )}
                     {storeId && store?.store?.status === "done" && (
                         <Popconfirm
-                            title={`Git Pull ${store.git_url} ?`}
+                            title={`Git Pull ${store?.store?.url} ?`}
                             onConfirm={async () => {
                                 await axios.post(`/git-pull/${store?.store?.store_id}`);
                                 message.success("Git pull success!");
@@ -184,10 +184,10 @@ const StoreContent: FC<StoreContentProps> = ({
             {/* <Button onClick={() => { console.log(useComponentStore.getState().print()) }}>componentStore</Button> */}
 
             <Spin spinning={componentLoading}>
-                {store?.lock_data?.url ? (
-                    <Typography.Text type="danger">Downloading {store.lock_data.url} ...</Typography.Text>
-                ) : (
-                    <>
+                <>
+                    {store?.store?.status != "done" ? <Skeleton active></Skeleton> : <>
+
+
                         {Array.isArray(filteredComponents) && filteredComponents.length !== 0 ? (
                             <Row gutter={16} style={{ position: "relative" }}>
                                 {filteredComponents.map((item: any, index: any) => (
@@ -224,8 +224,7 @@ const StoreContent: FC<StoreContentProps> = ({
                                                 title={
                                                     <Flex gap={"small"} align={"center"}>
 
-
-                                                        <Popconfirm
+                                                        {onOk && <Popconfirm
                                                             okButtonProps={{ color: `${item.installed ? "red" : "blue"}`, variant: "solid" }}
                                                             okText={item.installed ? "Reinstall" : "Install"}
                                                             title={item.installed ? `Reinstall ${item.name} ?` : `Install ${item.name} ?`}
@@ -247,8 +246,9 @@ const StoreContent: FC<StoreContentProps> = ({
                                                         >
                                                             {/* <DownloadOutlined style={{ cursor: "pointer" }} /> */}
                                                             <Button size="small" color="blue" variant="solid" icon={<DownloadOutlined />} >{item.installed ? "Reinstall" : "Install"}</Button>
-                                                        </Popconfirm>
-                                                        {item.installed && <>
+                                                        </Popconfirm>}
+
+                                                        {item.installed && onCancel && <>
                                                             <Button size="small" color="blue" variant="solid" onClick={() => {
                                                                 navigate(`/c/tools/${item.relation_id}`)
                                                                 onCancel && onCancel()
@@ -290,8 +290,10 @@ const StoreContent: FC<StoreContentProps> = ({
                         ) : (
                             <Empty />
                         )}
-                    </>
-                )}
+
+                    </>}
+
+                </>
             </Spin>
         </Card>
 

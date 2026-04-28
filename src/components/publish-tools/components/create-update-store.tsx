@@ -1,4 +1,5 @@
 import { useGlobalMessage } from "@/hooks/useGlobalMessage";
+import { ActionDispatcher } from "@/llmv2/dispatcher";
 import { Button, Form, Input, Space } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import axios from "axios";
@@ -68,6 +69,17 @@ const CreateUpdateStore: FC<CreateUpdateStoreProps> = ({ onOk, onCancel, store_i
                 message.success("Created successfully");
             }
 
+            const data = {
+                action: "component.invoke",
+                payload: {
+                    category: "tables",
+                    id: "tools-details",
+                    method: "reload",
+                }
+            }
+
+            ActionDispatcher.dispatch(data.action, data.payload);
+
             onOk?.(true);
         } catch (error: any) {
             message.error(error.response?.data?.detail || error.message || "Save store failed");
@@ -105,9 +117,9 @@ const CreateUpdateStore: FC<CreateUpdateStoreProps> = ({ onOk, onCancel, store_i
                     <TextArea placeholder="Update Info" />
                 </Form.Item>
 
-                <Form.Item label="Publish URLs" name="publish_urls">
+                {/* <Form.Item label="Publish URLs" name="publish_urls">
                     <TextArea placeholder="Publish URLs" />
-                </Form.Item>
+                </Form.Item> */}
             </Form>
 
             <Space style={{ width: "100%", justifyContent: "flex-end" }}>

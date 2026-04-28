@@ -38,6 +38,7 @@ import { useStoreRender } from "@/context/render/RenderProvider"
 import { renderCloseViewButton, renderViewButton } from "@/utils/render-view-btn"
 import { useSideViewContext } from "@/context/side/SideViewContext"
 import ViewResolver from "@/core/ui-renderer/ViewResolver"
+import { invoke } from "@/core/ui-system/invokeV2"
 
 const Pipeline: FC<any> = ({ }) => {
 
@@ -317,13 +318,44 @@ const Pipeline: FC<any> = ({ }) => {
                     // overflowY: "auto"
                 }
             }}
-            title={<>
-                {component?.name} <Tag color="blue">{component?.script_type}</Tag>
+            title={<Space>
+                {component?.name}
+                {/* <Tag color="blue">{component?.script_type}</Tag> */}
                 {component?.category &&
                     <Tag style={{ marginLeft: "0.5rem" }} color="blue">{component?.category}</Tag>
                 }
+                {component?.store_url &&
+                    <Space>
+                        <Tooltip title={<>
+                            {component.store_update_info && <>Last Update: {component.store_update_info} <br />
+                            </>}
+                        </>}>
+                            <Tag style={{ cursor: "pointer" }} onClick={() => {
+                                invoke.storeContent.open({
+                                    storeId: component.store_id,
+                                }, {
+                                    title: `Store Content - ${component.store_name}`,
+                                    footer: null,
+                                    width: "60%",
+                                })
+                            }}>{component.store_name} {component.store_version && <>({component.store_version})</>} </Tag>
+                        </Tooltip>
+                        <Popconfirm title="Whether to remove?" onConfirm={async () => {
+                            // /reinstall-relation/{relation_id}
+                            await axios.post(`/reinstall-relation/${component.relation_id}`)
+                            messageApi.success("ReInstalled successfully!")
+                            loadData()
 
-            </>}
+                        }}>
+                            <Tag style={{ cursor: "pointer" }}>ReInstall</Tag>
+
+                        </Popconfirm>
+
+
+                    </Space>
+                }
+
+            </Space>}
             extra={<Flex justify={"space-between"} align={"center"} gap="small">
                 <Space wrap>
                     <QuestionCircleOutlined
@@ -573,6 +605,7 @@ const Pipeline: FC<any> = ({ }) => {
                 <ViewResolver
                     setView={setView}
                     ref={leftRef}
+                    store_id={component?.store_id}
                     relation_id={component?.relation_id}
                     callback={loadData}
                     component_id={component?.component_id}
