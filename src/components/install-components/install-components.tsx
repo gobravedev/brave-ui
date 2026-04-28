@@ -139,7 +139,7 @@ const InstallComponents: FC<any> = ({ relation_type, onOk,onCancel }) => {
         
         </Spin> */}
 
-        {cmd && <pre>{cmd}</pre>}
+        {/* {cmd && <pre>{cmd}</pre>} */}
 
     </>
 

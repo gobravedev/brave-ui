@@ -185,11 +185,14 @@ const StoreContent: FC<StoreContentProps> = ({
 
             <Spin spinning={componentLoading}>
                 <>
-                    {store?.store?.status != "done" ? <Skeleton active></Skeleton> : <>
 
 
-                        {Array.isArray(filteredComponents) && filteredComponents.length !== 0 ? (
-                            <Row gutter={16} style={{ position: "relative" }}>
+
+                    {Array.isArray(filteredComponents) && filteredComponents.length !== 0 ? (
+                        <Row gutter={16} style={{ position: "relative" }}>
+
+                            {store?.store?.status != "done" ? <Skeleton active></Skeleton> : <>
+
                                 {filteredComponents.map((item: any, index: any) => (
                                     <Col key={index} lg={6} sm={4} xs={24} style={{ marginBottom: "1rem", cursor: "pointer" }}>
 
@@ -286,12 +289,15 @@ const StoreContent: FC<StoreContentProps> = ({
                                         </Card>
                                     </Col>
                                 ))}
-                            </Row>
-                        ) : (
-                            <Empty />
-                        )}
 
-                    </>}
+                            </>}
+
+                        </Row>
+                    ) : (
+                        <Empty />
+                    )}
+
+
 
                 </>
             </Spin>
