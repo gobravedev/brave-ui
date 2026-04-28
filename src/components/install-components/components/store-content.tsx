@@ -6,6 +6,7 @@ import { colors } from "@/utils/utils";
 import axios from "axios";
 import { useGlobalMessage } from "@/hooks/useGlobalMessage";
 import { useSelector } from "react-redux";
+import { useComponentStore } from "@/store-zustand/components";
 
 interface StoreContentProps {
     storeId?: string;
@@ -25,6 +26,8 @@ const StoreContent: FC<StoreContentProps> = ({
     const [componentLoading, setComponentLoading] = useState(false);
     const [store, setStore] = useState<any>();
     const [components, setComponents] = useState<any[]>([]);
+
+
 
     const loadData = useCallback(
         async (storeId?: string) => {
@@ -48,6 +51,7 @@ const StoreContent: FC<StoreContentProps> = ({
     useEffect(() => {
         loadData(storeId);
     }, [loadData, storeId]);
+   
 
     const filteredComponents = useMemo(() => {
         return components;
@@ -70,8 +74,8 @@ const StoreContent: FC<StoreContentProps> = ({
                 <>
                     {store?.store?.name && (
                         <Tooltip title={<>
-                        {store?.store?.url}<br></br>
-                        {store?.store?.path}
+                            {store?.store?.url}<br></br>
+                            {store?.store?.path}
                         </>}>
 
                             <a href={store?.store?.url} target="_blank" rel="noopener noreferrer">
@@ -79,7 +83,7 @@ const StoreContent: FC<StoreContentProps> = ({
                             </a>
                         </Tooltip>
                     )}
-                  
+
 
                 </>
             }

@@ -118,6 +118,10 @@ const PublishTools: FC<any> = ({ relation_id }) => {
                     dataIndex: "name",
                     key: "name",
                 }, {
+                    title: "category",
+                    dataIndex: "category",
+                    key: "category",
+                },{
                     title: "path_name",
                     dataIndex: "path_name",
                     key: "path_name",

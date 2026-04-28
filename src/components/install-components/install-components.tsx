@@ -14,19 +14,20 @@ const InstallComponents: FC<any> = ({ relation_type, onOk }) => {
     const [cmd, setCmd] = useState<any>("")
     const [selectedStoreId, setSelectedStoreId] = useState<string>()
     const [sidebarRefreshToken, setSidebarRefreshToken] = useState(0)
-    const [contentRefreshToken, setContentRefreshToken] = useState(0)
-
+    // const [contentRefreshToken, setContentRefreshToken] = useState(0)
     const { register, unregister } = useComponentStore();
 
     const instance = useMemo(() => {
         return {
             clone: () => {
-                setContentRefreshToken((value) => value + 1)
-                setSidebarRefreshToken((value) => value + 1)
+                // loadData(storeId)
+                // setContentRefreshToken((value) => value + 1)
+                // setSidebarRefreshToken((value) => value + 1)
             }, pull: () => {
-                setContentRefreshToken((value) => value + 1)
+                // loadData(storeId)
+                // setContentRefreshToken((value) => value + 1)
             }, stop: () => {
-                setSidebarRefreshToken((value) => value + 1)
+                // setSidebarRefreshToken((value) => value + 1)
             }
         };
     }, []);
@@ -79,19 +80,10 @@ const InstallComponents: FC<any> = ({ relation_type, onOk }) => {
                     message.success("create store!")
                     setSelectedStoreId(resp.data.store_id)
                     setSidebarRefreshToken((value) => value + 1)
-                    setContentRefreshToken((value) => value + 1)
+                    // setContentRefreshToken((value) => value + 1)
                 }
             }}>Download</Button>
         </Space.Compact>
-        {/* <Flex gap="small" justify="end" style={{ marginTop: "0.5rem" }} align="center" >
-            <span>force:</span>
-            <Switch size="small" checked={downloadParams?.force || false} onChange={(checked) => {
-                setDownloadParams({
-                    ...downloadParams,
-                    force: checked
-                })
-            }}></Switch>
-        </Flex> */}
 
         <Row gutter={[12, 12]} align="top" style={{ marginTop: "1rem" }}>
             <Col xs={24} lg={6} xl={6}>

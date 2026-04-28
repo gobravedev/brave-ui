@@ -72,20 +72,6 @@ const CreateUpdateStore: FC<CreateUpdateStoreProps> = ({ onOk, onCancel, store_i
     return (
         <>
             <Form form={form} layout="vertical">
-                {/* 
-
-              */}
-                <Form.Item
-                    label="Name"
-                    name="name"
-                    rules={[{ required: true, message: "Please input store name" }]}
-                >
-                    <Input placeholder="Store name" />
-                </Form.Item>
-                <Form.Item label="Path Name" name="path_name" rules={[{ required: true, message: "Please input path name" }]}
-                >
-                    <Input placeholder="owner/repo" />
-                </Form.Item>
                 <Form.Item
                     label="URL"
                     name="url"
@@ -93,6 +79,18 @@ const CreateUpdateStore: FC<CreateUpdateStoreProps> = ({ onOk, onCancel, store_i
                 >
                     <Input placeholder="http://github.com/owner/repo" />
                 </Form.Item>
+
+                <Form.Item
+                    label="Name"
+                    name="name"
+                    
+                >
+                    <Input placeholder="Store name" />
+                </Form.Item>
+           
+                <Form.Item label="Category" name="category">
+                    <Input placeholder="Category" />
+                </Form.Item>    
             </Form>
 
             <Space style={{ width: "100%", justifyContent: "flex-end" }}>

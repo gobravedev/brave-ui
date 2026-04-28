@@ -68,6 +68,7 @@ const StoreSidebar: FC<StoreSidebarProps> = ({
         loadStoreList();
     }, [loadStoreList, relationType, address, refreshToken]);
 
+    
     return (
 
         <Card
