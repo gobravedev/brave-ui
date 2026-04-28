@@ -1,5 +1,6 @@
 import { useGlobalMessage } from "@/hooks/useGlobalMessage";
 import { Button, Form, Input, Space } from "antd";
+import TextArea from "antd/es/input/TextArea";
 import axios from "axios";
 import { FC, useEffect, useMemo, useState } from "react";
 
@@ -26,6 +27,9 @@ const CreateUpdateStore: FC<CreateUpdateStoreProps> = ({ onOk, onCancel, store_i
         try {
             // Reuse the existing list endpoint and locate the selected store.
             const resp = await axios.get(`/find-store-by-id/${store_id}`);
+            if (resp.data.publish_urls) {
+                resp.data.publish_urls = JSON.stringify(resp.data.publish_urls, null, 2);
+            }
             form.setFieldsValue(resp.data);
         } catch (error: any) {
             message.error(error.response?.data?.detail || error.message || "Load store failed");
@@ -50,6 +54,9 @@ const CreateUpdateStore: FC<CreateUpdateStoreProps> = ({ onOk, onCancel, store_i
             //     await axios.post(`/create-store`, values);
             //     message.success("Created successfully");
             // }
+            if (values.publish_urls) {
+                values.publish_urls = JSON.parse(values.publish_urls)
+            }
             await axios.post(`/save-store`, {
                 ...values,
                 store_id: store_id || undefined,
@@ -83,14 +90,24 @@ const CreateUpdateStore: FC<CreateUpdateStoreProps> = ({ onOk, onCancel, store_i
                 <Form.Item
                     label="Name"
                     name="name"
-                    
+
                 >
                     <Input placeholder="Store name" />
                 </Form.Item>
-           
+
                 <Form.Item label="Category" name="category">
                     <Input placeholder="Category" />
-                </Form.Item>    
+                </Form.Item>
+                <Form.Item label="Version" name="version">
+                    <Input placeholder="Version" />
+                </Form.Item>
+                <Form.Item label="Update Info" name="update_info">
+                    <TextArea placeholder="Update Info" />
+                </Form.Item>
+
+                <Form.Item label="Publish URLs" name="publish_urls">
+                    <TextArea placeholder="Publish URLs" />
+                </Form.Item>
             </Form>
 
             <Space style={{ width: "100%", justifyContent: "flex-end" }}>

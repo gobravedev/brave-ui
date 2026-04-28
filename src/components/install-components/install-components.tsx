@@ -6,7 +6,7 @@ import { invoke } from "@/core/ui-system/invokeV2";
 import { useComponentStore } from "@/store-zustand/components";
 import StoreSidebar from "./components/store-sidebar";
 import StoreContent from "./components/store-content";
-const InstallComponents: FC<any> = ({ relation_type, onOk }) => {
+const InstallComponents: FC<any> = ({ relation_type, onOk,onCancel }) => {
 
     const message = useGlobalMessage()
     const [address, setAddress] = useState("local")
@@ -15,32 +15,32 @@ const InstallComponents: FC<any> = ({ relation_type, onOk }) => {
     const [selectedStoreId, setSelectedStoreId] = useState<string>()
     const [sidebarRefreshToken, setSidebarRefreshToken] = useState(0)
     // const [contentRefreshToken, setContentRefreshToken] = useState(0)
-    const { register, unregister } = useComponentStore();
+    // const { register, unregister } = useComponentStore();
 
-    const instance = useMemo(() => {
-        return {
-            clone: () => {
-                // loadData(storeId)
-                // setContentRefreshToken((value) => value + 1)
-                // setSidebarRefreshToken((value) => value + 1)
-            }, pull: () => {
-                // loadData(storeId)
-                // setContentRefreshToken((value) => value + 1)
-            }, stop: () => {
-                // setSidebarRefreshToken((value) => value + 1)
-            }
-        };
-    }, []);
+    // const instance = useMemo(() => {
+    //     return {
+    //         clone: () => {
+    //             // loadData(storeId)
+    //             // setContentRefreshToken((value) => value + 1)
+    //             // setSidebarRefreshToken((value) => value + 1)
+    //         }, pull: () => {
+    //             // loadData(storeId)
+    //             // setContentRefreshToken((value) => value + 1)
+    //         }, stop: () => {
+    //             // setSidebarRefreshToken((value) => value + 1)
+    //         }
+    //     };
+    // }, []);
 
 
-    useEffect(() => {
-        if (selectedStoreId) {
-            register("store", selectedStoreId, instance);
-            return () => {
-                unregister("store", selectedStoreId, instance);
-            };
-        }
-    }, [selectedStoreId, instance, register, unregister]);
+    // useEffect(() => {
+    //     if (selectedStoreId) {
+    //         register("store", selectedStoreId, instance);
+    //         return () => {
+    //             unregister("store", selectedStoreId, instance);
+    //         };
+    //     }
+    // }, [selectedStoreId, instance, register, unregister]);
 
     return <>
         {/* <Button onClick={() => { console.log(useComponentStore.getState().print()) }}>componentStore</Button> */}
@@ -107,6 +107,7 @@ const InstallComponents: FC<any> = ({ relation_type, onOk }) => {
                         setSidebarRefreshToken((value) => value + 1)
                     }}
                     onOk={onOk}
+                    onCancel={onCancel}
                 />
             </Col>
 

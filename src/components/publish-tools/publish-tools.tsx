@@ -118,6 +118,10 @@ const PublishTools: FC<any> = ({ relation_id }) => {
                     dataIndex: "name",
                     key: "name",
                 }, {
+                    title: "version",
+                    dataIndex: "version",
+                    key: "version",
+                }, {
                     title: "category",
                     dataIndex: "category",
                     key: "category",
@@ -172,7 +176,9 @@ const PublishTools: FC<any> = ({ relation_id }) => {
 
                             <Button size="small" color="cyan" variant="solid" onClick={() => {
                                 publishToStore(relation_id, record.store_id)
-                            }}>Publish</Button>
+                            }}>Copy To Store</Button>
+
+
                         </Space>
                     ),
                 }
