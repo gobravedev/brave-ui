@@ -3,7 +3,8 @@ import { registerLazyViews } from "@/core/component-registry";
 import type { InferViewRegistryFromLoaders } from "@/core/component-registry/registry-types";
 
 const storeViewLoaders = {
-    createUpdateStore: () => import("./components/create-update-store")
+    createUpdateStore: () => import("./components/create-update-store"),
+    publishStore: () => import("./components/publish-store"),
 };
 
 

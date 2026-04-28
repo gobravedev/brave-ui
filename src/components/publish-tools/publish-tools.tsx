@@ -100,7 +100,7 @@ const PublishTools: FC<any> = ({ relation_id }) => {
             expandable={{
                 expandedRowRender: (record: any) => (
                     <>
-                       
+
                         <ViewResolver
                             storeId={record.store_id}
                             view={"storeContent"}
@@ -125,14 +125,14 @@ const PublishTools: FC<any> = ({ relation_id }) => {
                     title: "category",
                     dataIndex: "category",
                     key: "category",
-                },{
+                }, {
                     title: "path_name",
                     dataIndex: "path_name",
                     key: "path_name",
-                    render: (value: any,record: any) =>{
+                    render: (value: any, record: any) => {
                         return <Tooltip title={record?.path}>
                             {value}
-                            </Tooltip>
+                        </Tooltip>
                     }
                 }, {
                     title: "remote url",
@@ -141,7 +141,7 @@ const PublishTools: FC<any> = ({ relation_id }) => {
                     render: (value: any) => <Tooltip title={value}>
                         <a href={value} target="_blank" rel="noopener noreferrer">{value}</a>
                     </Tooltip>
-                   
+
                 }, {
                     title: "action",
                     key: "action",
@@ -177,6 +177,13 @@ const PublishTools: FC<any> = ({ relation_id }) => {
                             <Button size="small" color="cyan" variant="solid" onClick={() => {
                                 publishToStore(relation_id, record.store_id)
                             }}>Copy To Store</Button>
+                            <Button size="small" color="cyan" variant="solid" onClick={() => {
+                                invoke.publishStore.open(record,{
+                                    footer:null,
+                                    width:640,
+                                    title:"Publish Store"
+                                })
+                            }}>Publish</Button>
 
 
                         </Space>
