@@ -1,7 +1,7 @@
 import { Tag, Typography } from "antd";
 import { FC } from "react";
 
-const PublishStore: FC<any> = ({ publish_urls }) => {
+const PublishStore: FC<any> = ({ publish_urls,path }) => {
 
     return <>
         {publish_urls && publish_urls.map((item:any, index:number) => (
@@ -13,10 +13,19 @@ const PublishStore: FC<any> = ({ publish_urls }) => {
                     {/* 换行 */}
                     <pre>
                         <code style={{ whiteSpace: 'pre-wrap' }}>
-                            {`git add .
+                            {`cd ${path}
+git add .
 git commit -m 'update'
 git remote add ${item.name} ${item.ssh}
 git push ${item.name} master`}
+                        </code>
+                    </pre>
+                </Typography>
+                                <Typography>
+                    {/* 换行 */}
+                    <pre>
+                        <code style={{ whiteSpace: 'pre-wrap' }}>
+                            {`cd ${path} && git add . && git commit -m 'update' && git push ${item.name} master`}
                         </code>
                     </pre>
                 </Typography>

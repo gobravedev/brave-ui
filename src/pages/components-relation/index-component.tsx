@@ -340,7 +340,7 @@ const Pipeline: FC<any> = ({ }) => {
                                 })
                             }}>{component.store_name} {component.store_version && <>({component.store_version})</>} </Tag>
                         </Tooltip>
-                        <Popconfirm title="Whether to remove?" onConfirm={async () => {
+                        <Popconfirm title="Reinstall?" onConfirm={async () => {
                             // /reinstall-relation/{relation_id}
                             await axios.post(`/reinstall-relation/${component.relation_id}`)
                             messageApi.success("ReInstalled successfully!")
