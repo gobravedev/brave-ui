@@ -319,14 +319,35 @@ const Pipeline: FC<any> = ({ }) => {
                 }
             }}
             title={<Space>
-                {component?.name}
+                <Tooltip title={component?.category}>
+                    {component?.name}
+                </Tooltip>
                 {/* <Tag color="blue">{component?.script_type}</Tag> */}
-                {component?.category &&
+                {/* {component?.category &&
                     <Tag style={{ marginLeft: "0.5rem" }} color="blue">{component?.category}</Tag>
-                }
+                } */}
+                {component && <>
+                    {!component?.store_version ? <>
+                        <Tag color="red"> {component?.version} (unpublished)</Tag>
+                    </> : <Tooltip title={component?.store_url}>
+                        {component?.store_version === component?.version ?
+                            <Tag style={{ cursor: "pointer" }} onClick={() => {
+                                window.open(component?.store_url, "_blank")
+                            }}> {component.version}</Tag> :
+                            <Tag color="red" style={{ cursor: "pointer" }} onClick={() => {
+                                window.open(component?.store_url, "_blank")
+                            }}>store/current: {component?.store_version}/{component?.version}</Tag>
+                        }
+
+                    </Tooltip>}
+
+                </>}
+
+
+
                 {component?.store_url &&
                     <Space>
-                        <Tooltip title={<>
+                        {/* <Tooltip title={<>
                             {component.store_update_info && <>Last Update: {component.store_update_info} <br />
                             </>}
                         </>}>
@@ -339,11 +360,10 @@ const Pipeline: FC<any> = ({ }) => {
                                     width: "60%",
                                 })
                             }}>{component.store_name} </Tag>
-                        </Tooltip>
-                        {component.store_version === component.version ?
-                            <Tag> {component.version}</Tag> :
-                            <Tag color="red">store/current: {component.store_version}/{component.version}</Tag>
-                        }
+                        </Tooltip> */}
+
+
+
                         <Popconfirm title="Reinstall?" onConfirm={async () => {
                             // /reinstall-relation/{relation_id}
                             await axios.post(`/reinstall-relation/${component.relation_id}`)
@@ -414,7 +434,7 @@ const Pipeline: FC<any> = ({ }) => {
                             setLeftPanel("analysisTools")
                         }}>Close</Button>
                     </>} */}
-                    {renderViewButton(view, setView, "publishTools", "Publish")}
+                    {renderViewButton(view, setView, "PublishToolsV2", "Publish")}
                     {/* {renderViewButton(view, setView, "publishToolsComponents", "Publish")} */}
 
 

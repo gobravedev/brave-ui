@@ -93,6 +93,7 @@ export const useComponentStore = create<ComponentStore>((set, get) => ({
     },
 
     invoke: (category, id, method, args = []) => {
+        // debugger
         console.log(`Invoking method on component - Category: ${category}, ID: ${id}, Method: ${method}, Args: ${JSON.stringify(args)}`);
         // const comp = (get() as any)[category]?.[id];
         // if (comp && typeof comp[method] === "function") {
@@ -117,6 +118,15 @@ export const useComponentStore = create<ComponentStore>((set, get) => ({
                         } else {
                             fn(args);
                         }
+                    }
+                }
+            }else{
+                const fn = globalTarget[method];
+                if (typeof fn === "function") {
+                    if (args instanceof Array) {
+                        fn(...args);
+                    } else {
+                        fn(args);
                     }
                 }
             }

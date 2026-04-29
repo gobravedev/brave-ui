@@ -195,7 +195,7 @@ const PipelineComponentsCard: FC<any> = (params) => {
 
                     <Button size="small" color="cyan" variant="solid" onClick={async () => {
                         // openModal("installComponents", { relation_type: "tools" })
-                        await invoke.installComponents.openAsync({
+                        await invoke.installComponentsV2.openAsync({
                             relation_type: "tools",
                         },{
                             width:"80%",

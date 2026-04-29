@@ -1,12 +1,24 @@
-import { Tag, Typography } from "antd";
-import { FC } from "react";
+import { tr } from "@faker-js/faker";
+import { Flex, Switch, Tag, Typography } from "antd";
+import { FC, useState } from "react";
 
-const PublishStore: FC<any> = ({ publish_urls,path }) => {
+const PublishStore: FC<any> = ({ publish_urls, path }) => {
 
+    const [type, setType] = useState<any>("SSH");
     return <>
-        {publish_urls && publish_urls.map((item:any, index:number) => (
+        <Flex justify="end">
+
+            <Switch size="small" unCheckedChildren={"SSH"} checkedChildren={"HTTPS"}
+                onChange={(checked) => {
+                    setType(checked ? "HTTPS" : "SSH")
+                }}
+                value={type === "SSH" ? false : true}
+            ></Switch>
+        </Flex>
+
+        {publish_urls && publish_urls.map((item: any, index: number) => (
             <div key={index}>
-                <Tag style={{cursor:"pointer"}} onClick={()=>{
+                <Tag style={{ cursor: "pointer" }} onClick={() => {
                     window.open(item.https, "_blank")
                 }}>{item.name}</Tag>
                 <Typography>
@@ -16,12 +28,12 @@ const PublishStore: FC<any> = ({ publish_urls,path }) => {
                             {`cd ${path}
 git add .
 git commit -m 'update'
-git remote add ${item.name} ${item.ssh}
+git remote add ${item.name} ${type === "SSH" ? item.ssh : item.https}
 git push ${item.name} master`}
                         </code>
                     </pre>
                 </Typography>
-                                <Typography>
+                <Typography>
                     {/* 换行 */}
                     <pre>
                         <code style={{ whiteSpace: 'pre-wrap' }}>
