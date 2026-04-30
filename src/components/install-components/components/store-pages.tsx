@@ -111,7 +111,7 @@ const StorePages = forwardRef<any, any>(({ onOk, onCancel }, ref) => {
 
                                     }}
                                     title={<Space>
-                                        {item?.status === "running" && (
+                                        {item?.status != "done" && (
                                             <Button
                                                 color="red"
                                                 variant="solid"

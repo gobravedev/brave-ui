@@ -1,5 +1,5 @@
 import { Breadcrumb, Button, Card, message, Empty, Flex, Modal, Popconfirm, Skeleton, Switch, Tabs, Tag, Tooltip, Row, Col, Spin, Menu, Dropdown, Space, Collapse, Typography, Segmented, Divider } from "antd"
-import { FC, lazy, Suspense, useEffect, useRef, useState } from "react"
+import { FC, lazy, Suspense, useEffect, useMemo, useRef, useState } from "react"
 import AnalysisPanel, { UpstreamAnalysisInput, UpstreamAnalysisOutput } from '../../components/analysis-sotware-panel'
 import Meta from "antd/es/card/Meta"
 import { colors } from '@/utils/utils'
@@ -302,6 +302,43 @@ const Pipeline: FC<any> = ({ }) => {
     // }
 
 
+    const instance = useMemo(() => {
+        return {
+            clone: () => {
+                loadData()
+                // setContentRefreshToken((value) => value + 1)
+                // setSidebarRefreshToken((value) => value + 1)
+            }, pull: () => {
+                // loadData(storeId)
+                loadData()
+                // setContentRefreshToken((value) => value + 1)
+            }, stop: () => {
+                loadData()
+                // setSidebarRefreshToken((value) => value + 1)
+            }, already_exists: (args: any) => {
+                // console.log("111111111111111")
+                // search("aaa")
+                message.error("Component already exists in your tools, please go to tools page to check or uninstall it first.")
+                // if (args?.id) {
+                //     setParams({ ...params, storeId: args.id });
+                // }
+                loadData()
+            }
+        };
+    }, [relation_id]);
+
+
+    useEffect(() => {
+        if (component?.store_id) {
+            register("store", component?.store_id, instance);
+            return () => {
+                unregister("store", component?.store_id, instance);
+            };
+        }
+
+    }, [component?.store_id, instance, register, unregister]);
+
+
     return <div >
         <Card size="small"
             style={{
@@ -375,7 +412,32 @@ const Pipeline: FC<any> = ({ }) => {
 
                         </Popconfirm>
 
+                        <Popconfirm title={`Git pull ${component?.store_url} ?`} onConfirm={async () => {
+                            // /reinstall-relation/{relation_id}
+                            await axios.post(`/git-pull/${component?.store_id}`);
+                            message.success("Git pull submitted!");
+                            loadData()
 
+                        }}>
+                            <Tag style={{ cursor: "pointer" }}>Check Update</Tag>
+
+                        </Popconfirm>
+
+                        {component?.store_status != "done" &&
+                            <Tag
+                            icon={<Spin size="small" />}
+                                color="red"
+                                style={{ cursor: "pointer" }}
+                                onClick={async () => {
+                                    await axios.post(`/git-stop/${component?.store_id}`);
+                                    message.success("Stop success!");
+                                    loadData()
+                                }}
+                            >
+                                Stop ({component?.store_status})
+                            </Tag>
+
+                        }
                     </Space>
                 }
 

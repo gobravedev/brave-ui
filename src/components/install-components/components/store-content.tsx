@@ -126,7 +126,7 @@ const StoreContent: FC<StoreContentProps> = ({
             size="small"
             extra={
                 <Space>
-                    {storeId && store?.store?.status == "running" && (
+                    {storeId && store?.store?.status != "done"  && (
                         <Button
                             color="red"
                             variant="solid"
