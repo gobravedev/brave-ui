@@ -52,9 +52,15 @@ const StorePages = forwardRef<any, any>(({ onOk, onCancel }, ref) => {
             }, already_exists: (args: any) => {
                 // console.log("111111111111111")
                 // search("aaa")
-                message.error("Component already exists in your tools, please go to tools page to check or uninstall it first.")
+                // console.log(args)
+                if (args?.reason) {
+                    message.error(args.reason)
+                } else {
+                    message.error("Component already exists in your tools, please go to tools page to check or uninstall it first.")
+
+                }
                 if (args?.id) {
-                    setParams({ ...params, storeId: args.id });
+                    setParams({app_id: args.app_id });
                 }
                 reload()
             }
@@ -84,7 +90,7 @@ const StorePages = forwardRef<any, any>(({ onOk, onCancel }, ref) => {
                     onSearch={(value) => { search(value) }}
                     style={{ width: 400 }}
                 />
-                {params?.storeId && <Tag closable onClose={() => setParams({ ...params, storeId: null })}>{params.storeId}</Tag>}
+                {params?.app_id && <Tag closable onClose={() => setParams({ })}>{params.app_id}</Tag>}
             </Space>}
             size="small" extra={<Space>
                 <Button size="small" color="cyan" variant="solid" icon={<RedoOutlined />} onClick={reload}></Button>
@@ -116,19 +122,21 @@ const StorePages = forwardRef<any, any>(({ onOk, onCancel }, ref) => {
                                         {item?.version && <Tag color="blue">{item?.version}</Tag>}
 
                                         {item?.status != "done" && (
-                                            <Button
-                                                icon={<Spin size="small" />}
-                                                color="red"
-                                                variant="solid"
-                                                size="small"
-                                                onClick={async () => {
-                                                    await axios.post(`/git-stop/${item?.store_id}`);
-                                                    message.success("Stop success!");
-                                                    reload();
-                                                }}
-                                            >
-                                                Stop
-                                            </Button>
+                                            <Tooltip title={item?.log}>
+                                                <Button
+                                                    icon={<Spin size="small" />}
+                                                    color="red"
+                                                    variant="solid"
+                                                    size="small"
+                                                    onClick={async () => {
+                                                        await axios.post(`/git-stop/${item?.store_id}`);
+                                                        message.success("Stop success!");
+                                                        reload();
+                                                    }}
+                                                >
+                                                    Stop ({item?.status})
+                                                </Button>
+                                            </Tooltip>
                                         )}
                                         {item?.status === "done" && (
                                             <Popconfirm
