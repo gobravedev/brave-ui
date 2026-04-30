@@ -359,6 +359,7 @@ const Pipeline: FC<any> = ({ }) => {
                 <Tooltip title={component?.category}>
                     {component?.name}
                 </Tooltip>
+                {component?.store_origin && <Tag color="blue">{component?.store_origin}</Tag>}
                 {/* <Tag color="blue">{component?.script_type}</Tag> */}
                 {/* {component?.category &&
                     <Tag style={{ marginLeft: "0.5rem" }} color="blue">{component?.category}</Tag>
@@ -408,7 +409,7 @@ const Pipeline: FC<any> = ({ }) => {
                             loadData()
 
                         }}>
-                            <Tag style={{ cursor: "pointer" }}>ReInstall</Tag>
+                            <Button   variant="solid" size="small"  style={{ cursor: "pointer" }}>ReInstall</Button>
 
                         </Popconfirm>
 
@@ -419,13 +420,14 @@ const Pipeline: FC<any> = ({ }) => {
                             loadData()
 
                         }}>
-                            <Tag style={{ cursor: "pointer" }}>Check Update</Tag>
+                            <Button   variant="solid" size="small" style={{ cursor: "pointer" }}>Check Update</Button>
 
                         </Popconfirm>
 
                         {component?.store_status != "done" &&
-                            <Tag
-                            icon={<Spin size="small" />}
+                            <Button size="small" 
+                            variant="solid"
+                            icon={<Spin size="small"  />}
                                 color="red"
                                 style={{ cursor: "pointer" }}
                                 onClick={async () => {
@@ -435,7 +437,7 @@ const Pipeline: FC<any> = ({ }) => {
                                 }}
                             >
                                 Stop ({component?.store_status})
-                            </Tag>
+                            </Button>
 
                         }
                     </Space>

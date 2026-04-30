@@ -18,7 +18,7 @@ const StorePages = forwardRef<any, any>(({ onOk, onCancel }, ref) => {
     const { data, pageNumber, totalPage, loading, reload, pageSize, setPageNumber, search } = usePagination({
         id: "store-page",
         url: `/page-stores`,
-        params:params,
+        params: params,
         // params: { category: activeCategory, ...params },
         // map: mapFun,
         initialPageSize: 12
@@ -49,11 +49,11 @@ const StorePages = forwardRef<any, any>(({ onOk, onCancel }, ref) => {
             }, stop: () => {
                 reload()
                 // setSidebarRefreshToken((value) => value + 1)
-            }, already_exists: (args:any) => {
+            }, already_exists: (args: any) => {
                 // console.log("111111111111111")
                 // search("aaa")
                 message.error("Component already exists in your tools, please go to tools page to check or uninstall it first.")
-                if(args?.id){
+                if (args?.id) {
                     setParams({ ...params, storeId: args.id });
                 }
                 reload()
@@ -84,7 +84,7 @@ const StorePages = forwardRef<any, any>(({ onOk, onCancel }, ref) => {
                     onSearch={(value) => { search(value) }}
                     style={{ width: 400 }}
                 />
-                {params?.storeId &&  <Tag closable onClose={()=> setParams({ ...params, storeId: null })}>{params.storeId}</Tag>}
+                {params?.storeId && <Tag closable onClose={() => setParams({ ...params, storeId: null })}>{params.storeId}</Tag>}
             </Space>}
             size="small" extra={<Space>
                 <Button size="small" color="cyan" variant="solid" icon={<RedoOutlined />} onClick={reload}></Button>
@@ -111,8 +111,13 @@ const StorePages = forwardRef<any, any>(({ onOk, onCancel }, ref) => {
 
                                     }}
                                     title={<Space>
+                                        {item?.origin && <Tag color="blue">{item?.origin}</Tag>}
+
+                                        {item?.version && <Tag color="blue">{item?.version}</Tag>}
+
                                         {item?.status != "done" && (
                                             <Button
+                                                icon={<Spin size="small" />}
                                                 color="red"
                                                 variant="solid"
                                                 size="small"
