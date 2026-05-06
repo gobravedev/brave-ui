@@ -17,6 +17,7 @@ export type ComponentStore = {
     analysis: Record<string, Set<any>>; 
     graph: Record<string, any>; 
     store: Record<string, any>;
+    container: Record<string, any>;
 
     register: <T>(category: keyof ComponentStore, id: string, instance: T) => void;
     unregister: <T>(category: keyof ComponentStore, id: string, instance?: T) => void;
@@ -33,6 +34,7 @@ export const useComponentStore = create<ComponentStore>((set, get) => ({
     analysis: {},
     graph: {},
     store:{},
+    container: {},
 
     print:()=>{
         return get()

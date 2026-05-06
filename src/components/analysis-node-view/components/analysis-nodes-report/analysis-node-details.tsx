@@ -73,6 +73,7 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
         try {
             const res = await axios.get(`/analysis/visualization-node-file/${targetAnalysisNodeId}`);
             setSelectedSampleDetail(res.data);
+
         } finally {
             setDetailLoading(false);
         }
@@ -85,7 +86,9 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
             },
             analysisStarted: () => {
                 loadSampleDetail(analysis_node_id);
-            },
+            }, analysisPulled: () => {
+                loadSampleDetail(analysis_node_id);
+            }
         };
     }, [analysis_node_id]);
 
@@ -101,6 +104,27 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
             };
         }
     }, [analysis_node_id, instance, register, unregister]);
+
+    // const containerInstance = useMemo(() => {
+    //     return {
+    //         analysisPulled: () => {
+
+    //         }
+    //     };
+    // }, [analysis_node_id]);
+    useEffect(() => {
+        // console.log("selectedSampleDetail?.node?.container_id", selectedSampleDetail?.node?.container_id)
+        if (selectedSampleDetail?.node?.container_id) {
+            register("container", selectedSampleDetail?.node?.container_id, {
+                containerPulled: () => {
+                    loadSampleDetail(analysis_node_id);
+                }
+            });
+            return () => {
+                unregister("container", selectedSampleDetail?.node?.container_id);
+            };
+        }
+    }, [selectedSampleDetail?.node?.container_id, register, unregister]);
 
     return (
         <Card
@@ -252,9 +276,12 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                             title="Pull?"
                                             onConfirm={async () => {
                                                 await axios.post(`/container/pull-image/${selectedSampleDetail.node?.container_id}`);
+                                                if (analysis_node_id) {
+                                                    loadSampleDetail(analysis_node_id);
+                                                }
                                             }}
                                         >
-                                            <Button size="small" color="cyan" variant="solid">
+                                            <Button size="small" color="blue" variant="solid">
                                                 {selectedSampleDetail.node?.image_status == "pulling" ? "pulling" : "Pull"}
                                             </Button>
                                         </Popconfirm>
@@ -307,11 +334,11 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                 <Typography.Text type="secondary">
                                     analysis_node_id: {selectedSampleDetail.node?.analysis_node_id}
                                 </Typography.Text>
+
                                 <Typography.Text type="secondary">
-                                    container_image: {selectedSampleDetail.node?.container_image}
-                                </Typography.Text>
-                                <Typography.Text type="secondary">
-                                    container_name: {selectedSampleDetail.node?.container_name}
+                                    container_name: <Tooltip title={selectedSampleDetail.node?.container_image}>
+                                        {selectedSampleDetail.node?.container_name}
+                                    </Tooltip>
                                 </Typography.Text>
 
                                 {selectedSampleDetail.node?.sample_id && (

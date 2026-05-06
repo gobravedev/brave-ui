@@ -28,7 +28,6 @@ const WorkflowComponent: FC<any> = ({ component }) => {
             </>} */}
 
             {renderViewButton(view, setView, "workflow-vis", "Visualization")}
-            {renderViewButton(view, setView, "depContainer", "Container")}
 
             {renderViewButton(view, setView, "relationDefinitionDAG", "DAG Definition")}
             <Button

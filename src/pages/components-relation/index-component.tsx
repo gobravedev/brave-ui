@@ -409,7 +409,7 @@ const Pipeline: FC<any> = ({ }) => {
                             loadData()
 
                         }}>
-                            <Button   variant="solid" size="small"  style={{ cursor: "pointer" }}>ReInstall</Button>
+                            <Button variant="solid" size="small" style={{ cursor: "pointer" }}>ReInstall</Button>
 
                         </Popconfirm>
 
@@ -420,14 +420,14 @@ const Pipeline: FC<any> = ({ }) => {
                             loadData()
 
                         }}>
-                            <Button   variant="solid" size="small" style={{ cursor: "pointer" }}>Check Update</Button>
+                            <Button variant="solid" size="small" style={{ cursor: "pointer" }}>Check Update</Button>
 
                         </Popconfirm>
 
                         {component?.store_status != "done" &&
-                            <Button size="small" 
-                            variant="solid"
-                            icon={<Spin size="small"  />}
+                            <Button size="small"
+                                variant="solid"
+                                icon={<Spin size="small" />}
                                 color="red"
                                 style={{ cursor: "pointer" }}
                                 onClick={async () => {
@@ -482,6 +482,8 @@ const Pipeline: FC<any> = ({ }) => {
                     {/* {renderViewButton(view, setView, "analysisTools", "Tools Panel")} */}
 
                     {renderViewButton(view, setView, "workflowComponent", "Workflow")}
+                    {renderViewButton(view, setView, "depContainer", "Container")}
+
 
                     {renderViewButton(view, (view) => {
                         setView(view)
