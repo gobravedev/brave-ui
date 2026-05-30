@@ -32,7 +32,7 @@ export default defineConfig({
         target: `http://localhost:10100`,
         ws: true
       },'/brave-api':{
-        target: `http://192.168.3.63:5005`,
+        target: `http://192.168.3.63:5000`,
         ws: true
       },'/api':{
         target: `http://10.110.1.11:11434`,
