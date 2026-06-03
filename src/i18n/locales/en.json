@@ -1,4 +1,24 @@
 {
     "home": "Home",
-    "description": "This is an internationalized React application."
+    "description": "This is an internationalized React application.",
+    "login": {
+        "title": "Bioinformatics Analysis Platform",
+        "subtitle": "Manage analysis, data and workflows in one place",
+        "brand": "BRAVE UI",
+        "apiCardTitle": "API",
+        "apiCardDesc": "v1 login endpoint",
+        "redirectCardTitle": "401",
+        "redirectCardDesc": "Auto redirect to login",
+        "formTitle": "Sign In",
+        "formSubtitle": "Enter your credentials to continue",
+        "emailLabel": "Email",
+        "passwordLabel": "Password",
+        "emailRequired": "Please input your email",
+        "emailInvalid": "Please enter a valid email",
+        "passwordRequired": "Please input your password",
+        "submit": "Sign In",
+        "themeTag": "Theme",
+        "light": "Light",
+        "dark": "Dark"
+    }
 }

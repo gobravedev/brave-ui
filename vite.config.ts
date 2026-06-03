@@ -31,13 +31,10 @@ export default defineConfig({
       '/jupyter':{
         target: `http://localhost:10100`,
         ws: true
-      },'/brave-api':{
-        target: `http://192.168.3.63:5000`,
-        ws: true
       },'/api':{
-        target: `http://10.110.1.11:11434`,
+        target: `http://localhost:8084`,
         ws: true
-      },
+      }
     }
   }
 })

@@ -1,5 +1,25 @@
 {
     "home": "主页",
-    "description": "这是一个支持国际化的 React 应用。"
+  "description": "这是一个支持国际化的 React 应用。",
+  "login": {
+    "title": "生物信息分析平台",
+    "subtitle": "统一管理分析、数据与工作流",
+    "brand": "BRAVE UI",
+    "apiCardTitle": "API",
+    "apiCardDesc": "v1 登录接口",
+    "redirectCardTitle": "401",
+    "redirectCardDesc": "自动跳转登录页",
+    "formTitle": "登录",
+    "formSubtitle": "请输入账号信息继续",
+    "emailLabel": "邮箱",
+    "passwordLabel": "密码",
+    "emailRequired": "请输入邮箱",
+    "emailInvalid": "请输入有效邮箱",
+    "passwordRequired": "请输入密码",
+    "submit": "登录",
+    "themeTag": "主题",
+    "light": "浅色",
+    "dark": "深色"
+  }
   }
   

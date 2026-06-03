@@ -12,6 +12,19 @@ const project = localStorage.getItem('project')
 const githubToken = localStorage.getItem('githubToken')
 const storeRepos = localStorage.getItem('storeRepos')
 const scmOrigin = localStorage.getItem('scmOrigin')
+const userInfo = localStorage.getItem('userInfo')
+
+export interface LoginUserInfo {
+    id: string;
+    username: string;
+    email: string;
+    avatar: string;
+    is_active: boolean;
+    can_access_all_tenants: boolean;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+}
 
 interface UserState {
     locale: string;
@@ -25,6 +38,7 @@ interface UserState {
     githubToken:any;
     storeRepos:any;
     scmOrigin:any;
+    userInfo: LoginUserInfo | null;
     componentLayout:"simple"|"complex",
     network:"UNKNOW" | "CONNECT" | "NOT_CONNECT"
 
@@ -45,6 +59,7 @@ const contextSlice = createSlice({
         projectObj:{},
         githubToken:githubToken,
         storeRepos:storeRepos?storeRepos:"[]",
+        userInfo: userInfo ? JSON.parse(userInfo) : null,
         componentLayout:"simple",
         network:"UNKNOW",
         scmOrigin:scmOrigin?scmOrigin:"github"
@@ -85,13 +100,28 @@ const contextSlice = createSlice({
             if(action.payload.scmOrigin){
                 localStorage.setItem('scmOrigin', action.payload.scmOrigin)
             }
+            if (action.payload.userInfo !== undefined) {
+                if (action.payload.userInfo) {
+                    localStorage.setItem('userInfo', JSON.stringify(action.payload.userInfo))
+                } else {
+                    localStorage.removeItem('userInfo')
+                }
+            }
             // debugger
+        },
+        clearUserSession(state) {
+            state.authorization = null;
+            state.userInfo = null;
+            localStorage.removeItem('Authorization');
+            localStorage.removeItem('authorization');
+            localStorage.removeItem('RefreshToken');
+            localStorage.removeItem('userInfo');
         },
     },
 })
 
 
-export const { setUserItem } = contextSlice.actions
+export const { setUserItem, clearUserSession } = contextSlice.actions
 export default contextSlice.reducer
 
 

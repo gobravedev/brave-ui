@@ -1,12 +1,12 @@
 import React, { FC, Suspense, useEffect, useState, lazy } from 'react';
 import { ApiOutlined, BookOutlined, LaptopOutlined, NotificationOutlined, PlusOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Breadcrumb, Button, Card, Col, Divider, Drawer, Empty, Flex, Form, Input, Layout, Menu, message, Modal, notification, Popconfirm, Row, Segmented, Select, Skeleton, Space, Tag, theme, Tooltip, Typography } from 'antd';
+import { Breadcrumb, Button, Card, Col, Divider, Drawer, Dropdown, Empty, Flex, Form, Input, Layout, Menu, message, Modal, notification, Popconfirm, Row, Segmented, Select, Skeleton, Space, Tag, theme, Tooltip, Typography } from 'antd';
 import { NavLink, Outlet, useLocation, useNavigate, useParams } from 'react-router';
 import { Header } from 'antd/es/layout/layout';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
-import { setUserItem } from '@/store/userSlice'
+import { clearUserSession, setUserItem } from '@/store/userSlice'
 import { setSetting, setSseData } from '@/store/globalSlice'
 
 import useMessage from 'antd/es/message/useMessage';
@@ -63,7 +63,7 @@ const Test = () => {
     return <Skeleton active></Skeleton>
 }
 const App: React.FC = () => {
-    const { theme, baseURL, projectObj, project: project_id, network } = useSelector((state: any) => state.user); // 'light' | 'dark'
+    const { theme, baseURL, projectObj, project: project_id, network, userInfo } = useSelector((state: any) => state.user); // 'light' | 'dark'
     const navigate = useNavigate();
     const location = useLocation();
     const [leftMenus, setLeftMenus] = useState<any>([])
@@ -109,6 +109,20 @@ const App: React.FC = () => {
             description: description,
             placement: "bottomRight"
         });
+    };
+    const userMenuItems: MenuProps['items'] = [
+        {
+            key: 'logout',
+            label: '退出登录',
+        },
+    ];
+
+    const handleUserMenuClick: MenuProps['onClick'] = ({ key }) => {
+        if (key === 'logout') {
+            dispatch(clearUserSession());
+            axios.defaults.headers.common['Authorization'] = '';
+            window.location.hash = '/login';
+        }
     };
     console.log(project_id)
     const onMenuClick = (key: string) => {
@@ -734,6 +748,16 @@ const App: React.FC = () => {
                     <SettingOutlined style={{ cursor: "pointer" }} onClick={() => {
                         openModals("setting")
                     }} />
+
+                    <Dropdown
+                        trigger={["hover"]}
+                        menu={{ items: userMenuItems, onClick: handleUserMenuClick }}
+                        placement="bottomRight"
+                    >
+                        <Tag style={{ cursor: "pointer", marginLeft: 8 }} color="geekblue">
+                            {userInfo?.username || userInfo?.email || '未登录'}
+                        </Tag>
+                    </Dropdown>
 
                     {/* <Button size="small" onClick={async () => {
                         await axios.get("/send-test")

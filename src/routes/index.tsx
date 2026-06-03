@@ -85,6 +85,7 @@ const ToolsCard = lazy(() => import("../pages/pipeline-components-card-v2/index-
 const ToolsDetail = lazy(() => import("../pages/components-relation/index-component"));
 
 const ComponentsV3 = lazy(() => import("../pages/components-relation/components-v3"));
+const Login = lazy(() => import("@/pages/users/login"));
 
 import axios from "axios";
 import { Skeleton } from "antd";
@@ -307,6 +308,10 @@ if (appType == "index") {
     ]
     routes = [
         {
+            path: "/login",
+            element: <Login />
+        },
+        {
             path: "/doc",
             element: <Doc />
         }, {
@@ -487,6 +492,10 @@ if (appType == "index") {
         }
     ]
     routes = [
+        {
+            path: "/login",
+            element: <Login />
+        },
         {
             path: "/",
             element: <MicroGraphLayout />,

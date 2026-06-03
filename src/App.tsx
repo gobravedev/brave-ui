@@ -15,6 +15,9 @@ import { RenderProvider } from "./context/render/RenderProvider";
 import "@/core/component-registry/module-auto-loader";
 import { SideViewProvider } from "./context/side/SideViewContext";
 import { UIContainer } from "@/core/ui-system/UIContainer";
+import { setupLegacyAxios401Interceptor } from "@/api/client/http";
+
+setupLegacyAxios401Interceptor();
 
 // registerLLMActions();
 const App: FC<any> = () => {
@@ -28,7 +31,7 @@ const App: FC<any> = () => {
 
   const baseURL = localStorage.getItem('baseURL') || getPathname()
   axios.defaults.baseURL = `${baseURL}/brave-api`;
-  const authorization = localStorage.getItem('authorization')
+  const authorization = localStorage.getItem('Authorization')
   if (authorization) {
     axios.defaults.headers.common['Authorization'] = `Bearer ${authorization}`;
 
@@ -44,9 +47,9 @@ const App: FC<any> = () => {
 
         const { status, data } = error.response;
         switch (status) {
-          // case 401:
-          //   window.location.href = "/login";
-          //   break;
+          case 401:
+            window.location.hash = "/login";
+            break;
           default:
             if (network == "CONNECT") {
               // debugger
