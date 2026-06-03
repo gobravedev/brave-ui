@@ -6,14 +6,15 @@ import { NavLink, Outlet, useLocation, useNavigate, useParams } from 'react-rout
 import { Header } from 'antd/es/layout/layout';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
-import { clearUserSession, setUserItem } from '@/store/userSlice'
+import { clearUserSession, loadActiveProject, setUserItem } from '@/store/userSlice'
 import { setSetting, setSseData } from '@/store/globalSlice'
+import { invoke } from "@/core/ui-system/invokeV2";
 
 import useMessage from 'antd/es/message/useMessage';
 import { useModal, useModals } from '@/hooks/useModal';
 import ContextModal from '@/components/context';
 import FormProject from '@/components/form-project';
-import { deleteProjectApi } from '@/api/project';
+import { activateProjectApi, deleteProjectApi, type ProjectItem } from '@/api/project';
 import { Project } from '@/type/project';
 import { useI18n } from '@/hooks/useI18n';
 import LanguageSelector from '@/components/setting-switcher/language';
@@ -235,7 +236,7 @@ const App: React.FC = () => {
 
     // const eventSourceRef :React.RefObject < EventSource | null> = useSSE(openNotification)
     useEffect(() => {
-        // loadProject()
+        dispatch(loadActiveProject() as any)
         getSetting()
     }, [])
     // const {
@@ -656,18 +657,18 @@ const App: React.FC = () => {
     ]
 
 
-    const loadProject = async () => {
-        if (!project_id) return;
-        const resp = await axios.get(`/project/find-by-project-id/${project_id}`)
-        // setProjectObj(resp.data)
-        dispatch(setUserItem({ projectObj: resp.data }))
-    }
+    // const loadProject = async () => {
+    //     if (!project_id) return;
+    //     const resp = await axios.get(`/project/find-by-project-id/${project_id}`)
+    //     // setProjectObj(resp.data)
+    //     dispatch(setUserItem({ projectObj: resp.data }))
+    // }
 
 
-    useEffect(() => {
+    // useEffect(() => {
 
-        loadProject()
-    }, [baseURL, project_id])
+    //     loadProject()
+    // }, [baseURL, project_id])
 
 
     return (
@@ -728,7 +729,25 @@ const App: React.FC = () => {
                 {/* 右侧：项目选择 */}
                 <Flex align="center" gap={"small"}>
                     {projectObj?.project_name && <Tooltip title={`Current Project: ${projectObj.project_id}`} placement="bottom">
-                        <Tag color={"blue"} style={{ marginRight: "0.5rem" }}>
+                        <Tag  onClick={async () => {
+                            try {
+                                const value = await invoke.projectTable.openAsync(undefined, {
+                                    title: "Switch Project",
+                                    width: 900,
+                                    footer: null,
+                                }) as ProjectItem
+                                if (!value?.project_id) {
+                                    return
+                                }
+
+                                await activateProjectApi({ project_id: value.project_id })
+                                await dispatch(loadActiveProject() as any)
+                                messageApi.success(`Switching Project: ${value.project_name}`)
+                            } catch (error) {
+                                // User canceled project switch modal.
+                            }
+
+                        }} color={"blue"} style={{ marginRight: "0.5rem",cursor:"pointer"}}>
                         {projectObj?.project_name}
                     </Tag>
                         </Tooltip>}

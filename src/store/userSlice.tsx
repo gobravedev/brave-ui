@@ -1,5 +1,5 @@
-import { el } from '@faker-js/faker'
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { getActiveProjectApi } from '@/api/project'
 import { getPathname } from "@/utils/utils";
 
 const locale = localStorage.getItem('locale')
@@ -8,11 +8,22 @@ const baseURL = localStorage.getItem('baseURL')
 const authorization = localStorage.getItem('authorization')
 const containerURL = localStorage.getItem('containerURL')
 const namespace = localStorage.getItem('namespace')
-const project = localStorage.getItem('project')
 const githubToken = localStorage.getItem('githubToken')
 const storeRepos = localStorage.getItem('storeRepos')
 const scmOrigin = localStorage.getItem('scmOrigin')
 const userInfo = localStorage.getItem('userInfo')
+
+export const loadActiveProject = createAsyncThunk(
+    'user/loadActiveProject',
+    async (_, { rejectWithValue }) => {
+        try {
+            const resp = await getActiveProjectApi()
+            return resp.data
+        } catch (error) {
+            return rejectWithValue(null)
+        }
+    }
+)
 
 export interface LoginUserInfo {
     id: string;
@@ -55,7 +66,7 @@ const contextSlice = createSlice({
         containerURL:containerURL?`${containerURL}`:"",
         authorization:authorization,
         namespace:namespace?`${namespace}`:`default`,
-        project:project?`${project}`:`default`,
+        project:"",
         projectObj:{},
         githubToken:githubToken,
         storeRepos:storeRepos?storeRepos:"[]",
@@ -85,9 +96,6 @@ const contextSlice = createSlice({
             if(action.payload.namespace){
                 localStorage.setItem('namespace', action.payload.namespace)
             }
-            if(action.payload.project){
-                localStorage.setItem('project', action.payload.project)
-            }
             if(action.payload.githubToken){
                 localStorage.setItem('githubToken', action.payload.githubToken)
             }
@@ -112,12 +120,20 @@ const contextSlice = createSlice({
         clearUserSession(state) {
             state.authorization = null;
             state.userInfo = null;
+            state.project = "";
+            state.projectObj = {};
             localStorage.removeItem('Authorization');
             localStorage.removeItem('authorization');
             localStorage.removeItem('RefreshToken');
             localStorage.removeItem('userInfo');
         },
     },
+    extraReducers: (builder) => {
+        builder.addCase(loadActiveProject.fulfilled, (state, action) => {
+            state.project = action.payload?.project_id || "";
+            state.projectObj = action.payload || {};
+        });
+    }
 })
 
 
