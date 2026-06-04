@@ -1,5 +1,5 @@
 {
-    "home": "主页",
+  "home": "主页",
   "description": "这是一个支持国际化的 React 应用。",
   "login": {
     "title": "生物信息分析平台",
@@ -19,7 +19,8 @@
     "submit": "登录",
     "themeTag": "主题",
     "light": "浅色",
-    "dark": "深色"
+    "dark": "深色",
+    "emailPlaceholder": "请输入邮箱",
+    "passwordPlaceholder": "请输入密码"
   }
-  }
-  
+}

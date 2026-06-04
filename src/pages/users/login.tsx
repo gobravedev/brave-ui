@@ -1,5 +1,5 @@
 import { FC, useMemo, useState } from "react";
-import { Button, Card, ConfigProvider, Divider, Form, Input, Select, Space, Tag, Typography, message, theme as antdTheme } from "antd";
+import { Button, Card, ConfigProvider, Divider, Form, Input, Select, Space, Tag, Typography, theme as antdTheme } from "antd";
 import { LockOutlined, MailOutlined, MoonOutlined, SunOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router";
 import { useDispatch } from "react-redux";
@@ -8,6 +8,7 @@ import axios from "axios";
 import { loginApi } from "@/api/auth";
 import { setUserItem } from "@/store/userSlice";
 import { useI18n } from "@/hooks/useI18n";
+import { useGlobalMessage } from "@/hooks/useGlobalMessage";
 
 type LoginFormValues = {
 	email: string;
@@ -21,7 +22,7 @@ const Login: FC = () => {
 	const { theme } = useSelector((state: any) => state.user);
 	const [form] = Form.useForm<LoginFormValues>();
 	const [loading, setLoading] = useState(false);
-
+	const message = useGlobalMessage();
 	const isDark = theme === "dark";
 	const pageStyle = useMemo(
 		() => ({
@@ -128,7 +129,7 @@ const Login: FC = () => {
 											{ type: "email", message: t("login.emailInvalid") },
 										]}
 									>
-										<Input prefix={<MailOutlined />} placeholder="" />
+										<Input prefix={<MailOutlined />} placeholder={t("login.emailPlaceholder")} />
 									</Form.Item>
 
 									<Form.Item
@@ -136,7 +137,7 @@ const Login: FC = () => {
 										name="password"
 										rules={[{ required: true, message: t("login.passwordRequired") }]}
 									>
-										<Input.Password prefix={<LockOutlined />} placeholder="" />
+										<Input.Password prefix={<LockOutlined />} placeholder={t("login.passwordPlaceholder")} />
 									</Form.Item>
 
 									<Form.Item style={{ marginBottom: 0 }}>

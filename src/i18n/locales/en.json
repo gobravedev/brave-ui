@@ -19,6 +19,8 @@
         "submit": "Sign In",
         "themeTag": "Theme",
         "light": "Light",
-        "dark": "Dark"
+        "dark": "Dark",
+        "emailPlaceholder": "Enter your email",
+        "passwordPlaceholder": "Enter your password"
     }
 }
