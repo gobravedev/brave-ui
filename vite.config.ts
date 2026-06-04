@@ -21,19 +21,27 @@ export default defineConfig({
     },
   },
   plugins: [react()],
-  server:{
-    allowedHosts:true,
-    proxy:{
+  server: {
+    allowedHosts: true,
+    proxy: {
       // '/api':{
       //   target: `http://localhost:3000`,
       //   ws: true
       // },
-      '/jupyter':{
+      '/jupyter': {
         target: `http://localhost:10100`,
         ws: true
-      },'/api':{
+      }, '/api': {
         target: `http://localhost:8084`,
         ws: true
+      }, "/brave-api/ws-group": {
+        target: "ws://localhost:8084",
+        ws: true,
+        changeOrigin: true,
+      }, "/brave-api": {
+        target: `http://localhost:8084`,
+        ws: true,
+        changeOrigin: true,
       }
     }
   }

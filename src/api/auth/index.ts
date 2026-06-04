@@ -32,3 +32,11 @@ export const loginApi = (payload: LoginRequest) => {
 		},
 	});
 };
+
+export const logoutApi = () => {
+	return http.post("/auth/logout", "", {
+		headers: {
+			accept: "application/json",
+		},
+	});
+};

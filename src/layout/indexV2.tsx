@@ -31,6 +31,7 @@ import { ActionDispatcher } from '@/llmv2/dispatcher';
 import ViewResolver from '@/core/ui-renderer/ViewResolver';
 import { useComponentStore } from '@/store-zustand/components';
 import { useUI } from '@/core/ui-system/useUI';
+import { logoutApi } from '@/api/auth';
 
 const { Content, Sider } = Layout;
 
@@ -118,8 +119,14 @@ const App: React.FC = () => {
         },
     ];
 
-    const handleUserMenuClick: MenuProps['onClick'] = ({ key }) => {
-        if (key === 'logout') {
+    const handleUserMenuClick: MenuProps['onClick'] = async ({ key }) => {
+        if (key !== 'logout') return;
+
+        try {
+            await logoutApi();
+        } catch (error) {
+            console.warn('logout api failed, fallback to local sign-out', error);
+        } finally {
             dispatch(clearUserSession());
             axios.defaults.headers.common['Authorization'] = '';
             window.location.hash = '/login';
