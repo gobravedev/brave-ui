@@ -42,6 +42,10 @@ export default defineConfig({
         target: `http://localhost:8084`,
         ws: true,
         changeOrigin: true,
+      }, "/container": {
+        target: `http://localhost:8084`,
+        ws: true,
+        changeOrigin: true,
       }
     }
   }

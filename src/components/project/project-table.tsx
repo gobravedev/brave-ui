@@ -19,12 +19,12 @@ const columns: ColumnsType<ProjectItem> = [
         dataIndex: "project_id",
         key: "project_id",
     },
-    {
-        title: "Description",
-        dataIndex: "description",
-        key: "description",
-        render: (text: string) => text || "-",
-    },
+    // {
+    //     title: "Description",
+    //     dataIndex: "description",
+    //     key: "description",
+    //     render: (text: string) => text || "-",
+    // },
 ];
 
 const ProjectTable: FC<ProjectTableProps> = ({ onOk, onCancel }) => {

@@ -65,7 +65,7 @@ const contextSlice = createSlice({
             : 'en_US',
         theme:theme?theme:"light",
         baseURL:baseURL?`${baseURL}`:getPathname(),
-        containerURL:containerURL?`${containerURL}`:"",
+        containerURL:containerURL?`${containerURL}`:getPathname(),
         authorization:authorization,
         refreshToken:refreshToken,
         namespace:namespace?`${namespace}`:`default`,
