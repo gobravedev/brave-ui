@@ -479,6 +479,13 @@ const App: React.FC = () => {
                     ]
                 },
             ]
+        },{
+            key: `/literature-intelligence`,
+            label: {
+                zh_CN: "文献情报",
+                en_US: "Literature Intelligence"
+            }
+
         }
 
 
@@ -718,6 +725,10 @@ const App: React.FC = () => {
                             if (k.key == "/psycmicrograph") {
                                 window.open(`${window.location.origin}${window.location.pathname}psycmicrograph.html`, "_blank")
                                 return
+                            }
+                            if (k.key == "/literature-intelligence") {
+                                window.open(`https://www.mbiolance.com/c/news/`, "_blank")
+                                return 
                             }
                             onMenuClick(k.key)
                             console.log(k)
