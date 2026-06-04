@@ -5,7 +5,8 @@ import { getPathname } from "@/utils/utils";
 const locale = localStorage.getItem('locale')
 const theme = localStorage.getItem('theme')
 const baseURL = localStorage.getItem('baseURL')
-const authorization = localStorage.getItem('authorization')
+const authorization = localStorage.getItem('Authorization') || localStorage.getItem('authorization')
+const refreshToken = localStorage.getItem('RefreshToken')
 const containerURL = localStorage.getItem('containerURL')
 const namespace = localStorage.getItem('namespace')
 const githubToken = localStorage.getItem('githubToken')
@@ -42,6 +43,7 @@ interface UserState {
     theme:string;
     baseURL:string;
     authorization:string|null;
+    refreshToken:string|null;
     containerURL:string;
     namespace:string;
     projectObj:any;
@@ -65,6 +67,7 @@ const contextSlice = createSlice({
         baseURL:baseURL?`${baseURL}`:getPathname(),
         containerURL:containerURL?`${containerURL}`:"",
         authorization:authorization,
+        refreshToken:refreshToken,
         namespace:namespace?`${namespace}`:`default`,
         project:"",
         projectObj:{},
@@ -87,8 +90,21 @@ const contextSlice = createSlice({
             if(action.payload.baseURL){
                 localStorage.setItem('baseURL', action.payload.baseURL)
             }
-            if(action.payload.authorization){
-                localStorage.setItem('authorization', action.payload.authorization)
+            if(action.payload.authorization !== undefined){
+                if(action.payload.authorization){
+                    localStorage.setItem('Authorization', action.payload.authorization)
+                } else {
+                    localStorage.removeItem('Authorization')
+                }
+                // 兼容旧版本遗留 key，统一清理小写键
+                localStorage.removeItem('authorization')
+            }
+            if(action.payload.refreshToken !== undefined){
+                if(action.payload.refreshToken){
+                    localStorage.setItem('RefreshToken', action.payload.refreshToken)
+                } else {
+                    localStorage.removeItem('RefreshToken')
+                }
             }
             if(action.payload.containerURL){
                 localStorage.setItem('containerURL', action.payload.containerURL)
@@ -119,6 +135,7 @@ const contextSlice = createSlice({
         },
         clearUserSession(state) {
             state.authorization = null;
+            state.refreshToken = null;
             state.userInfo = null;
             state.project = "";
             state.projectObj = {};

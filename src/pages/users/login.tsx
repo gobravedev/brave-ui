@@ -67,12 +67,13 @@ const Login: FC = () => {
 				return;
 			}
 
-			localStorage.setItem("Authorization", data.token);
-			localStorage.setItem("authorization", data.token);
-			if (data.refresh_token) {
-				localStorage.setItem("RefreshToken", data.refresh_token);
-			}
-			dispatch(setUserItem({ authorization: data.token, userInfo: data.user }));
+			dispatch(
+				setUserItem({
+					authorization: data.token,
+					refreshToken: data.refresh_token ?? null,
+					userInfo: data.user,
+				})
+			);
 			axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
 
 			message.success(data.message || "Login successful");

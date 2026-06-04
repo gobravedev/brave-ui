@@ -84,8 +84,13 @@ function buildRealtimeUrl(
   const normalizedBase =
     transport === "websocket" ? toWebSocketBase(baseURL) : baseURL;
 
+  if (transport === "websocket") {
+    // WebSocket auth should rely on cookie/session instead of exposing token in URL.
+    return `${normalizedBase}${pathname}`;
+  }
+
   return authorization
-    ? `${normalizedBase}${pathname}?authorization=${authorization}`
+    ? `${normalizedBase}${pathname}?authorization=${encodeURIComponent(authorization)}`
     : `${normalizedBase}${pathname}`;
 }
 
