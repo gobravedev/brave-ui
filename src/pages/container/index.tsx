@@ -428,8 +428,11 @@ const ContainerModal: FC<any> = ({ visible, params, onClose, callback }) => {
             <Form.Item name={"image"} label="Image" rules={[{ required: true, message: 'This field is required!' }]}>
                 <Input ></Input>
             </Form.Item>
-            <Form.Item name={"container_key"} label="Container Key" >
+            {/* <Form.Item name={"container_key"} label="Container Key" >
                 <Input disabled ></Input>
+            </Form.Item> */}
+            <Form.Item name={"volumes"} label="Volumes" >
+                <TextArea  ></TextArea>
             </Form.Item>
             <Form.Item name={"description"} label="Description">
                 <TextArea ></TextArea>

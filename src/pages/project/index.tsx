@@ -5,6 +5,8 @@ import { Alert, Button, Card, Col, Empty, Flex, List, message, Popconfirm, Row, 
 import { chinese } from './chinese'
 import { english } from './english'
 import { introduction } from './introduction'
+import ComponentsDetailsRender from '../../core/ui-renderer/ViewResolver';
+import { renderViewButton } from "@/utils/render-view-btn"
 
 import { EmbedLLM } from '../../components/embed-llm'
 // import Demo from "@/components/smart-table"
@@ -15,11 +17,13 @@ import { useDispatch, useSelector } from "react-redux"
 import { setUserItem } from "@/store/userSlice"
 import { useModal } from "@/hooks/useModal"
 import FormProject from "@/components/form-project"
+import { ReloadOutlined } from "@ant-design/icons"
 import { useComponentRegistry } from "@/core/component-registry/registry-context"
 import { useSideViewContext } from "@/context/side/SideViewContext"
 const Project: FC<any> = () => {
     const [data, setData] = useState<any>(introduction)
     const { ref: containerRef, top, isSticky } = useStickyTop(576);
+    const [view, setView] = useState<any>("analysisDocView")
     const { project, projectObj, baseURL } = useSelector((state: any) => state.user);
     const { modal, openModal, closeModal } = useModal();
     const registry = useComponentRegistry();
@@ -82,20 +86,27 @@ const Project: FC<any> = () => {
             variant="borderless" size="small" extra={
                 <Flex gap={"small"}>
 
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        openModal("projectForm", { project_id: project })
-                    }}>Edit</Button>
+                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        // openModal("projectForm", { project_id: project })
+                        setView("analysisDocEditor")
+                        
+                    }}>Edit</Button> */}
+                     {renderViewButton(view, setView, "analysisDocView", "View")}
+                    {renderViewButton(view, setView, "analysisDocEditor", "Edit")}
 
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                    <Button icon={<ReloadOutlined></ReloadOutlined>} size="small" color="cyan" variant="solid" onClick={() => {
                         loadProject()
                         // setProjectObj(resp.data)
                         // dispatch(setUserItem({ projectObj: resp.data }))
-                    }}>Refresh</Button>
+                    }}></Button>
                 </Flex>
 
             }>
 
-            {projectObj?.description ? <Markdown data={projectObj?.description}></Markdown> : <Empty />}
+            <ComponentsDetailsRender view={view} 
+            project_id={project}
+            description={projectObj?.description}></ComponentsDetailsRender>
+            {/* {projectObj?.description ? <Markdown data={projectObj?.description}></Markdown> : <Empty />} */}
         </Card>
         {/* <Row
             ref={containerRef}
@@ -150,11 +161,11 @@ const Project: FC<any> = () => {
 
       
         </Row> */}
-        <FormProject
+        {/* <FormProject
             research={true}
             params={modal.params}
             visible={modal.key == "projectForm" && modal.visible}
-            onClose={closeModal} />
+            onClose={closeModal} /> */}
     </div>
 }
 

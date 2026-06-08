@@ -61,10 +61,14 @@ export const CreateOrUpdateNamespace: FC<any> = ({ visible, onClose, params, cal
             <Form.Item name="name" label="Name" rules={[{ required: true, message: "This field cannot be empty!" }]}>
                 <Input />
             </Form.Item>
-            <Form.Item name="volumes" label="Volumes" rules={[{ required: true, message: "This field cannot be empty!" }]}>
+            <Form.Item name="volumes" label="Volumes" >
                 <TextArea />
             </Form.Item>
-            <Form.Item name="resources" label="Resource" rules={[{ required: true, message: "This field cannot be empty!" }]}>
+
+                   <Form.Item name="envionment" label="Environment Variables" >
+                <TextArea />
+            </Form.Item>
+            <Form.Item name="resources" label="Resource" >
                 <TextArea placeholder={JSON.stringify({
                     "cpus": "10",
                     "memory": "10.GB",
