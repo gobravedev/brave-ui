@@ -1,51 +1,109 @@
 import { FC, useEffect, useState } from "react"
-import Markdown from "../../components/markdown"
-import { Alert, Button, Card, Col, Empty, Flex, List, message, Popconfirm, Row, Segmented, Skeleton, Tabs, Tag } from "antd"
-
-import { chinese } from './chinese'
-import { english } from './english'
-import { introduction } from './introduction'
+import { Button, Card, Empty, Flex, Popconfirm, Tabs } from "antd"
 import ComponentsDetailsRender from '../../core/ui-renderer/ViewResolver';
 import { renderViewButton } from "@/utils/render-view-btn"
-
-import { EmbedLLM } from '../../components/embed-llm'
-// import Demo from "@/components/smart-table"
-import axios from "axios"
-import DashboardRender from "./dashboard-render"
-import { useStickyTop } from "@/hooks/useStickyTop"
-import { useDispatch, useSelector } from "react-redux"
-import { setUserItem } from "@/store/userSlice"
-import { useModal } from "@/hooks/useModal"
-import FormProject from "@/components/form-project"
+import { useSelector } from "react-redux"
 import { ReloadOutlined } from "@ant-design/icons"
-import { useComponentRegistry } from "@/core/component-registry/registry-context"
 import { useSideViewContext } from "@/context/side/SideViewContext"
+import { invoke } from "@/core/ui-system/invokeV2";
+import { deleteProjectReportApi, getProjectReportDetailApi, listProjectReportApi, type ProjectReportDetailItem, type ProjectReportItem } from "@/api/project";
+import { useGlobalMessage } from "@/hooks/useGlobalMessage";
 const Project: FC<any> = () => {
-    const [data, setData] = useState<any>(introduction)
-    const { ref: containerRef, top, isSticky } = useStickyTop(576);
     const [view, setView] = useState<any>("analysisDocView")
-    const { project, projectObj, baseURL } = useSelector((state: any) => state.user);
-    const { modal, openModal, closeModal } = useModal();
-    const registry = useComponentRegistry();
-    useEffect(() => {
-        console.log("registry", registry)
-    }, [])
-    const onChange = (value: any) => {
-        if (value == "chinese") {
-            setData(chinese)
-        } else if (value == "english") {
-            setData(english)
+    const { project } = useSelector((state: any) => state.user);
+    const { setSideView, setSideOptions } = useSideViewContext();
+    const message = useGlobalMessage()
+    const [reportList, setReportList] = useState<ProjectReportItem[]>([])
+    const [activeReport, setActiveReport] = useState<ProjectReportDetailItem>()
+    const [activeReportId, setActiveReportId] = useState<string>()
+
+    const loadProjectReports = async (preferReportID?: string   ) => {
+        if (!project) return;
+
+        const listResp = await listProjectReportApi(project)
+
+        const listData = Array.isArray(listResp.data) ? listResp.data : []
+
+        setReportList(listData)
+
+        if (listData.length === 0) {
+            setActiveReportId(undefined)
+            setActiveReport(undefined)
+            return
+        }
+
+        const fallbackID = listData[0]?.id
+        const nextID = (preferReportID && listData.some((item:any) => item.id === preferReportID))
+            ? preferReportID
+            : fallbackID
+        setActiveReportId(nextID)
+    }
+
+    const loadReportDetail = async (id?: string ) => {
+        if (!id) {
+            setActiveReport(undefined)
+            return
+        }
+
+        const resp = await getProjectReportDetailApi(id)
+        setActiveReport(resp.data)
+    }
+
+    const openCreateReportModal = async () => {
+        if (!project) return
+        try {
+            const created = await invoke.projectReportItemForm.openAsync(
+                {
+                    mode: "create",
+                    project_id: project,
+                },
+                {
+                    title: "Create Project Report Item",
+                    footer: null,
+                    width: 560,
+                }
+            )
+            await loadProjectReports(created?.id)
+        } catch {
         }
     }
-    const dispatch = useDispatch()
 
-    const [panel, setPanel] = useState<string>("llm")
-    const loadProject = async () => {
-        const resp = await axios.get(`/project/find-by-project-id/${project}`)
-        // setQueryProject(resp.data)
-        dispatch(setUserItem({ projectObj: resp.data }))
+    const openUpdateReportModal = async () => {
+        if (!activeReport) {
+            message.warning("Please select a report tab first")
+            return
+        }
+
+        try {
+            await invoke.projectReportItemForm.openAsync(
+                {
+                    mode: "update",
+                    project_id: project,
+                    report: activeReport,
+                },
+                {
+                    title: "Update Project Report Item",
+                    footer: null,
+                    width: 560,
+                }
+            )
+            await loadProjectReports(activeReport.id)
+        } catch {
+        }
     }
-    const { setSideView, sideView, sideOptions, setSideOptions } = useSideViewContext();
+
+    const deleteActiveReport = async () => {
+        if (!activeReport) {
+            message.warning("Please select a report tab first")
+            return
+        }
+
+        await deleteProjectReportApi({
+            id: activeReport.id,
+        })
+        message.success("Deleted successfully")
+        await loadProjectReports()
+    }
 
 
     useEffect(() => {
@@ -64,6 +122,15 @@ const Project: FC<any> = () => {
             setSideView("llm-card")
         }
     }, [])
+
+    useEffect(() => {
+        loadProjectReports()
+    }, [project])
+
+    useEffect(() => {
+        loadReportDetail(activeReportId)
+    }, [activeReportId])
+
     return <div >
         <Card
             style={{
@@ -79,93 +146,48 @@ const Project: FC<any> = () => {
                     display: "flex",
                     flexDirection: "column",
                     height: " 100%",
-                    padding: 0,
+                    // padding: 0,
                     overflowY: "auto"
                 }
             }}
             variant="borderless" size="small" extra={
                 <Flex gap={"small"}>
-
-                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        // openModal("projectForm", { project_id: project })
-                        setView("analysisDocEditor")
-                        
-                    }}>Edit</Button> */}
-                     {renderViewButton(view, setView, "analysisDocView", "View")}
+                    {renderViewButton(view, setView, "analysisDocView", "View")}
                     {renderViewButton(view, setView, "analysisDocEditor", "Edit")}
 
+                    <Button size="small" color="cyan" variant="solid" onClick={openCreateReportModal}>Add Item</Button>
+                    <Button size="small" color="cyan" variant="solid" onClick={openUpdateReportModal}>Edit Item</Button>
+                    <Popconfirm title="Delete selected report item?" onConfirm={deleteActiveReport}>
+                        <Button size="small" color="red" variant="solid">Delete Item</Button>
+                    </Popconfirm>
+
                     <Button icon={<ReloadOutlined></ReloadOutlined>} size="small" color="cyan" variant="solid" onClick={() => {
-                        loadProject()
-                        // setProjectObj(resp.data)
-                        // dispatch(setUserItem({ projectObj: resp.data }))
+                        loadProjectReports(activeReportId)
                     }}></Button>
                 </Flex>
 
             }>
+                {/* {JSON.stringify(reportList)} */}
+            {reportList.length > 0 ? <>
+                <Tabs
+                    size="small"
 
-            <ComponentsDetailsRender view={view} 
-            project_id={project}
-            description={projectObj?.description}></ComponentsDetailsRender>
-            {/* {projectObj?.description ? <Markdown data={projectObj?.description}></Markdown> : <Empty />} */}
+                    activeKey={activeReportId ? String(activeReportId) : undefined}
+                    onChange={(key) => setActiveReportId(key)}
+                    items={reportList.map((item) => ({
+                        key: String(item.id),
+                        label: item.title || `Untitled-${item.id}`,
+                    }))}
+                />
+
+                <ComponentsDetailsRender view={view}
+                    project_id={project}
+                    report={activeReport}
+                    content={activeReport?.content}
+                    onSaved={() => loadReportDetail(activeReport?.id)}></ComponentsDetailsRender>
+            </> : <Empty description="No project report item, please create one first" />}
         </Card>
-        {/* <Row
-            ref={containerRef}
-            gutter={[isSticky ? 16 : 0, 16]}>
-            <Col lg={18} sm={18} xs={24}>
 
-               
-            </Col>
-            <Col lg={6} sm={6} xs={24}
-                style={isSticky ? {
-                    overflow: "hidden",
-                    // marginTop: "1rem",
-                    position: "sticky",
-                    top: `${top}px`, // 吸顶距离
-                    alignSelf: "flex-start", // 避免被stretch
-                    height: `calc(100vh - ${top}px - 1rem )`, // 可选：固定高度，让内部滚动
-                } : {}}
-            >
-                <Card
-                    style={{
-                        flex: 1,
-                        display: "flex",
-                        flexDirection: "column",
-                        height: " 100%"
-                    }}
-                    styles={{
-                        body: {
-                            // height: "90%",
-                            flex: 1,
-                            overflowY: "auto"
-                        }
-                    }}
-                    title="Brave Dashboard" size="small" extra={<>
-                        <Segmented size="small" value={panel}
-                            onChange={(val: any) => setPanel(val)}
-                            options={[
-                                {
-                                    label: 'LLM',
-                                    value: 'llm'
-                                }, {
-                                    label: 'Introduce',
-                                    value: 'markdown'
-                                }
-                            ]} />
-                    </>} >
-                    <DashboardRender
-                        view={panel}
-                        introduction={introduction}
-                    ></DashboardRender>
-                </Card>
-            </Col>
-
-      
-        </Row> */}
-        {/* <FormProject
-            research={true}
-            params={modal.params}
-            visible={modal.key == "projectForm" && modal.visible}
-            onClose={closeModal} /> */}
     </div>
 }
 
