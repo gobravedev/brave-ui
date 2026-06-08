@@ -36,7 +36,7 @@
 
 import React, { FC, useEffect, useState } from "react";
 import axios from "axios";
-import { Breadcrumb, Button, Card, Flex, Input, List, Pagination, Space, Typography } from "antd";
+import { Breadcrumb, Button, Card, Flex, Input, List, Pagination, Space, Tooltip, Typography } from "antd";
 const { Search } = Input
 const { Text } = Typography
 type FileItem = {
@@ -118,12 +118,13 @@ const SysFileBrowser1: FC<any> = ({ output_dir: dir }) => {
 
 
 
-const SysFileBrowser: FC<any> = ({ type,path, onSelectFile, onClose }) => {
+const SysFileBrowser: FC<any> = ({ type, path, onSelectFile, onClose }) => {
     const [files, setFiles] = useState<FileItem[]>([])
     const [currentPath, setCurrentPath] = useState(path)
     const [keyword, setKeyword] = useState("")
     const [page, setPage] = useState(1)
     const [total, setTotal] = useState(0)
+    const [dir, setDir] = useState("")
     const limit = 10
     const { project } = useSelector((state: any) => state.user);
 
@@ -136,20 +137,21 @@ const SysFileBrowser: FC<any> = ({ type,path, onSelectFile, onClose }) => {
             params: {
                 path: pathVal,
                 keyword: keywordVal,
-                type:type,
+                type: type,
                 page: pageNum,
                 limit,
             },
         })
         setFiles(res.data.items)
         setTotal(res.data.total)
+        setDir(res.data.dir)
         setCurrentPath(pathVal)
         setPage(pageNum)
     }
 
     useEffect(() => {
         loadFiles(path)
-    }, [path,project, type])
+    }, [path, project, type])
 
     const handleNavigate = (name: string) => {
         loadFiles(`${currentPath}/${name}`, "", 1)
@@ -166,7 +168,7 @@ const SysFileBrowser: FC<any> = ({ type,path, onSelectFile, onClose }) => {
     }
 
     const handleSelectFile = (file: FileItem) => {
-        let path =  file.name
+        let path = file.name
         if (currentPath !== "/") {
             path = currentPath + "/" + file.name
         }
@@ -181,7 +183,10 @@ const SysFileBrowser: FC<any> = ({ type,path, onSelectFile, onClose }) => {
 
     return (
         <Card
-            title="File browser"
+            title={<Tooltip title={dir}>
+
+                File browser
+            </Tooltip>}
             size="small"
             styles={{
                 body: {

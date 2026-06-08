@@ -132,6 +132,9 @@ const ContainerApp: FC<any> = ({ keys = [] }) => {
 
                             newParams.envionment = JSON.stringify(templete.envionment)
                             newParams.labels = JSON.stringify(templete.labels)
+                            if(newParams.volumes){
+                                newParams.volumes = JSON.stringify(newParams.volumes)
+                            }
                             console.log(newParams)
 
                             await axios.post(`/container/add-or-update-container`, newParams)
