@@ -7,7 +7,99 @@ import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import 'katex/dist/katex.min.css'
 import { useSelector } from "react-redux";
+import ViewResolver from "@/core/ui-renderer/ViewResolver";
+import type { ViewRenderProps } from "@/core/component-registry/registry-types";
 import './index.css'
+
+const VIEW_RESOLVER_TOKEN_REGEXP = /@@VIEW_RESOLVER_(\d+)@@/g
+
+const parsePrimitiveValue = (rawValue: string) => {
+  const value = rawValue.trim()
+  if (value === 'true') return true
+  if (value === 'false') return false
+  if (value === 'null') return null
+  if (value === 'undefined') return undefined
+  if (/^-?\d+(\.\d+)?$/.test(value)) return Number(value)
+  return value
+}
+
+const parseViewResolverProps = (attrsText: string): Record<string, unknown> => {
+  const props: Record<string, unknown> = {}
+  const attrRegexp = /([A-Za-z_][A-Za-z0-9_-]*)\s*=\s*(?:"([^"]*)"|'([^']*)'|\{([^}]*)\}|([^\s"'=<>`]+))/g
+
+  let match: RegExpExecArray | null
+  while ((match = attrRegexp.exec(attrsText)) !== null) {
+    const key = match[1]
+    const raw = match[2] ?? match[3] ?? match[4] ?? match[5] ?? ''
+    const unwrapped = raw.replace(/^['"]|['"]$/g, '')
+    props[key] = parsePrimitiveValue(unwrapped)
+  }
+
+  return props
+}
+
+type SafeViewResolverProps = {
+  view: string
+} & Record<string, unknown>
+
+const isValidViewResolverProps = (props: Record<string, unknown>): props is SafeViewResolverProps => {
+  return typeof props.view === 'string' && props.view.length > 0
+}
+
+const replaceViewResolverTags = (text: string) => {
+  const viewResolvers: Record<string, Record<string, unknown>> = {}
+  let index = 0
+
+  const markdownText = text.replace(
+    /<ViewResolver\b([^>]*)\/?>(?:\s*<\/ViewResolver>)?/g,
+    (_match, attrsText: string) => {
+      const token = `@@VIEW_RESOLVER_${index}@@`
+      viewResolvers[token] = parseViewResolverProps(attrsText || '')
+      index += 1
+      return token
+    }
+  )
+
+  return { markdownText, viewResolvers }
+}
+
+const renderTextWithViewResolvers = (
+  value: string,
+  viewResolvers: Record<string, Record<string, unknown>>
+) => {
+  const segments: any[] = []
+  let lastIndex = 0
+  let match: RegExpExecArray | null
+
+  VIEW_RESOLVER_TOKEN_REGEXP.lastIndex = 0
+  while ((match = VIEW_RESOLVER_TOKEN_REGEXP.exec(value)) !== null) {
+    const token = match[0]
+    if (match.index > lastIndex) {
+      segments.push(value.slice(lastIndex, match.index))
+    }
+
+    const props = viewResolvers[token]
+    if (props && isValidViewResolverProps(props)) {
+      const viewRenderProps = props as ViewRenderProps
+      segments.push(
+        <ViewResolver
+          key={`${token}-${match.index}`}
+          {...viewRenderProps}
+        />
+      )
+    } else {
+      segments.push(token)
+    }
+    lastIndex = match.index + token.length
+  }
+
+  if (lastIndex < value.length) {
+    segments.push(value.slice(lastIndex))
+  }
+
+  if (segments.length === 0) return value
+  return segments
+}
 
 const isAbsoluteOrSpecialUrl = (url: string) => {
   return /^(https?:)?\/\//i.test(url) || /^(data:|blob:|#)/i.test(url)
@@ -23,12 +115,16 @@ const resolveImageSrc = (baseURL: string, src?: string) => {
 const Markdown: FC<any> = ({ data }) => {
 
   const { baseURL, project, theme } = useSelector((state: any) => state.user)
-  const parsedData = useMemo(() => {
+  const parsedResult = useMemo(() => {
     if (!data || typeof data !== 'string') return data
-    return data.replace(/@report:([A-Za-z0-9-]+)/g, (_match, key) => {
+    const reportReplaced = data.replace(/@report:([A-Za-z0-9-]+)/g, (_match, key) => {
       return `[点击查看](#/analysis-report?project=${project}&key=${key})`
     })
-  }, [data, baseURL, project])
+    return replaceViewResolverTags(reportReplaced)
+  }, [data, project])
+
+  const parsedData = typeof parsedResult === 'string' ? parsedResult : parsedResult?.markdownText
+  const viewResolvers = typeof parsedResult === 'string' ? {} : (parsedResult?.viewResolvers || {})
 
   const isDarkTheme = theme === 'dark'
   const markdownThemeClass = isDarkTheme ? 'markdown-theme-dark' : 'markdown-theme-light'
@@ -92,8 +188,19 @@ const Markdown: FC<any> = ({ data }) => {
           <blockquote className="markdown-blockquote" {...props}>{children}</blockquote>
         ),
         p: ({ node, children }) => {
-          // 如果是单张图片，改用 <div>
-          return <div>{children}</div>
+          const normalizedChildren = Array.isArray(children) ? children : [children]
+          return (
+            <div>
+              {normalizedChildren.map((child, index) => {
+                if (typeof child !== 'string') return child
+                return (
+                  <span key={`md-p-${index}`}>
+                    {renderTextWithViewResolvers(child, viewResolvers)}
+                  </span>
+                )
+              })}
+            </div>
+          )
         }
       }}
       ></ReactMarkdown>

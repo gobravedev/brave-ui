@@ -22,6 +22,9 @@ export default defineConfig({
   },
   plugins: [react()],
   server: {
+     watch: {
+      usePolling: true,
+    },
     allowedHosts: true,
     proxy: {
       // '/api':{
