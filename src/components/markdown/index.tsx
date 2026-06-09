@@ -83,6 +83,14 @@ const Markdown: FC<any> = ({ data }) => {
             {props.alt ? <div className="markdown-image__caption">{props.alt}</div> : null}
           </div>
         ),
+        table: ({ node, children, ...props }) => (
+          <div className="markdown-table-wrap">
+            <table className="markdown-table" {...props}>{children}</table>
+          </div>
+        ),
+        blockquote: ({ node, children, ...props }) => (
+          <blockquote className="markdown-blockquote" {...props}>{children}</blockquote>
+        ),
         p: ({ node, children }) => {
           // 如果是单张图片，改用 <div>
           return <div>{children}</div>
