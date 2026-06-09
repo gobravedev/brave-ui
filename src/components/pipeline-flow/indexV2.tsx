@@ -1,57 +1,23 @@
 import {
   Background,
   Controls,
-  MiniMap,
+  Handle,
+  type Node,
+  type Edge,
+  Position,
   ReactFlow,
   addEdge,
   applyEdgeChanges,
-  applyNodeChanges
+  applyNodeChanges,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import axios from 'axios';
-import { useCallback, useEffect, useState } from 'react';
-import { Button, Card, Popover } from 'antd';
+import { useCallback, useEffect, useMemo } from 'react';
+import { Button, Popover, Tag, Tooltip, theme } from 'antd';
 import { CodeOutlined, EditOutlined } from '@ant-design/icons';
 
 import { memo } from 'react';
-import { savePipelineComponentsEdgesApi } from '@/api/pipeline';
-
-const DEFAULT_HANDLE_STYLE = {
-  width: 10,
-  height: 10,
-  bottom: -5,
-};
-export const CustomNode2 = memo(({ data, isConnectable }: any) => {
-  return (
-    <>
-      <div style={{ padding: 25 }}>
-        <div>Node</div>
-        <Handle
-          type="source"
-          id="red"
-          position={Position.Bottom}
-          style={{ ...DEFAULT_HANDLE_STYLE, left: '15%', background: 'red' }}
-          onConnect={(params) => console.log('handle onConnect', params)}
-          isConnectable={isConnectable}
-        />
-        <Handle
-          type="source"
-          position={Position.Bottom}
-          id="blue"
-          style={{ ...DEFAULT_HANDLE_STYLE, left: '50%', background: 'blue' }}
-          isConnectable={isConnectable}
-        />
-        <Handle
-          type="target"
-          position={Position.Bottom}
-          id="orange"
-          style={{ ...DEFAULT_HANDLE_STYLE, left: '85%', background: 'orange' }}
-          isConnectable={isConnectable}
-        />
-      </div>
-    </>
-  );
-});
+import { useOutletContext } from 'react-router';
+import { invoke } from '@/core/ui-system/invokeV2';
 
 // const initialNodes = [
 //   {
@@ -107,11 +73,44 @@ export const CustomNode2 = memo(({ data, isConnectable }: any) => {
 //     type: 'smoothstep',
 //   },
 // ];
-const nodeTypes = { custom: CustomNode };
+const NODE_MIN_WIDTH = 260;
+const PORT_ROW_HEIGHT = 28;
 
-export default function App({ nodes, edges, setNodes, setEdges }: { nodes: any[], edges: any[], setNodes: any, setEdges: any }) {
+const ioColorByKind: Record<string, string> = {
+  fastq: '#5B8FF9',
+  bam: '#36CFC9',
+  vcf: '#9254DE',
+  matrix: '#73D13D',
+  report: '#FAAD14',
+  default: '#8C8C8C',
+};
 
-  const { messageApi } = useOutletContext<any>()
+function inferPortColor(port: any): string {
+  const kind = String(port?.type || port?.format || '').toLowerCase();
+  return ioColorByKind[kind] || ioColorByKind.default;
+}
+
+function formatPortTitle(port: any): string {
+  const primary = port?.display_name || port?.name || port?.id || 'port';
+  const dataType = port?.type || port?.format || '';
+  return dataType ? `${primary} (${dataType})` : primary;
+}
+
+export default function App({
+  nodes,
+  edges,
+  setNodes,
+  setEdges,
+}: {
+  nodes: Node[];
+  edges: Edge[];
+  setNodes: any;
+  setEdges: any;
+}) {
+  const { token } = theme.useToken();
+  const isDark = token.colorBgBase === '#000';
+
+  const { messageApi } = useOutletContext<any>();
 
   // useEffect(() => {
   //   setNodes(nodes)
@@ -132,6 +131,8 @@ export default function App({ nodes, edges, setNodes, setEdges }: { nodes: any[]
     (params: any) => setEdges((edgesSnapshot: any) => addEdge(params, edgesSnapshot)),
     [],
   );
+
+  const nodeTypes = useMemo(() => ({ custom: CustomNode }), []);
 
   const deleteSelectedElements = useCallback(() => {
     const selectedNodeIds = new Set(
@@ -213,6 +214,7 @@ export default function App({ nodes, edges, setNodes, setEdges }: { nodes: any[]
       {/* {JSON.stringify(edges)} */}
 
       <ReactFlow
+        className="pipeline-flow-theme"
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
@@ -223,74 +225,260 @@ export default function App({ nodes, edges, setNodes, setEdges }: { nodes: any[]
         deleteKeyCode={null}
         fitView
       >
-        <Controls />
-        <MiniMap />
+        <Controls
+          position="bottom-left"
+          style={{
+            border: `1px solid ${token.colorBorderSecondary}`,
+            borderRadius: 8,
+            background: token.colorBgElevated,
+            boxShadow: isDark ? '0 2px 8px rgba(0, 0, 0, 0.35)' : '0 2px 8px rgba(0, 0, 0, 0.08)',
+          }}
+        />
         <Background gap={12} size={1} />
       </ReactFlow>
+      <style>
+        {`
+          .pipeline-flow-theme .react-flow__controls-button {
+            background: ${token.colorBgElevated};
+            border-bottom: 1px solid ${token.colorBorderSecondary};
+            color: ${token.colorText};
+          }
+          .pipeline-flow-theme .react-flow__controls-button:hover {
+            background: ${token.colorFillSecondary};
+          }
+          .pipeline-flow-theme .react-flow__controls-button svg {
+            fill: ${token.colorText};
+          }
+          .pipeline-flow-theme .react-flow__minimap {
+            background: ${token.colorBgElevated};
+          }
+        `}
+      </style>
       {/* {JSON.stringify(initialNodes,null,2)} */}
 
     </div>
   );
 }
 
-
-// CustomNode.tsx
-import React from 'react';
-import { Handle, Position } from '@xyflow/react';
-import { useOutletContext } from 'react-router';
-import { invoke } from '@/core/ui-system/invokeV2';
-
-export function CustomNode({ data }: any) {
+export const CustomNode = memo(({ data, selected, isConnectable }: any) => {
+  const { token } = theme.useToken();
   const inputs = data.inputs || [];
   const outputs = data.outputs || [];
-  const onEditDetail = data?.onEditDetail;
-  const onCodeDetail = data?.onCodeDetail;
+  const bioMeta = data.bioMeta || {};
+  const componentType = data.componentType || 'script';
+  const isDark = token.colorBgBase === '#000';
+  const accentColor = data.color || token.colorPrimary;
+  const baseBorder = selected ? token.colorPrimary : token.colorBorderSecondary;
+  const cardBg = token.colorBgContainer;
+  const titleColor = token.colorText;
+  const subTextColor = token.colorTextSecondary;
 
   return (
     <div
       style={{
-        background: data.color || '#1976d2',
-        color: 'white',
-        padding: 10,
-        borderRadius: 12,
-        minWidth: 150,
+        background: cardBg,
+        color: titleColor,
+        padding: '10px 10px 8px 10px',
+        borderRadius: 10,
+        minWidth: NODE_MIN_WIDTH,
         position: 'relative',
+        border: `1px solid ${baseBorder}`,
+        boxShadow: selected
+          ? `0 0 0 1px ${token.colorPrimaryBorder}, inset 3px 0 0 0 ${accentColor}`
+          : `${isDark ? '0 1px 3px rgba(0, 0, 0, 0.4)' : '0 1px 3px rgba(0, 0, 0, 0.08)'}, inset 3px 0 0 0 ${accentColor}`,
       }}
     >
-      <div style={{ fontWeight: 'bold', marginBottom: 4 }}>{data.label}</div>
-
-      {/* 输入口 */}
-      {inputs.map((input: any, index: number) => (
-        <Popover key={index} content={<div>{input.id} ({input.id})</div>}>
-          <Handle
-            key={input.id}
-            type="target"
-            position={Position.Left}
-            id={input.id}
-            style={{ top: 30 + index * 20, background: '#555' }}
-          /></Popover>
-      ))}
-
-      {/* 输出口 */}
-      {outputs.map((output: any, index: number) => (
-        <Popover key={index} content={<div>{output.id} ({output.id})</div>}>
-          <Handle
-            key={output.id}
-            type="source"
-            position={Position.Right}
-            id={output.id}
-            style={{ top: 30 + index * 20, background: '#888' }}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: 6,
+          gap: 8,
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            fontWeight: 700,
+            fontSize: 13,
+            lineHeight: 1.3,
+            maxWidth: 170,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+          title={data.label}
+        >
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              minWidth: 8,
+              borderRadius: '50%',
+              background: accentColor,
+              boxShadow: selected ? `0 0 0 2px ${accentColor}33` : 'none',
+            }}
           />
-        </Popover>
+          {data.label}
+        </div>
+        <Tag
+          color="default"
+          style={{
+            marginInlineEnd: 0,
+            borderRadius: 999,
+            border: `1px solid ${token.colorBorderSecondary}`,
+            color: subTextColor,
+            background: token.colorFillQuaternary,
+            fontSize: 10,
+            textTransform: 'uppercase',
+          }}
+        >
+          {componentType}
+        </Tag>
+      </div>
 
-      ))}
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+        <Tag color="default" style={{ marginInlineEnd: 0, borderRadius: 999, fontSize: 10 }}>
+          IN {inputs.length}
+        </Tag>
+        <Tag color="default" style={{ marginInlineEnd: 0, borderRadius: 999, fontSize: 10 }}>
+          OUT {outputs.length}
+        </Tag>
+        {bioMeta?.assay ? (
+          <Tag color="default" style={{ marginInlineEnd: 0, borderRadius: 999, fontSize: 10 }}>
+            {String(bioMeta.assay).slice(0, 14)}
+          </Tag>
+        ) : null}
+      </div>
+
+      {(bioMeta?.organism || bioMeta?.reference) && (
+        <div
+          style={{
+            fontSize: 11,
+            color: subTextColor,
+            marginBottom: 8,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+          title={`${bioMeta?.organism || ''} ${bioMeta?.reference || ''}`.trim()}
+        >
+          {bioMeta?.organism || 'Unknown organism'}
+          {bioMeta?.reference ? ` | Ref: ${bioMeta.reference}` : ''}
+        </div>
+      )}
+
+      <div
+        style={{
+          position: 'relative',
+          minHeight: Math.max(inputs.length, outputs.length) * PORT_ROW_HEIGHT + 4,
+          padding: '2px 0',
+        }}
+      >
+        {inputs.map((input: any, index: number) => {
+          const top = 16 + index * PORT_ROW_HEIGHT;
+          const portColor = inferPortColor(input);
+
+          return (
+            <Popover key={input.id || `${index}-in`} content={<div>{formatPortTitle(input)}</div>}>
+              <>
+                <Handle
+                  type="target"
+                  position={Position.Left}
+                  id={input.id}
+                  isConnectable={isConnectable}
+                  style={{
+                    top,
+                    left: -8,
+                    width: 12,
+                    height: 12,
+                    borderRadius: '50%',
+                    border: `2px solid ${token.colorBgContainer}`,
+                    background: portColor,
+                    boxShadow: selected ? `0 0 0 2px ${portColor}33` : 'none',
+                  }}
+                />
+                <Tooltip title={formatPortTitle(input)}>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: top - 9,
+                      left: 14,
+                      maxWidth: 108,
+                      fontSize: 11,
+                      lineHeight: '18px',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      color: subTextColor,
+                    }}
+                  >
+                    {input?.display_name || input?.id}
+                  </div>
+                </Tooltip>
+              </>
+            </Popover>
+          );
+        })}
+
+        {outputs.map((output: any, index: number) => {
+          const top = 16 + index * PORT_ROW_HEIGHT;
+          const portColor = inferPortColor(output);
+
+          return (
+            <Popover key={output.id || `${index}-out`} content={<div>{formatPortTitle(output)}</div>}>
+              <>
+                <Handle
+                  type="source"
+                  position={Position.Right}
+                  id={output.id}
+                  isConnectable={isConnectable}
+                  style={{
+                    top,
+                    right: -8,
+                    width: 12,
+                    height: 12,
+                    borderRadius: '50%',
+                    border: `2px solid ${token.colorBgContainer}`,
+                    background: portColor,
+                    boxShadow: selected ? `0 0 0 2px ${portColor}33` : 'none',
+                  }}
+                />
+                <Tooltip title={formatPortTitle(output)}>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: top - 9,
+                      right: 14,
+                      maxWidth: 108,
+                      fontSize: 11,
+                      lineHeight: '18px',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      textAlign: 'right',
+                      color: subTextColor,
+                    }}
+                  >
+                    {output?.display_name || output?.id}
+                  </div>
+                </Tooltip>
+              </>
+            </Popover>
+          );
+        })}
+      </div>
+
       <div
         style={{
           position: 'absolute',
-          right: 4,
-          bottom: 4,
+          right: 8,
+          bottom: 6,
           display: 'flex',
-          gap: 4,
+          gap: 6,
         }}
       >
         <Button
@@ -313,12 +501,12 @@ export function CustomNode({ data }: any) {
             );
           }}
           style={{
-            color: '#fff',
-            background: 'rgba(255, 255, 255, 0.18)',
-            borderRadius: 4,
-            width: 16,
-            height: 16,
-            minWidth: 16,
+            color: subTextColor,
+            background: token.colorFillTertiary,
+            borderRadius: 6,
+            width: 20,
+            height: 20,
+            minWidth: 20,
             padding: 0,
             lineHeight: 1,
           }}
@@ -349,12 +537,12 @@ export function CustomNode({ data }: any) {
             );
           }}
           style={{
-            color: '#fff',
-            background: 'rgba(255, 255, 255, 0.18)',
-            borderRadius: 4,
-            width: 16,
-            height: 16,
-            minWidth: 16,
+            color: subTextColor,
+            background: token.colorFillTertiary,
+            borderRadius: 6,
+            width: 20,
+            height: 20,
+            minWidth: 20,
             padding: 0,
             lineHeight: 1,
           }}
@@ -362,4 +550,4 @@ export function CustomNode({ data }: any) {
       </div>
     </div>
   );
-}
+});
