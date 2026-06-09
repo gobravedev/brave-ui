@@ -1,0 +1,43 @@
+.markdown-wrapper {
+  line-height: 1.8;
+}
+
+.markdown-wrapper .markdown-image {
+  margin: 14px auto 20px;
+  padding: 10px;
+  max-width: min(560px, 88%);
+  border: 1px solid #e8ebf0;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: 0 10px 26px rgba(23, 30, 46, 0.08);
+}
+
+.markdown-wrapper .markdown-image .ant-image {
+  display: block;
+  width: 100%;
+}
+
+.markdown-wrapper .markdown-image__img {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #eef1f5;
+  object-fit: contain;
+  overflow: hidden;
+}
+
+.markdown-wrapper .markdown-image__caption {
+  margin-top: 8px;
+  color: #546173;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .markdown-wrapper .markdown-image {
+    margin: 10px auto 14px;
+    padding: 8px;
+    max-width: 96%;
+    border-radius: 12px;
+  }
+}

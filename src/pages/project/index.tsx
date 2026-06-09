@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from "react"
-import { Button, Card, Empty, Flex, Popconfirm, Tabs } from "antd"
+import { Button, Card, Empty, Flex, Popconfirm, Skeleton, Space, Spin, Tabs } from "antd"
 import ComponentsDetailsRender from '../../core/ui-renderer/ViewResolver';
 import { renderViewButton } from "@/utils/render-view-btn"
 import { useDispatch, useSelector } from "react-redux"
@@ -14,16 +14,17 @@ const Project: FC<any> = () => {
     const { project, activeProjectReportId } = useSelector((state: any) => state.user);
     const dispatch = useDispatch()
     const { setSideView, setSideOptions } = useSideViewContext();
+    const [loading, setLoading] = useState(false)
     const message = useGlobalMessage()
     const [reportList, setReportList] = useState<ProjectReportItem[]>([])
     const [activeReport, setActiveReport] = useState<ProjectReportDetailItem>()
     const [activeReportId, setActiveReportId] = useState<string | undefined>(activeProjectReportId || undefined)
 
-    const loadProjectReports = async (preferReportID?: string   ) => {
+    const loadProjectReports = async (preferReportID?: string) => {
         if (!project) return;
-
+        setLoading(true)
         const listResp = await listProjectReportApi(project)
-
+        setLoading(false)
         const listData = Array.isArray(listResp.data) ? listResp.data : []
 
         setReportList(listData)
@@ -37,14 +38,14 @@ const Project: FC<any> = () => {
 
         const fallbackID = String(listData[0]?.id)
         const preferID = preferReportID ?? activeProjectReportId ?? undefined
-        const nextID = (preferID && listData.some((item:any) => String(item.id) === String(preferID)))
+        const nextID = (preferID && listData.some((item: any) => String(item.id) === String(preferID)))
             ? String(preferID)
             : fallbackID
         setActiveReportId(nextID)
         dispatch(setUserItem({ activeProjectReportId: nextID }))
     }
 
-    const loadReportDetail = async (id?: string ) => {
+    const loadReportDetail = async (id?: string) => {
         if (!id) {
             setActiveReport(undefined)
             return
@@ -136,6 +137,7 @@ const Project: FC<any> = () => {
         loadReportDetail(activeReportId)
     }, [activeReportId])
 
+
     return <div >
         <Card
             style={{
@@ -157,14 +159,21 @@ const Project: FC<any> = () => {
             }}
             variant="borderless" size="small" extra={
                 <Flex gap={"small"}>
-                    {renderViewButton(view, setView, "analysisDocView", "View")}
-                    {renderViewButton(view, setView, "analysisDocEditor", "Edit")}
+                    {reportList.length > 0 && <Space>
+                        {renderViewButton(view, setView, "analysisDocView", "View")}
+                        {renderViewButton(view, setView, "analysisDocEditor", "Edit")}
+                    </Space>}
+
 
                     <Button size="small" color="cyan" variant="solid" onClick={openCreateReportModal}>Add Item</Button>
-                    <Button size="small" color="cyan" variant="solid" onClick={openUpdateReportModal}>Edit Item</Button>
-                    <Popconfirm title="Delete selected report item?" onConfirm={deleteActiveReport}>
-                        <Button size="small" color="red" variant="solid">Delete Item</Button>
-                    </Popconfirm>
+                    {activeReport && <Space>
+                        <Button size="small" color="cyan" variant="solid" onClick={openUpdateReportModal}>Edit Item</Button>
+                        <Popconfirm title="Delete selected report item?" onConfirm={deleteActiveReport}>
+                            <Button size="small" color="red" variant="solid">Delete Item</Button>
+                        </Popconfirm>
+                    </Space>
+
+                    }
 
                     <Button icon={<ReloadOutlined></ReloadOutlined>} size="small" color="cyan" variant="solid" onClick={() => {
                         loadProjectReports(activeReportId)
@@ -172,28 +181,31 @@ const Project: FC<any> = () => {
                 </Flex>
 
             }>
-                {/* {JSON.stringify(reportList)} */}
-            {reportList.length > 0 ? <>
-                <Tabs
-                    size="small"
+            {/* {JSON.stringify(reportList)} */}
+            <Spin spinning={loading}>
+                {reportList.length > 0 ? <>
+                    <Tabs
+                        size="small"
 
-                    activeKey={activeReportId ? String(activeReportId) : undefined}
-                    onChange={(key) => {
-                        setActiveReportId(key)
-                        dispatch(setUserItem({ activeProjectReportId: key }))
-                    }}
-                    items={reportList.map((item) => ({
-                        key: String(item.id),
-                        label: item.title || `Untitled-${item.id}`,
-                    }))}
-                />
+                        activeKey={activeReportId ? String(activeReportId) : undefined}
+                        onChange={(key) => {
+                            setActiveReportId(key)
+                            dispatch(setUserItem({ activeProjectReportId: key }))
+                        }}
+                        items={reportList.map((item) => ({
+                            key: String(item.id),
+                            label: item.title || `Untitled-${item.id}`,
+                        }))}
+                    />
 
-                <ComponentsDetailsRender view={view}
-                    project_id={project}
-                    report={activeReport}
-                    content={activeReport?.content}
-                    onSaved={() => loadReportDetail(activeReport?.id)}></ComponentsDetailsRender>
-            </> : <Empty description="No project report item, please create one first" />}
+                    <ComponentsDetailsRender view={view}
+                        project_id={project}
+                        report={activeReport}
+                        content={activeReport?.content}
+                        onSaved={() => loadReportDetail(activeReport?.id)}></ComponentsDetailsRender>
+
+                </> : <Empty description="No project report item, please create one first" />}
+            </Spin>
         </Card>
 
     </div>

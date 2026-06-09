@@ -7,6 +7,18 @@ import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import 'katex/dist/katex.min.css'
 import { useSelector } from "react-redux";
+import './index.css'
+
+const isAbsoluteOrSpecialUrl = (url: string) => {
+  return /^(https?:)?\/\//i.test(url) || /^(data:|blob:|#)/i.test(url)
+}
+
+const resolveImageSrc = (baseURL: string, src?: string) => {
+  if (!src) return ''
+  if (isAbsoluteOrSpecialUrl(src)) return src
+  if (src.startsWith('/')) return `${baseURL}${src}`
+  return `${baseURL}/${src}`
+}
 
 const Markdown: FC<any> = ({ data }) => {
 
@@ -18,21 +30,23 @@ const Markdown: FC<any> = ({ data }) => {
     })
   }, [data, baseURL, project])
 
-  return <>
+  return <div className="markdown-wrapper">
     <ReactMarkdown
       children={parsedData}
       rehypePlugins={[rehypeKatex]}
       remarkPlugins={[remarkGfm, remarkMath]}
       components={{
         img: ({ node, src, ...props }) => (
-          <>
-          {/* maxWidth: '50%', */}
+          <div className="markdown-image">
             <Image
-              src={`${baseURL}${src}`}
-              style={{  height: 'auto', margin: '1rem auto', display: 'block' }}
+              src={resolveImageSrc(baseURL, src)}
+              className="markdown-image__img"
+              style={{ width: '100%', height: 'auto', display: 'block' }}
               alt={props.alt || ''}
-            ></Image>
-          </>
+              preview={{ mask: '点击预览' }}
+            />
+            {props.alt ? <div className="markdown-image__caption">{props.alt}</div> : null}
+          </div>
         ),
         p: ({ node, children }) => {
           // 如果是单张图片，改用 <div>
@@ -41,7 +55,7 @@ const Markdown: FC<any> = ({ data }) => {
       }}
       ></ReactMarkdown>
 
-  </>
+  </div>
 }
 
 export default Markdown
