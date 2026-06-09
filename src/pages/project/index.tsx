@@ -2,20 +2,22 @@ import { FC, useEffect, useState } from "react"
 import { Button, Card, Empty, Flex, Popconfirm, Tabs } from "antd"
 import ComponentsDetailsRender from '../../core/ui-renderer/ViewResolver';
 import { renderViewButton } from "@/utils/render-view-btn"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { ReloadOutlined } from "@ant-design/icons"
 import { useSideViewContext } from "@/context/side/SideViewContext"
 import { invoke } from "@/core/ui-system/invokeV2";
 import { deleteProjectReportApi, getProjectReportDetailApi, listProjectReportApi, type ProjectReportDetailItem, type ProjectReportItem } from "@/api/project";
 import { useGlobalMessage } from "@/hooks/useGlobalMessage";
+import { setUserItem } from "@/store/userSlice";
 const Project: FC<any> = () => {
     const [view, setView] = useState<any>("analysisDocView")
-    const { project } = useSelector((state: any) => state.user);
+    const { project, activeProjectReportId } = useSelector((state: any) => state.user);
+    const dispatch = useDispatch()
     const { setSideView, setSideOptions } = useSideViewContext();
     const message = useGlobalMessage()
     const [reportList, setReportList] = useState<ProjectReportItem[]>([])
     const [activeReport, setActiveReport] = useState<ProjectReportDetailItem>()
-    const [activeReportId, setActiveReportId] = useState<string>()
+    const [activeReportId, setActiveReportId] = useState<string | undefined>(activeProjectReportId || undefined)
 
     const loadProjectReports = async (preferReportID?: string   ) => {
         if (!project) return;
@@ -29,14 +31,17 @@ const Project: FC<any> = () => {
         if (listData.length === 0) {
             setActiveReportId(undefined)
             setActiveReport(undefined)
+            dispatch(setUserItem({ activeProjectReportId: null }))
             return
         }
 
-        const fallbackID = listData[0]?.id
-        const nextID = (preferReportID && listData.some((item:any) => item.id === preferReportID))
-            ? preferReportID
+        const fallbackID = String(listData[0]?.id)
+        const preferID = preferReportID ?? activeProjectReportId ?? undefined
+        const nextID = (preferID && listData.some((item:any) => String(item.id) === String(preferID)))
+            ? String(preferID)
             : fallbackID
         setActiveReportId(nextID)
+        dispatch(setUserItem({ activeProjectReportId: nextID }))
     }
 
     const loadReportDetail = async (id?: string ) => {
@@ -173,7 +178,10 @@ const Project: FC<any> = () => {
                     size="small"
 
                     activeKey={activeReportId ? String(activeReportId) : undefined}
-                    onChange={(key) => setActiveReportId(key)}
+                    onChange={(key) => {
+                        setActiveReportId(key)
+                        dispatch(setUserItem({ activeProjectReportId: key }))
+                    }}
                     items={reportList.map((item) => ({
                         key: String(item.id),
                         label: item.title || `Untitled-${item.id}`,

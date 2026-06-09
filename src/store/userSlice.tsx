@@ -13,6 +13,7 @@ const githubToken = localStorage.getItem('githubToken')
 const storeRepos = localStorage.getItem('storeRepos')
 const scmOrigin = localStorage.getItem('scmOrigin')
 const userInfo = localStorage.getItem('userInfo')
+const activeProjectReportId = localStorage.getItem('activeProjectReportId')
 
 export const loadActiveProject = createAsyncThunk(
     'user/loadActiveProject',
@@ -51,6 +52,7 @@ interface UserState {
     githubToken:any;
     storeRepos:any;
     scmOrigin:any;
+    activeProjectReportId:string | null;
     userInfo: LoginUserInfo | null;
     componentLayout:"simple"|"complex",
     network:"UNKNOW" | "CONNECT" | "NOT_CONNECT"
@@ -73,6 +75,7 @@ const contextSlice = createSlice({
         projectObj:{},
         githubToken:githubToken,
         storeRepos:storeRepos?storeRepos:"[]",
+        activeProjectReportId:activeProjectReportId?activeProjectReportId:null,
         userInfo: userInfo ? JSON.parse(userInfo) : null,
         componentLayout:"simple",
         network:"UNKNOW",
@@ -124,6 +127,13 @@ const contextSlice = createSlice({
             if(action.payload.scmOrigin){
                 localStorage.setItem('scmOrigin', action.payload.scmOrigin)
             }
+            if (action.payload.activeProjectReportId !== undefined) {
+                if (action.payload.activeProjectReportId) {
+                    localStorage.setItem('activeProjectReportId', action.payload.activeProjectReportId)
+                } else {
+                    localStorage.removeItem('activeProjectReportId')
+                }
+            }
             if (action.payload.userInfo !== undefined) {
                 if (action.payload.userInfo) {
                     localStorage.setItem('userInfo', JSON.stringify(action.payload.userInfo))
@@ -143,6 +153,7 @@ const contextSlice = createSlice({
             localStorage.removeItem('authorization');
             localStorage.removeItem('RefreshToken');
             localStorage.removeItem('userInfo');
+            localStorage.removeItem('activeProjectReportId');
         },
     },
     extraReducers: (builder) => {

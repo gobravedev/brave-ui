@@ -67,6 +67,12 @@ export interface DeleteProjectReportRequest {
 	id: string;
 }
 
+export interface UploadProjectReportImageResponse {
+	url: string;
+	name: string;
+	size: number;
+}
+
 export const addProjectApi = (data: any) => axios.post("/project/add-project", data)
 export const updateProjectApi = (data: any) => axios.post("/project/update-project", data)
 export const findProjectByIdApi = (project_id: string) => axios.get(`/project/find-by-project-id/${project_id}`)
@@ -85,4 +91,13 @@ export const updateProjectReportApi = (payload: UpdateProjectReportRequest) => h
 export const deleteProjectReportApi = (payload: DeleteProjectReportRequest) => http.post<{ message: string }>("/project/delete-project-report", payload)
 export const listProjectReportApi = (project_id: string) => http.get<ProjectReportItem[]>(`/project/list-project-report?project_id=${encodeURIComponent(project_id)}`)
 export const getProjectReportDetailApi = (id: string) => http.get<ProjectReportDetailItem>(`/project/project-report-detail?id=${encodeURIComponent(id)}`)
+export const uploadProjectReportImageApi = (file: File) => {
+	const formData = new FormData()
+	formData.append("file", file, file.name || "clipboard-image.png")
+	return http.post<UploadProjectReportImageResponse>("/project/upload-image", formData, {
+		headers: {
+			"Content-Type": "multipart/form-data",
+		},
+	})
+}
 

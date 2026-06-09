@@ -2,7 +2,6 @@
 // yarn add monaco-editor
 
 import type { FC } from 'react'
-import { useRef } from 'react'
 import Editor from '@monaco-editor/react';
 import { loader } from '@monaco-editor/react';
 import * as monaco from 'monaco-editor';
@@ -13,9 +12,9 @@ import cssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker';
 import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
 import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
 // import pythonWorker from 'monaco-editor/esm/vs/language/python/ts.worker?worker';
-import { Drawer, Modal } from 'antd';
+import { Drawer } from 'antd';
 
-const MonacoEditorComp: FC<any> = ({onChange, value, editorRef, defaultLanguage, format, height }) => {
+const MonacoEditorComp: FC<any> = ({onChange, value, editorRef, defaultLanguage, format, height, onEditorMount }) => {
     // const editorRef = useRef<any>(null);
 
     self.MonacoEnvironment = {
@@ -50,11 +49,8 @@ const MonacoEditorComp: FC<any> = ({onChange, value, editorRef, defaultLanguage,
                
             }
         }
+        onEditorMount?.(editor, monaco);
 
-    }
-
-    function showValue() {
-        alert(editorRef.current.getValue());
     }
 
 

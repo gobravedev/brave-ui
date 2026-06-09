@@ -46,6 +46,10 @@ export default defineConfig({
         target: `http://localhost:8084`,
         ws: true,
         changeOrigin: true,
+      }, "/images": {
+        target: `http://localhost:8084`,
+        ws: true,
+        changeOrigin: true,
       }
     }
   }
