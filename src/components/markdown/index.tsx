@@ -22,7 +22,7 @@ const resolveImageSrc = (baseURL: string, src?: string) => {
 
 const Markdown: FC<any> = ({ data }) => {
 
-  const { baseURL,project } = useSelector((state: any) => state.user) 
+  const { baseURL, project, theme } = useSelector((state: any) => state.user)
   const parsedData = useMemo(() => {
     if (!data || typeof data !== 'string') return data
     return data.replace(/@report:([A-Za-z0-9-]+)/g, (_match, key) => {
@@ -30,12 +30,47 @@ const Markdown: FC<any> = ({ data }) => {
     })
   }, [data, baseURL, project])
 
-  return <div className="markdown-wrapper">
+  const isDarkTheme = theme === 'dark'
+  const markdownThemeClass = isDarkTheme ? 'markdown-theme-dark' : 'markdown-theme-light'
+
+  return <div className={`markdown-wrapper ${markdownThemeClass}`}>
     <ReactMarkdown
       children={parsedData}
       rehypePlugins={[rehypeKatex]}
       remarkPlugins={[remarkGfm, remarkMath]}
       components={{
+        code: ({ node, className, children, ...props }: any) => {
+          const codeText = String(children ?? '').replace(/\n$/, '')
+          const languageMatch = /language-(\w+)/.exec(className || '')
+          const language = languageMatch?.[1] || 'text'
+          const isBlockCode = Boolean(className?.includes('language-')) || codeText.includes('\n')
+
+          if (!isBlockCode) {
+            return <code className="markdown-inline-code" {...props}>{children}</code>
+          }
+
+          return (
+            <div className="markdown-code-block">
+              <div className="markdown-code-block__header">
+                <span className="markdown-code-block__lang">{language}</span>
+                <button
+                  type="button"
+                  className="markdown-code-block__copy"
+                  onClick={() => {
+                    if (navigator?.clipboard?.writeText) {
+                      navigator.clipboard.writeText(codeText)
+                    }
+                  }}
+                >
+                  复制
+                </button>
+              </div>
+              <pre className="markdown-code-block__pre">
+                <code className={className} {...props}>{codeText}</code>
+              </pre>
+            </div>
+          )
+        },
         img: ({ node, src, ...props }) => (
           <div className="markdown-image">
             <Image
