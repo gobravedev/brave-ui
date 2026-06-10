@@ -90,7 +90,9 @@ const WorkflowVisComponent: FC<Prop> = ({ relation_id }) => {
         // const outputs = (node.outputs || []).map((outputs: any) => outputs);
 
         return {
-            id: node.id,
+            id: node.node_id,
+            script_id: node.script_id,
+            node_id:node.node_id,
             type: 'custom',
             position: position,
             scatter:node?.scatter,
@@ -118,6 +120,7 @@ const WorkflowVisComponent: FC<Prop> = ({ relation_id }) => {
     const instance = useMemo(() => {
         return {
             addNode: (args: any) => {
+
                 console.log("Adding node to workflow vis", args);
                 const node = formatNode(args, 0)
                 setNodes((prevNodes) => [...prevNodes, node]);
@@ -151,8 +154,10 @@ const WorkflowVisComponent: FC<Prop> = ({ relation_id }) => {
         //     target: edge.target,
         //     targetHandle: edge.targetHandle,
         // }));
+        console.log(nodes)
         const nodesParams = nodes.map(node => ({
-            script_id: node.id,
+            node_id: node.node_id,
+            script_id:node.script_id,
             scatter: node?.scatter,
             position: node.position,
             // color: node.data.color,
@@ -181,6 +186,7 @@ const WorkflowVisComponent: FC<Prop> = ({ relation_id }) => {
     >
         {/* {JSON.stringify(edges)} */}
         {/* <pre>{JSON.stringify(data, null, 2)}</pre> */}
+        {/* {JSON.stringify(nodes)} */}
         <Spin spinning={loading}>
             <PipelineFlow
                 nodes={nodes}

@@ -13,7 +13,11 @@ const ScriptPage = () => {
 
     const addScriptToNode = async (scriptId: any) => {
         // /tools/script-to-node/{component_id}
-        const resp = await axios.get(`/tools/script-to-node/${scriptId}`)
+        if(!relation.relation_id){
+            console.error("relation_id 不存在！")
+            return
+        }
+        const resp = await axios.get(`/tools/script-to-node/${scriptId}/${relation.relation_id}`)
         // return resp.data
         // console.log("Response from script-to-node API", resp.data)
         const data = {
