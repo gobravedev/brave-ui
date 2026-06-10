@@ -441,11 +441,24 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                         }}
                                         color={statusColorMap[selectedSampleDetail.status]}>{selectedSampleDetail.status}</Tag>
                                 )}
+                                {selectedSampleDetail.status == "done" && <Popconfirm title="is complete?" onConfirm={() => {
+                                    async () => {
+                                        await axios.post(`/complete-node/${selectedSampleDetail.node.analysis_node_id}`)
+                                        message.success("complete success!")
+                                    }
+                                }}>
+                                    <Button size="small"
+                                    >
+                                        complete node
+                                    </Button>
+                                </Popconfirm>}
                                 {selectedSampleDetail.server_status && (
                                     <Tag color={statusColorMap[selectedSampleDetail.server_status]}>
                                         {selectedSampleDetail.server_status}
                                     </Tag>
                                 )}
+
+
 
 
 
