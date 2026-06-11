@@ -6,6 +6,7 @@ import { usePagination } from "@/hooks/usePagination";
 import { useComponentStore } from "@/store-zustand/components";
 import axios from "axios";
 import { useGlobalMessage } from "@/hooks/useGlobalMessage";
+import { invoke } from "@/core/ui-system/invokeV2";
 
 const Search = Input.Search
 const ComponentsPage = forwardRef<any, any>(({ component_type, setComponent }, ref) => {
@@ -48,6 +49,21 @@ const ComponentsPage = forwardRef<any, any>(({ component_type, setComponent }, r
             key: "action",
             render: (_: any, record: any) => {
                 return <Space>
+                    <a onClick={async () => {
+                        await invoke.createOrUpdateComponent.openAsync(
+                            {
+                                component_id: record.component_id,
+                                structure: {
+                                    component_type: "script",
+                                },
+                            },
+                            {
+                                width: "60%",
+                                title: `Update Script Component`,
+                            }
+                        );
+                        reload()
+                    }}>Update</a>
                     <a onClick={() => {
                         setComponent(record)
                     }}>Select</a>
@@ -60,7 +76,7 @@ const ComponentsPage = forwardRef<any, any>(({ component_type, setComponent }, r
                         // loadTable()
                     }}>
                         <Button size="small" type="link" icon={<DeleteOutlined style={{ color: "red" }} />} ></Button>
-                    
+
                     </Popconfirm>
                     {/* <a onClick={() => {
                         openModal("createOrUpdatePipelineComponent", {
@@ -85,7 +101,7 @@ const ComponentsPage = forwardRef<any, any>(({ component_type, setComponent }, r
 
 
         <Table
-            title={() => <Flex gap={"small"} wrap>
+            title={() => <Flex gap={"small"} wrap justify="space-between" align="center">
                 {/* <Button size="small" onClick={() => setComponent(undefined)}>Clear</Button> */}
                 <Search
                     size="small"
@@ -95,7 +111,25 @@ const ComponentsPage = forwardRef<any, any>(({ component_type, setComponent }, r
                     onSearch={(value) => { search(value) }}
                     style={{ width: 200 }}
                 />
-                <RedoOutlined style={{ cursor: "pointer" }} onClick={reload} />
+                <Space>
+
+                    <Button size="small" onClick={async () => {
+                        await invoke.createOrUpdateComponent.openAsync(
+                            {
+                                // component_id: data.script_id,
+                                structure: {
+                                    component_type: "script",
+                                },
+                            },
+                            {
+                                width: "60%",
+                                title: `Create Script Component`,
+                            }
+                        );
+                        reload()
+                    }}>Create</Button>
+                    <Button size="small" loading={loading} icon={<RedoOutlined></RedoOutlined>} onClick={reload}></Button>
+                </Space>
             </Flex>}
             rowKey="component_id"
             size="small"

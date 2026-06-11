@@ -228,9 +228,9 @@ const ScriptContent: FC<any> = ({ data, form }) => {
         <Form.Item name={"container_id"} label="Container" rules={[{ required: true, message: 'Please select container!' }]}>
             <SelectContainer mode="none" containers={containers}></SelectContainer>
         </Form.Item>
-        <Form.Item name={"tools_container_id"} label="Tools Container Id" >
+        {/* <Form.Item name={"tools_container_id"} label="Tools Container Id" >
             <SelectContainer mode="multiple" containers={containers}></SelectContainer>
-        </Form.Item>
+        </Form.Item> */}
         <Form.Item name={"script_type"} label="Script Type" rules={[{ required: true, message: 'Please select script type!' }]}>
             <Select options={
                 [{ label: "python", value: "python" },
@@ -238,11 +238,12 @@ const ScriptContent: FC<any> = ({ data, form }) => {
                 { label: "shell", value: "shell" },
                 { label: "R", value: "r" }]}></Select>
         </Form.Item>
-        <Form.Item name={"io_schema"} label="io_schema" >
-            <TextAreaComp templete={""}></TextAreaComp>
-        </Form.Item>
-        <Form.Item name={"content"} label="content" rules={[{ required: true, message: 'Please input content!' }]}>
+        <Form.Item name={"io_schema"} label="io_schema" rules={[{ required: true, message: 'Please input content!' }]}>
             <TextAreaComp templete={templete}></TextAreaComp>
+        </Form.Item>
+        <Form.Item name={"content"} label="content" >
+            {/* <TextAreaComp templete={""}></TextAreaComp> */}
+            <TextArea></TextArea>
         </Form.Item>
 
 
@@ -797,39 +798,63 @@ export const CreateOrUpdatePipelineV2: FC<any> = ({ component_id, structure, cal
 
         <Spin spinning={loading}>
             {/* {JSON.stringify(component)} */}
+            <Flex justify="end" gap="small" style={{ marginBottom: "0.5rem" }}>
+                {component_id &&
+                    <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        getPipeleine(component_id)
+                    }}>
+                        Refresh
+                    </Button>
+                }
 
+                <Button size="small" color="cyan" variant="solid" onClick={savePipeline}>
+                    {component_id ? "Update" : "Create"}
+                </Button>
+            </Flex>
             <Form form={form} >
-                <Tabs
-                    tabBarExtraContent={<Space>
-                        {component_id &&
-                            <Button size="small" color="cyan" variant="solid" onClick={() => {
-                                getPipeleine(component_id)
-                            }}>
-                                Refresh
-                            </Button>
-                        }
 
-                        <Button size="small" color="cyan" variant="solid" onClick={savePipeline}>
-                            {component_id ? "Update" : "Create"}
-                        </Button>
-                    </Space>
-                    }
+
+                <Form.Item name={"component_name"} label="Component Name" rules={[{ required: true, message: 'Please input component name!' }]}>
+                    <Input ></Input>
+                </Form.Item>
+
+
+
+                <ComponentsRender structure={structure} {...structure} data={component} form={form}></ComponentsRender>
+                <Form.Item name={"prompt"} label="Prompt" >
+                    <TextArea rows={4}></TextArea>
+                </Form.Item>
+
+                <Form.Item name={"tags"} label="Tags">
+                    <Select
+                        mode="tags"
+                        style={{ width: '100%' }}
+                    />
+                </Form.Item>
+                <Form.Item name={"category"} label="Category">
+                    <Input ></Input>
+                </Form.Item>
+                {/* valuePropName="fileList"  getValueFromEvent={normFile}*/}
+                {component_id && <Form.Item label="Upload" name={"img"}  >
+                    <UploadComp component_id={component_id}></UploadComp>
+                </Form.Item>}
+                <Form.Item label="Order" name={"order_index"} initialValue={0}>
+                    <InputNumber ></InputNumber >
+                </Form.Item>
+
+                <Form.Item name={"description"} label="Description">
+                    {/* <TextAreaComp templete={""}></TextAreaComp> */}
+                    <TextArea></TextArea>
+
+                </Form.Item>
+                {/* <Tabs
+
                     items={[
                         {
                             label: "Component Info",
                             key: "1",
                             children: <>
-                                {/* <Form.Item name={"namespace"} label="Namespace"   >
-                                <Input disabled></Input>
-                            </Form.Item> */}
-
-                                <Form.Item name={"component_name"} label="Component Name" rules={[{ required: true, message: 'Please input component name!' }]}>
-                                    <Input ></Input>
-                                </Form.Item>
-
-
-
-                                <ComponentsRender structure={structure} {...structure} data={component} form={form}></ComponentsRender>
+                             
 
                             </>
                         }, {
@@ -837,36 +862,12 @@ export const CreateOrUpdatePipelineV2: FC<any> = ({ component_id, structure, cal
                             key: "2",
                             children: <>
 
-                                <Form.Item name={"prompt"} label="Prompt" >
-                                    <TextArea rows={4}></TextArea>
-                                </Form.Item>
 
-                                <Form.Item name={"tags"} label="Tags">
-                                    <Select
-                                        mode="tags"
-                                        style={{ width: '100%' }}
-                                    />
-                                </Form.Item>
-                                <Form.Item name={"category"} label="Category">
-                                    <Input ></Input>
-                                </Form.Item>
-                                {/* valuePropName="fileList"  getValueFromEvent={normFile}*/}
-                                {component_id && <Form.Item label="Upload" name={"img"}  >
-                                    <UploadComp component_id={component_id}></UploadComp>
-                                </Form.Item>}
-                                <Form.Item label="Order" name={"order_index"} initialValue={0}>
-                                    <InputNumber ></InputNumber >
-                                </Form.Item>
-
-                                <Form.Item name={"description"} label="Description">
-                                    <TextAreaComp templete={""}></TextAreaComp>
-
-                                </Form.Item>
 
                             </>
                         }
                     ]}>
-                </Tabs>
+                </Tabs> */}
 
                 <Collapse ghost items={[
                     {
@@ -1333,8 +1334,8 @@ export const CreateORUpdateRelationComp: FC<any> = (params) => {
                 <Form.Item name={"name"} label="Name" rules={[{ required: true, message: 'Please input name!' }]}>
                     <Input ></Input>
                 </Form.Item>
-             
-                
+
+
                 <Form.Item name={"dag_definition"} label="DAG Definition" >
                     <TextArea rows={4}></TextArea>
                 </Form.Item>

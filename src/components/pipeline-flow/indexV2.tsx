@@ -492,10 +492,10 @@ export const CustomNode = memo(({ data, selected, isConnectable }: any) => {
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            invoke.scriptCodeEdit.drawer(
+            invoke.scriptCodeEdit.open(
               { component_id: data.script_id },
               {
-                width: 960,
+                width: "60%",
                 title: `Code - ${data.label}`,
               }
             );
@@ -523,7 +523,7 @@ export const CustomNode = memo(({ data, selected, isConnectable }: any) => {
             e.preventDefault();
             e.stopPropagation();
             // console.log("Edit details for node", data.script_id);
-            invoke.createOrUpdateComponent.openDrawerAsync(
+            invoke.createOrUpdateComponent.openAsync(
               {
                 component_id: data.script_id,
                 structure: {
@@ -531,7 +531,7 @@ export const CustomNode = memo(({ data, selected, isConnectable }: any) => {
                 },
               },
               {
-                width: 960,
+                width: "60%",
                 title: `Edit - ${data.label}`,
               }
             );

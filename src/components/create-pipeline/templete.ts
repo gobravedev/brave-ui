@@ -40,7 +40,7 @@ export const softwareTemplete = {
   ]
 }
 
-export const scriptTemplete = {
+export const scriptTempleteV1 = {
   "formJson": [
     {
       "name": "x_input",
@@ -69,32 +69,48 @@ export const scriptTemplete = {
       ]
     }
   ]
-  // "formJson": [
-  //   {
-  //     "name": "group_field",
-  //     "label": "Group Field",
-  //     "rules": [
-  //       {
-  //         "required": true,
-  //         "message": "This field cannot be empty!"
-  //       }
-  //     ],
-  //     "type": "GroupFieldSelect"
-  //   },
-  //   {
-  //     "name": "metaphlan_sam_abundance",
-  //     "label": "Abundance",
-  //     "db":true,
-  //     "rules": [
-  //       {
-  //         "required": true,
-  //         "message": "This field cannot be empty!"
-  //       }
-  //     ],
-  //     "type": "GroupSelectSampleButton",
-  //     "group": "group_field"
-  //   }
-  // ]
+}
+
+export const scriptTemplete = {
+  "inputs": [
+    {
+      "label": "input1",
+      "name": "input1",
+      "type": "BaseInput",
+      "required": true
+    },
+    {
+      "label": "input2",
+      "name": "input2",
+      "type": "BaseInput",
+      "required": true
+    }
+    
+  ],
+  "outputs": [
+    {
+      "name": "bam",
+      "type": "file"
+    }
+  ],
+  "params": [
+    {
+      "name": "params_name",
+      "label": "params_name",
+      "type": "BaseInput",
+      "initialValue": "params_value",
+    }
+   
+  ],
+  "resources": {
+    "cpu": 4,
+    "memory": "6GB",
+    // "docker": "quay.io/biocontainers/trim-galore:0.6.7"
+  },
+  "ui": {
+    "icon": "scissors",
+    "color": "green"
+  }
 }
 
 export const fileTemplete = {
