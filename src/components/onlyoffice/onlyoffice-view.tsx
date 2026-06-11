@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { DocumentEditor } from "@onlyoffice/document-editor-react";
+// import { DocumentEditor } from "@onlyoffice/document-editor-react";
 
 var onDocumentReady = function (event:any) {
     console.log("Document is loaded");
@@ -29,7 +29,7 @@ const OnlyOffice = () => {
     const callbackBaseURL = "http://198.19.5.216:8084";
     const docPath = "/home/admin/Downloads/test1.xlsx";
     return <div style={{ width: '100%', height: '100vh', display: 'flex', flexDirection: 'column' }}>
-        <DocumentEditor
+        {/* <DocumentEditor
             id="docxEditor"
             documentServerUrl={`${origin}/onlyoffice/`}
             height="100%"
@@ -60,7 +60,7 @@ const OnlyOffice = () => {
                 }
             }}
             onLoadComponentError={onLoadComponentError}
-        />
+        /> */}
     </div>
 }
 

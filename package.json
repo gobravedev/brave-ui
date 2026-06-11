@@ -23,7 +23,6 @@
     "@faker-js/faker": "^9.9.0",
     "@kanaries/graphic-walker": "^0.5.0-alpha.4",
     "@monaco-editor/react": "^4.7.0",
-    "@onlyoffice/document-editor-react": "^2.2.0",
     "@reduxjs/toolkit": "^2.8.2",
     "@tanstack/react-virtual": "^3.13.12",
     "@types/lodash.debounce": "^4.0.9",
