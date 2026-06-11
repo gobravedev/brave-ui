@@ -86,7 +86,7 @@ const ToolsDetail = lazy(() => import("../pages/components-relation/index-compon
 
 const ComponentsV3 = lazy(() => import("../pages/components-relation/components-v3"));
 const Login = lazy(() => import("@/pages/users/login"));
-
+const Explore = lazy(() => import("@/pages/explore"))
 import axios from "axios";
 import { Skeleton } from "antd";
 import { useDispatch } from "react-redux";
@@ -132,6 +132,10 @@ if (appType == "index") {
         //     element: <ToolsPage />
         // },
         {
+            path: "/explore",
+            element: <Explore />
+        },
+        {
             path: "/c/tools",
             element: <ToolsCard relation_type={"tools"} />
         },
@@ -145,7 +149,7 @@ if (appType == "index") {
         {
             path: "/c/tools/:relation_id",
             element: <ToolsDetail />
-        },{
+        }, {
             path: "/c/tools/:relation_id/:analysis_id",
             element: <ToolsDetail />
         },

@@ -258,6 +258,13 @@ const App: React.FC = () => {
                 en_US: "Dashboard"
             }
 
+        }, {
+            key: "/explore",
+            label: {
+                zh_CN: "Explore Analsyis",
+                en_US: "Explore"
+            }
+
         },
         // {
         //     key: "/doc",
@@ -276,12 +283,6 @@ const App: React.FC = () => {
             label: {
                 zh_CN: "工具",
                 en_US: "Tools"
-            }
-        }, {
-            key: "/c/scripts",
-            label: {
-                zh_CN: "脚本",
-                en_US: "Scripts"
             }
         },
 
@@ -302,12 +303,6 @@ const App: React.FC = () => {
                 zh_CN: "文件",
                 en_US: "Files"
             }
-        }, {
-            key: `/tasks`,
-            label: {
-                zh_CN: "任务",
-                en_US: "Tasks"
-            },
         },
         {
             key: `/analysis-report`,
@@ -348,6 +343,18 @@ const App: React.FC = () => {
                 //     ]
                 // }, 
                 {
+                    key: `/tasks`,
+                    label: {
+                        zh_CN: "任务",
+                        en_US: "Tasks"
+                    },
+                }, {
+                    key: "/c/scripts",
+                    label: {
+                        zh_CN: "脚本",
+                        en_US: "Scripts"
+                    }
+                }, {
                     key: "/c/file",
                     label: {
                         zh_CN: "文件",
@@ -486,7 +493,7 @@ const App: React.FC = () => {
                     ]
                 },
             ]
-        },{
+        }, {
             key: `/literature-intelligence`,
             label: {
                 zh_CN: "文献情报",
@@ -735,7 +742,7 @@ const App: React.FC = () => {
                             }
                             if (k.key == "/literature-intelligence") {
                                 window.open(`https://www.mbiolance.com/c/news/`, "_blank")
-                                return 
+                                return
                             }
                             onMenuClick(k.key)
                             console.log(k)
@@ -747,7 +754,7 @@ const App: React.FC = () => {
                 {/* 右侧：项目选择 */}
                 <Flex align="center" gap={"small"}>
                     {projectObj?.project_name && <Tooltip title={`Current Project: ${projectObj.project_id}`} placement="bottom">
-                        <Tag  onClick={async () => {
+                        <Tag onClick={async () => {
                             try {
                                 const value = await invoke.projectTable.openAsync(undefined, {
                                     title: "Switch Project",
@@ -765,10 +772,10 @@ const App: React.FC = () => {
                                 // User canceled project switch modal.
                             }
 
-                        }} color={"blue"} style={{ marginRight: "0.5rem",cursor:"pointer"}}>
-                        {projectObj?.project_name}
-                    </Tag>
-                        </Tooltip>}
+                        }} color={"blue"} style={{ marginRight: "0.5rem", cursor: "pointer" }}>
+                            {projectObj?.project_name}
+                        </Tag>
+                    </Tooltip>}
 
                     {/* {isConnect=="NOT_CONNECT" && <>aaaaaaaaaaaa</>} */}
                     <Button size="small"
@@ -924,7 +931,7 @@ export default AppLayout;
 
 const SettingDrawer: FC<any> = ({ visible, onClose, project_id, openModal: openModal_ }) => {
     const { modal, openModal, closeModal } = useModal();
-    const { analysis,tables,forms } = useComponentStore();
+    const { analysis, tables, forms } = useComponentStore();
     const { openAsync } = useUI();
     return <Drawer title="Setting"
         extra={<>
@@ -934,7 +941,7 @@ const SettingDrawer: FC<any> = ({ visible, onClose, project_id, openModal: openM
         <Flex vertical gap={"small"}>
             {JSON.stringify(tables)}
             {JSON.stringify(analysis)}
-           forms: {JSON.stringify(forms)}
+            forms: {JSON.stringify(forms)}
 
             <Button onClick={() => { console.log(useComponentStore.getState().print()) }}>componentStore</Button>
             <Button onClick={() => {
