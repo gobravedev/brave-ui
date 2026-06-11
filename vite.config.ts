@@ -53,6 +53,10 @@ export default defineConfig({
         target: `http://localhost:8084`,
         ws: true,
         changeOrigin: true,
+      }, "/onlyoffice": {
+        target: `http://localhost:8084`,
+        ws: true,
+        changeOrigin: true,
       }
     }
   }

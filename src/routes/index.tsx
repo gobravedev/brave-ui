@@ -91,6 +91,7 @@ import axios from "axios";
 import { Skeleton } from "antd";
 import { useDispatch } from "react-redux";
 
+const OnlyOffice = lazy(() => import('@/components/onlyoffice/onlyoffice-view'));
 const rootElement = document.getElementById("root")!;
 const appType = rootElement.getAttribute("data-app");
 console.log("data-app: ", appType)
@@ -314,6 +315,9 @@ if (appType == "index") {
         {
             path: "/login",
             element: <Login />
+        },{
+            path:"/office",
+            element:<OnlyOffice />
         },
         {
             path: "/doc",

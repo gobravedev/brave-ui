@@ -1912,6 +1912,13 @@
     interval-tree-1d "^1.0.0"
     isoformat "^0.2.0"
 
+"@onlyoffice/document-editor-react@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@onlyoffice/document-editor-react/-/document-editor-react-2.2.0.tgz#d4b8275c93cbd84a5e684d2ce1f802fc4c2eb330"
+  integrity sha512-SPgeJ1lK+I5mpcCUi6Qz98QVtlZR6axxCArgHoKNNBfFqXNmb6iDOf5Z1QUiVQ0xr57oo84D0ptyXZaF8K51nA==
+  dependencies:
+    lodash "4.18.1"
+
 "@radix-ui/number@1.1.2":
   version "1.1.2"
   resolved "https://registry.npmmirror.com/@radix-ui/number/-/number-1.1.2.tgz#3ace52303a4a570d03dc79bf17d6da49ed40d0cf"
@@ -6851,7 +6858,7 @@ lodash.throttle@^4.1.1:
   resolved "https://registry.npmmirror.com/lodash.throttle/-/lodash.throttle-4.1.1.tgz#c23e91b710242ac70c37f1e1cda9274cc39bf2f4"
   integrity sha512-wIkUCfVKpVsWo3JSZlc+8MB5it+2AN5W8J7YVMST30UrvcQNZ1Okbj+rbVniijTWE6FGYy4XJq/rHkas8qJMLQ==
 
-lodash@^4.0.1:
+lodash@4.18.1, lodash@^4.0.1:
   version "4.18.1"
   resolved "https://registry.npmmirror.com/lodash/-/lodash-4.18.1.tgz#ff2b66c1f6326d59513de2407bf881439812771c"
   integrity sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==
