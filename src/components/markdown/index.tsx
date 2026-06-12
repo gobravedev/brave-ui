@@ -1,4 +1,4 @@
-import { FC, useMemo } from "react"
+import { FC, useEffect, useMemo, useRef, useState } from "react"
 import { Image } from "antd";
 
 import ReactMarkdown from 'react-markdown'
@@ -112,6 +112,102 @@ const resolveImageSrc = (baseURL: string, src?: string) => {
   return `${baseURL}/${src}`
 }
 
+const MermaidBlock: FC<{ chart: string; isDarkTheme: boolean }> = ({ chart, isDarkTheme }) => {
+  const graphRef = useRef<HTMLDivElement | null>(null)
+  const [errorText, setErrorText] = useState('')
+  const [zoomScale, setZoomScale] = useState(1)
+
+  const clampScale = (scale: number) => {
+    if (scale < 0.4) return 0.4
+    if (scale > 3) return 3
+    return Number(scale.toFixed(2))
+  }
+
+  const handleWheelZoom = (event: React.WheelEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    const step = Math.exp(-event.deltaY * 0.0015)
+    setZoomScale((prev) => clampScale(prev * step))
+  }
+
+  useEffect(() => {
+    let isCancelled = false
+
+    const renderMermaid = async () => {
+      try {
+        const mermaid = (await import('mermaid')).default
+        mermaid.initialize({
+          startOnLoad: false,
+          securityLevel: 'strict',
+          theme: isDarkTheme ? 'dark' : 'default'
+        })
+
+        const renderId = `markdown-mermaid-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+        const { svg } = await mermaid.render(renderId, chart)
+
+        if (isCancelled || !graphRef.current) return
+        graphRef.current.innerHTML = svg
+        setErrorText('')
+        setZoomScale(1)
+      } catch (_error) {
+        if (!isCancelled) {
+          setErrorText('Mermaid 图表渲染失败')
+        }
+      }
+    }
+
+    renderMermaid()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [chart, isDarkTheme])
+
+  return (
+    <div className="markdown-code-block markdown-mermaid-block">
+      <div className="markdown-code-block__header">
+        <span className="markdown-code-block__lang">mermaid</span>
+        <div className="markdown-mermaid__actions">
+          <span className="markdown-mermaid__zoom">{Math.round(zoomScale * 100)}%</span>
+          <button
+            type="button"
+            className="markdown-code-block__copy"
+            onClick={() => setZoomScale(1)}
+          >
+            重置
+          </button>
+          <button
+            type="button"
+            className="markdown-code-block__copy"
+            onClick={() => {
+              if (navigator?.clipboard?.writeText) {
+                navigator.clipboard.writeText(chart)
+              }
+            }}
+          >
+            复制
+          </button>
+        </div>
+      </div>
+      <div className="markdown-mermaid__container" onWheel={handleWheelZoom}>
+        {errorText ? (
+          <div className="markdown-mermaid__error">
+            <div>{errorText}</div>
+            <pre className="markdown-code-block__pre">
+              <code>{chart}</code>
+            </pre>
+          </div>
+        ) : (
+          <div
+            ref={graphRef}
+            className="markdown-mermaid__graph"
+            style={{ transform: `scale(${zoomScale})` }}
+          />
+        )}
+      </div>
+    </div>
+  )
+}
+
 const Markdown: FC<any> = ({ data }) => {
 
   const { baseURL, project, theme } = useSelector((state: any) => state.user)
@@ -139,10 +235,15 @@ const Markdown: FC<any> = ({ data }) => {
           const codeText = String(children ?? '').replace(/\n$/, '')
           const languageMatch = /language-(\w+)/.exec(className || '')
           const language = languageMatch?.[1] || 'text'
+          const normalizedLanguage = language.toLowerCase()
           const isBlockCode = Boolean(className?.includes('language-')) || codeText.includes('\n')
 
           if (!isBlockCode) {
             return <code className="markdown-inline-code" {...props}>{children}</code>
+          }
+
+          if (normalizedLanguage === 'mermaid') {
+            return <MermaidBlock chart={codeText} isDarkTheme={isDarkTheme} />
           }
 
           return (

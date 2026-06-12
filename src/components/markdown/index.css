@@ -52,6 +52,35 @@
   white-space: pre;
 }
 
+.markdown-wrapper .markdown-mermaid-block {
+  overflow: hidden;
+}
+
+.markdown-wrapper .markdown-mermaid__container {
+  padding: 12px 14px;
+  overflow-x: auto;
+}
+
+.markdown-wrapper .markdown-mermaid__graph {
+  min-width: fit-content;
+}
+
+.markdown-wrapper .markdown-mermaid__graph svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+.markdown-wrapper .markdown-mermaid__error {
+  font-size: 13px;
+}
+
+.markdown-wrapper .markdown-mermaid__error .markdown-code-block__pre {
+  margin-top: 8px;
+  border-radius: 10px;
+}
+
 .markdown-wrapper.markdown-theme-light .markdown-inline-code {
   background: #f3f6fa;
   color: #1f2a37;
@@ -85,6 +114,14 @@
 
 .markdown-wrapper.markdown-theme-light .markdown-code-block__pre {
   background: #fbfdff;
+}
+
+.markdown-wrapper.markdown-theme-light .markdown-mermaid__container {
+  background: #fbfdff;
+}
+
+.markdown-wrapper.markdown-theme-light .markdown-mermaid__error {
+  color: #b54708;
 }
 
 .markdown-wrapper.markdown-theme-dark .markdown-inline-code {
@@ -122,8 +159,16 @@
   background: #161f2a;
 }
 
+.markdown-wrapper.markdown-theme-dark .markdown-mermaid__container {
+  background: #161f2a;
+}
+
 .markdown-wrapper.markdown-theme-dark .markdown-code-block__pre code {
   color: #d7e2f1;
+}
+
+.markdown-wrapper.markdown-theme-dark .markdown-mermaid__error {
+  color: #f6c97d;
 }
 
 .markdown-wrapper .markdown-image {

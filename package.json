@@ -34,6 +34,7 @@
     "i18next": "^25.5.2",
     "lodash.debounce": "^4.0.8",
     "markdown-it": "^14.1.0",
+    "mermaid": "^11.9.0",
     "monaco-editor": "^0.52.2",
     "ollama": "^0.5.16",
     "react": "^19.0.0",
