@@ -1,5 +1,7 @@
 import { FC, useEffect, useMemo, useRef, useState } from "react"
 import { Image } from "antd";
+import { select } from 'd3-selection'
+import { zoom as d3Zoom, zoomIdentity, zoomTransform, type ZoomBehavior } from 'd3-zoom'
 
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -114,7 +116,56 @@ const resolveImageSrc = (baseURL: string, src?: string) => {
 
 const MermaidBlock: FC<{ chart: string; isDarkTheme: boolean }> = ({ chart, isDarkTheme }) => {
   const graphRef = useRef<HTMLDivElement | null>(null)
+  const zoomSvgRef = useRef<SVGSVGElement | null>(null)
+  const zoomBehaviorRef = useRef<ZoomBehavior<SVGSVGElement, unknown> | null>(null)
   const [errorText, setErrorText] = useState('')
+
+  const resetZoom = () => {
+    const svg = zoomSvgRef.current
+    const zoomBehavior = zoomBehaviorRef.current
+    if (!svg || !zoomBehavior) return
+
+    select(svg).call(zoomBehavior.transform, zoomIdentity)
+  }
+
+  const updateZoomByFactor = (factor: number) => {
+    const svg = zoomSvgRef.current
+    const zoomBehavior = zoomBehaviorRef.current
+    if (!svg || !zoomBehavior) return
+
+    const current = zoomTransform(svg)
+    const minScale = 0.5
+    const maxScale = 8
+    const nextScale = Math.max(minScale, Math.min(maxScale, current.k * factor))
+    select(svg).call(zoomBehavior.scaleTo, nextScale)
+  }
+
+  const setupSvgPanZoom = (svgElement: SVGSVGElement) => {
+    const svgSelection = select(svgElement)
+
+    const zoomLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+    zoomLayer.setAttribute('class', 'markdown-mermaid__zoom-layer')
+
+    while (svgElement.firstChild) {
+      zoomLayer.appendChild(svgElement.firstChild)
+    }
+    svgElement.appendChild(zoomLayer)
+
+    const zoomBehavior = d3Zoom<SVGSVGElement, unknown>()
+      .scaleExtent([0.5, 8])
+      .on('zoom', (event) => {
+        zoomLayer.setAttribute('transform', event.transform.toString())
+      })
+
+    svgSelection
+      .style('cursor', 'grab')
+      .style('touch-action', 'none')
+      .call(zoomBehavior)
+      .on('dblclick.zoom', null)
+
+    zoomSvgRef.current = svgElement
+    zoomBehaviorRef.current = zoomBehavior
+  }
 
   useEffect(() => {
     let isCancelled = false
@@ -133,6 +184,12 @@ const MermaidBlock: FC<{ chart: string; isDarkTheme: boolean }> = ({ chart, isDa
 
         if (isCancelled || !graphRef.current) return
         graphRef.current.innerHTML = svg
+
+        const svgElement = graphRef.current.querySelector('svg')
+        if (svgElement) {
+          setupSvgPanZoom(svgElement)
+        }
+
         setErrorText('')
       } catch (_error) {
         if (!isCancelled) {
@@ -145,6 +202,11 @@ const MermaidBlock: FC<{ chart: string; isDarkTheme: boolean }> = ({ chart, isDa
 
     return () => {
       isCancelled = true
+      if (zoomSvgRef.current) {
+        select(zoomSvgRef.current).on('.zoom', null)
+      }
+      zoomSvgRef.current = null
+      zoomBehaviorRef.current = null
     }
   }, [chart, isDarkTheme])
 
@@ -152,17 +214,43 @@ const MermaidBlock: FC<{ chart: string; isDarkTheme: boolean }> = ({ chart, isDa
     <div className="markdown-code-block markdown-mermaid-block">
       <div className="markdown-code-block__header">
         <span className="markdown-code-block__lang">mermaid</span>
-        <button
-          type="button"
-          className="markdown-code-block__copy"
-          onClick={() => {
-            if (navigator?.clipboard?.writeText) {
-              navigator.clipboard.writeText(chart)
-            }
-          }}
-        >
-          复制
-        </button>
+        <div className="markdown-mermaid__toolbar">
+          <button
+            type="button"
+            className="markdown-code-block__copy"
+            onClick={() => updateZoomByFactor(1.2)}
+            aria-label="放大"
+          >
+            放大
+          </button>
+          <button
+            type="button"
+            className="markdown-code-block__copy"
+            onClick={resetZoom}
+            aria-label="重置缩放"
+          >
+            1:1
+          </button>
+          <button
+            type="button"
+            className="markdown-code-block__copy"
+            onClick={() => updateZoomByFactor(1 / 1.2)}
+            aria-label="缩小"
+          >
+            缩小
+          </button>
+          <button
+            type="button"
+            className="markdown-code-block__copy"
+            onClick={() => {
+              if (navigator?.clipboard?.writeText) {
+                navigator.clipboard.writeText(chart)
+              }
+            }}
+          >
+            复制
+          </button>
+        </div>
       </div>
       <div className="markdown-mermaid__container">
         {errorText ? (

@@ -58,11 +58,12 @@
 
 .markdown-wrapper .markdown-mermaid__container {
   padding: 12px 14px;
-  overflow-x: auto;
+  overflow: hidden;
 }
 
 .markdown-wrapper .markdown-mermaid__graph {
   min-width: fit-content;
+  min-height: 120px;
 }
 
 .markdown-wrapper .markdown-mermaid__graph svg {
@@ -70,6 +71,17 @@
   height: auto;
   display: block;
   margin: 0 auto;
+  user-select: none;
+}
+
+.markdown-wrapper .markdown-mermaid__graph svg:active {
+  cursor: grabbing;
+}
+
+.markdown-wrapper .markdown-mermaid__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .markdown-wrapper .markdown-mermaid__error {
