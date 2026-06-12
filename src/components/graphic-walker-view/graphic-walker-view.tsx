@@ -1,15 +1,13 @@
 
-import { GraphicWalker } from '@kanaries/graphic-walker';
-import { Button, Card, Empty, Space, Spin, Tabs } from 'antd';
-import axios from 'axios';
+import { Card, Tabs } from 'antd';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { RedoOutlined } from "@ant-design/icons";
+import GraphicWalkerContent from './graphic-walker-content';
 
 const GraphicWalkerView = () => {
 
 
-    const { projectObj,theme } = useSelector((state: any) => state.user); // 'light' | 'dark'
+    const { projectObj } = useSelector((state: any) => state.user);
 
     // const data = [
     //     {
@@ -56,30 +54,9 @@ const GraphicWalkerView = () => {
     //     { fid: "salary", name: "salary", semanticType: "quantitative", analyticType: "measure" },
     // ];
 
-    const [data, setData] = useState<any>()
-    const [loading, setLoading] = useState(false)
-    const loadData = async (analysis_result_id: any) => {
-        setLoading(true)
-        try {
-            const resp = await axios.get(`/analysis-result/graphic-walker/${analysis_result_id}`)
-            setData(resp.data)
-        } catch (error) {
-            console.error(error)
-            setData(undefined)
-        } finally {
-            setLoading(false)
-        }
-    }
-
     const [parameter, setParameter] = useState<any>()
     const [activeFileId, setActiveFileId] = useState<string>()
     const gwItems = parameter?.gw?.items || []
-
-    const reload = () => {
-        if (activeFileId) {
-            loadData(activeFileId)
-        }
-    }
 
     useEffect(() => {
         try {
@@ -100,20 +77,7 @@ const GraphicWalkerView = () => {
         }
     }, [projectObj])
 
-    useEffect(() => {
-        if (activeFileId) {
-            loadData(activeFileId)
-        } else {
-            setData(undefined)
-        }
-    }, [activeFileId])
-
-    return <Card size='small'
-
-        extra={<Space>
-
-            <Button icon={<RedoOutlined />} size='small' loading={loading} onClick={reload}></Button>
-        </Space>}>
+    return <Card size='small'>
         {/* {JSON.stringify(parameter)} */}
 
         <Tabs
@@ -126,16 +90,7 @@ const GraphicWalkerView = () => {
             }))}
         />
 
-        <Spin spinning={loading}>
-            {data?.data && data?.fields ? <GraphicWalker
-                data={data?.data}
-                fields={data?.fields}
-                appearance={theme === "dark" ? "dark" : "light"}
-            // fields={fields}
-            // chart={graphicWalkerSpec}
-            // i18nLang={langStore.lang}
-            /> : <Empty></Empty>}
-        </Spin>
+        <GraphicWalkerContent analysis_result_id={activeFileId} />
 
 
 

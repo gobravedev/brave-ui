@@ -4,6 +4,8 @@ import type { InferViewRegistryFromLoaders } from "@/core/component-registry/reg
 
 const viewLoaders = {
     graphicWalkerView: () => import("./graphic-walker-view"),
+    graphicWalkerContent: () => import("./graphic-walker-content"),
+    graphicWalkerBtn: () => import("./graphic-walker-btn"),
 };
 // ;
 declare module "@/core/component-registry/registry-types" {
