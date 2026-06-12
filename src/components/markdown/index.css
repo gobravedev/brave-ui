@@ -1,5 +1,7 @@
 .markdown-wrapper {
   line-height: 1.8;
+  --markdown-mermaid-width: 90%;
+  --markdown-mermaid-height: 550px;
 }
 
 .markdown-wrapper .markdown-inline-code {
@@ -54,24 +56,28 @@
 
 .markdown-wrapper .markdown-mermaid-block {
   overflow: visible;
+  width: var(--markdown-mermaid-width, 100%);
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .markdown-wrapper .markdown-mermaid__container {
   padding: 12px 14px;
   overflow-x: auto;
   overflow-y: hidden;
+  height: var(--markdown-mermaid-height, 120px);
 }
 
 .markdown-wrapper .markdown-mermaid__graph {
   min-width: fit-content;
-  min-height: 120px;
+  height: 100%;
   overflow: visible;
 }
 
 .markdown-wrapper .markdown-mermaid__graph svg {
   max-width: none;
   width: auto;
-  height: auto;
+  height: 100%;
   display: block;
   margin: 0 auto;
   user-select: none;
