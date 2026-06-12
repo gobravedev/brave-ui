@@ -31,6 +31,8 @@
     "antd": "^5.24.8",
     "antd-style": "^3.7.1",
     "axios": "^1.8.4",
+    "d3-selection": "^3.0.0",
+    "d3-zoom": "^3.0.0",
     "i18next": "^25.5.2",
     "lodash.debounce": "^4.0.8",
     "markdown-it": "^14.1.0",

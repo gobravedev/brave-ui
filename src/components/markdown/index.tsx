@@ -176,6 +176,7 @@ const MermaidBlock: FC<{ chart: string; isDarkTheme: boolean }> = ({ chart, isDa
         mermaid.initialize({
           startOnLoad: false,
           securityLevel: 'strict',
+          // useMaxWidth: false,
           theme: isDarkTheme ? 'dark' : 'default'
         })
 
