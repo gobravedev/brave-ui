@@ -115,19 +115,6 @@ const resolveImageSrc = (baseURL: string, src?: string) => {
 const MermaidBlock: FC<{ chart: string; isDarkTheme: boolean }> = ({ chart, isDarkTheme }) => {
   const graphRef = useRef<HTMLDivElement | null>(null)
   const [errorText, setErrorText] = useState('')
-  const [zoomScale, setZoomScale] = useState(1)
-
-  const clampScale = (scale: number) => {
-    if (scale < 0.4) return 0.4
-    if (scale > 3) return 3
-    return Number(scale.toFixed(2))
-  }
-
-  const handleWheelZoom = (event: React.WheelEvent<HTMLDivElement>) => {
-    event.preventDefault()
-    const step = Math.exp(-event.deltaY * 0.0015)
-    setZoomScale((prev) => clampScale(prev * step))
-  }
 
   useEffect(() => {
     let isCancelled = false
@@ -147,7 +134,6 @@ const MermaidBlock: FC<{ chart: string; isDarkTheme: boolean }> = ({ chart, isDa
         if (isCancelled || !graphRef.current) return
         graphRef.current.innerHTML = svg
         setErrorText('')
-        setZoomScale(1)
       } catch (_error) {
         if (!isCancelled) {
           setErrorText('Mermaid 图表渲染失败')
@@ -166,29 +152,19 @@ const MermaidBlock: FC<{ chart: string; isDarkTheme: boolean }> = ({ chart, isDa
     <div className="markdown-code-block markdown-mermaid-block">
       <div className="markdown-code-block__header">
         <span className="markdown-code-block__lang">mermaid</span>
-        <div className="markdown-mermaid__actions">
-          <span className="markdown-mermaid__zoom">{Math.round(zoomScale * 100)}%</span>
-          <button
-            type="button"
-            className="markdown-code-block__copy"
-            onClick={() => setZoomScale(1)}
-          >
-            重置
-          </button>
-          <button
-            type="button"
-            className="markdown-code-block__copy"
-            onClick={() => {
-              if (navigator?.clipboard?.writeText) {
-                navigator.clipboard.writeText(chart)
-              }
-            }}
-          >
-            复制
-          </button>
-        </div>
+        <button
+          type="button"
+          className="markdown-code-block__copy"
+          onClick={() => {
+            if (navigator?.clipboard?.writeText) {
+              navigator.clipboard.writeText(chart)
+            }
+          }}
+        >
+          复制
+        </button>
       </div>
-      <div className="markdown-mermaid__container" onWheel={handleWheelZoom}>
+      <div className="markdown-mermaid__container">
         {errorText ? (
           <div className="markdown-mermaid__error">
             <div>{errorText}</div>
@@ -197,11 +173,7 @@ const MermaidBlock: FC<{ chart: string; isDarkTheme: boolean }> = ({ chart, isDa
             </pre>
           </div>
         ) : (
-          <div
-            ref={graphRef}
-            className="markdown-mermaid__graph"
-            style={{ transform: `scale(${zoomScale})` }}
-          />
+          <div ref={graphRef} className="markdown-mermaid__graph" />
         )}
       </div>
     </div>
