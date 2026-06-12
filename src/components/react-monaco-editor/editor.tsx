@@ -13,9 +13,11 @@ import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
 import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
 // import pythonWorker from 'monaco-editor/esm/vs/language/python/ts.worker?worker';
 import { Drawer } from 'antd';
+import { useSelector } from 'react-redux';
 
 const MonacoEditorComp: FC<any> = ({onChange, value, editorRef, defaultLanguage, format, height, onEditorMount }) => {
     // const editorRef = useRef<any>(null);
+    const { theme } = useSelector((state: any) => state.user);
 
     self.MonacoEnvironment = {
         getWorker(_, label) {
@@ -59,12 +61,13 @@ const MonacoEditorComp: FC<any> = ({onChange, value, editorRef, defaultLanguage,
         <Editor
             height={height ? height : "65vh"}
             value={value}
-            theme="vs-dark"
+            theme={theme === 'dark' ? 'vs-dark' : 'vs-light'}
             onChange={onChange}
             defaultLanguage={defaultLanguage}
             //   defaultValue={defaultValue}
             onMount={handleEditorDidMount}
             options={{
+                wordWrap: 'on',
                 formatOnPaste: true
             }}
         />
