@@ -1,7 +1,7 @@
 
 
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { Button, Input, Space, message } from 'antd'
+import { FC, useCallback, useEffect, useRef, useState } from 'react'
+import { Button, Input, Space } from 'antd'
 import { UniverSheetsCorePreset } from '@univerjs/preset-sheets-core'
 import sheetsCoreZhCN from '@univerjs/preset-sheets-core/locales/zh-CN'
 import { createUniver, LocaleType, mergeLocales } from '@univerjs/presets'
@@ -12,15 +12,19 @@ import { readSheetWorkbookApi, writeSheetWorkbookApi } from '@/api/sheet'
 import './styles.css'
 
 import '@univerjs/preset-sheets-core/lib/index.css'
+import { useSelector } from 'react-redux'
+import { useGlobalMessage } from '@/hooks/useGlobalMessage.ts'
 
-const DEFAULT_SHEET_PATH = '/home/admin/Downloads/test1.xlsx'
+// const DEFAULT_SHEET_PATH = '/home/admin/Downloads/test1.xlsx'
 
-const UniverView = () => {
+const UniverView: FC<any> = ({ path }) => {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const univerAPIRef = useRef<ReturnType<typeof createUniver>['univerAPI'] | null>(null)
   const workbookSeqRef = useRef(0)
-  const [filePath, setFilePath] = useState(DEFAULT_SHEET_PATH)
+  const [filePath, setFilePath] = useState(path)
   const [loading, setLoading] = useState(false)
+  const { theme } = useSelector((state: any) => state.user);
+  const message = useGlobalMessage()
 
   const replaceWorkbook = useCallback((workbookData: Partial<IWorkbookData>) => {
     const univerAPI = univerAPIRef.current
@@ -103,6 +107,7 @@ const UniverView = () => {
 
     const { univer, univerAPI } = createUniver({
       locale: LocaleType.ZH_CN,
+      darkMode: theme === 'dark',
       locales: {
         [LocaleType.ZH_CN]: mergeLocales(sheetsCoreZhCN),
       },
@@ -115,13 +120,17 @@ const UniverView = () => {
 
     univerAPIRef.current = univerAPI
 
-    void loadWorkbookFromFile(DEFAULT_SHEET_PATH)
+    void loadWorkbookFromFile(path)
 
     return () => {
       univerAPIRef.current = null
       univer.dispose()
     }
-  }, [loadWorkbookFromFile])
+  }, [loadWorkbookFromFile, path])
+
+  useEffect(() => {
+    univerAPIRef.current?.toggleDarkMode(theme === 'dark')
+  }, [theme])
 
   return (
     <div className="univer-view">
@@ -132,8 +141,8 @@ const UniverView = () => {
             onChange={(event) => setFilePath(event.target.value)}
             placeholder="请输入相对路径，例如 demo/univer-demo.xlsx"
           />
-          <Button loading={loading} onClick={() => loadWorkbookFromFile(filePath)}>读取Excel</Button>
-          <Button type="primary" loading={loading} onClick={saveWorkbookToFile}>保存Excel</Button>
+          <Button loading={loading} onClick={() => loadWorkbookFromFile(filePath)}>Read</Button>
+          <Button type="primary" loading={loading} onClick={saveWorkbookToFile}> Save</Button>
         </Space.Compact>
       </div>
       <div className="univer-view__container" ref={containerRef} />

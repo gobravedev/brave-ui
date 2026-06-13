@@ -17,6 +17,7 @@ import BigTable from '@/components/big-table';
 import { el, fa } from "@faker-js/faker"
 import { EditResultTableModal } from "../edit-table"
 import { useStoreRender } from "@/context/render/RenderProvider"
+import { invoke } from "@/core/ui-system/invokeV2"
 // import PreviewExample from "./components/preview-example"
 
 
@@ -53,7 +54,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
     useImperativeHandle(ref, () => ({
         reload
     }))
-    const {  setResultTableList } = useStoreRender()
+    const { setResultTableList } = useStoreRender()
 
     const { project, projectObj } = useOutletContext<any>()
     const message = useGlobalMessage()
@@ -413,6 +414,38 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
         downloadTSV(resp.data, contentPath.split('/').pop())
     }
 
+    const getFileExt = (filePath: string) => {
+        const fileName = filePath.split("/").pop() || filePath
+        const idx = fileName.lastIndexOf(".")
+        if (idx < 0) {
+            return ""
+        }
+        return fileName.slice(idx + 1).toLowerCase()
+    }
+
+    const SHEET_FILE_EXTENSIONS = new Set(["xlsx", "xls", "csv", "tsv", "ods"])
+
+    const handleOpenContent = (record: any) => {
+        const contentPath = record?.content
+        if (!contentPath || typeof contentPath !== "string") {
+            operatePipeline.openModal("openFile", { content: record?.content, fileType: record?.file_type })
+            return
+        }
+
+        const ext = getFileExt(contentPath)
+        if (SHEET_FILE_EXTENSIONS.has(ext)) {
+            invoke.univerView.open({ path: contentPath }, {
+                width: "90%",
+                title: record?.file_name || "Sheet Preview",
+                footer: null,
+            })
+            return
+        }
+
+        const url = `/brave-api/file-operation/download?path=${encodeURIComponent(contentPath)}`
+        window.open(url, "_blank")
+    }
+
     const getMetadataColumns = () => {
         // console.log("projectObj",projectObj?.metadata_form)
         if (!projectObj?.metadata_form || !Array.isArray(projectObj?.metadata_form)) return []
@@ -542,6 +575,11 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
 
             render: (_: any, record: any) => (
                 <Space size="middle">
+                    {/* <Button type="link" size="small" onClick={() => {
+                        handleOpenContent(record)
+                    }}>
+                        Open
+                    </Button> */}
                     <Popover content={<>
                         {/* {record.component_id} */}
                         <Typography >
@@ -549,7 +587,10 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                         </Typography>
                         {/* {record.analysis_name} */}
                     </>} >
-                        <Button size="small" color="cyan" variant="solid" onClick={() => {
+
+
+
+                        <Button size="small" color="cyan" type="link" onClick={() => {
                             // record.content = JSON.parse(record.content)
                             if (setRecord) {
                                 setRecord(record)
@@ -564,7 +605,8 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
                                 }))
 
                             } else {
-                                operatePipeline.openModal("openFile", { content: record.content, fileType: record.file_type })
+                                handleOpenContent(record)
+                                // operatePipeline.openModal("openFile", { content: record.content, fileType: record.file_type })
 
                             }
 

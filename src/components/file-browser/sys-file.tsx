@@ -47,6 +47,24 @@ type FileItem = {
 };
 import { FolderOutlined, FileOutlined, DownloadOutlined, ArrowLeftOutlined, ReloadOutlined } from "@ant-design/icons"
 import { useSelector } from "react-redux";
+import { invoke } from "@/core/ui-system/invokeV2";
+
+const joinPath = (basePath: string, name: string) => {
+    if (!basePath || basePath === "/") {
+        return `/${name}`
+    }
+    return `${basePath.replace(/\/+$/, "")}/${name}`
+}
+
+const getFileExt = (fileName: string) => {
+    const idx = fileName.lastIndexOf(".")
+    if (idx < 0) {
+        return ""
+    }
+    return fileName.slice(idx + 1).toLowerCase()
+}
+
+const SHEET_FILE_EXTENSIONS = new Set(["xlsx", "xls", "csv", "tsv", "ods"])
 
 const SysFileBrowser1: FC<any> = ({ output_dir: dir }) => {
     const [currentPath, setCurrentPath] = useState<string>(dir);
@@ -154,7 +172,7 @@ const SysFileBrowser: FC<any> = ({ type, path, onSelectFile, onClose }) => {
     }, [path, project, type])
 
     const handleNavigate = (name: string) => {
-        loadFiles(`${currentPath}/${name}`, "", 1)
+        loadFiles(joinPath(currentPath, name), "", 1)
     }
 
     const handleBack = () => {
@@ -168,15 +186,33 @@ const SysFileBrowser: FC<any> = ({ type, path, onSelectFile, onClose }) => {
     }
 
     const handleSelectFile = (file: FileItem) => {
-        let path = file.name
-        if (currentPath !== "/") {
-            path = currentPath + "/" + file.name
-        }
+        const path = joinPath(currentPath, file.name)
         onSelectFile({
             path: path,
             file: file.name,
             type: type
         })
+    }
+
+    const resolveFilePath = (fileName: string) => {
+        return joinPath(dir || currentPath, fileName)
+    }
+
+    const handleOpenFile = (file: FileItem) => {
+        const filePath = resolveFilePath(file.name)
+        const ext = getFileExt(file.name)
+
+        if (SHEET_FILE_EXTENSIONS.has(ext)) {
+            invoke.univerView.open({ path: filePath }, {
+                width: "90%",
+                title: file.name,
+                footer: null,
+            })
+            return
+        }
+
+        const url = `/brave-api/file-operation/download?path=${encodeURIComponent(filePath)}`
+        window.open(url, "_blank")
     }
 
     const pathSegments = currentPath.split("/").filter(Boolean)
@@ -247,11 +283,14 @@ const SysFileBrowser: FC<any> = ({ type, path, onSelectFile, onClose }) => {
                             file.is_dir
                                 ? [<Button size="small" onClick={() => handleNavigate(file.name)}>Enter</Button>]
                                 : [
+                                    <Button type="link" size="small" onClick={() => handleOpenFile(file)}>
+                                       Open
+                                    </Button>,
                                     <Button
                                         type="link"
                                         size="small"
                                         icon={<DownloadOutlined />}
-                                        href={`/brave-api/file-operation/download?path=${encodeURIComponent(currentPath + "/" + file.name)}`}
+                                        href={`/brave-api/file-operation/download?path=${encodeURIComponent(resolveFilePath(file.name))}`}
                                         target="_blank"
                                     >
                                         Download
