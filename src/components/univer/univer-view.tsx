@@ -18,6 +18,7 @@ const DEFAULT_SHEET_PATH = '/home/admin/Downloads/test1.xlsx'
 const UniverView = () => {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const univerAPIRef = useRef<ReturnType<typeof createUniver>['univerAPI'] | null>(null)
+  const workbookSeqRef = useRef(0)
   const [filePath, setFilePath] = useState(DEFAULT_SHEET_PATH)
   const [loading, setLoading] = useState(false)
 
@@ -32,7 +33,14 @@ const UniverView = () => {
       activeWorkbook.dispose()
     }
 
-    univerAPI.createWorkbook(workbookData)
+    workbookSeqRef.current += 1
+    const baseId = String(workbookData.id ?? 'workbook')
+    const uniqueWorkbookData: Partial<IWorkbookData> = {
+      ...workbookData,
+      id: `${baseId}-${Date.now()}-${workbookSeqRef.current}`,
+    }
+
+    univerAPI.createWorkbook(uniqueWorkbookData)
   }, [])
 
   const loadWorkbookFromFile = useCallback(async (targetPath: string) => {
@@ -45,7 +53,6 @@ const UniverView = () => {
     try {
       const resp = await readSheetWorkbookApi({
         file_path: targetPath,
-        format: 'xlsx',
       })
 
       replaceWorkbook(resp.data.workbook_data as Partial<IWorkbookData>)
@@ -76,7 +83,7 @@ const UniverView = () => {
       const workbookData = activeWorkbook.save()
       const resp = await writeSheetWorkbookApi({
         file_path: filePath,
-        format: 'xlsx',
+        // format: 'xlsx',
         workbook_data: workbookData as unknown as Record<string, unknown>,
       })
 
