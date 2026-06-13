@@ -27,6 +27,8 @@
     "@tanstack/react-virtual": "^3.13.12",
     "@types/lodash.debounce": "^4.0.9",
     "@types/node": "^22.14.1",
+    "@univerjs/preset-sheets-core": "^0.25.0",
+    "@univerjs/presets": "^0.25.0",
     "@xyflow/react": "^12.8.2",
     "antd": "^5.24.8",
     "antd-style": "^3.7.1",
