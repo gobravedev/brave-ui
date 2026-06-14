@@ -1,7 +1,7 @@
 import React, { FC, Suspense, useEffect, useState, lazy } from 'react';
-import { ApiOutlined, BookOutlined, LaptopOutlined, NotificationOutlined, PlusOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
+import { ApiOutlined, BookOutlined, LaptopOutlined, MenuOutlined, NotificationOutlined, PlusOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Breadcrumb, Button, Card, Col, Divider, Drawer, Dropdown, Empty, Flex, Form, Input, Layout, Menu, message, Modal, notification, Popconfirm, Row, Segmented, Select, Skeleton, Space, Tag, theme, Tooltip, Typography } from 'antd';
+import { Breadcrumb, Button, Card, Col, Divider, Drawer, Dropdown, Empty, Flex, Form, Grid, Input, Layout, Menu, message, Modal, notification, Popconfirm, Row, Segmented, Select, Skeleton, Space, Tag, theme, Tooltip, Typography } from 'antd';
 import { NavLink, Outlet, useLocation, useNavigate, useParams } from 'react-router';
 import { Header } from 'antd/es/layout/layout';
 import { useDispatch, useSelector } from 'react-redux';
@@ -77,11 +77,17 @@ const App: React.FC = () => {
     const [current, setCurrent] = useState('/');
     const [menus, setMenus] = useState<any>([])
     const [selectedKeyMap, setSelectedKeyMap] = useState<any>()
+    const [siderCollapsed, setSiderCollapsed] = useState(false)
     const { t, locale } = useI18n();
+    const screens = Grid.useBreakpoint();
+    const isMobileLayout = !screens.md;
 
     const isDark = theme === 'dark';
-    const bgColor = isDark ? '#001529' : '#fff'; // 深色/白色
-    const textColor = isDark ? '#fff' : '#000';
+    const bgColor = isDark ? 'linear-gradient(180deg, #1c1c1c 0%, #141414 100%)' : '#fff';
+    const textColor = isDark ? '#f5f5f5' : '#000';
+    const headerBorderColor = isDark ? 'rgba(255,255,255,0.14)' : '#f0f0f0';
+    const headerShadow = isDark ? '0 2px 12px rgba(0,0,0,0.32)' : '0 1px 6px rgba(15,23,42,0.08)';
+    const siderBgColor = isDark ? '#101010' : '#fff';
     const { sideView, setSideView, sideOptions, setSideOptions } = useSideViewContext();
 
 
@@ -104,6 +110,10 @@ const App: React.FC = () => {
     useEffect(() => {
         ping()
     }, [baseURL])
+
+    useEffect(() => {
+        setSiderCollapsed(isMobileLayout)
+    }, [isMobileLayout])
 
     const openNotification = ({ type, message = "", description = "" }: { type: NotificationType, message: string, description?: string }) => {
         notificationApi[type]({
@@ -137,6 +147,22 @@ const App: React.FC = () => {
         console.log(key)
         navigate(key);
         setCurrent(key)
+    }
+
+    const handleMainMenuSelect: MenuProps['onSelect'] = (k) => {
+        if (k.key == "/psycmicrograph") {
+            window.open(`${window.location.origin}${window.location.pathname}psycmicrograph.html`, "_blank")
+            return
+        }
+        if (k.key == "/literature-intelligence") {
+            window.open(`https://www.mbiolance.com/c/news/`, "_blank")
+            return
+        }
+        onMenuClick(k.key)
+        if (isMobileLayout) {
+            setSiderCollapsed(true)
+        }
+        console.log(k)
     }
 
     const getSetting = async () => {
@@ -524,7 +550,21 @@ const App: React.FC = () => {
             .filter(item => !item.hidden)
             .map(item => {
                 const newItem: MenuItem = { ...item } as MenuItem;
-                newItem.label = item.label[locale]; // 选择当前语言
+                const labelText = item.label[locale];
+                newItem.label = (
+                    <span
+                        style={{
+                            display: 'block',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            maxWidth: '100%'
+                        }}
+                        title={labelText}
+                    >
+                        {labelText}
+                    </span>
+                ) as any; // 选择当前语言并处理超长省略
                 if (item.children) {
                     newItem.children = filterMenu(item.children) as MenuItem[];
                     if (newItem.children.length === 0) delete newItem.children;
@@ -715,44 +755,77 @@ const App: React.FC = () => {
                 position: 'sticky',
                 top: 0,
                 zIndex: 10,
+                overflow: 'hidden',
                 width: '100%',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'space-between',
+                justifyContent: 'flex-start',
                 background: bgColor,
                 color: textColor,
-                boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+                borderBottom: `1px solid ${headerBorderColor}`,
+                boxShadow: headerShadow,
+                backdropFilter: 'saturate(120%) blur(4px)',
 
 
             }}>
+                <div style={{
+                    position: 'absolute',
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    height: 1,
+                    background: isDark
+                        ? 'linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.30), rgba(255,255,255,0))'
+                        : 'linear-gradient(90deg, rgba(15,23,42,0), rgba(15,23,42,0.18), rgba(15,23,42,0))'
+                }} />
+                <Button
+                    type='text'
+                    icon={<MenuOutlined style={{ color: textColor, fontSize: 16 }} />}
+                    onClick={() => setSiderCollapsed(!siderCollapsed)}
+                    style={{
+                        position: 'absolute',
+                        left: 8,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        display: isMobileLayout ? 'inline-flex' : 'none',
+                        zIndex: 12
+                    }}
+                />
                 {/* 左侧：LOGO + 菜单 */}
-                <div style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0 }}>
-                    <div style={{ color: textColor, marginRight: '1rem', cursor: 'pointer' }} onClick={async () => {
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    flex: isMobileLayout ? '0 0 auto' : 1,
+                    minWidth: isMobileLayout ? 96 : 0,
+                    paddingLeft: isMobileLayout ? 40 : 0,
+                    marginRight: 8
+                }}>
+                    <div style={{
+                        color: textColor,
+                        marginRight: '1rem',
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                        flexShrink: 0,
+                        fontWeight: 600
+                    }} onClick={async () => {
                         await axios.get("/send-test")
                     }}>BRAVE</div>
-                    <Menu
-                        mode="horizontal"
-                        // defaultSelectedKeys={['1']}
-                        selectedKeys={[current]}
-                        items={menus}
-                        onSelect={k => {
-                            if (k.key == "/psycmicrograph") {
-                                window.open(`${window.location.origin}${window.location.pathname}psycmicrograph.html`, "_blank")
-                                return
-                            }
-                            if (k.key == "/literature-intelligence") {
-                                window.open(`https://www.mbiolance.com/c/news/`, "_blank")
-                                return
-                            }
-                            onMenuClick(k.key)
-                            console.log(k)
-                        }}
-                        style={{ flex: 1, minWidth: 0, background: 'transparent', borderInlineEnd: 0 }}
-                    />
                 </div>
 
                 {/* 右侧：项目选择 */}
-                <Flex align="center" gap={"small"}>
+                <Flex align="center" gap={"small"} wrap={false} className='app-header-actions' style={{
+                    padding: '4px 8px',
+                    borderRadius: 10,
+                    background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(15,23,42,0.03)',
+                    border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #e5e7eb',
+                    maxWidth: isMobileLayout ? '68vw' : 'none',
+                    overflowX: isMobileLayout ? 'auto' : 'visible',
+                    overflowY: 'hidden',
+                    whiteSpace: 'nowrap',
+                    scrollbarWidth: 'none',
+                    marginLeft: 'auto',
+                    width: isMobileLayout ? 'calc(100vw - 156px)' : 'auto'
+                }}>
                     {projectObj?.project_name && <Tooltip title={`Current Project: ${projectObj.project_id}`} placement="bottom">
                         <Tag onClick={async () => {
                             try {
@@ -793,16 +866,6 @@ const App: React.FC = () => {
                         openModals("setting")
                     }} />
 
-                    <Dropdown
-                        trigger={["hover"]}
-                        menu={{ items: userMenuItems, onClick: handleUserMenuClick }}
-                        placement="bottomRight"
-                    >
-                        <Tag style={{ cursor: "pointer", marginLeft: 8 }} color="geekblue">
-                            {userInfo?.username || userInfo?.email || '未登录'}
-                        </Tag>
-                    </Dropdown>
-
                     {/* <Button size="small" onClick={async () => {
                         await axios.get("/send-test")
                     }}>
@@ -821,21 +884,91 @@ const App: React.FC = () => {
                     </Button> */}
                     {/* <Button>   {project}</Button> */}
                 </Flex>
+
+                {/* 用户头像 */}
+                <Dropdown
+                    trigger={['hover']}
+                    menu={{ items: userMenuItems, onClick: handleUserMenuClick }}
+                    placement="bottomRight"
+                >
+                    <div style={{
+                        flexShrink: 0,
+                        marginLeft: 8,
+                        width: 32,
+                        height: 32,
+                        borderRadius: '50%',
+                        background: userInfo?.username || userInfo?.email
+                            ? (isDark ? 'linear-gradient(135deg,#4096ff,#1677ff)' : 'linear-gradient(135deg,#1677ff,#4096ff)')
+                            : (isDark ? '#333' : '#e0e0e0'),
+                        border: isDark ? '2px solid rgba(255,255,255,0.18)' : '2px solid #d0d7de',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        fontSize: 13,
+                        fontWeight: 700,
+                        color: userInfo?.username || userInfo?.email ? '#fff' : (isDark ? '#888' : '#aaa'),
+                        letterSpacing: 0,
+                        userSelect: 'none',
+                        transition: 'box-shadow 0.2s, border-color 0.2s',
+                        boxShadow: isDark ? '0 0 0 0 rgba(64,150,255,0)' : '0 1px 4px rgba(22,119,255,0.15)',
+                    }}
+                        onMouseEnter={e => (e.currentTarget.style.boxShadow = isDark ? '0 0 0 3px rgba(64,150,255,0.35)' : '0 0 0 3px rgba(22,119,255,0.18)')}
+                        onMouseLeave={e => (e.currentTarget.style.boxShadow = isDark ? '0 0 0 0 rgba(64,150,255,0)' : '0 1px 4px rgba(22,119,255,0.15)')}
+                    >
+                        {userInfo?.username
+                            ? userInfo.username.charAt(0).toUpperCase()
+                            : userInfo?.email
+                                ? userInfo.email.charAt(0).toUpperCase()
+                                : <UserOutlined style={{ fontSize: 14 }} />}
+                    </div>
+                </Dropdown>
             </Header>
             <Layout
                 style={{ padding: '0 0 0  0' }}
             >
-                {/* <Sider style={{ background: colorBgContainer }} width={120}>
+                <Sider
+                    theme={isDark ? 'dark' : 'light'}
+                    width={150}
+                    collapsedWidth={0}
+                    breakpoint='md'
+                    trigger={null}
+                    collapsible
+                    collapsed={siderCollapsed}
+                    style={{
+                        background: siderBgColor,
+                        borderInlineEnd: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid #f0f0f0',
+                        boxShadow: isDark ? '2px 0 10px rgba(0,0,0,0.25)' : '2px 0 10px rgba(0,0,0,0.04)',
+                        zIndex: 9,
+                        position: isMobileLayout ? 'fixed' : 'sticky',
+                        top: 64,
+                        left: 0,
+                        height: 'calc(100vh - 64px)',
+                        overflowY: 'auto'
+                    }}
+                >
+                    {/* <div style={{
+                        padding: '12px 16px 8px 16px',
+                        color: isDark ? '#94a3b8' : '#64748b',
+                        fontSize: 12,
+                        letterSpacing: '0.04em'
+                    }}>
+                        NAVIGATION
+                    </div> */}
                     <Menu
+                        className='app-main-sider-menu'
                         mode="inline"
-                        onSelect={k => onMenuClick(k.key)}
-           
-                        style={{ height: '100%' }}
-                        items={leftMenus}
+                        selectedKeys={[current]}
+                        items={menus}
+                        onSelect={handleMainMenuSelect}
+                        style={{
+                            background: 'transparent',
+                            height: '100%',
+                            borderInlineEnd: 0
+                        }}
                     />
-                 
 
-                </Sider> */}
+                </Sider>
                 {/* {JSON.stringify(location)} */}
                 {/* {JSON.stringify(projectObj)} */}
                 <Content>
