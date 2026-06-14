@@ -122,7 +122,20 @@ const App: React.FC = () => {
             placement: "bottomRight"
         });
     };
+    const userDisplayName = userInfo?.username || userInfo?.email || '未登录';
     const userMenuItems: MenuProps['items'] = [
+        {
+            key: 'user-display',
+            label: (
+                <div style={{ maxWidth: 220, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {userDisplayName}
+                </div>
+            ),
+            disabled: true,
+        },
+        {
+            type: 'divider',
+        },
         {
             key: 'logout',
             label: '退出登录',
