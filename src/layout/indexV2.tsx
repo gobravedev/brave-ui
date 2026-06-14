@@ -1,5 +1,5 @@
 import React, { FC, Suspense, useEffect, useState, lazy } from 'react';
-import { ApiOutlined, BookOutlined, LaptopOutlined, MenuOutlined, NotificationOutlined, PlusOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
+import { ApiOutlined, AppstoreOutlined, BookOutlined, CodeOutlined, CompassOutlined, ContainerOutlined, DashboardOutlined, FileTextOutlined, FolderOpenOutlined, LaptopOutlined, MenuOutlined, NotificationOutlined, PlusOutlined, ReadOutlined, SettingOutlined, ToolOutlined, UserOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Breadcrumb, Button, Card, Col, Divider, Drawer, Dropdown, Empty, Flex, Form, Grid, Input, Layout, Menu, message, Modal, notification, Popconfirm, Row, Segmented, Select, Skeleton, Space, Tag, theme, Tooltip, Typography } from 'antd';
 import { NavLink, Outlet, useLocation, useNavigate, useParams } from 'react-router';
@@ -292,6 +292,7 @@ const App: React.FC = () => {
     const menu0: any = [
         {
             key: "/",
+            icon: "dashboard",
             label: {
                 zh_CN: "仪表盘",
                 en_US: "Dashboard"
@@ -299,8 +300,9 @@ const App: React.FC = () => {
 
         }, {
             key: "/explore",
+            icon: "explore",
             label: {
-                zh_CN: "Explore Analsyis",
+                zh_CN: "探索",
                 en_US: "Explore"
             }
 
@@ -319,6 +321,7 @@ const App: React.FC = () => {
         // }, 
         {
             key: "/c/tools",
+            icon: "tools",
             label: {
                 zh_CN: "工具",
                 en_US: "Tools"
@@ -338,6 +341,7 @@ const App: React.FC = () => {
         // },
         {
             key: `/files`,
+            icon: "files",
             label: {
                 zh_CN: "文件",
                 en_US: "Files"
@@ -345,6 +349,7 @@ const App: React.FC = () => {
         },
         {
             key: `/analysis-report`,
+            icon: "report",
             label: {
                 zh_CN: "分析报告",
                 en_US: "Report"
@@ -362,6 +367,7 @@ const App: React.FC = () => {
         // },
         {
             key: `/more`,
+            icon: "apps",
             label: {
                 zh_CN: "更多",
                 en_US: "More"
@@ -383,18 +389,21 @@ const App: React.FC = () => {
                 // }, 
                 {
                     key: `/tasks`,
+                    icon: "apps",
                     label: {
                         zh_CN: "任务",
                         en_US: "Tasks"
                     },
                 }, {
                     key: "/c/scripts",
+                    icon: "code",
                     label: {
                         zh_CN: "脚本",
                         en_US: "Scripts"
                     }
                 }, {
                     key: "/c/file",
+                    icon: "files",
                     label: {
                         zh_CN: "文件",
                         en_US: "Files"
@@ -402,6 +411,7 @@ const App: React.FC = () => {
                 }, {
 
                     key: `/componentsV2/file`,
+                    icon: "files",
                     label: {
                         zh_CN: "文件",
                         en_US: "Files"
@@ -409,18 +419,21 @@ const App: React.FC = () => {
 
                 }, {
                     key: `/container-page`,
+                    icon: "container",
                     label: {
                         zh_CN: "容器管理",
                         en_US: "Container"
                     },
                 }, {
                     key: `/interactive-tools`,
+                    icon: "tools",
                     label: {
                         zh_CN: "交互工具",
                         en_US: "Interactive Tools"
                     }
                 }, {
                     key: `/tool-kit`,
+                    icon: "tools",
                     label: {
                         zh_CN: "工具集",
                         en_US: "TookKit"
@@ -442,6 +455,7 @@ const App: React.FC = () => {
                 // },
                 {
                     key: `/literature`,
+                    icon: "literature",
                     label: {
                         zh_CN: "文献资料",
                         en_US: "Literature"
@@ -449,6 +463,7 @@ const App: React.FC = () => {
                 }, {
 
                     key: `/componentsV2/script`,
+                    icon: "code",
                     label: {
                         zh_CN: "脚本",
                         en_US: "Scripts"
@@ -534,6 +549,7 @@ const App: React.FC = () => {
             ]
         }, {
             key: `/literature-intelligence`,
+            icon: "literature",
             label: {
                 zh_CN: "文献情报",
                 en_US: "Literature Intelligence"
@@ -545,12 +561,14 @@ const App: React.FC = () => {
     ]
     type MenuItem = {
         key: string;
+        icon?: string;
         label: string;
         children?: MenuItem[];
         hidden?: boolean; // 新增字段
     };
     type MenuItem0 = {
         key: string;
+        icon?: string;
         label?: {
             zh_CN: string;
             en_US: string;
@@ -558,11 +576,28 @@ const App: React.FC = () => {
         children?: MenuItem0[];
         hidden?: boolean; // 新增字段
     };
+    const iconRegistry: Record<string, React.ReactNode> = {
+        dashboard: <DashboardOutlined />,
+        explore: <CompassOutlined />,
+        tools: <ToolOutlined />,
+        files: <FolderOpenOutlined />,
+        report: <FileTextOutlined />,
+        apps: <AppstoreOutlined />,
+        literature: <ReadOutlined />,
+        container: <ContainerOutlined />,
+        code: <CodeOutlined />,
+    };
+
+    const resolveMenuIcon = (iconName?: string) => {
+        if (!iconName) return undefined;
+        return iconRegistry[iconName] ?? <AppstoreOutlined />;
+    };
+
     const filterMenu = (menus: MenuItem[]): MenuProps['items'] => {
         return menus
             .filter(item => !item.hidden)
             .map(item => {
-                const newItem: MenuItem = { ...item } as MenuItem;
+                const newItem: any = { ...item };
                 const labelText = item.label[locale];
                 newItem.label = (
                     <span
@@ -578,8 +613,9 @@ const App: React.FC = () => {
                         {labelText}
                     </span>
                 ) as any; // 选择当前语言并处理超长省略
+                newItem.icon = resolveMenuIcon(item.icon);
                 if (item.children) {
-                    newItem.children = filterMenu(item.children) as MenuItem[];
+                    newItem.children = filterMenu(item.children) as any[];
                     if (newItem.children.length === 0) delete newItem.children;
                 }
                 return newItem;
