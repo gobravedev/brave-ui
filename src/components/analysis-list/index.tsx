@@ -4,7 +4,7 @@ import { FC, forwardRef, memo, useEffect, useImperativeHandle, useMemo, useRef, 
 import { useLocation, useNavigate, useOutletContext, useParams } from "react-router"
 import { useModal, useModals } from "@/hooks/useModal"
 import PipelineInfo, { ParamsFile } from "../pipeline-monitor"
-import { runAnalysisApi, stopAnalysisApi } from "@/api/analysis"
+import { runAnalysisApi, stopAnalysisApi } from "@/api/analysisv1"
 import { DownOutlined, ExportOutlined, LineChartOutlined, RedoOutlined } from '@ant-design/icons'
 export const readHdfsAPi = (contentPath: any) => axios.get(`/api/read-hdfs?path=${contentPath}`)
 export const readJsonAPi = (contentPath: any) => axios.get(`/fast-api/read-json?path=${contentPath}`)

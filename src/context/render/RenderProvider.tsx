@@ -2,6 +2,9 @@ import axios from "axios"
 import { createContext, FC, useContext, useEffect, useMemo, useRef, useState } from "react"
 import { useSideViewContext } from "../side/SideViewContext"
 import { useComponentStore } from "@/store-zustand/components"
+import { getWorkflowFormApi } from "@/api/workflow"
+import { useSelector } from "react-redux"
+import { editNodeParamsApi, editParamsV2Api } from "@/api/analysis"
 
 export const RenderContext = createContext<any>(null)
 
@@ -29,6 +32,7 @@ export const RenderProvider: FC<any> = ({ children }) => {
     const [formData, setFormData] = useState<any>(null)
     const [formStatus, setFormStatus] = useState<any>(null)
     const { setSideView, sideView, sideOptions, setSideOptions } = useSideViewContext();
+    const { project: project_id } = useSelector((state: any) => state.user); // 'light' | 'dark'
 
     const updateFormStatus = (args: any) => {
         // debugger
@@ -110,28 +114,38 @@ export const RenderProvider: FC<any> = ({ children }) => {
         }
     }
     const loadToolsForm = async (tools_id: any) => {
-        const resp = await axios.get(`/tools/get-from-json/${tools_id}`)
-        return resp.data
+        const resp = await getWorkflowFormApi({
+            workflowId: tools_id,
+            projectId:project_id
+        })
+        // const resp = await axios.get(`/tools/get-from-json/${tools_id}`)
+        // return resp.data
+        return {
+            dataMap: { ...resp.data.analysis_result },
+            formJson: resp.data.formJson,
+        }
     }
     const loadAnalysis = async (analysisId: any) => {
         // setLoading(true)
-        const resp = await axios.post(`/analysis/edit-params-v2/${analysisId}`)
+        // const resp = await axios.post(`/analysis/edit-params-v2/${analysisId}`)
+        const resp = await editParamsV2Api(analysisId)
         return {
             requestParam: resp.data.request_param,
             dataMap: { ...resp.data.analysis_result },
             formJson: resp.data.formJson,
-            databases: resp.data.databases,
-            upstreamFormJson: resp.data.upstreamFormJson,
+            // databases: resp.data.databases,
+            // upstreamFormJson: resp.data.upstreamFormJson,
             status: resp.data.status,
         }
     }
     const loadNodeAnalysis = async (nodeAnalysisId: any) => {
         // /analysis/edit-node-params/{analysis_node_id}
-        const resp = await axios.post(`/analysis/edit-node-params/${nodeAnalysisId}`)
+        // const resp = await axios.post(`/analysis/edit-node-params/${nodeAnalysisId}`)
+        const resp = await editNodeParamsApi(nodeAnalysisId)
         return {
             requestParam: resp.data.request_param,
             formJson: resp.data.formJson,
-            databases: resp.data.databases,
+            // databases: resp.data.databases,
             status: resp.data.status,
         }
     }
@@ -160,7 +174,7 @@ export const RenderProvider: FC<any> = ({ children }) => {
                 let data = formData;
                 if (!data || force) {
                     data = await loadToolsForm(relation.relation_id)
-                    setFormData(data)
+                    // setFormData(data)
 
                 }
                 const params = buildRequestParams()

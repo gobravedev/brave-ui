@@ -5,7 +5,7 @@ import { ExportOutlined, LoadingOutlined, RedoOutlined } from "@ant-design/icons
 import { useComponentStore } from "@/store-zustand/components";
 import { useGlobalMessage } from "@/hooks/useGlobalMessage";
 import { useSelector } from "react-redux";
-import { stopAnalysisApi } from "@/api/analysis";
+import { stopAnalysisApi } from "@/api/analysisv1";
 const STATUS_ORDER = [
     "pending",
     "ready",

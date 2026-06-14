@@ -14,15 +14,16 @@ import SysFileBrowser from "@/components/file-browser/sys-file";
 import { useSideViewContext } from "@/context/side/SideViewContext";
 import { invoke } from "@/core/ui-system/invokeV2";
 import { useSelector } from "react-redux";
-import axios from "axios";
 import { useGlobalMessage } from "@/hooks/useGlobalMessage";
+import { addFileToDatasetApi } from "@/api/data";
+import ViewResolver from "@/core/ui-renderer/ViewResolver";
 const { Search } = Input;
 
 const Files: FC<any> = () => {
 
     const { ref: containerRef, top, isSticky } = useStickyTop(576);
     const [component, setComponent] = useState<any>();
-    const { project } = useSelector((state: any) => state.user)
+    useSelector((state: any) => state.user)
 
     const { modal, openModal, closeModal } = useModal();
     const { modals, openModals, closeModals } = useModals(["modalD", "metadataModal", "bindSample"])
@@ -72,7 +73,7 @@ const Files: FC<any> = () => {
                         key: "result",
                         label: "Files",
                         children: <>
-                            <AnalysisResultPage
+                            {/* <AnalysisResultPage
                                 title="Analysis Results"
 
                                 // ref={tableRef}
@@ -84,7 +85,8 @@ const Files: FC<any> = () => {
                                     openModals: openModals
                                 }}
 
-                            ></AnalysisResultPage>
+                            ></AnalysisResultPage> */}
+                            <ViewResolver view="datasetFilePage"></ViewResolver>
                         </>
                     }, {
                         key: "data_file_browser",
@@ -92,25 +94,42 @@ const Files: FC<any> = () => {
                         children: <SysFileBrowser path="/" type="data" onSelectFile={async (file: any) => {
                             console.log(file)
                             try {
-                                const data = await invoke.fileTypePage.openDrawerAsync(file, {
+                                const data = await invoke.datasetProjectPage.openDrawerAsync(file, {
                                     width: 600,
                                     title: "Select File Type"
                                 })
                                 // /analysis-result/add-to-file
                                 const params = {
-                                    component_id: data.component_id,
-                                    project: project,
-                                    type: "data",
+                                    dataset_id: data.id,
                                     path: file.path
                                 }
                                 console.log(params)
-                                const resp = await axios.post(`/analysis-result/add-to-file`, params)
+                                await addFileToDatasetApi(params)
                                 message.success("File added to analysis results")
                             } catch (error) {
                                 console.log("File type selection cancelled or failed", error)
                             }
 
                         }} ></SysFileBrowser>
+                    },    {
+                        key: "sample-dataset",
+                        label: "Sample",
+                        children: <>
+                            {/* <AnalysisResultPage
+                                title="Analysis Results"
+
+                                // ref={tableRef}
+                                setComponent={setComponent}
+                                component={component}
+                                params={{ component_id: component?.component_id }}
+                                operatePipeline={{
+                                    openModal: openModal,
+                                    openModals: openModals
+                                }}
+
+                            ></AnalysisResultPage> */}
+                            <ViewResolver view="sampleProjectPage"></ViewResolver>
+                        </>
                     }, {
                         key: "analysis_file_browser",
                         label: "Analysis File browser",

@@ -4,7 +4,7 @@ import { FC, forwardRef, memo, use, useEffect, useImperativeHandle, useMemo, use
 import axios from "axios";
 import { DeleteOutlined, DownloadOutlined, ExportOutlined, QuestionCircleOutlined, RedoOutlined } from "@ant-design/icons"
 import { useNavigate, useOutletContext } from "react-router";
-import { findAnalysisById, runAnalysisApi, stopAnalysisApi } from "@/api/analysis";
+import { findAnalysisById, runAnalysisApi, stopAnalysisApi } from "@/api/analysisv1";
 import { useModal, useModals } from "@/hooks/useModal";
 import { useSelector } from "react-redux";
 import { useGlobalMessage } from "@/hooks/useGlobalMessage";

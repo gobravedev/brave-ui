@@ -14,3 +14,7 @@ export const setupGlobalMessage = () => {
 export const useGlobalMessage = () => {
   return globalMessage!;
 };
+
+export const getGlobalMessage = () => {
+  return globalMessage;
+};

@@ -87,6 +87,9 @@ const ToolsDetail = lazy(() => import("../pages/components-relation/index-compon
 const ComponentsV3 = lazy(() => import("../pages/components-relation/components-v3"));
 const Login = lazy(() => import("@/pages/users/login"));
 const Explore = lazy(() => import("@/pages/explore"))
+const DatasetProjectPage = lazy(() => import("@/components/data-dataset-page/dataset-project-page"))
+const DatasetFilePage = lazy(() => import("@/components/data-dataset-page/dataset-file-page"))
+const SampleProjectPage = lazy(() => import("@/components/data-dataset-page/sample-project-page"))
 import axios from "axios";
 import { Skeleton } from "antd";
 import { useDispatch } from "react-redux";
@@ -100,6 +103,15 @@ if (appType == "index") {
     const children = [
 
         {
+            path:"dataset",
+            element:<DatasetProjectPage />
+        },{
+            path:"dataset-file",
+            element:<DatasetFilePage />
+        },{
+            path:"sample-project",
+            element:<SampleProjectPage />
+        },{
             path: "/",
             element: <Project />
         }, {

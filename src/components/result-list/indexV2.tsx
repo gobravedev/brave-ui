@@ -9,6 +9,7 @@ import ImportData from "../import-data"
 import { useModal } from "@/hooks/useModal"
 export const readHdfsAPi = (contentPath: any) => axios.get(`/api/read-hdfs?path=${contentPath}`)
 export const readJsonAPi = (contentPath: any) => axios.get(`/fast-api/read-json?path=${contentPath}`)
+import { listFileByProjectGroupApi } from "@/api/data"
 import AnalysisResultEdit from "../analysis-result-edit"
 import Dragger from "antd/es/upload/Dragger"
 import { useGlobalMessage } from "@/hooks/useGlobalMessage"
@@ -36,7 +37,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
         setRecord,
         setTableLoading,
         setTabletData,
-        analysisMethod,
+        // analysisMethod,
         columnsParamsALL,
         // activeTabKey,
         // setActiveTabKey,
@@ -56,6 +57,27 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
     }))
     const { setResultTableList } = useStoreRender()
 
+    const analysisMethod = [
+        {
+            "name": "raw_reads",
+            "mode": "multiple",
+            "type": "GroupSelectSampleButton",
+            "label": "Raw Reads", "group": "group_field",
+            "rules": [{ "required": true, "message": "This field cannot be empty!" }],
+            "dir": "", "fileFormat": { "profile": "*.tsv" },
+            "inputForm": [
+                {
+                    "name": ["content", "fastq1"],
+                    "initialValue": "/data/wangyang/NGS_TEST/*_1.fastq.gz",
+                    "label": "fastq1", "type": "BaseInput", "rules": [{ "required": true, "message": "This field cannot be empty!" }]
+                },
+                { "name": ["content", "fastq2"], "initialValue": "/data/wangyang/NGS_TEST/*_2.fastq.gz", "label": "fastq2", "type": "BaseInput", "rules": [{ "required": true, "message": "This field cannot be empty!" }] }],
+
+            "id": 11, "component_id": "EXP", 
+            "install_key": null, "component_type": "file", "component_name": "Experimental Data List", "description": null, "component_ids": null, "img": "/brave-api/img/pipeline.jpg", "container_id": null, "tools_container_id": null, "prompt": null, "io_schema": null, "sub_container_id": null, "tags": null, 
+            "file_type": "collected", "script_type": null, "category": null, "order_index": null, "position": null, "edges": null, "created_at": "2026-06-09T22:30:49", "updated_at": null
+        }]
+        // individual collected
     const { project, projectObj } = useOutletContext<any>()
     const message = useGlobalMessage()
     const [data, setData] = useState<any>()
@@ -300,14 +322,15 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
         if (componentIdList) {
             // const keyMap = getKeyMap()
             // console.log(keyMap)
-            let resp: any = await axios.post(`/analysis-result/list-analysis-result-grouped`, {
-                project: project,
-                // analysis_method: analysisMethodValues,
-                component_ids: componentIdList,
-                component_parent_ids_map: componentParentIdsMap,
-                // rows: -1,
-                ...params
-            })
+            // let resp: any = await axios.post(`/analysis-result/list-analysis-result-grouped`, {
+            //     project: project,
+            //     // analysis_method: analysisMethodValues,
+            //     component_ids: componentIdList,
+            //     component_parent_ids_map: componentParentIdsMap,
+            //     // rows: -1,
+            //     ...params
+            // })
+            let resp = await listFileByProjectGroupApi("default")
             setLoading(false)
             const groupedData = resp.data;
             // debugger
@@ -333,7 +356,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
             console.log("groupedData", groupedData)
             if (setResultTableList) {
                 // console.log(groupedData)
-                setResultTableList(groupedData)
+                // setResultTableList(groupedData)
             }
             setGroupedData(groupedData)
             // console.log("activeTabKey: ", activeTabKey)
@@ -348,7 +371,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
             setData(currentData)
 
             if (currentData.length > 0) {
-                setAnalysisResultId(currentData[0].analysis_result_id)
+                setAnalysisResultId(currentData[0].id)
                 setTableColumns(currentData[0].columns)
             } else {
                 setTableColumns([])
@@ -851,6 +874,7 @@ const ResultList = forwardRef<any, any>((params_, ref) => {
 
                 <Flex gap={"small"} wrap>
 
+                    {/* {JSON.stringify(analysisMethod)} */}
                     {getCurrectParent()}
                     <Input.Search
                         size="small"

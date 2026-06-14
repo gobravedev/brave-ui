@@ -6,7 +6,7 @@ import { useOutletContext } from "react-router";
 import { SyncOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { SSEContextType } from '@/type/sse'
 import { readFileApi, readLogFileApi } from "@/api/file-operation";
-import { findAnalysisById, runAnalysisApi, stopAnalysisApi } from "@/api/analysis";
+import { findAnalysisById, runAnalysisApi, stopAnalysisApi } from "@/api/analysisv1/index.tsx";
 import FileBrowser from "../file-browser";
 import ResultParse from "../result-parse";
 import { useModal } from "@/hooks/useModal";

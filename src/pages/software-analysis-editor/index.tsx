@@ -2,7 +2,7 @@ import { Button, Card, Flex, Popconfirm, Splitter, Tabs, Tag, Tooltip, Typograph
 import { FC, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useOutletContext, useParams } from "react-router";
 import { MonacoEditor } from "@/components/react-monaco-editor";
-import { findAnalysisById, monitorAnalysisApi, runAnalysisApi } from "@/api/analysis";
+import { findAnalysisById, monitorAnalysisApi, runAnalysisApi } from "@/api/analysisv1";
 import { readFileApi, writeFileApi } from "@/api/file-operation";
 import { current } from "@reduxjs/toolkit";
 import { SSEContextType } from '@/type/sse'

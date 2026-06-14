@@ -48,6 +48,7 @@
     "react-graph-vis-ts": "^1.0.9",
     "react-i18next": "^15.7.3",
     "react-markdown": "^10.1.0",
+    "react-query": "^3.39.3",
     "react-redux": "^9.2.0",
     "react-resizable-panels": "^3.0.6",
     "react-resize-detector": "^12.3.0",

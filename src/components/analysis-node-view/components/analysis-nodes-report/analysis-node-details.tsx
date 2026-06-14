@@ -4,7 +4,7 @@ import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { CloseOutlined, EditOutlined, ExportOutlined, RedoOutlined } from "@ant-design/icons";
 import ViewResolver from "@/core/ui-renderer/ViewResolver";
 import { invoke } from "@/core/ui-system/invokeV2";
-import { runAnalysisNodeApi, stopAnalysisNodeApi } from "@/api/analysis";
+import { runAnalysisNodeApi, stopAnalysisNodeApi } from "@/api/analysisv1";
 import { useGlobalMessage } from "@/hooks/useGlobalMessage";
 import { useSelector } from "react-redux";
 import { useStoreRender } from "@/context/render/RenderProvider";

@@ -7,7 +7,7 @@ import LogFile from "@/components/log-file";
 import { DeleteColumnOutlined, DeleteOutlined, QuestionCircleOutlined } from "@ant-design/icons"
 import { MonacoEditor } from "@/components/react-monaco-editor";
 import { useNavigate, useOutletContext } from "react-router";
-import { findAnalysisById, runAnalysisApi, stopAnalysisNodeApi } from "@/api/analysis";
+import { findAnalysisById, runAnalysisApi, stopAnalysisNodeApi } from "@/api/analysisv1";
 import { useModal, useModals } from "@/hooks/useModal";
 // import FormJsonComp from "@/components/form-components";
 import ParamsView from "@/components/params-view";

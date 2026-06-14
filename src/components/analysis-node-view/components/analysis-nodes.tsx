@@ -9,7 +9,7 @@ import { useSelector } from "react-redux";
 import { CreateOrUpdatePipelineComponent } from "@/components/create-pipeline";
 import { useModals } from "@/hooks/useModal";
 import ModuleEdit from "@/components/module-edit";
-import { findAnalysisById, runAnalysisApi, runAnalysisNodeApi, stopAnalysisApi, stopAnalysisNodeApi } from "@/api/analysis";
+import { findAnalysisById, runAnalysisApi, runAnalysisNodeApi, stopAnalysisApi, stopAnalysisNodeApi } from "@/api/analysisv1";
 import ViewResolver from "@/core/ui-renderer/ViewResolver";
 import { useUI } from "@/core/ui-system/useUI";
 import { invoke } from "@/core/ui-system/invokeV2";
