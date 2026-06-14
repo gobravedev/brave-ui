@@ -5,6 +5,8 @@ import { ReloadOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import { useDatasetFilePageQuery } from "@/hooks/usePaginationV2";
 import type { DatasetFileItem } from "@/api/data";
+import { invoke } from "@/core/ui-system/invokeV2";
+import { useGlobalMessage } from "@/hooks/useGlobalMessage";
 
 const { Text } = Typography;
 
@@ -57,6 +59,16 @@ const normalizeRoles = (role?: string | string[]) => {
     .filter(Boolean);
 
   return roles.length > 0 ? roles : undefined;
+};
+
+const isSpreadsheetFile = (item: DatasetFileItem) => {
+  const format = String(item.format ?? "").toLowerCase();
+  if (["xlsx", "xls", "csv", "tsv"].includes(format)) {
+    return true;
+  }
+
+  const path = String(item.path ?? "").toLowerCase();
+  return [".xlsx", ".xls", ".csv", ".tsv"].some((ext) => path.endsWith(ext));
 };
 
 const columns: ColumnsType<DatasetFileItem> = [
@@ -122,6 +134,7 @@ const DatasetFilePage = ({
   close,
 }: DatasetFilePageProps) => {
   const { project, projectObj } = useSelector((state: any) => state.user);
+  const message = useGlobalMessage();
   const [selectedId, setSelectedID] = useState<string>();
 
   const selectable = Boolean(onOk || onCancel);
@@ -173,13 +186,46 @@ const DatasetFilePage = ({
 
   const selectedItem = useMemo(() => data.find((item) => item.id === selectedId), [data, selectedId]);
 
+  const handleOpenSheet = (item: DatasetFileItem) => {
+    if (!isSpreadsheetFile(item)) {
+      message.warning("Only spreadsheet files can be opened in Univer");
+      return;
+    }
+
+    invoke.univerView.open(
+      {
+        // path: item.path,
+        file_id: item.file_id,
+      },
+      {
+        width: "90%",
+        title: `Sheet: ${item.file_name || item.file_id}`,
+      }
+    );
+  };
+
   const selectColumns = useMemo<ColumnsType<DatasetFileItem>>(() => {
+    const baseColumns: ColumnsType<DatasetFileItem> = [
+      ...columns,
+      {
+        title: "Sheet",
+        key: "sheet",
+        width: 120,
+        fixed: "right",
+        render: (_: unknown, record) => (
+          <Button size="small" disabled={!isSpreadsheetFile(record)} onClick={() => handleOpenSheet(record)}>
+            Open
+          </Button>
+        ),
+      },
+    ];
+
     if (!selectable) {
-      return columns;
+      return baseColumns;
     }
 
     return [
-      ...columns,
+      ...baseColumns,
       {
         title: "Action",
         key: "action",

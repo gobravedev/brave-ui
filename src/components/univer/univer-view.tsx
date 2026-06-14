@@ -7,7 +7,12 @@ import sheetsCoreZhCN from '@univerjs/preset-sheets-core/locales/zh-CN'
 import { createUniver, LocaleType, mergeLocales } from '@univerjs/presets'
 import type { IWorkbookData } from '@univerjs/presets'
 import { WORKBOOK_DATA } from './data.ts'
-import { readSheetWorkbookApi, writeSheetWorkbookApi } from '@/api/sheet'
+import {
+  readSheetWorkbookApi,
+  readSheetWorkbookByFileIDApi,
+  writeSheetWorkbookApi,
+  writeSheetWorkbookByFileIDApi,
+} from '@/api/sheet'
 
 import './styles.css'
 
@@ -17,11 +22,12 @@ import { useGlobalMessage } from '@/hooks/useGlobalMessage.ts'
 
 // const DEFAULT_SHEET_PATH = '/home/admin/Downloads/test1.xlsx'
 
-const UniverView: FC<any> = ({ path }) => {
+const UniverView: FC<any> = ({ path, file_id }) => {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const univerAPIRef = useRef<ReturnType<typeof createUniver>['univerAPI'] | null>(null)
   const workbookSeqRef = useRef(0)
-  const [filePath, setFilePath] = useState(path)
+  const [filePath, setFilePath] = useState(path ?? '')
+  const [fileId, setFileId] = useState(file_id ?? '')
   const [loading, setLoading] = useState(false)
   const { theme } = useSelector((state: any) => state.user);
   const message = useGlobalMessage()
@@ -47,17 +53,24 @@ const UniverView: FC<any> = ({ path }) => {
     univerAPI.createWorkbook(uniqueWorkbookData)
   }, [])
 
-  const loadWorkbookFromFile = useCallback(async (targetPath: string) => {
+  const loadWorkbook = useCallback(async (targetPath: string, targetFileId: string) => {
     const univerAPI = univerAPIRef.current
     if (!univerAPI) {
       return
     }
 
+    const resolvedPath = String(targetPath ?? '').trim()
+    const resolvedFileID = String(targetFileId ?? '').trim()
+    if (!resolvedPath && !resolvedFileID) {
+      message.warning('请先输入 file path 或 file id')
+      return
+    }
+
     setLoading(true)
     try {
-      const resp = await readSheetWorkbookApi({
-        file_path: targetPath,
-      })
+      const resp = resolvedPath
+        ? await readSheetWorkbookApi({ file_path: resolvedPath })
+        : await readSheetWorkbookByFileIDApi({ file_id: resolvedFileID })
 
       replaceWorkbook(resp.data.workbook_data as Partial<IWorkbookData>)
       message.success(`读取成功: ${resp.data.file_path}`)
@@ -84,12 +97,23 @@ const UniverView: FC<any> = ({ path }) => {
 
     setLoading(true)
     try {
+      const resolvedPath = String(filePath ?? '').trim()
+      const resolvedFileID = String(fileId ?? '').trim()
+      if (!resolvedPath && !resolvedFileID) {
+        message.warning('请先输入 file path 或 file id')
+        return
+      }
+
       const workbookData = activeWorkbook.save()
-      const resp = await writeSheetWorkbookApi({
-        file_path: filePath,
-        // format: 'xlsx',
-        workbook_data: workbookData as unknown as Record<string, unknown>,
-      })
+      const resp = resolvedPath
+        ? await writeSheetWorkbookApi({
+          file_path: resolvedPath,
+          workbook_data: workbookData as unknown as Record<string, unknown>,
+        })
+        : await writeSheetWorkbookByFileIDApi({
+          file_id: resolvedFileID,
+          workbook_data: workbookData as unknown as Record<string, unknown>,
+        })
 
       message.success(`保存成功: ${resp.data.file_path}`)
     } catch (error) {
@@ -98,7 +122,15 @@ const UniverView: FC<any> = ({ path }) => {
     } finally {
       setLoading(false)
     }
-  }, [filePath])
+  }, [fileId, filePath])
+
+  useEffect(() => {
+    setFilePath(path ?? '')
+  }, [path])
+
+  useEffect(() => {
+    setFileId(file_id ?? '')
+  }, [file_id])
 
   useEffect(() => {
     if (!containerRef.current) {
@@ -120,13 +152,13 @@ const UniverView: FC<any> = ({ path }) => {
 
     univerAPIRef.current = univerAPI
 
-    void loadWorkbookFromFile(path)
+    void loadWorkbook(path ?? '', file_id ?? '')
 
     return () => {
       univerAPIRef.current = null
       univer.dispose()
     }
-  }, [loadWorkbookFromFile, path])
+  }, [file_id, loadWorkbook, path])
 
   useEffect(() => {
     univerAPIRef.current?.toggleDarkMode(theme === 'dark')
@@ -139,9 +171,15 @@ const UniverView: FC<any> = ({ path }) => {
           <Input
             value={filePath}
             onChange={(event) => setFilePath(event.target.value)}
-            placeholder="请输入相对路径，例如 demo/univer-demo.xlsx"
+            placeholder="请输入相对路径，例如 demo/univer-demo.xlsx（可选）"
           />
-          <Button loading={loading} onClick={() => loadWorkbookFromFile(filePath)}>Read</Button>
+          <Input
+            style={{ maxWidth: 280 }}
+            value={fileId}
+            onChange={(event) => setFileId(event.target.value)}
+            placeholder="或输入 file id（可选）"
+          />
+          <Button loading={loading} onClick={() => loadWorkbook(filePath, fileId)}>Read</Button>
           <Button type="primary" loading={loading} onClick={saveWorkbookToFile}> Save</Button>
         </Space.Compact>
       </div>
