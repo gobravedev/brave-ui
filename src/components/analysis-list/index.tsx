@@ -652,14 +652,14 @@ const AnalysisList = forwardRef<any, any>(({
                                     }}>Analysis Task</a>
                                 </>)
                             },
-                            {
-                                key: '6',
-                                label: (<>
-                                    <a onClick={() => {
-                                        openModal("addProject", record)
-                                    }}>Add Project</a>
-                                </>)
-                            }
+                            // {
+                            //     key: '6',
+                            //     label: (<>
+                            //         <a onClick={() => {
+                            //             openModal("addProject", record)
+                            //         }}>Add Project</a>
+                            //     </>)
+                            // }
                         ]
                     }}>
                         <a onClick={(e) => e.preventDefault()}>
@@ -678,9 +678,9 @@ const AnalysisList = forwardRef<any, any>(({
         closeModal()
     }, [project])
 
-    useEffect(() => {
-        loadData()
-    }, [project])
+    // useEffect(() => {
+    //     loadData()
+    // }, [project])
     // const [searchText, setSearchText] = useState("");
     // const filteredData = useMemo(() => {
     //     if (!searchText) return data;
@@ -828,12 +828,12 @@ const AnalysisList = forwardRef<any, any>(({
             params={modal.params}
             onClose={closeModal}
         ></EditParams>
-        <AddProject
+        {/* <AddProject
             callback={loadData}
             visible={modal.key == "addProject" && modal.visible}
             params={modal.params}
             onClose={closeModal}
-        ></AddProject>
+        ></AddProject> */}
 
         <InspectPanel
             callback={loadData}

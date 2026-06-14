@@ -279,7 +279,7 @@ const Pipeline: FC<any> = ({ }) => {
                 value: "editParamsPanel"
             }
         ])
-        // setSideView("analysis-tools")
+        setSideView("editParamsPanel")
         return () => {
             setSideOptions([])
             setSideView("llm-card")
