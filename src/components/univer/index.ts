@@ -4,6 +4,7 @@ import type { InferViewRegistryFromLoaders } from "@/core/component-registry/reg
 
 const viewLoaders = {
     univerView: () => import("./univer-view"),
+    sheetButton: () => import("./sheet-button"),
 };
 // ;
 declare module "@/core/component-registry/registry-types" {

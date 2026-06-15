@@ -169,17 +169,19 @@ const UniverView: FC<any> = ({ path, file_id }) => {
       <div className="univer-view__toolbar">
         <Space.Compact style={{ width: '100%' }}>
           <Input
+            disabled
             value={filePath}
             onChange={(event) => setFilePath(event.target.value)}
             placeholder="请输入相对路径，例如 demo/univer-demo.xlsx（可选）"
           />
           <Input
+            disabled
             style={{ maxWidth: 280 }}
             value={fileId}
             onChange={(event) => setFileId(event.target.value)}
             placeholder="或输入 file id（可选）"
           />
-          <Button loading={loading} onClick={() => loadWorkbook(filePath, fileId)}>Read</Button>
+          <Button disabled loading={loading} onClick={() => loadWorkbook(filePath, fileId)}>Read</Button>
           <Button type="primary" loading={loading} onClick={saveWorkbookToFile}> Save</Button>
         </Space.Compact>
       </div>
