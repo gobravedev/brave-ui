@@ -90,6 +90,12 @@ const Explore = lazy(() => import("@/pages/explore"))
 const DatasetProjectPage = lazy(() => import("@/components/data-dataset-page/dataset-project-page"))
 const DatasetFilePage = lazy(() => import("@/components/data-dataset-page/dataset-file-page"))
 const SampleProjectPage = lazy(() => import("@/components/data-dataset-page/sample-project-page"))
+const ContainerImagePage = lazy(() => import("@/components/container-manager/container-image-page"))
+const ContainerTemplatePage = lazy(() => import("@/components/container-manager/container-template-page"))
+const AppSessionPage = lazy(() => import("@/components/container-manager/app-session-page"))
+const ContainerInstancePage = lazy(() => import("@/components/container-manager/container-instance-page"))
+const ContainerEventPage = lazy(() => import("@/components/container-manager/container-event-page"))
+const OutboxEventPage = lazy(() => import("@/components/container-manager/outbox-event-page"))
 import axios from "axios";
 import { Skeleton } from "antd";
 import { useDispatch } from "react-redux";
@@ -109,8 +115,26 @@ if (appType == "index") {
             path:"dataset-file",
             element:<DatasetFilePage />
         },{
+            path:"app-session",
+            element:<AppSessionPage />
+        },{
+            path:"container-instance",
+            element:<ContainerInstancePage />
+        },{
+            path:"container-event",
+            element:<ContainerEventPage />
+        },{
+            path:"outbox-event",
+            element:<OutboxEventPage />
+        },{
             path:"sample-project",
             element:<SampleProjectPage />
+        },{
+            path:"container-image",
+            element:<ContainerImagePage />
+        },{
+            path:"container-template",
+            element:<ContainerTemplatePage />
         },{
             path: "/",
             element: <Project />

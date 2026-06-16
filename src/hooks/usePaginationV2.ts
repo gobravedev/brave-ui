@@ -13,6 +13,26 @@ import type {
 	PageRequest,
 	PageResponse,
 } from "@/api/data";
+import {
+	pageAppSessionApi,
+	pageContainerEventApi,
+	pageContainerImageApi,
+	pageContainerInstanceApi,
+	pageContainerTemplateApi,
+	pageOutboxEventApi,
+	type AppSessionItem,
+	type AppSessionPageQuery,
+	type ContainerEventItem,
+	type ContainerEventPageQuery,
+	type ContainerImageItem,
+	type ContainerImagePageQuery,
+	type ContainerInstanceItem,
+	type ContainerInstancePageQuery,
+	type ContainerTemplateItem,
+	type ContainerTemplatePageQuery,
+	type OutboxEventItem,
+	type OutboxEventPageQuery,
+} from "@/api/container";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 20;
@@ -219,6 +239,102 @@ export const useSampleProjectPageQuery = (
 		query,
 		queryFn: async (payload) => {
 			const response = await pageSampleByProjectApi(payload);
+			return response.data;
+		},
+		initialPageSize: 10,
+		...options,
+	});
+};
+
+export const useContainerImagePageQuery = (
+	query: ContainerImagePageQuery,
+	options?: Omit<UsePageQueryOptions<ContainerImageItem, ContainerImagePageQuery>, "queryKey" | "query" | "endpoint" | "queryFn">
+) => {
+	return usePageQuery<ContainerImageItem, ContainerImagePageQuery>({
+		queryKey: ["container-image-page"],
+		query,
+		queryFn: async (payload) => {
+			const response = await pageContainerImageApi(payload);
+			return response.data;
+		},
+		initialPageSize: 10,
+		...options,
+	});
+};
+
+export const useContainerTemplatePageQuery = (
+	query: ContainerTemplatePageQuery,
+	options?: Omit<UsePageQueryOptions<ContainerTemplateItem, ContainerTemplatePageQuery>, "queryKey" | "query" | "endpoint" | "queryFn">
+) => {
+	return usePageQuery<ContainerTemplateItem, ContainerTemplatePageQuery>({
+		queryKey: ["container-template-page"],
+		query,
+		queryFn: async (payload) => {
+			const response = await pageContainerTemplateApi(payload);
+			return response.data;
+		},
+		initialPageSize: 10,
+		...options,
+	});
+};
+
+export const useAppSessionPageQuery = (
+	query: AppSessionPageQuery,
+	options?: Omit<UsePageQueryOptions<AppSessionItem, AppSessionPageQuery>, "queryKey" | "query" | "endpoint" | "queryFn">
+) => {
+	return usePageQuery<AppSessionItem, AppSessionPageQuery>({
+		queryKey: ["app-session-page"],
+		query,
+		queryFn: async (payload) => {
+			const response = await pageAppSessionApi(payload);
+			return response.data;
+		},
+		initialPageSize: 10,
+		...options,
+	});
+};
+
+export const useContainerInstancePageQuery = (
+	query: ContainerInstancePageQuery,
+	options?: Omit<UsePageQueryOptions<ContainerInstanceItem, ContainerInstancePageQuery>, "queryKey" | "query" | "endpoint" | "queryFn">
+) => {
+	return usePageQuery<ContainerInstanceItem, ContainerInstancePageQuery>({
+		queryKey: ["container-instance-page"],
+		query,
+		queryFn: async (payload) => {
+			const response = await pageContainerInstanceApi(payload);
+			return response.data;
+		},
+		initialPageSize: 10,
+		...options,
+	});
+};
+
+export const useContainerEventPageQuery = (
+	query: ContainerEventPageQuery,
+	options?: Omit<UsePageQueryOptions<ContainerEventItem, ContainerEventPageQuery>, "queryKey" | "query" | "endpoint" | "queryFn">
+) => {
+	return usePageQuery<ContainerEventItem, ContainerEventPageQuery>({
+		queryKey: ["container-event-page"],
+		query,
+		queryFn: async (payload) => {
+			const response = await pageContainerEventApi(payload);
+			return response.data;
+		},
+		initialPageSize: 10,
+		...options,
+	});
+};
+
+export const useOutboxEventPageQuery = (
+	query: OutboxEventPageQuery,
+	options?: Omit<UsePageQueryOptions<OutboxEventItem, OutboxEventPageQuery>, "queryKey" | "query" | "endpoint" | "queryFn">
+) => {
+	return usePageQuery<OutboxEventItem, OutboxEventPageQuery>({
+		queryKey: ["outbox-event-page"],
+		query,
+		queryFn: async (payload) => {
+			const response = await pageOutboxEventApi(payload);
 			return response.data;
 		},
 		initialPageSize: 10,

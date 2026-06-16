@@ -1,6 +1,169 @@
-import axios from "axios"
+import axios from "axios";
+import { http } from "@/api/client/http";
+import type { PageRequest, PageResponse } from "@/api/data";
 
-export const pageContainerApi  = async (params:any)=>{
-    const resp: any = await axios.post(`/container/page`,params)
-    return resp
+export interface ContainerImageItem {
+    id: string;
+    name: string;
+    tag: string;
+    registry: string;
+    namespace: string;
+    full_name: string;
+    digest: string;
+    description: string;
+    size: number;
+    created_at: string;
+    updated_at: string;
 }
+
+export interface ContainerTemplateItem {
+    id: string;
+    name: string;
+    description: string;
+    type: string;
+    image_id: string;
+    command: string;
+    cpu: number;
+    memory: number;
+    work_dir: string;
+    env: Record<string, unknown> | null;
+    mounts: Record<string, unknown> | null;
+    volumes: Record<string, unknown> | null;
+    labels: Record<string, unknown> | null;
+    change_uid: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface AppSessionItem {
+    id: string;
+    user_id: string;
+    project_id: string;
+    container_template_id: string;
+    name: string;
+    status: string;
+    workspace_path: string;
+    last_access_at: string;
+    started_at: string;
+    stopped_at: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ContainerInstanceItem {
+    id: string;
+    template_id: string;
+    owner_type: string;
+    owner_id: string;
+    runtime_id: string;
+    name: string;
+    status: string;
+    ip_address: string;
+    exit_code: number;
+    started_at: string;
+    finished_at: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ContainerEventItem {
+    id: string;
+    container_instance_id: string;
+    event: string;
+    message: string;
+    created_at: string;
+}
+
+export interface OutboxEventItem {
+    id: string;
+    type: string;
+    payload: Record<string, unknown> | null;
+    status: string;
+    sent_at: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ContainerImagePageQuery {
+    id?: string;
+    name?: string;
+    tag?: string;
+    registry?: string;
+    namespace?: string;
+    full_name?: string;
+    digest?: string;
+    description?: string;
+}
+
+export interface ContainerTemplatePageQuery {
+    id?: string;
+    name?: string;
+    description?: string;
+    type?: string;
+    image_id?: string;
+    command?: string;
+    work_dir?: string;
+}
+
+export interface AppSessionPageQuery {
+    id?: string;
+    project_id?: string;
+    container_template_id?: string;
+    name?: string;
+    status?: string;
+    workspace_path?: string;
+}
+
+export interface ContainerInstancePageQuery {
+    id?: string;
+    template_id?: string;
+    owner_type?: string;
+    owner_id?: string;
+    runtime_id?: string;
+    name?: string;
+    status?: string;
+    ip_address?: string;
+}
+
+export interface ContainerEventPageQuery {
+    id?: string;
+    container_instance_id?: string;
+    event?: string;
+    message?: string;
+}
+
+export interface OutboxEventPageQuery {
+    id?: string;
+    type?: string;
+    status?: string;
+}
+
+export const pageContainerImageApi = (payload: PageRequest<ContainerImagePageQuery>) => {
+    return http.post<PageResponse<ContainerImageItem>>("/container/image/list-by-page", payload);
+};
+
+export const pageContainerTemplateApi = (payload: PageRequest<ContainerTemplatePageQuery>) => {
+    return http.post<PageResponse<ContainerTemplateItem>>("/container/template/list-by-page", payload);
+};
+
+export const pageAppSessionApi = (payload: PageRequest<AppSessionPageQuery>) => {
+    return http.post<PageResponse<AppSessionItem>>("/container/app-session/list-by-page", payload);
+};
+
+export const pageContainerInstanceApi = (payload: PageRequest<ContainerInstancePageQuery>) => {
+    return http.post<PageResponse<ContainerInstanceItem>>("/container/instance/list-by-page", payload);
+};
+
+export const pageContainerEventApi = (payload: PageRequest<ContainerEventPageQuery>) => {
+    return http.post<PageResponse<ContainerEventItem>>("/container/event/list-by-page", payload);
+};
+
+export const pageOutboxEventApi = (payload: PageRequest<OutboxEventPageQuery>) => {
+    return http.post<PageResponse<OutboxEventItem>>("/container/outbox/list-by-page", payload);
+};
+
+// Backward compatible export for legacy pages using the old endpoint.
+export const pageContainerApi = async (params: any) => {
+    const resp: any = await axios.post(`/container/page`, params);
+    return resp;
+};

@@ -355,6 +355,64 @@ const App: React.FC = () => {
                 en_US: "Report"
             }
 
+        }, {
+            key: `/container`,
+            icon: "container",
+            label: {
+                zh_CN: "容器管理",
+                en_US: "Container"
+            },
+            children: [
+
+                {
+                    key: `/app-session`,
+                    icon: "container",
+                    label: {
+                        zh_CN: "应用会话",
+                        en_US: "App Session"
+                    },
+                },
+                {
+                    key: `/container-instance`,
+                    icon: "container",
+                    label: {
+                        zh_CN: "容器实例",
+                        en_US: "Container Instance"
+                    },
+                },
+                {
+                    key: `/container-event`,
+                    icon: "container",
+                    label: {
+                        zh_CN: "容器事件",
+                        en_US: "Container Event"
+                    },
+                },
+                {
+                    key: `/outbox-event`,
+                    icon: "container",
+                    label: {
+                        zh_CN: "出箱事件",
+                        en_US: "Outbox Event"
+                    },
+                },
+                {
+                    key: `/container-image`,
+                    icon: "container",
+                    label: {
+                        zh_CN: "容器镜像",
+                        en_US: "Container Image"
+                    },
+                },
+                {
+                    key: `/container-template`,
+                    icon: "container",
+                    label: {
+                        zh_CN: "容器模板",
+                        en_US: "Container Template"
+                    },
+                },
+            ]
         },
         // {
         //     key: `/entity-page`,
@@ -421,8 +479,8 @@ const App: React.FC = () => {
                     key: `/container-page`,
                     icon: "container",
                     label: {
-                        zh_CN: "容器管理",
-                        en_US: "Container"
+                        zh_CN: "容器管理(deprecated)",
+                        en_US: "Container(deprecated)"
                     },
                 }, {
                     key: `/interactive-tools`,
@@ -978,7 +1036,7 @@ const App: React.FC = () => {
             >
                 <Sider
                     theme={isDark ? 'dark' : 'light'}
-                    width={150}
+                    width={200}
                     collapsedWidth={0}
                     breakpoint='md'
                     trigger={null}
