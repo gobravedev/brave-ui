@@ -114,6 +114,16 @@ export interface AppSessionPageQuery {
     workspace_path?: string;
 }
 
+export interface CreateAppSessionPayload {
+    container_template_id: string;
+    project_id: string;
+    name: string;
+}
+
+export interface AppSessionIDPayload {
+    id: string;
+}
+
 export interface ContainerInstancePageQuery {
     id?: string;
     template_id?: string;
@@ -148,6 +158,22 @@ export const pageContainerTemplateApi = (payload: PageRequest<ContainerTemplateP
 
 export const pageAppSessionApi = (payload: PageRequest<AppSessionPageQuery>) => {
     return http.post<PageResponse<AppSessionItem>>("/container/app-session/list-by-page", payload);
+};
+
+export const createAppSessionApi = (payload: CreateAppSessionPayload) => {
+    return http.post<AppSessionItem>("/container/app-session/create", payload);
+};
+
+export const startAppSessionApi = (payload: AppSessionIDPayload) => {
+    return http.post<{ message: string }>("/container/app-session/start", payload);
+};
+
+export const stopAppSessionApi = (payload: AppSessionIDPayload) => {
+    return http.post<{ message: string }>("/container/app-session/stop", payload);
+};
+
+export const deleteAppSessionApi = (payload: AppSessionIDPayload) => {
+    return http.post<{ message: string }>("/container/app-session/delete", payload);
 };
 
 export const pageContainerInstanceApi = (payload: PageRequest<ContainerInstancePageQuery>) => {

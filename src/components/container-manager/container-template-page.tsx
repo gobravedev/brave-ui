@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { Button, Card, Flex, Space, Table, Typography } from "antd";
+import { Button, Card, Flex, Space, Table, Typography, message } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { ReloadOutlined } from "@ant-design/icons";
+import { useSelector } from "react-redux";
 import { useContainerTemplatePageQuery } from "@/hooks/usePaginationV2";
-import type { ContainerTemplateItem } from "@/api/container";
+import { createAppSessionApi, type ContainerTemplateItem } from "@/api/container";
 
 const { Text } = Typography;
 
@@ -40,6 +41,22 @@ const normalizePageSize = (value?: number | string) => {
   }
 
   return 10;
+};
+
+const getDefaultAppSessionName = (item: ContainerTemplateItem) => {
+  const base = (item.name || "app-session").trim().replace(/\s+/g, "-").toLowerCase();
+  return `${base}-${Date.now()}`;
+};
+
+const getErrorMessage = (error: unknown, fallback: string) => {
+  if (typeof error === "object" && error !== null) {
+    const maybeResponse = (error as { response?: { data?: { message?: string; error?: string } } }).response;
+    const msg = maybeResponse?.data?.message || maybeResponse?.data?.error;
+    if (msg) {
+      return msg;
+    }
+  }
+  return fallback;
 };
 
 const columns: ColumnsType<ContainerTemplateItem> = [
@@ -117,6 +134,9 @@ const ContainerTemplatePage = ({
   close,
 }: ContainerTemplatePageProps) => {
   const [selectedId, setSelectedID] = useState<string>();
+  const [creatingTemplateID, setCreatingTemplateID] = useState<string>();
+  const [messageApi, contextHolder] = message.useMessage();
+  const projectID = useSelector((state: any) => String(state?.user?.project || ""));
   const selectable = Boolean(onOk || onCancel);
 
   const {
@@ -155,16 +175,57 @@ const ContainerTemplatePage = ({
 
   const selectedItem = useMemo(() => data.find((item) => item.id === selectedId), [data, selectedId]);
 
+  const handleCreateAppSession = async (item: ContainerTemplateItem) => {
+    if (!projectID) {
+      messageApi.warning("No active project selected");
+      return;
+    }
+
+    setCreatingTemplateID(item.id);
+    try {
+      await createAppSessionApi({
+        container_template_id: String(item.id),
+        project_id: String(projectID),
+        name: getDefaultAppSessionName(item),
+      });
+      messageApi.success("App session created");
+    } catch (error) {
+      messageApi.error(getErrorMessage(error, "Failed to create app session"));
+    } finally {
+      setCreatingTemplateID(undefined);
+    }
+  };
+
   const selectColumns = useMemo<ColumnsType<ContainerTemplateItem>>(() => {
+    const actionColumns: ColumnsType<ContainerTemplateItem> = [
+      {
+        title: "App Session",
+        key: "app_session_action",
+        width: 170,
+        fixed: "right",
+        render: (_: unknown, record) => (
+          <Button
+            type="link"
+            size="small"
+            loading={creatingTemplateID === record.id}
+            onClick={() => handleCreateAppSession(record)}
+          >
+            Create Session
+          </Button>
+        ),
+      },
+    ];
+
     if (!selectable) {
-      return columns;
+      return [...columns, ...actionColumns];
     }
 
     return [
       ...columns,
+      ...actionColumns,
       {
-        title: "Action",
-        key: "action",
+        title: "Select",
+        key: "select_action",
         width: 120,
         fixed: "right",
         render: (_: unknown, record) => (
@@ -178,7 +239,7 @@ const ContainerTemplatePage = ({
         ),
       },
     ];
-  }, [selectable, selectedId]);
+  }, [selectable, selectedId, creatingTemplateID, projectID]);
 
   const handleConfirm = () => {
     if (!selectedItem || !onOk) {
@@ -210,6 +271,7 @@ const ContainerTemplatePage = ({
         </Space>
       }
     >
+      {contextHolder}
       <Table<ContainerTemplateItem>
         rowKey="id"
         columns={selectColumns}

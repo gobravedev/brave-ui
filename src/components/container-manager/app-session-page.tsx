@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { Button, Card, Flex, Space, Table, Typography } from "antd";
+import { Button, Card, Flex, Popconfirm, Space, Table, Typography, message } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { ReloadOutlined } from "@ant-design/icons";
 import { useAppSessionPageQuery } from "@/hooks/usePaginationV2";
-import type { AppSessionItem } from "@/api/container";
+import { deleteAppSessionApi, startAppSessionApi, stopAppSessionApi, type AppSessionItem } from "@/api/container";
 
 const { Text } = Typography;
 
@@ -42,6 +42,21 @@ const normalizePageSize = (value?: number | string) => {
 };
 
 const formatTime = (value?: string) => (value ? new Date(value).toLocaleString() : "-");
+
+const getErrorMessage = (error: unknown, fallback: string) => {
+  if (typeof error === "object" && error !== null) {
+    const maybeResponse = (error as { response?: { data?: { message?: string; error?: string } } }).response;
+    const msg = maybeResponse?.data?.message || maybeResponse?.data?.error;
+    if (msg) {
+      return msg;
+    }
+  }
+  return fallback;
+};
+
+const isRunningStatus = (status?: string) => /running|started|active/i.test(status || "");
+
+const isStoppedStatus = (status?: string) => /stopped|exited|failed|terminated|created/i.test(status || "");
 
 const columns: ColumnsType<AppSessionItem> = [
   {
@@ -116,6 +131,8 @@ const AppSessionPage = ({
   close,
 }: AppSessionPageProps) => {
   const [selectedId, setSelectedID] = useState<string>();
+  const [pendingAction, setPendingAction] = useState<string>("");
+  const [messageApi, contextHolder] = message.useMessage();
   const selectable = Boolean(onOk || onCancel);
 
   const {
@@ -153,16 +170,92 @@ const AppSessionPage = ({
 
   const selectedItem = useMemo(() => data.find((item) => item.id === selectedId), [data, selectedId]);
 
+  const runAction = async (action: "start" | "stop" | "delete", item: AppSessionItem) => {
+    const actionKey = `${action}-${item.id}`;
+    setPendingAction(actionKey);
+    try {
+      if (action === "start") {
+        await startAppSessionApi({ id: String(item.id) });
+        messageApi.success("App session started");
+      } else if (action === "stop") {
+        await stopAppSessionApi({ id: String(item.id) });
+        messageApi.success("App session stopped");
+      } else {
+        await deleteAppSessionApi({ id: String(item.id) });
+        messageApi.success("App session deleted");
+      }
+      await refetch();
+    } catch (error) {
+      const fallback =
+        action === "start"
+          ? "Failed to start app session"
+          : action === "stop"
+            ? "Failed to stop app session"
+            : "Failed to delete app session";
+      messageApi.error(getErrorMessage(error, fallback));
+    } finally {
+      setPendingAction("");
+    }
+  };
+
   const selectColumns = useMemo<ColumnsType<AppSessionItem>>(() => {
+    const actionColumns: ColumnsType<AppSessionItem> = [
+      {
+        title: "Operation",
+        key: "operation",
+        width: 260,
+        fixed: "right",
+        render: (_: unknown, record) => {
+          const status = record.status || "";
+          const startKey = `start-${record.id}`;
+          const stopKey = `stop-${record.id}`;
+          const deleteKey = `delete-${record.id}`;
+
+          return (
+            <Space size={4}>
+              <Button
+                size="small"
+                type="link"
+                disabled={isRunningStatus(status)}
+                loading={pendingAction === startKey}
+                onClick={() => runAction("start", record)}
+              >
+                Start
+              </Button>
+              <Button
+                size="small"
+                type="link"
+                disabled={isStoppedStatus(status)}
+                loading={pendingAction === stopKey}
+                onClick={() => runAction("stop", record)}
+              >
+                Stop
+              </Button>
+              <Popconfirm
+                title="Delete this app session?"
+                onConfirm={() => runAction("delete", record)}
+                okButtonProps={{ loading: pendingAction === deleteKey }}
+              >
+                <Button size="small" type="link" danger loading={pendingAction === deleteKey}>
+                  Delete
+                </Button>
+              </Popconfirm>
+            </Space>
+          );
+        },
+      },
+    ];
+
     if (!selectable) {
-      return columns;
+      return [...columns, ...actionColumns];
     }
 
     return [
       ...columns,
+      ...actionColumns,
       {
-        title: "Action",
-        key: "action",
+        title: "Select",
+        key: "select_action",
         width: 120,
         fixed: "right",
         render: (_: unknown, record) => (
@@ -176,7 +269,7 @@ const AppSessionPage = ({
         ),
       },
     ];
-  }, [selectable, selectedId]);
+  }, [selectable, selectedId, pendingAction]);
 
   const handleConfirm = () => {
     if (!selectedItem || !onOk) {
@@ -208,6 +301,7 @@ const AppSessionPage = ({
         </Space>
       }
     >
+      {contextHolder}
       <Table<AppSessionItem>
         rowKey="id"
         columns={selectColumns}
