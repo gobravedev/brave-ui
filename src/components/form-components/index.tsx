@@ -615,7 +615,7 @@ const BaseInput: FC<any> = ({ label, name, form, data, initialValue, rules, ...r
 }
 const BaseSwitch: FC<any> = ({ label, name, data, initialValue, rules, ...rest }) => {
     return <>
-        <Form.Item initialValue={initialValue} label={label} name={name} rules={rules}>
+        <Form.Item initialValue={initialValue} label={label} name={name} rules={rules} tooltip={rest?.tooltip}>
             <Switch {...rest} />
         </Form.Item>
     </>
@@ -623,7 +623,7 @@ const BaseSwitch: FC<any> = ({ label, name, data, initialValue, rules, ...rest }
 
 const BaseInputNumber: FC<any> = ({ label, name, data, initialValue, rules, ...rest }) => {
     return <>
-        <Form.Item initialValue={initialValue} label={label} name={name} rules={rules}>
+        <Form.Item initialValue={initialValue} label={label} name={name} rules={rules} tooltip={rest?.tooltip}>
             <InputNumber {...rest} />
         </Form.Item>
     </>
@@ -632,7 +632,7 @@ export const BaseSelect: FC<any> = ({ extra, tooltip, label, name, data, initial
     return <>
         {/* {name} */}
         <Form.Item extra={extra} name={name} tooltip={tooltip}
-            initialValue={initialValue ? initialValue : null} label={label} rules={rules}>
+            initialValue={initialValue ? initialValue : null} label={label} rules={rules} >
             <BasicSelect {...rest} options={data}></BasicSelect>
             {/* <Select showSearch filterOption={(input: any, option: any) =>
                 (option?.label ?? '').toLowerCase().includes(input.toLowerCase())} {...rest} options={data}></Select> */}
