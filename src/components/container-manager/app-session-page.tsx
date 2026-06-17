@@ -48,7 +48,7 @@ const buildAppUrl = (containerURL: string, appSessionId?: string) => {
   if (!appSessionId) {
     return "";
   }
-  return `${containerURL}/apps/${encodeURIComponent(appSessionId)}`;
+  return `${containerURL}/apps/${encodeURIComponent(appSessionId)}/`;
 };
 
 const isRunningStatus = (status?: string) => /running|started|active/i.test(status || "");
