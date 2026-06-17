@@ -608,7 +608,7 @@ const BaseInput: FC<any> = ({ label, name, form, data, initialValue, rules, ...r
 
     return <>
         {/* {JSON.stringify(depends)} */}
-        <Form.Item initialValue={initialValue} label={label} name={name} rules={rules}>
+        <Form.Item initialValue={initialValue} label={label} name={name} rules={rules} tooltip={rest?.tooltip}>
             <Input {...rest} />
         </Form.Item>
     </>
