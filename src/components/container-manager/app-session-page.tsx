@@ -4,6 +4,7 @@ import type { ColumnsType } from "antd/es/table";
 import { ReloadOutlined } from "@ant-design/icons";
 import { useAppSessionPageQuery } from "@/hooks/usePaginationV2";
 import { deleteAppSessionApi, startAppSessionApi, stopAppSessionApi, type AppSessionItem } from "@/api/container";
+import { useSelector } from "react-redux";
 
 const { Text } = Typography;
 
@@ -43,15 +44,11 @@ const normalizePageSize = (value?: number | string) => {
 
 const formatTime = (value?: string) => (value ? new Date(value).toLocaleString() : "-");
 
-const getErrorMessage = (error: unknown, fallback: string) => {
-  if (typeof error === "object" && error !== null) {
-    const maybeResponse = (error as { response?: { data?: { message?: string; error?: string } } }).response;
-    const msg = maybeResponse?.data?.message || maybeResponse?.data?.error;
-    if (msg) {
-      return msg;
-    }
+const buildAppUrl = (containerURL: string, appSessionId?: string) => {
+  if (!appSessionId) {
+    return "";
   }
-  return fallback;
+  return `${containerURL}/apps/${encodeURIComponent(appSessionId)}`;
 };
 
 const isRunningStatus = (status?: string) => /running|started|active/i.test(status || "");
@@ -134,6 +131,7 @@ const AppSessionPage = ({
   const [pendingAction, setPendingAction] = useState<string>("");
   const [messageApi, contextHolder] = message.useMessage();
   const selectable = Boolean(onOk || onCancel);
+    const { containerURL } = useSelector((state: any) => state.user);
 
   const {
     data,
@@ -185,14 +183,8 @@ const AppSessionPage = ({
         messageApi.success("App session deleted");
       }
       await refetch();
-    } catch (error) {
-      const fallback =
-        action === "start"
-          ? "Failed to start app session"
-          : action === "stop"
-            ? "Failed to stop app session"
-            : "Failed to delete app session";
-      messageApi.error(getErrorMessage(error, fallback));
+    } catch (_error) {
+      // Error message is handled by the global HTTP interceptor.
     } finally {
       setPendingAction("");
     }
@@ -210,9 +202,18 @@ const AppSessionPage = ({
           const startKey = `start-${record.id}`;
           const stopKey = `stop-${record.id}`;
           const deleteKey = `delete-${record.id}`;
+          const appUrl = buildAppUrl(containerURL, record.id);
 
           return (
             <Space size={4}>
+              <Button
+                size="small"
+                type="link"
+                disabled={!isRunningStatus(status) || !appUrl}
+                onClick={() => window.open(appUrl, "_blank", "noopener,noreferrer")}
+              >
+                Open
+              </Button>
               <Button
                 size="small"
                 type="link"

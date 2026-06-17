@@ -15,16 +15,56 @@ const redirectToLogin = () => {
 type ApiErrorPayload = {
 	message?: string;
 	detail?: string;
+	details?: unknown;
 	error?: {
+		code?: number;
 		message?: string;
 		details?: unknown;
 	};
 	success?: boolean;
 };
 
-const getErrorMessage = (error: AxiosError<ApiErrorPayload>) => {
+export interface UnifiedApiErrorResponse {
+	success: false;
+	error: {
+		code: number;
+		message: string;
+		details?: unknown;
+	};
+}
+
+const DEFAULT_ERROR_CODE = 1000;
+
+const normalizeApiError = (error: AxiosError<ApiErrorPayload>): UnifiedApiErrorResponse => {
 	const data = error.response?.data;
-	return data?.error?.message || data?.message || data?.detail || error.message || "Request failed";
+	const message =
+		data?.error?.message ||
+		data?.message ||
+		data?.detail ||
+		error.message ||
+		"Request failed";
+
+	const code =
+		typeof data?.error?.code === "number"
+			? data.error.code
+			: typeof error.response?.status === "number"
+				? error.response.status
+				: DEFAULT_ERROR_CODE;
+
+	const details = data?.error?.details ?? data?.details ?? data?.detail;
+
+	return {
+		success: false,
+		error: {
+			code,
+			message,
+			...(details !== undefined ? { details } : {}),
+		},
+	};
+};
+
+const getErrorMessage = (error: AxiosError<ApiErrorPayload>) => {
+	return normalizeApiError(error).error.message;
 };
 
 export const http = axios.create({
@@ -46,6 +86,18 @@ http.interceptors.request.use((config) => {
 http.interceptors.response.use(
 	(response) => response,
 	(error: AxiosError<ApiErrorPayload>) => {
+		const normalized = normalizeApiError(error);
+		if (error.response) {
+			error.response.data = {
+				...normalized,
+				message: normalized.error.message,
+				detail:
+					typeof normalized.error.details === "string"
+						? normalized.error.details
+						: normalized.error.message,
+			} as ApiErrorPayload;
+		}
+
 		if (error.response?.status === 401) {
 			redirectToLogin();
 			return Promise.reject(error);
@@ -53,7 +105,7 @@ http.interceptors.response.use(
 
 		const globalMessage = getGlobalMessage();
 		if (globalMessage) {
-			globalMessage.error(getErrorMessage(error));
+			globalMessage.error(normalized.error.message);
 		}
 		return Promise.reject(error);
 	}
