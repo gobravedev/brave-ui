@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Button, Card, Empty, Flex, Pagination, Popconfirm, Space, Table, Tooltip, Typography, message } from "antd";
+import { Button, Card, Empty, Flex, Pagination, Popconfirm, Space, Table, Tag, Tooltip, Typography, message } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { ReloadOutlined } from "@ant-design/icons";
 import { useAppSessionPageQuery } from "@/hooks/usePaginationV2";
@@ -61,6 +61,27 @@ const buildAppUrl = (containerURL: string, appSession?: AppSessionItem) => {
 const isRunningStatus = (status?: string) => /running|started|active/i.test(status || "");
 
 const isStoppedStatus = (status?: string) => /stopped|exited|failed|terminated|created/i.test(status || "");
+
+const getStatusColor = (status?: string) => {
+  if (isRunningStatus(status)) {
+    return "success";
+  }
+  if (isStoppedStatus(status)) {
+    return "default";
+  }
+  return "processing";
+};
+
+const formatCompactTime = (value?: string) => {
+  if (!value) {
+    return "-";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "-";
+  }
+  return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+};
 
 const columns: ColumnsType<AppSessionItem> = [
   {
@@ -326,23 +347,26 @@ const AppSessionPage = ({
                 <Card
                   key={record.id}
                   size="small"
-                  style={{ borderColor: record.id === selectedId ? "#1677ff" : undefined }}
+                  style={{
+                    borderColor: record.id === selectedId ? "#1677ff" : undefined,
+                    background: record.id === selectedId ? "#f0f7ff" : undefined,
+                  }}
+                  bodyStyle={{ padding: 10 }}
                 >
-                  <Flex justify="space-between" align="flex-start" gap={8}>
-                    <Space direction="vertical" size={2} style={{ minWidth: 0, flex: 1 }}>
-                      <Text strong ellipsis={{ tooltip: record.name || "-" }}>
-                        {record.name || "-"}
-                      </Text>
-                      <Text type="secondary">Status: {record.status || "-"}</Text>
-                      <Text type="secondary">Project: {record.project_id || "-"}</Text>
-                      <Text type="secondary">Template: {record.container_template_id || "-"}</Text>
-                      <Text type="secondary" ellipsis={{ tooltip: record.workspace_path || "-" }}>
-                        Workspace: {record.workspace_path || "-"}
-                      </Text>
-                    </Space>
+                  <Flex vertical gap={6}>
+                    <Flex justify="space-between" align="flex-start" gap={8}>
+                      <Space direction="vertical" size={2} style={{ minWidth: 0, flex: 1 }}>
+                        <Text strong ellipsis={{ tooltip: record.name || "-" }}>
+                          {record.name || "-"}
+                        </Text>
+                        <Space size={6} wrap>
+                          <Tag color={getStatusColor(record.status)} style={{ marginInlineEnd: 0 }}>
+                            {record.status || "unknown"}
+                          </Tag>
+                          <Text type="secondary">ID: {record.id || "-"}</Text>
+                        </Space>
+                      </Space>
 
-                    <Space direction="vertical" size={4} align="end">
-                      {renderOperationButtons(record, true)}
                       {selectable && (
                         <Button
                           type={record.id === selectedId ? "primary" : "default"}
@@ -352,7 +376,25 @@ const AppSessionPage = ({
                           {record.id === selectedId ? "Selected" : "Select"}
                         </Button>
                       )}
+                    </Flex>
+
+                    <Space direction="vertical" size={1} style={{ width: "100%" }}>
+                      <Text type="secondary" ellipsis={{ tooltip: record.project_id || "-" }}>
+                        Project: {record.project_id || "-"}
+                      </Text>
+                      <Text type="secondary" ellipsis={{ tooltip: record.container_template_id || "-" }}>
+                        Template: {record.container_template_id || "-"}
+                      </Text>
+                      <Text type="secondary" ellipsis={{ tooltip: record.workspace_path || "-" }}>
+                        Workspace: {record.workspace_path || "-"}
+                      </Text>
+                      <Text type="secondary">Started: {formatCompactTime(record.started_at)}</Text>
+                      <Text type="secondary">Created: {formatCompactTime(record.created_at)}</Text>
                     </Space>
+
+                    <Flex align="center" justify="space-between" wrap gap={4}>
+                      {renderOperationButtons(record, true)}
+                    </Flex>
                   </Flex>
                 </Card>
               ))}
@@ -363,6 +405,9 @@ const AppSessionPage = ({
 
           <Flex justify="end" style={{ marginTop: 12 }}>
             <Pagination
+              size="small"
+              responsive
+              showLessItems
               current={page}
               pageSize={pageSize}
               total={total}
