@@ -48,7 +48,9 @@ const buildAppUrl = (containerURL: string, appSession?: AppSessionItem) => {
   if (!appSession || !appSession.id) {
     return "";
   }
-  return `${containerURL}/apps/${encodeURIComponent(appSession.app_type)}/${encodeURIComponent(appSession.id)}/`;
+  //如果containerURL后有/ 去掉
+  const normalizedContainerURL = containerURL.endsWith("/") ? containerURL.slice(0, -1) : containerURL;
+  return `${normalizedContainerURL}${appSession.path_prefix}/`;
 };
 
 const isRunningStatus = (status?: string) => /running|started|active/i.test(status || "");
@@ -206,7 +208,7 @@ const AppSessionPage = ({
 
           return (
             <Space size={4}>
-              <Tooltip title={appUrl}>
+              <Tooltip title={`${appUrl}`}>
                 <Button
                   size="small"
                   type="link"

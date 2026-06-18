@@ -47,6 +47,7 @@ export interface AppSessionItem {
     last_access_at: string;
     started_at: string;
     stopped_at: string;
+    path_prefix: string;
     created_at: string;
     updated_at: string;
 }
