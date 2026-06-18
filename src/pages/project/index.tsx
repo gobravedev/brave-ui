@@ -119,7 +119,7 @@ const Project: FC<any> = () => {
                 value: "llm-card"
             }, {
                 label: "Container App",
-                value: "containerAppProject"
+                value: "appSessionPage"
             }
         ])
         // setSideView("analysis-tools")
@@ -199,6 +199,7 @@ const Project: FC<any> = () => {
                     />
 
                     <ComponentsDetailsRender view={view}
+                      
                         project_id={project}
                         report={activeReport}
                         content={activeReport?.content}

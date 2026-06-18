@@ -1131,7 +1131,7 @@ const App: React.FC = () => {
                                             options={sideOptions} />
                                     }>
 
-                                    <ViewResolver view={sideView}></ViewResolver>
+                                    <ViewResolver view={sideView}   view_mode={"card"}></ViewResolver>
 
                                 </Card>
 

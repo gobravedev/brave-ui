@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Button, Card, Flex, Popconfirm, Space, Table, Tooltip, Typography, message } from "antd";
+import { Button, Card, Empty, Flex, Pagination, Popconfirm, Space, Table, Tooltip, Typography, message } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { ReloadOutlined } from "@ant-design/icons";
 import { useAppSessionPageQuery } from "@/hooks/usePaginationV2";
@@ -16,6 +16,7 @@ export interface AppSessionPageProps {
   status?: string;
   workspace_path?: string;
   page_size?: number | string;
+  view_mode?: "table" | "card" | string;
   title?: string;
   onOk?: (item: AppSessionItem) => void;
   onCancel?: () => void;
@@ -40,6 +41,10 @@ const normalizePageSize = (value?: number | string) => {
   }
 
   return 10;
+};
+
+const normalizeViewMode = (value?: string) => {
+  return value?.toLowerCase() === "card" ? "card" : "table";
 };
 
 const formatTime = (value?: string) => (value ? new Date(value).toLocaleString() : "-");
@@ -124,6 +129,7 @@ const AppSessionPage = ({
   status,
   workspace_path,
   page_size,
+  view_mode,
   title,
   onOk,
   onCancel,
@@ -133,6 +139,8 @@ const AppSessionPage = ({
   const [pendingAction, setPendingAction] = useState<string>("");
   const [messageApi, contextHolder] = message.useMessage();
   const selectable = Boolean(onOk || onCancel);
+  const activeViewMode = normalizeViewMode(view_mode);
+  const isCardMode = activeViewMode === "card";
   const { containerURL } = useSelector((state: any) => state.user);
 
   const {
@@ -192,6 +200,57 @@ const AppSessionPage = ({
     }
   };
 
+  const renderOperationButtons = (record: AppSessionItem, compact = false) => {
+    const itemStatus = record.status || "";
+    const startKey = `start-${record.id}`;
+    const stopKey = `stop-${record.id}`;
+    const deleteKey = `delete-${record.id}`;
+    const appUrl = buildAppUrl(containerURL, record);
+
+    return (
+      <Space size={compact ? 2 : 4} wrap>
+        <Tooltip title={`${appUrl}`}>
+          <Button
+            size="small"
+            type="link"
+            disabled={!isRunningStatus(itemStatus) || !appUrl}
+            onClick={() => window.open(appUrl, "_blank", "noopener,noreferrer")}
+          >
+            Open
+          </Button>
+        </Tooltip>
+
+        <Button
+          size="small"
+          type="link"
+          disabled={isRunningStatus(itemStatus)}
+          loading={pendingAction === startKey}
+          onClick={() => runAction("start", record)}
+        >
+          Start
+        </Button>
+        <Button
+          size="small"
+          type="link"
+          disabled={isStoppedStatus(itemStatus)}
+          loading={pendingAction === stopKey}
+          onClick={() => runAction("stop", record)}
+        >
+          Stop
+        </Button>
+        <Popconfirm
+          title="Delete this app session?"
+          onConfirm={() => runAction("delete", record)}
+          okButtonProps={{ loading: pendingAction === deleteKey }}
+        >
+          <Button size="small" type="link" danger loading={pendingAction === deleteKey}>
+            Delete
+          </Button>
+        </Popconfirm>
+      </Space>
+    );
+  };
+
   const selectColumns = useMemo<ColumnsType<AppSessionItem>>(() => {
     const actionColumns: ColumnsType<AppSessionItem> = [
       {
@@ -199,56 +258,7 @@ const AppSessionPage = ({
         key: "operation",
         width: 260,
         fixed: "right",
-        render: (_: unknown, record) => {
-          const status = record.status || "";
-          const startKey = `start-${record.id}`;
-          const stopKey = `stop-${record.id}`;
-          const deleteKey = `delete-${record.id}`;
-          const appUrl = buildAppUrl(containerURL, record);
-
-          return (
-            <Space size={4}>
-              <Tooltip title={`${appUrl}`}>
-                <Button
-                  size="small"
-                  type="link"
-                  disabled={!isRunningStatus(status) || !appUrl}
-                  onClick={() => window.open(appUrl, "_blank", "noopener,noreferrer")}
-                >
-                  Open
-                </Button>
-              </Tooltip>
-
-              <Button
-                size="small"
-                type="link"
-                disabled={isRunningStatus(status)}
-                loading={pendingAction === startKey}
-                onClick={() => runAction("start", record)}
-              >
-                Start
-              </Button>
-              <Button
-                size="small"
-                type="link"
-                disabled={isStoppedStatus(status)}
-                loading={pendingAction === stopKey}
-                onClick={() => runAction("stop", record)}
-              >
-                Stop
-              </Button>
-              <Popconfirm
-                title="Delete this app session?"
-                onConfirm={() => runAction("delete", record)}
-                okButtonProps={{ loading: pendingAction === deleteKey }}
-              >
-                <Button size="small" type="link" danger loading={pendingAction === deleteKey}>
-                  Delete
-                </Button>
-              </Popconfirm>
-            </Space>
-          );
-        },
+        render: (_: unknown, record) => renderOperationButtons(record),
       },
     ];
 
@@ -275,7 +285,7 @@ const AppSessionPage = ({
         ),
       },
     ];
-  }, [selectable, selectedId, pendingAction]);
+  }, [selectable, selectedId, renderOperationButtons]);
 
   const handleConfirm = () => {
     if (!selectedItem || !onOk) {
@@ -308,47 +318,109 @@ const AppSessionPage = ({
       }
     >
       {contextHolder}
-      <Table<AppSessionItem>
-        rowKey="id"
-        columns={selectColumns}
-        dataSource={data}
-        loading={isLoading || isFetching}
-        size="small"
-        scroll={{ x: 1500 }}
-        locale={{ emptyText: error ? "Failed to load app sessions" : "No app sessions" }}
-        rowSelection={
-          selectable
-            ? {
-              type: "radio",
-              selectedRowKeys: selectedId ? [selectedId] : [],
-              onChange: (selectedRowKeys) => {
-                setSelectedID(String(selectedRowKeys[0] || ""));
-              },
-            }
-            : undefined
-        }
-        onRow={
-          selectable
-            ? (record) => ({
-              onClick: () => setSelectedID(record.id),
-            })
-            : undefined
-        }
-        pagination={{
-          current: page,
-          pageSize,
-          total,
-          showSizeChanger: true,
-          pageSizeOptions: [20, 50, 100, 200, 500, 1000],
-          onChange: (nextPage, nextPageSize) => {
-            if (nextPageSize !== pageSize) {
-              setPageSize(nextPageSize);
-            }
-            setPage(nextPage);
-          },
-          showTotal: (value) => `Total ${value} items`,
-        }}
-      />
+      {isCardMode ? (
+        <>
+          {data.length > 0 ? (
+            <Flex vertical gap={8}>
+              {data.map((record) => (
+                <Card
+                  key={record.id}
+                  size="small"
+                  style={{ borderColor: record.id === selectedId ? "#1677ff" : undefined }}
+                >
+                  <Flex justify="space-between" align="flex-start" gap={8}>
+                    <Space direction="vertical" size={2} style={{ minWidth: 0, flex: 1 }}>
+                      <Text strong ellipsis={{ tooltip: record.name || "-" }}>
+                        {record.name || "-"}
+                      </Text>
+                      <Text type="secondary">Status: {record.status || "-"}</Text>
+                      <Text type="secondary">Project: {record.project_id || "-"}</Text>
+                      <Text type="secondary">Template: {record.container_template_id || "-"}</Text>
+                      <Text type="secondary" ellipsis={{ tooltip: record.workspace_path || "-" }}>
+                        Workspace: {record.workspace_path || "-"}
+                      </Text>
+                    </Space>
+
+                    <Space direction="vertical" size={4} align="end">
+                      {renderOperationButtons(record, true)}
+                      {selectable && (
+                        <Button
+                          type={record.id === selectedId ? "primary" : "default"}
+                          size="small"
+                          onClick={() => setSelectedID(record.id)}
+                        >
+                          {record.id === selectedId ? "Selected" : "Select"}
+                        </Button>
+                      )}
+                    </Space>
+                  </Flex>
+                </Card>
+              ))}
+            </Flex>
+          ) : (
+            <Empty description={error ? "Failed to load app sessions" : "No app sessions"} />
+          )}
+
+          <Flex justify="end" style={{ marginTop: 12 }}>
+            <Pagination
+              current={page}
+              pageSize={pageSize}
+              total={total}
+              showSizeChanger
+              pageSizeOptions={[20, 50, 100, 200, 500, 1000]}
+              onChange={(nextPage, nextPageSize) => {
+                if (nextPageSize !== pageSize) {
+                  setPageSize(nextPageSize);
+                }
+                setPage(nextPage);
+              }}
+              showTotal={(value) => `Total ${value} items`}
+            />
+          </Flex>
+        </>
+      ) : (
+        <Table<AppSessionItem>
+          rowKey="id"
+          columns={selectColumns}
+          dataSource={data}
+          loading={isLoading || isFetching}
+          size="small"
+          scroll={{ x: 1500 }}
+          locale={{ emptyText: error ? "Failed to load app sessions" : "No app sessions" }}
+          rowSelection={
+            selectable
+              ? {
+                type: "radio",
+                selectedRowKeys: selectedId ? [selectedId] : [],
+                onChange: (selectedRowKeys) => {
+                  setSelectedID(String(selectedRowKeys[0] || ""));
+                },
+              }
+              : undefined
+          }
+          onRow={
+            selectable
+              ? (record) => ({
+                onClick: () => setSelectedID(record.id),
+              })
+              : undefined
+          }
+          pagination={{
+            current: page,
+            pageSize,
+            total,
+            showSizeChanger: true,
+            pageSizeOptions: [20, 50, 100, 200, 500, 1000],
+            onChange: (nextPage, nextPageSize) => {
+              if (nextPageSize !== pageSize) {
+                setPageSize(nextPageSize);
+              }
+              setPage(nextPage);
+            },
+            showTotal: (value) => `Total ${value} items`,
+          }}
+        />
+      )}
 
       {selectable && (
         <Flex justify="end" gap="small" style={{ marginTop: 12 }}>
