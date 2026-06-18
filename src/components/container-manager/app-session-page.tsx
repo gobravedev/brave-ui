@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Button, Card, Flex, Popconfirm, Space, Table, Typography, message } from "antd";
+import { Button, Card, Flex, Popconfirm, Space, Table, Tooltip, Typography, message } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { ReloadOutlined } from "@ant-design/icons";
 import { useAppSessionPageQuery } from "@/hooks/usePaginationV2";
@@ -131,7 +131,7 @@ const AppSessionPage = ({
   const [pendingAction, setPendingAction] = useState<string>("");
   const [messageApi, contextHolder] = message.useMessage();
   const selectable = Boolean(onOk || onCancel);
-    const { containerURL } = useSelector((state: any) => state.user);
+  const { containerURL } = useSelector((state: any) => state.user);
 
   const {
     data,
@@ -206,14 +206,17 @@ const AppSessionPage = ({
 
           return (
             <Space size={4}>
-              <Button
-                size="small"
-                type="link"
-                disabled={!isRunningStatus(status) || !appUrl}
-                onClick={() => window.open(appUrl, "_blank", "noopener,noreferrer")}
-              >
-                Open
-              </Button>
+              <Tooltip title={appUrl}>
+                <Button
+                  size="small"
+                  type="link"
+                  disabled={!isRunningStatus(status) || !appUrl}
+                  onClick={() => window.open(appUrl, "_blank", "noopener,noreferrer")}
+                >
+                  Open
+                </Button>
+              </Tooltip>
+
               <Button
                 size="small"
                 type="link"
@@ -314,19 +317,19 @@ const AppSessionPage = ({
         rowSelection={
           selectable
             ? {
-                type: "radio",
-                selectedRowKeys: selectedId ? [selectedId] : [],
-                onChange: (selectedRowKeys) => {
-                  setSelectedID(String(selectedRowKeys[0] || ""));
-                },
-              }
+              type: "radio",
+              selectedRowKeys: selectedId ? [selectedId] : [],
+              onChange: (selectedRowKeys) => {
+                setSelectedID(String(selectedRowKeys[0] || ""));
+              },
+            }
             : undefined
         }
         onRow={
           selectable
             ? (record) => ({
-                onClick: () => setSelectedID(record.id),
-              })
+              onClick: () => setSelectedID(record.id),
+            })
             : undefined
         }
         pagination={{
