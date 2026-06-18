@@ -44,11 +44,11 @@ const normalizePageSize = (value?: number | string) => {
 
 const formatTime = (value?: string) => (value ? new Date(value).toLocaleString() : "-");
 
-const buildAppUrl = (containerURL: string, appSessionId?: string) => {
-  if (!appSessionId) {
+const buildAppUrl = (containerURL: string, appSession?: AppSessionItem) => {
+  if (!appSession || !appSession.id) {
     return "";
   }
-  return `${containerURL}/apps/${encodeURIComponent(appSessionId)}/`;
+  return `${containerURL}/apps/${encodeURIComponent(appSession.app_type)}/${encodeURIComponent(appSession.id)}/`;
 };
 
 const isRunningStatus = (status?: string) => /running|started|active/i.test(status || "");
@@ -202,7 +202,7 @@ const AppSessionPage = ({
           const startKey = `start-${record.id}`;
           const stopKey = `stop-${record.id}`;
           const deleteKey = `delete-${record.id}`;
-          const appUrl = buildAppUrl(containerURL, record.id);
+          const appUrl = buildAppUrl(containerURL, record);
 
           return (
             <Space size={4}>

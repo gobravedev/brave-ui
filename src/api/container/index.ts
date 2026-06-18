@@ -41,6 +41,7 @@ export interface AppSessionItem {
     project_id: string;
     container_template_id: string;
     name: string;
+    app_type: string;
     status: string;
     workspace_path: string;
     last_access_at: string;
