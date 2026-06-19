@@ -166,6 +166,7 @@ import ContainerPage from "@/pages/container"
 import { useSelector } from "react-redux"
 import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 import { ActionDispatcher } from "@/llmv2/dispatcher"
+import { invoke } from "@/core/ui-system/invokeV2"
 const SoftwareContent: FC<any> = ({ data, form }) => {
     const [templete, setTemplete] = useState<any>()
     const [containers, setContainers] = useState<any>([])
@@ -208,26 +209,53 @@ const SoftwareContent: FC<any> = ({ data, form }) => {
 }
 const ScriptContent: FC<any> = ({ data, form }) => {
     const [templete, setTemplete] = useState<any>()
-    const [containers, setContainers] = useState<any>([])
+    // const [containers, setContainers] = useState<any>([])
 
-    const loadData = async () => {
-        const resp = await axios.get(`/container/list-all`)
-        const opentions = resp.data.map((item: any) => ({ label: `${item.name}`, value: item.container_id }))
-        setContainers(opentions)
-    }
+    // const loadData = async () => {
+    //     const resp = await axios.get(`/container/list-all`)
+    //     const opentions = resp.data.map((item: any) => ({ label: `${item.name}`, value: item.container_id }))
+    //     setContainers(opentions)
+    // }
 
 
     useEffect(() => {
-        loadData()
+        // loadData()
         if (!data?.componemt_id) {
             // console.log(scriptTemplete)
             setTemplete(JSON.stringify(scriptTemplete, null, 2))
         }
     }, [])
     return <>
-        <Form.Item name={"container_id"} label="Container" rules={[{ required: true, message: 'Please select container!' }]}>
-            <SelectContainer mode="none" containers={containers}></SelectContainer>
+        <Form.Item
+            name={"container_id"}
+            label="Container"
+            rules={[{ required: true, message: 'Please select container!' }]}
+            dependencies={["container_name"]}
+            getValueProps={(value) => ({
+                value: form.getFieldValue("container_name") || value,
+            })}
+        >
+            {/* <SelectContainer mode="none" containers={containers}></SelectContainer> */}
+            <Input
+                readOnly
+                placeholder="Click to select container template"
+                onClick={async () => {
+                    const selected = await invoke.containerTemplatePage
+                        .openAsync({}, { title: "Select Container Template", width: "80%", footer: false })
+                        .catch(() => undefined);
+                    if (selected?.id) {
+                        form.setFieldsValue({
+                            container_id: selected.id,
+                            container_name: selected.name,
+                        });
+                        await form.validateFields(["container_id"]);
+                    }
+                }}
+            ></Input>
         </Form.Item>
+        {/* <Form.Item name={"container_name"} hidden>
+            <Input />
+        </Form.Item> */}
         {/* <Form.Item name={"tools_container_id"} label="Tools Container Id" >
             <SelectContainer mode="multiple" containers={containers}></SelectContainer>
         </Form.Item> */}

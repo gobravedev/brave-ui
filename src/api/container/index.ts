@@ -39,6 +39,7 @@ export interface AppSessionItem {
     id: string;
     user_id: string;
     project_id: string;
+    analysis_node_id: string;
     container_template_id: string;
     name: string;
     app_type: string;
@@ -110,6 +111,7 @@ export interface ContainerTemplatePageQuery {
 export interface AppSessionPageQuery {
     id?: string;
     project_id?: string;
+    analysis_node_id?: string;
     container_template_id?: string;
     name?: string;
     status?: string;
@@ -120,6 +122,11 @@ export interface CreateAppSessionPayload {
     container_template_id: string;
     project_id: string;
     name: string;
+}
+
+export interface CreateAppSessionByAnalysisNodePayload {
+    analysis_node_id: string;
+    name?: string;
 }
 
 export interface AppSessionIDPayload {
@@ -159,11 +166,20 @@ export const pageContainerTemplateApi = (payload: PageRequest<ContainerTemplateP
 };
 
 export const pageAppSessionApi = (payload: PageRequest<AppSessionPageQuery>) => {
-    return http.post<PageResponse<AppSessionItem>>("/container/app-session/list-by-page", payload);
+    const { page, page_size, ...query } = payload;
+    return http.post<PageResponse<AppSessionItem>>("/container/app-session/list-by-page", {
+        page,
+        page_size,
+        query,
+    });
 };
 
 export const createAppSessionApi = (payload: CreateAppSessionPayload) => {
     return http.post<AppSessionItem>("/container/app-session/create", payload);
+};
+
+export const createAppSessionByAnalysisNodeApi = (payload: CreateAppSessionByAnalysisNodePayload) => {
+    return http.post<AppSessionItem>("/container/app-session/create-by-analysis-node", payload);
 };
 
 export const startAppSessionApi = (payload: AppSessionIDPayload) => {

@@ -6,6 +6,7 @@ import ViewResolver from "@/core/ui-renderer/ViewResolver";
 import { invoke } from "@/core/ui-system/invokeV2";
 import { runAnalysisNodeApi, stopAnalysisNodeApi } from "@/api/analysisv1";
 import { useGlobalMessage } from "@/hooks/useGlobalMessage";
+import { http } from "@/api/client/http";
 import { useSelector } from "react-redux";
 import { useStoreRender } from "@/context/render/RenderProvider";
 import { useSideViewContext } from "@/context/side/SideViewContext";
@@ -71,7 +72,9 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
 
         setDetailLoading(true);
         try {
-            const res = await axios.get(`/analysis/visualization-node-file/${targetAnalysisNodeId}`);
+            // const res = await axios.get(`/analysis/visualization-node-file/${targetAnalysisNodeId}`);
+
+            const res = await http.get(`/analysis/visualization-node-file/${targetAnalysisNodeId}`);
             setSelectedSampleDetail(res.data);
 
         } finally {
@@ -134,6 +137,25 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                 <Space>
                     {selectedSampleDetail && (
                         <Space>
+                             <Button
+                                size="small"
+                                color="cyan"
+                                variant="solid"
+                                onClick={() => {
+                                    invoke.appSessionPage.open(
+                                        {
+                                            analysis_node_id: String(selectedSampleDetail.node?.id ?? ""),
+                                            analysis_node_name: selectedSampleDetail.node?.node_name,
+                                        },
+                                        {
+                                            width: 960,
+                                            title: `App Session - ${selectedSampleDetail.node?.node_id}`,
+                                        }
+                                    );
+                                }}
+                            >
+                                App Session
+                            </Button>
                             <Button
                                 size="small"
                                 color="cyan"

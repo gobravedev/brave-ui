@@ -3,7 +3,13 @@ import { Button, Card, Empty, Flex, Pagination, Popconfirm, Space, Table, Tag, T
 import type { ColumnsType } from "antd/es/table";
 import { ReloadOutlined } from "@ant-design/icons";
 import { useAppSessionPageQuery } from "@/hooks/usePaginationV2";
-import { deleteAppSessionApi, startAppSessionApi, stopAppSessionApi, type AppSessionItem } from "@/api/container";
+import {
+  createAppSessionByAnalysisNodeApi,
+  deleteAppSessionApi,
+  startAppSessionApi,
+  stopAppSessionApi,
+  type AppSessionItem,
+} from "@/api/container";
 import { useSelector } from "react-redux";
 
 const { Text } = Typography;
@@ -11,6 +17,8 @@ const { Text } = Typography;
 export interface AppSessionPageProps {
   id?: string;
   project_id?: string;
+  analysis_node_id?: string;
+  analysis_node_name?: string;
   container_template_id?: string;
   name?: string;
   status?: string;
@@ -145,6 +153,8 @@ const columns: ColumnsType<AppSessionItem> = [
 const AppSessionPage = ({
   id,
   project_id,
+  analysis_node_id,
+  analysis_node_name,
   container_template_id,
   name,
   status,
@@ -158,6 +168,7 @@ const AppSessionPage = ({
 }: AppSessionPageProps) => {
   const [selectedId, setSelectedID] = useState<string>();
   const [pendingAction, setPendingAction] = useState<string>("");
+  const [creatingFromAnalysisNode, setCreatingFromAnalysisNode] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const selectable = Boolean(onOk || onCancel);
   const activeViewMode = normalizeViewMode(view_mode);
@@ -190,12 +201,13 @@ const AppSessionPage = ({
     setQuery({
       id: normalizeText(id),
       project_id: normalizeText(project_id),
+      analysis_node_id: normalizeText(analysis_node_id),
       container_template_id: normalizeText(container_template_id),
       name: normalizeText(name),
       status: normalizeText(status),
       workspace_path: normalizeText(workspace_path),
     });
-  }, [id, project_id, container_template_id, name, status, workspace_path, setQuery]);
+  }, [id, project_id, analysis_node_id, container_template_id, name, status, workspace_path, setQuery]);
 
   const selectedItem = useMemo(() => data.find((item) => item.id === selectedId), [data, selectedId]);
 
@@ -325,12 +337,43 @@ const AppSessionPage = ({
     }
   };
 
+  const handleCreateByAnalysisNode = async () => {
+    const normalizedAnalysisNodeId = normalizeText(analysis_node_id);
+    if (!normalizedAnalysisNodeId) {
+      return;
+    }
+
+    setCreatingFromAnalysisNode(true);
+    try {
+      const normalizedNodeName = normalizeText(analysis_node_name) || normalizedAnalysisNodeId;
+      await createAppSessionByAnalysisNodeApi({
+        analysis_node_id: normalizedAnalysisNodeId,
+        name: `app-${normalizedNodeName}-${Date.now()}`,
+      });
+      messageApi.success("App session created");
+      await refetch();
+    } catch (_error) {
+      // Error message is handled by the global HTTP interceptor.
+    } finally {
+      setCreatingFromAnalysisNode(false);
+    }
+  };
+
   return (
     <Card
       size="small"
       title={title || "App Session List"}
       extra={
         <Space>
+          {normalizeText(analysis_node_id) && (
+            <Button
+              type="primary"
+              onClick={handleCreateByAnalysisNode}
+              loading={creatingFromAnalysisNode}
+            >
+              Create from Analysis Node
+            </Button>
+          )}
           <Text type="secondary">Total: {total}</Text>
           <Button icon={<ReloadOutlined />} onClick={() => refetch()} loading={isFetching}>
             Refresh
