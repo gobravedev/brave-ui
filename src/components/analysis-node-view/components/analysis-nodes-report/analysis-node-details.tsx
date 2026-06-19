@@ -137,25 +137,7 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                 <Space>
                     {selectedSampleDetail && (
                         <Space>
-                             <Button
-                                size="small"
-                                color="cyan"
-                                variant="solid"
-                                onClick={() => {
-                                    invoke.appSessionPage.open(
-                                        {
-                                            analysis_node_id: String(selectedSampleDetail.node?.id ?? ""),
-                                            analysis_node_name: selectedSampleDetail.node?.node_name,
-                                        },
-                                        {
-                                            width: 960,
-                                            title: `App Session - ${selectedSampleDetail.node?.node_id}`,
-                                        }
-                                    );
-                                }}
-                            >
-                                App Session
-                            </Button>
+
                             <Button
                                 size="small"
                                 color="cyan"
@@ -250,7 +232,7 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                                 </Popconfirm>
                                             )}
 
-                                            {selectedSampleDetail.node?.server_status == "running" ? (
+                                            {/* {selectedSampleDetail.node?.server_status == "running" ? (
                                                 <>
                                                     <Popconfirm
                                                         title={"Whether or not to stop?"}
@@ -291,7 +273,7 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                                         Run Server
                                                     </Button>
                                                 </Popconfirm>
-                                            )}
+                                            )} */}
                                         </>
                                     ) : (
                                         <Popconfirm
@@ -308,6 +290,26 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                             </Button>
                                         </Popconfirm>
                                     )}
+
+                                    <Button
+                                        size="small"
+                                        color="cyan"
+                                        variant="solid"
+                                        onClick={() => {
+                                            invoke.appSessionPage.open(
+                                                {
+                                                    analysis_node_id: String(selectedSampleDetail.node?.id ?? ""),
+                                                    analysis_node_name: selectedSampleDetail.node?.node_name,
+                                                },
+                                                {
+                                                    width: 960,
+                                                    title: `App Session - ${selectedSampleDetail.node?.node_id}`,
+                                                }
+                                            );
+                                        }}
+                                    >
+                                        App Session
+                                    </Button>
                                 </>
                             )}
                         </Space>

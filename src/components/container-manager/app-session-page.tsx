@@ -348,7 +348,7 @@ const AppSessionPage = ({
       const normalizedNodeName = normalizeText(analysis_node_name) || normalizedAnalysisNodeId;
       await createAppSessionByAnalysisNodeApi({
         analysis_node_id: normalizedAnalysisNodeId,
-        name: `app-${normalizedNodeName}-${Date.now()}`,
+        name: `app-${normalizedNodeName}`,
       });
       messageApi.success("App session created");
       await refetch();

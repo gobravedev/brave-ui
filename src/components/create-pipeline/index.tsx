@@ -227,7 +227,7 @@ const ScriptContent: FC<any> = ({ data, form }) => {
     }, [])
     return <>
         <Form.Item
-            name={"container_id"}
+            name={"container_template_id"}
             label="Container"
             rules={[{ required: true, message: 'Please select container!' }]}
             dependencies={["container_name"]}
@@ -245,10 +245,10 @@ const ScriptContent: FC<any> = ({ data, form }) => {
                         .catch(() => undefined);
                     if (selected?.id) {
                         form.setFieldsValue({
-                            container_id: selected.id,
+                            container_template_id: selected.id,
                             container_name: selected.name,
                         });
-                        await form.validateFields(["container_id"]);
+                        await form.validateFields(["container_template_id"]);
                     }
                 }}
             ></Input>
