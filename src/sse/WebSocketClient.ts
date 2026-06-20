@@ -18,10 +18,35 @@ export class WebSocketClient implements RealtimeClient {
   private lastReceived = Date.now();
   private heartbeatTimer: any = null;
   private retryTimer: any = null;
+  private manualClosed = false;
+  private lastUserActivity = Date.now();
+
+  private readonly activeWindowMs = 60_000;
+
+  private readonly onUserActivity = () => {
+    this.lastUserActivity = Date.now();
+  };
+
+  private readonly onVisibilityOrFocus = () => {
+    this.onUserActivity();
+    this.tryReconnectForActivePage();
+  };
+
+  private readonly onOnline = () => {
+    this.onUserActivity();
+    this.tryReconnectForActivePage();
+  };
+
+  private readonly onOffline = () => {
+    // Keep state as closed while offline and stop heartbeat/retry timers.
+    this.clearTimers();
+    this.status = "closed";
+  };
 
   constructor(retryInterval = 5000, heartbeatTimeout = 30000) {
     this.retryInterval = retryInterval;
     this.heartbeatTimeout = heartbeatTimeout;
+    this.setupPageActivityWatchers();
   }
 
   getStatus() {
@@ -59,9 +84,13 @@ export class WebSocketClient implements RealtimeClient {
   }
 
   close() {
+    this.manualClosed = true;
     this.clearTimers();
 
     if (this.ws) {
+      // Manual close should not trigger auto-reconnect.
+      this.ws.onclose = null;
+      this.ws.onerror = null;
       this.ws.close();
       this.ws = null;
     }
@@ -70,40 +99,64 @@ export class WebSocketClient implements RealtimeClient {
   }
 
   reconnect() {
-    this.close();
+    if (!this.url) {
+      return;
+    }
     this.connect(this.url);
   }
 
   connect(url: string) {
     this.url = url;
+    this.manualClosed = false;
     this.clearTimers();
 
     if (this.ws) {
+      // Replacing the socket is an intentional close, not a reconnect signal.
+      this.ws.onclose = null;
+      this.ws.onerror = null;
       this.ws.close();
       this.ws = null;
     }
 
     this.status = "connecting";
-    this.ws = new WebSocket(this.url);
+    const ws = new WebSocket(this.url);
+    this.ws = ws;
 
-    this.ws.onopen = () => {
+    ws.onopen = () => {
+      if (this.ws !== ws) {
+        return;
+      }
       this.status = "open";
       this.lastReceived = Date.now();
       this.startHeartbeatCheck();
       console.log("🟢 WebSocket connected:", this.url);
     };
 
-    this.ws.onclose = () => {
-      console.warn("🔴 WebSocket closed, scheduling reconnect...");
-      this.scheduleReconnect();
+    ws.onclose = (event) => {
+      if (this.ws !== ws) {
+        return;
+      }
+      this.ws = null;
+      console.warn("🔴 WebSocket closed");
+      this.clearTimers();
+      this.status = "closed";
+      if (this.shouldReconnectOnClose(event)) {
+        this.scheduleReconnect();
+      }
     };
 
-    this.ws.onerror = () => {
+    ws.onerror = () => {
+      if (this.ws !== ws) {
+        return;
+      }
       console.warn("🔴 WebSocket error, scheduling reconnect...");
       this.scheduleReconnect();
     };
 
-    this.ws.onmessage = (event) => {
+    ws.onmessage = (event) => {
+      if (this.ws !== ws) {
+        return;
+      }
       this.lastReceived = Date.now();
 
       let data: any;
@@ -137,6 +190,23 @@ export class WebSocketClient implements RealtimeClient {
   }
 
   private scheduleReconnect() {
+    if (this.manualClosed) {
+      return;
+    }
+
+    if (!this.shouldAutoReconnectNow()) {
+      this.status = "closed";
+      return;
+    }
+
+    if (
+      this.ws &&
+      (this.ws.readyState === WebSocket.OPEN ||
+        this.ws.readyState === WebSocket.CONNECTING)
+    ) {
+      return;
+    }
+
     this.status = "closed";
 
     this.clearTimers();
@@ -144,9 +214,73 @@ export class WebSocketClient implements RealtimeClient {
     if (!this.retryTimer) {
       this.retryTimer = setTimeout(() => {
         this.retryTimer = null;
+        if (this.manualClosed || !this.shouldAutoReconnectNow()) {
+          this.status = "closed";
+          return;
+        }
         this.reconnect();
       }, this.retryInterval);
     }
+  }
+
+  private shouldReconnectOnClose(_event: CloseEvent) {
+    if (this.manualClosed) {
+      return false;
+    }
+    return this.shouldAutoReconnectNow();
+  }
+
+  private shouldAutoReconnectNow() {
+    const online =
+      typeof navigator === "undefined" || typeof navigator.onLine !== "boolean"
+        ? true
+        : navigator.onLine;
+
+    if (!online) {
+      return false;
+    }
+
+    if (typeof document === "undefined") {
+      return true;
+    }
+
+    const isVisible = document.visibilityState === "visible";
+    const isFocused = document.hasFocus();
+    const recentlyActive = Date.now() - this.lastUserActivity <= this.activeWindowMs;
+
+    return isVisible || isFocused || recentlyActive;
+  }
+
+  private tryReconnectForActivePage() {
+    if (
+      this.status !== "closed" ||
+      !this.url ||
+      this.retryTimer ||
+      this.manualClosed ||
+      !this.shouldAutoReconnectNow()
+    ) {
+      return;
+    }
+    this.scheduleReconnect();
+  }
+
+  private setupPageActivityWatchers() {
+    if (typeof window === "undefined" || typeof document === "undefined") {
+      return;
+    }
+
+    window.addEventListener("focus", this.onVisibilityOrFocus);
+    document.addEventListener("visibilitychange", this.onVisibilityOrFocus);
+    window.addEventListener("online", this.onOnline);
+    window.addEventListener("offline", this.onOffline);
+
+    ["pointerdown", "keydown", "touchstart", "mousemove", "scroll"].forEach(
+      (eventName) => {
+        window.addEventListener(eventName, this.onUserActivity, {
+          passive: true,
+        });
+      }
+    );
   }
 
   private clearTimers() {

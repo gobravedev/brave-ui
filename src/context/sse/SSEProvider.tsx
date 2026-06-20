@@ -96,15 +96,16 @@ export const SSEProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
-      const backendTransport = await fetchBackendTransport(baseURL, authorization);
-      if (backendTransport && backendTransport !== sseClient.getTransport()) {
-        switchTransport(backendTransport);
-        reconnectFailuresRef.current = 0;
-        return;
-      }
+      // Auto transport switching is disabled.
+      // const backendTransport = await fetchBackendTransport(baseURL, authorization);
+      // if (backendTransport && backendTransport !== sseClient.getTransport()) {
+      //   switchTransport(backendTransport);
+      //   reconnectFailuresRef.current = 0;
+      //   return;
+      // }
 
-      const fallback = sseClient.getTransport() === "websocket" ? "sse" : "websocket";
-      switchTransport(fallback);
+      // const fallback = sseClient.getTransport() === "websocket" ? "sse" : "websocket";
+      // switchTransport(fallback);
       reconnectFailuresRef.current = 0;
     }, 8000);
 

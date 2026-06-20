@@ -12,11 +12,12 @@ function resolveTransport(): RealtimeTransport {
 		return envTransport;
 	}
 
-	const localTransport = window.localStorage.getItem(
-		"realtime.transport"
-	) as RealtimeTransport | null;
+	// const localTransport = window.localStorage.getItem(
+	// 	"realtime.transport"
+	// ) as RealtimeTransport | null;
 
-	return localTransport || envTransport;
+	// return localTransport || envTransport;
+	return envTransport
 }
 
 export function createRealtimeClient(transport: RealtimeTransport): RealtimeClient {
