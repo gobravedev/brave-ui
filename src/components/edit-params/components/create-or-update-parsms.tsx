@@ -19,6 +19,7 @@ import { useStoreRender } from "@/context/render/RenderProvider";
 import { ActionDispatcher } from "@/llmv2/dispatcher";
 import { useGlobalMessage } from "@/hooks/useGlobalMessage";
 import { invoke } from "@/core/ui-system/invokeV2";
+import { http } from "@/api/client/http";
 const RenderFromJson = lazy(() => import("./render-form-json"));
 
 
@@ -127,7 +128,7 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                         }
                     }
                 ]
-                if(analysisId ){
+                if (analysisId) {
                     data.push({
                         action: "component.invoke",
                         payload: {
@@ -147,7 +148,7 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                 // openModals("paramsView", resp.data)
                 invoke.paramsView.drawer({
                     data: resp.data,
-                },{
+                }, {
                     width: "60%",
                     title: "Parameters",
                     footer: null,
@@ -247,7 +248,37 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                         }
                     </Space>
 
+
                 </Flex>
+                <Space style={{ marginTop: 10 }}>
+                    <Button size="small" color="cyan" variant="solid"
+                        onClick={async () => {
+                            const values = await form.validateFields()
+                            const requestParams = getRequestParams(values)
+                            await http.post(`/analysis/controller`, {
+                                request_param: requestParams,
+                                save:true,
+                                is_submit:true
+                            })
+
+                        }}>Go Submit</Button>
+                           <Button size="small" color="cyan" variant="solid"
+                        onClick={async () => {
+                            // const values = await form.validateFields()
+                            // const requestParams = getRequestParams(values)
+                            await http.post(`/analysis/stop/${analysisId}`)
+
+                        }}>Go Stop</Button>
+                    <Button size="small" color="cyan" variant="solid"
+                        onClick={async () => {
+                            const values = await form.validateFields()
+                            const requestParams = getRequestParams(values)
+                            await http.post(`/analysis/parse-params`, {
+                                request_param: requestParams
+                            })
+
+                        }}>Go Parameters</Button>
+                </Space>
                 {/* <Form.Item name={"anno1"}>
                 <Input></Input>
             </Form.Item>

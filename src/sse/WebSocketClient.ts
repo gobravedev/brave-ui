@@ -19,7 +19,7 @@ export class WebSocketClient implements RealtimeClient {
   private heartbeatTimer: any = null;
   private retryTimer: any = null;
 
-  constructor(retryInterval = 5000, heartbeatTimeout = 15000) {
+  constructor(retryInterval = 5000, heartbeatTimeout = 30000) {
     this.retryInterval = retryInterval;
     this.heartbeatTimeout = heartbeatTimeout;
   }
@@ -114,6 +114,9 @@ export class WebSocketClient implements RealtimeClient {
       }
 
       if (data?.type === "ping") {
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+          this.ws.send(JSON.stringify({ type: "pong", ts: Date.now() }));
+        }
         return;
       }
 
