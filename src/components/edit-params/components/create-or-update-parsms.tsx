@@ -96,11 +96,16 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
             // is_submit: Optional[bool] = False
             // is_report: Optional[bool] = None
             // analysis_node_id: Optional[str] = None
-            const resp: any = await axios.post(`/fast-api/analysis-controller`, {
+            // const resp: any = await axios.post(`/fast-api/analysis-controller`, {
+            //     request_param: requestParams,
+            //     save: save,
+            //     is_submit: is_submit,
+            //     analysis_node_id: analysisNodeId
+            // })
+            const resp = await http.post(`/analysis/controller`, {
                 request_param: requestParams,
                 save: save,
-                is_submit: is_submit,
-                analysis_node_id: analysisNodeId
+                is_submit: is_submit
             })
             // setFilePlot(resp.data)
             // setAnalysisParams(resp.data)
@@ -193,31 +198,47 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                 <Flex gap={"small"} justify="space-between">
 
                     {formStatus == "running" || formStatus == "stopping" || formStatus == "submitted" ?
-                        <Popconfirm title="Are you sure to stop the analysis?" onConfirm={async () => {
-                            setFormStatus("stopping")
-                            if (analysisNodeId) {
-                                await stopAnalysisNodeApi(analysisNodeId, "node")
-                                messageApi.success("Node analysis stopped!")
-                            } else {
+                        // <Popconfirm title="Are you sure to stop the analysis?" onConfirm={async () => {
+                        //     setFormStatus("stopping")
+                        //     if (analysisNodeId) {
+                        //         await stopAnalysisNodeApi(analysisNodeId, "node")
+                        //         messageApi.success("Node analysis stopped!")
+                        //     } else {
 
-                                await axios.post(`/analysis-runtime/running-dags/${analysisId}/stop`)
-                                messageApi.success("Analysis stopped!")
-                            }
-                            // 
-                        }}>
-                            <Button disabled={formStatus == "stopping"} size="small" color="cyan" variant="solid" >
-                                Stop
-                            </Button>
+                        //         await axios.post(`/analysis-runtime/running-dags/${analysisId}/stop`)
+                        //         messageApi.success("Analysis stopped!")
+                        //     }
+                        //     // 
+                        // }}>
+                        //     <Button disabled={formStatus == "stopping"} size="small" color="cyan" variant="solid" >
+                        //         Stop
+                        //     </Button>
 
-                        </Popconfirm>
+                        // </Popconfirm>
+                        <Button disabled={formStatus == "stopping"} size="small" color="cyan" variant="solid"
+                            onClick={async () => {
+                                // const values = await form.validateFields()
+                                // const requestParams = getRequestParams(values)
+                                await http.post(`/analysis/stop/${analysisId}`)
+
+                            }}>Go Stop</Button>
                         :
+                        // <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid"
+                        //     onClick={async () => {
+                        //         const values = await form.validateFields()
+                        //         const requestParams = getRequestParams(values)
+
+
+                        //     }}>Submit {analysisNodeId ? "Node" : ""}</Button>
                         <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true, true)}>
                             Submit {analysisNodeId ? "Node" : ""}
                         </Button>
                     }
+                    <Space >
 
 
-                    <Space>
+
+
                         {!analysisNodeId && <Form.Item
                             noStyle
                             initialValue={false}
@@ -228,17 +249,29 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                         >
                             <Switch size="small" checkedChildren="cache" unCheckedChildren="no-cache" disabled={formStatus == "running"} />
                         </Form.Item>}
+                        {/* <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid"
+                            onClick={async () => {
+                                const values = await form.validateFields()
+                                const requestParams = getRequestParams(values)
+                                await http.post(`/analysis/controller`, {
 
-                        <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid" onClick={() => {
-                            saveUpstreamAnalysis(false)
-                        }}>Parameters</Button>
-
-                        {/* Analysis({requestParam.analysis_name})({String(requestParam.analysis_id).slice(0, 8)}) */}
+                                    request_param: requestParams,
+                                    save: true,
+                                    is_submit: false
+                                })
+                            }}>
+                            {requestParam?.analysis_id ? <>Update </> : <>Create</>}</Button> */}
                         <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>
                             {requestParam?.analysis_id ? <>Update </> : <>Create</>}</Button>
-                        {(requestParam?.analysis_id && showCancal) && <Button size="small" color="cyan" onClick={() => form.setFieldValue("analysis_id", undefined)}>Cancel</Button>}
-                        {/* <Button size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>更新分析</Button> */}
+                        <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid"
+                            onClick={async () => {
+                                const values = await form.validateFields()
+                                const requestParams = getRequestParams(values)
+                                await http.post(`/analysis/parse-params`, {
+                                    request_param: requestParams
+                                })
 
+                            }}>Parameters</Button>
                         {showCreate &&
                             <Popconfirm title="Are you sure to create a new analysis?"
                                 onConfirm={createAnalysis}
@@ -248,37 +281,37 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                         }
                     </Space>
 
+                    {/* <Space>
+                        {!analysisNodeId && <Form.Item
+                            noStyle
+                            initialValue={false}
+                            label="is cache"
+                            name={`is_cache`}
+                            valuePropName="checked"
+                        >
+                            <Switch size="small" checkedChildren="cache" unCheckedChildren="no-cache" disabled={formStatus == "running"} />
+                        </Form.Item>}
+
+                        <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid" onClick={() => {
+                            saveUpstreamAnalysis(false)
+                        }}>Parameters</Button>
+
+                        <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>
+                            {requestParam?.analysis_id ? <>Update </> : <>Create</>}</Button>
+                        {(requestParam?.analysis_id && showCancal) && <Button size="small" color="cyan" onClick={() => form.setFieldValue("analysis_id", undefined)}>Cancel</Button>}
+
+                        {showCreate &&
+                            <Popconfirm title="Are you sure to create a new analysis?"
+                                onConfirm={createAnalysis}
+                            >
+                                <Button disabled={formStatus == "running"} size="small" color="orange" variant="solid" onClick={() => form.setFieldValue("analysis_id", undefined)}>Copy</Button>
+                            </Popconfirm>
+                        }
+                    </Space> */}
+
 
                 </Flex>
-                <Space style={{ marginTop: 10 }}>
-                    <Button size="small" color="cyan" variant="solid"
-                        onClick={async () => {
-                            const values = await form.validateFields()
-                            const requestParams = getRequestParams(values)
-                            await http.post(`/analysis/controller`, {
-                                request_param: requestParams,
-                                save:true,
-                                is_submit:true
-                            })
 
-                        }}>Go Submit</Button>
-                           <Button size="small" color="cyan" variant="solid"
-                        onClick={async () => {
-                            // const values = await form.validateFields()
-                            // const requestParams = getRequestParams(values)
-                            await http.post(`/analysis/stop/${analysisId}`)
-
-                        }}>Go Stop</Button>
-                    <Button size="small" color="cyan" variant="solid"
-                        onClick={async () => {
-                            const values = await form.validateFields()
-                            const requestParams = getRequestParams(values)
-                            await http.post(`/analysis/parse-params`, {
-                                request_param: requestParams
-                            })
-
-                        }}>Go Parameters</Button>
-                </Space>
                 {/* <Form.Item name={"anno1"}>
                 <Input></Input>
             </Form.Item>
