@@ -29,41 +29,43 @@ const Code: FC<any> = ({ component_id }) => {
 
     }, [component_id, scriptName])
     return <>
+        {data?.path && <Typography >{data?.path}</Typography>}
+        <Flex justify="flex-end" gap={"small"}>
+            <Popconfirm title="Whether to generate scripts?" onConfirm={async () => {
+                await axios.post(`/component/convert-ipynb/${component_id}`)
+                messageApi.success("Generate Script Successful!")
+                getModuleContent()
+            }}>
+                <Button size="small" color="cyan" variant="solid">Generate scripts</Button>
+            </Popconfirm>
+            <Button size="small" color="cyan" variant="solid" onClick={() => {
+                getModuleContent()
+            }}>Refresh</Button>
+            <Tooltip title={
+                data?.path
+            }>
+                <Button size="small" color="cyan" variant="solid" onClick={() => {
+                    editorRef.current.setValue(data?.content)
+                }}>Save</Button>
+            </Tooltip>
+        </Flex>
         {contextHolder}
+        <MonacoEditor value={data?.content} editorRef={editorRef} defaultLanguage="python"></MonacoEditor>
 
         {/* <Typography>
                 <pre>
                     {data?.content}s
                 </pre>
             </Typography> */}
-        <Tabs
-            // key={scriptName}
+        {/* <Tabs
             tabBarExtraContent={
-                <Flex justify="flex-end" gap={"small"}>
-                    <Popconfirm title="Whether to generate scripts?" onConfirm={async () => {
-                        await axios.post(`/component/convert-ipynb/${component_id}`)
-                        messageApi.success("Generate Script Successful!")
-                        getModuleContent()
-                    }}>
-                        <Button size="small" color="cyan" variant="solid">Generate scripts</Button>
-                    </Popconfirm>
-                    <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        getModuleContent()
-                    }}>Refresh</Button>
-                    <Tooltip title={
-                        data?.path
-                    }>
-                        <Button size="small" color="cyan" variant="solid" onClick={() => {
-                            editorRef.current.setValue(data?.content)
-                        }}>Save</Button>
-                    </Tooltip>
-                </Flex>
+               
             }
             onChange={(key) => {
                 setScriptName(key)
             }}
-            items={[{ label: "main", key: "main" }, { label: "input_parse", key: "input_parse" }, { label: "output_parse", key: "output_parse" }]}></Tabs>
-        <MonacoEditor value={data?.content} editorRef={editorRef} defaultLanguage="python"></MonacoEditor>
+            items={[{ label: "main", key: "main" }]}></Tabs> */}
+        {/* , { label: "input_parse", key: "input_parse" }, { label: "output_parse", key: "output_parse"  */}
         {/* <TextArea value={data?.content} disabled rows={10}>
             </TextArea> */}
 
