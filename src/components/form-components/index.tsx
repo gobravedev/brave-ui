@@ -240,8 +240,10 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap = {}, analysisResultId }
             mode: undefined,
             // initialValue:"sample_group"
         },
-        SelectSample:{
+        SelectSample: {
             Component: SelectSample,
+        }, NestSelectSample: {
+            Component: NestSelectSample
         },
         GroupSelectSampleButton: {
             Component: GroupSelectSampleButton,
@@ -906,7 +908,7 @@ export const CollectedSampleSelect: FC<any> = ({ label, modes = [], columns, gro
         </Form.Item>
 
         {/* {JSON.stringify(name)} */}
-        <Form.Item style={{display:"none"}} label={`Node Name`} name={[name, `node_name`]}>
+        <Form.Item style={{ display: "none" }} label={`Node Name`} name={[name, `node_name`]}>
             <Input placeholder="Auto generated from group names" />
         </Form.Item>
         {(columns && Array.isArray(columns)) && columns.map((item: any, index: any) => (
@@ -946,7 +948,6 @@ export const CollectedSampleSelect: FC<any> = ({ label, modes = [], columns, gro
     </>
 }
 
-
 export const NestCollectedSampleSelect: FC<any> = ({ name, ...rest }) => {
 
     return <>
@@ -960,7 +961,7 @@ export const NestCollectedSampleSelect: FC<any> = ({ name, ...rest }) => {
 
                             {/* <CollectedSampleSelect name={} {...rest}></CollectedSampleSelect> */}
                             {/* {JSON.stringify(listIndex)} */}
-                            <Card style={{ flex: 1, marginBottom: "0.5rem", marginRight: "0.5rem" }} size="small"> 
+                            <Card style={{ flex: 1, marginBottom: "0.5rem", marginRight: "0.5rem" }} size="small">
 
                                 <CollectedSampleSelect
 
@@ -985,6 +986,7 @@ export const NestCollectedSampleSelect: FC<any> = ({ name, ...rest }) => {
 
     </>
 }
+
 export const NestCollectedColumnsSelect: FC<any> = ({ label, modes = [], columns, name, columns_rules = [], rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
     const { columnsMap } = useStoreForm()
     const options = columnsMap[name] ?? []
@@ -1355,16 +1357,71 @@ export const GroupSelectSampleButton: FC<any> = ({ label, projParameter, name, r
 }
 
 
+export const NestSelectSample: FC<any> = ({ name, append, ...rest }) => {
+
+    return <>
+        {rest?.label}
+        {/* {JSON.stringify(rest)} */}
+        <Form.List name={name}>
+            {(fields, { add, remove }) => (
+                <>
+                    {fields.map(({ key, name: listIndex, ...restField }) => (
+                        <div key={key} style={{ display: 'flex', marginBottom: 4, width: '100%' }} >
+
+                            {/* <CollectedSampleSelect name={} {...rest}></CollectedSampleSelect> */}
+                            {/* {JSON.stringify(listIndex)} */}
+                            <Card style={{ flex: 1, marginBottom: "0.5rem", marginRight: "0.5rem" }} size="small">
+                                {/* {listIndex} */}
+                                <SelectSample
+
+                                    name={[name, listIndex]}  //⭐ 把动态 index 传给子组件
+                                    {...rest}
+                                />
+                                {/* {JSON.stringify(append)} */}
+                                {append && Array.isArray(append) && append.map((item: any, index: any) => {
+                                    const {name,type, ...rest} = item
+                                    return <div key={index}>
+                                        {/* {JSON.stringify(item)} {index} */}
+                                        {item?.type == "BaseTextAreaNum" && <BaseTextAreaNum name={[listIndex,name]} {...rest} ></BaseTextAreaNum>}
+                                    </div>
+                                }
+
+                                )}
+                                {/* {append_type == "BaseTextAreaNum" &&
+                                
+                                } */}
+
+                            </Card>
+                            <MinusCircleOutlined onClick={() => remove(listIndex)} />
+                        </div>
+                    ))}
+                    <Form.Item>
+                        <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                            Add field
+                        </Button>
+                    </Form.Item>
+                </>
+            )}
+        </Form.List>
+
+
+
+    </>
+}
 
 
 
 
-
-export const SelectSample: FC<any> = ({ label, mode, name, rules, data, filter, group, groupField: groupField_ }) => {
+export const SelectSample: FC<any> = ({ label, mode, name: name_, rules, data, filter, group, groupField: groupField_ }) => {
     const [sampleGrouped, setSampleGrouped] = useState<any>()
     const [options, setOptions] = useState<any>([])
     // const {  project } = useOutletContext<any>()
-
+    let name = name_
+    if (name_ instanceof Array && name_.length > 1) {
+        name = name_[1]
+    } else {
+        name_ = [name_]
+    }
     // const [sampleGroupedOptions, setSampleGroupedOptions] = useState<any>([])
     const form = Form.useFormInstance();
     let filterName: any = []
@@ -1409,9 +1466,9 @@ export const SelectSample: FC<any> = ({ label, mode, name, rules, data, filter, 
 
                 }
             })
-           
+
         }
-      
+
 
         if (data && groupField_) {
             calculateGroup(data, groupField_)
@@ -1422,10 +1479,11 @@ export const SelectSample: FC<any> = ({ label, mode, name, rules, data, filter, 
         }
 
         setOptions(data)
-       
+
     }, [data, groupField, customFilterValue])
     return <>
         {/* {JSON.stringify(data)} */}
+        {/* {name} */}
         <Form.Item label={label} name={[name, "sample"]} rules={rules}>
             <GroupSelectSample mode={mode} sampleGrouped={sampleGrouped} sampleGroup={options} watch={[name, "group"]}></GroupSelectSample>
         </Form.Item>

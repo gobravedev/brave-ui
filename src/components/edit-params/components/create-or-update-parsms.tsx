@@ -429,9 +429,9 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                             })
 
                         }}> debug Parameters</Button>
-                    <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid" onClick={() => {
+                    {/* <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid" onClick={() => {
                         saveUpstreamAnalysisOld(false)
-                    }}>Old Parameters</Button>
+                    }}>Old Parameters</Button> */}
 
                 </Space>
             </Form>
