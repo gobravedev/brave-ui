@@ -509,7 +509,7 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                         <Skeleton active paragraph={{ rows: 6 }} />
                     ) : (
                         <ViewResolver
-                            analsyisResult={selectedSampleDetail.result || { images: [], tables: [], htmls: [] }}
+                            analsyisResult={selectedSampleDetail.result || { images: [], tables: [], htmls: [] ,files: []}}
                             view={"analysisResultDisplay"}
                         ></ViewResolver>
                     )}

@@ -47,7 +47,7 @@ type FileItem = {
 };
 import { FolderOutlined, FileOutlined, DownloadOutlined, ArrowLeftOutlined, ReloadOutlined } from "@ant-design/icons"
 import { useSelector } from "react-redux";
-import { invoke } from "@/core/ui-system/invokeV2";
+import { openFileByPath } from "@/utils/file-open";
 
 const joinPath = (basePath: string, name: string) => {
     if (!basePath || basePath === "/") {
@@ -55,16 +55,6 @@ const joinPath = (basePath: string, name: string) => {
     }
     return `${basePath.replace(/\/+$/, "")}/${name}`
 }
-
-const getFileExt = (fileName: string) => {
-    const idx = fileName.lastIndexOf(".")
-    if (idx < 0) {
-        return ""
-    }
-    return fileName.slice(idx + 1).toLowerCase()
-}
-
-const SHEET_FILE_EXTENSIONS = new Set(["xlsx", "xls", "csv", "tsv", "ods"])
 
 const SysFileBrowser1: FC<any> = ({ output_dir: dir }) => {
     const [currentPath, setCurrentPath] = useState<string>(dir);
@@ -200,19 +190,7 @@ const SysFileBrowser: FC<any> = ({ type, path, onSelectFile, onClose }) => {
 
     const handleOpenFile = (file: FileItem) => {
         const filePath = resolveFilePath(file.name)
-        const ext = getFileExt(file.name)
-
-        if (SHEET_FILE_EXTENSIONS.has(ext)) {
-            invoke.univerView.open({ path: filePath }, {
-                width: "90%",
-                title: file.name,
-                footer: null,
-            })
-            return
-        }
-
-        const url = `/brave-api/file-operation/download?path=${encodeURIComponent(filePath)}`
-        window.open(url, "_blank")
+        openFileByPath({ filePath, title: file.name })
     }
 
     const pathSegments = currentPath.split("/").filter(Boolean)

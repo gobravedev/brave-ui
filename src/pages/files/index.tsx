@@ -101,7 +101,8 @@ const Files: FC<any> = () => {
                                 // /analysis-result/add-to-file
                                 const params = {
                                     dataset_id: data.id,
-                                    path: file.path
+                                    path: file.path,
+                                    source: "data",
                                 }
                                 console.log(params)
                                 await addFileToDatasetApi(params)

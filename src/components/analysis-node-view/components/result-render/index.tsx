@@ -1,4 +1,4 @@
-import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Alert, Modal, Tooltip, Divider, Segmented } from "antd";
+import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Alert, Modal, Tooltip, Divider, Segmented, Space } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { FC, forwardRef, memo, use, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import axios from "axios";
@@ -16,6 +16,9 @@ import ComponentsDetailsRender from "@/core/ui-renderer/ComponentsDetailsRender"
 import ViewResolver from "@/core/ui-renderer/ViewResolver";
 import { componentMap, ImgView, UrlComp } from "./components";
 import LogFile from "@/components/log-file";
+import { invoke } from "@/core/ui-system/invokeV2";
+import { addFileToDatasetApi } from "@/api/data";
+import { openFileByPath } from "@/utils/file-open";
 // import EditParamsPanel from "../edit-params/components/panel";
 
 
@@ -387,7 +390,7 @@ export const AnalysisResultViewCompV2: FC<any> = ({ analysis_id, onClose, callba
                 </>}
                 {analsyisResult?.analysis_id &&
                     <>
-                    
+
                         <ViewResolver
                             analysis_id={analsyisResult?.analysis_id}
                             view="analysisNodes">
@@ -403,7 +406,7 @@ export const AnalysisResultViewCompV2: FC<any> = ({ analysis_id, onClose, callba
 
             </Spin >
 
-            
+
 
         </Card >
 
@@ -516,11 +519,11 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, callback
             // bodyStyle={{ padding: 0 }}
 
             title={<>
-            
+
 
 
             </>}
-           >
+        >
 
             {/* <div >
                 dew<br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
@@ -575,7 +578,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, callback
                                     ]} />
                             </>}
                         >
-                          
+
                             {/* <EditParamsPanel
                                 analysis_id={analysis_id}></EditParamsPanel> */}
                         </Card>
@@ -589,7 +592,7 @@ export const AnalysisResultViewComp: FC<any> = ({ analysis_id, onClose, callback
 
             </Spin >
 
-            
+
         </Card >
 
     </>
@@ -613,10 +616,89 @@ const AnalysisResultDisplay: FC<any> = ({ analsyisResult }) => {
     const { projectObj } = useSelector((state: any) => state.user);
 
     const { modal, openModal, closeModal } = useModal()
+    const message = useGlobalMessage()
 
     return <div >
 
         {analsyisResult && <>
+
+            {analsyisResult.files && Array.isArray(analsyisResult.files) && <>
+                <Collapse
+                    style={{ marginBottom: "1rem" }}
+                    defaultActiveKey={[]}
+                    items={[
+                        {
+                            key: "analysis-files",
+                            label: `Files (${analsyisResult.files.length})`,
+                            children: (
+                                <Flex vertical gap={8}>
+                                    {analsyisResult.files.map((item: any, index: any) => {
+                                        const filePath = item?.filepath || item?.path || item?.url || ""
+                                        const fileName = item?.filename || filePath.split("/").pop() || `File ${index + 1}`
+
+                                        return (
+                                            <Card key={index} size="small" styles={{ body: { padding: "8px 12px" } }}>
+                                                <Flex justify="space-between" align="center" gap={8} wrap>
+                                                    <Flex vertical>
+                                                        <Typography.Text strong>{fileName}</Typography.Text>
+                                                        <Typography.Text type="secondary" style={{ wordBreak: "break-all" }}>
+                                                            {filePath}
+                                                        </Typography.Text>
+                                                    </Flex>
+
+                                                    <Space>
+                                                        <Button
+                                                            size="small"
+                                                            type="default"
+                                                            onClick={() => {
+                                                                if (!filePath) {
+                                                                    message.error("Invalid file path")
+                                                                    return
+                                                                }
+                                                                openFileByPath({ filePath, title: fileName })
+                                                            }}
+                                                        >
+                                                            Open
+                                                        </Button>
+                                                        <Button
+                                                            size="small"
+                                                            color="cyan"
+                                                            variant="solid"
+                                                            onClick={async () => {
+                                                                if (!filePath) {
+                                                                    message.error("Invalid file path")
+                                                                    return
+                                                                }
+                                                                try {
+                                                                    const data = await invoke.datasetProjectPage.openDrawerAsync({}, {
+                                                                        width: 600,
+                                                                        title: "Select File Type"
+                                                                    })
+                                                                    const params = {
+                                                                        dataset_id: data.id,
+                                                                        path: filePath,
+                                                                        source: "analysis",
+                                                                    }
+                                                                    await addFileToDatasetApi(params)
+                                                                    message.success("File added to analysis results")
+                                                                } catch (error) {
+                                                                    console.log("File type selection cancelled or failed", error)
+                                                                }
+                                                            }}
+                                                        >
+                                                            Add To
+                                                        </Button>
+                                                    </Space>
+                                                </Flex>
+                                            </Card>
+                                        )
+                                    })}
+                                </Flex>
+                            ),
+                        },
+                    ]}
+                />
+            </>}
 
             {analsyisResult.images && <div >
                 {
