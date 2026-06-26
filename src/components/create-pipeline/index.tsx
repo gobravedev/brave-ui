@@ -1390,7 +1390,8 @@ export const CreateORUpdateRelationComp: FC<any> = (params) => {
                 </Form.Item>
 
                 <Form.Item name={"description"} label="Description">
-                    <TextArea></TextArea>
+                    {/* <TextArea></TextArea> */}
+                    <TextAreaComp></TextAreaComp>
                 </Form.Item>
 
                 <Collapse ghost items={[

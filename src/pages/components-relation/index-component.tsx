@@ -451,7 +451,12 @@ const Pipeline: FC<any> = ({ }) => {
                 <Space wrap>
                     <QuestionCircleOutlined
                         onClick={() => {
-                            setSize([14, 6])
+                            // setSize([14, 6])
+                            invoke.markdown.open({introduction:component?.description},{
+                                title: `Description - ${component?.name}`,
+                                footer: null,
+                                width: "60%",
+                            })
                         }}
                         style={{ color: "#1890ff" }} />
 
