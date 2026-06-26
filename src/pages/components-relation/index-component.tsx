@@ -271,6 +271,9 @@ const Pipeline: FC<any> = ({ }) => {
                 label: "LLM",
                 value: "llm-card"
             }, {
+                label: "Container App",
+                value: "appSessionPage"
+            },{
                 label: "Script",
                 value: "scriptPage"
             },
