@@ -86,6 +86,80 @@ const countAssets = (samples: AnalysisNodeSample[]) => {
         { images: 0, tables: 0, htmls: 0 }
     );
 };
+
+const buildReportTreeData = (groups: AnalysisNodeGroup[]): ReportTreeNode[] => {
+    return groups.map((item) => {
+        const samples = item.children || [];
+        const assets = countAssets(samples);
+        return {
+            key: makeNodeKey(item.script_id),
+            title: item.script_name || item.script_id,
+            nodeType: "node",
+            scriptId: item.script_id,
+            sampleCount: samples.length,
+            images: assets.images,
+            tables: assets.tables,
+            htmls: assets.htmls,
+            children: samples.map((sample) => ({
+                key: makeSampleKey(sample.analysis_node_id),
+                title: sample.node_name || sample.analysis_node_id,
+                nodeType: "sample",
+                scriptId: item.script_id,
+                sampleId: sample.analysis_node_id,
+                status: sample.status,
+                images: sample.result?.images?.length || 0,
+                tables: sample.result?.tables?.length || 0,
+                htmls: sample.result?.htmls?.length || 0,
+            })),
+        };
+    });
+};
+
+const buildReportMenuItems = (treeData: ReportTreeNode[]): ReportMenuItem[] => {
+    return treeData.map((node) => ({
+        key: node.key,
+        label: (
+            <Flex justify="space-between" align="center" gap={8} style={{ width: "100%", minWidth: 0 }}>
+                <Tooltip title={node.title}>
+                    <Typography.Text
+                        style={{
+                            flex: 1,
+                            minWidth: 0,
+                            display: "block",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                        }}
+                    >
+                        {node.title}
+                    </Typography.Text>
+                </Tooltip>
+            </Flex>
+        ),
+        children: (node.children || []).map((child) => ({
+            key: child.key,
+            label: (
+                <Flex justify="space-between" align="center" gap={8} style={{ width: "100%", minWidth: 0 }}>
+                    <Tooltip title={child.title}>
+                        <Typography.Text
+                            style={{
+                                flex: 1,
+                                minWidth: 0,
+                                display: "block",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                            }}
+                        >
+                            {child.title}
+                        </Typography.Text>
+                    </Tooltip>
+                </Flex>
+            ),
+        })),
+    }));
+};
+
 export interface AnalysisNodesReportProps {
     analysis_id: string;
 }
@@ -93,6 +167,8 @@ export interface AnalysisNodesReportProps {
 const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState<AnalysisNodeGroup[]>([]);
+    const [reportTreeData, setReportTreeData] = useState<ReportTreeNode[]>([]);
+    const [reportMenuItems, setReportMenuItems] = useState<ReportMenuItem[]>([]);
     const [selectedNodeId, setSelectedNodeId] = useState<string>();
     const [selectedSampleId, setSelectedSampleId] = useState<string>();
     const [openMenuKeys, setOpenMenuKeys] = useState<string[]>([]);
@@ -124,6 +200,9 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
 
     const loadData = async () => {
         if (!analysis_id) {
+            setData([]);
+            setReportTreeData([]);
+            setReportMenuItems([]);
             return;
         }
         setLoading(true)
@@ -132,6 +211,9 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
 
             const nextData = Array.isArray(res.data?.result) ? res.data.result : [];
             setData(nextData)
+            const nextReportTreeData = buildReportTreeData(nextData);
+            setReportTreeData(nextReportTreeData);
+            setReportMenuItems(buildReportMenuItems(nextReportTreeData));
             setRelation({
                 relation_id: res.data?.relation_id,
             })
@@ -168,7 +250,15 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
     useEffect(() => {
         if (analysis_id) {
             loadData()
+            return;
         }
+
+        setData([]);
+        setReportTreeData([]);
+        setReportMenuItems([]);
+        setSelectedNodeId(undefined);
+        setSelectedSampleId(undefined);
+        setOpenMenuKeys([]);
 
     }, [analysis_id])
 
@@ -207,88 +297,6 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
             setSelectedSampleId(selectedSample.analysis_node_id);
         }
     }, [selectedNodeSamples, selectedSample, selectedSampleId]);
-
-
-
-    const reportTreeData = useMemo<ReportTreeNode[]>(() => {
-        return data.map((item) => {
-            const samples = item.children || [];
-            const assets = countAssets(samples);
-            return {
-                key: makeNodeKey(item.script_id),
-                title: item.script_name || item.script_id,
-                nodeType: "node",
-                scriptId: item.script_id,
-                sampleCount: samples.length,
-                images: assets.images,
-                tables: assets.tables,
-                htmls: assets.htmls,
-                children: samples.map((sample, index) => ({
-                    key: makeSampleKey(sample.analysis_node_id),
-                    title: sample.node_name || sample.analysis_node_id,
-                    nodeType: "sample",
-                    scriptId: item.script_id,
-                    sampleId: sample.analysis_node_id,
-                    status: sample.status,
-                    images: sample.result?.images?.length || 0,
-                    tables: sample.result?.tables?.length || 0,
-                    htmls: sample.result?.htmls?.length || 0,
-                })),
-            };
-        });
-    }, [data]);
-
-    const reportMenuItems = useMemo<ReportMenuItem[]>(() => {
-        return reportTreeData.map((node) => ({
-            key: node.key,
-            label: (
-                <Flex justify="space-between" align="center" gap={8} style={{ width: "100%", minWidth: 0 }}>
-                    <Tooltip title={node.title}>
-                        <Typography.Text
-                            style={{
-                                flex: 1,
-                                minWidth: 0,
-                                display: "block",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
-                            }}
-                        >
-                            {node.title}
-                        </Typography.Text>
-                    </Tooltip>
-                    {/* <Space size={4}>
-                        <Tag>{node.sampleCount || 0}</Tag>
-                        <Tag color="blue">{node.images || 0}i</Tag>
-                    </Space> */}
-                </Flex>
-            ),
-            children: (node.children || []).map((child) => ({
-                key: child.key,
-                label: (
-                    <Flex justify="space-between" align="center" gap={8} style={{ width: "100%", minWidth: 0 }}>
-                        <Tooltip title={child.title}>
-                            <Typography.Text
-                                style={{
-                                    flex: 1,
-                                    minWidth: 0,
-                                    display: "block",
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                    whiteSpace: "nowrap",
-                                }}
-                            >
-                                {child.title}
-                            </Typography.Text>
-                        </Tooltip>
-                        {/* <Tag color={statusColorMap[child.status || ""] || "default"}>
-                            {child.status || "unknown"}
-                        </Tag> */}
-                    </Flex>
-                ),
-            })),
-        }));
-    }, [reportTreeData]);
 
     useEffect(() => {
         if (!selectedNodeId) {
@@ -329,7 +337,7 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
                 <Col xs={24} lg={8} xl={7}>
                     <Card
                         size="small"
-                        title="Analysis Menu"
+                        title={`Analysis (${analysis_id && analysis_id?.slice(-4)})`}
                         styles={{ body: { padding: "8px" } }}
                         extra={<Space>
                             <Button loading={loading} onClick={loadData} icon={<RedoOutlined />} size="small"></Button>
@@ -344,6 +352,7 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
                             onOpenChange={(keys) => setOpenMenuKeys(keys.map((key) => String(key)))}
                             onClick={({ key }) => {
                                 const keyString = String(key);
+                                console.log(keyString)
                                 if (keyString.startsWith("node:")) {
                                     setSelectedNodeId(keyString.replace("node:", ""));
                                     setSelectedSampleId(undefined);
