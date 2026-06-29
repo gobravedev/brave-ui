@@ -147,10 +147,10 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                 color="cyan"
                                 variant="solid"
                                 onClick={() => {
-                                    invoke.nodeParams.drawer(
+                                    invoke.nodeParams.open(
                                         { analysis_node_id: selectedSampleDetail.node?.analysis_node_id },
                                         {
-                                            width: 960,
+                                             width: "60%",
                                             title: `Params - ${selectedSampleDetail.node?.node_id}`,
                                         }
                                     );
@@ -164,7 +164,7 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                     color="cyan"
                                     variant="solid"
                                     onClick={async () => {
-                                        await invoke.createOrUpdateComponent.openDrawerAsync(
+                                        await invoke.createOrUpdateComponent.openAsync(
                                             {
                                                 component_id: selectedSampleDetail.node?.script_id,
                                                 structure: {
@@ -172,7 +172,7 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                                 },
                                             },
                                             {
-                                                width: 960,
+                                                 width: "60%",
                                                 title: `Edit - ${selectedSampleDetail.node?.node_id}`,
                                             }
                                         );
@@ -191,12 +191,12 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                     color="cyan"
                                     variant="solid"
                                     onClick={() => {
-                                        invoke.scriptCodeEdit.openDrawerAsync(
+                                        invoke.scriptCodeEdit.openAsync(
                                             {
                                                 component_id: selectedSampleDetail.node?.script_id,
                                             },
                                             {
-                                                width: 960,
+                                                width: "60%",
                                                 title: `Code - ${selectedSampleDetail.node?.node_id}`,
                                             }
                                         );
