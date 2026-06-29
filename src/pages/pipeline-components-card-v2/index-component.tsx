@@ -301,7 +301,8 @@ const PipelineComponentsCard: FC<any> = (params) => {
                                     {/* <Tooltip title={item?.namespace}>
                                     <span style={{ margin: "0", color: "rgba(0, 0, 0, 0.45)", fontSize: "0.5rem" }}> {item?.namespace_name}</span>
                                 </Tooltip> */}
-                                </Flex>} description={item?.description} style={{ marginBottom: "1rem" }} />
+                                {/* item?.description */}
+                                </Flex>} description={""} style={{ marginBottom: "1rem" }} />
                                 {item?.category && <Tag style={{
                                     wordBreak: "break-word",
                                     whiteSpace: "nowrap",
