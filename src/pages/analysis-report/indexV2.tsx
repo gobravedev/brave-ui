@@ -31,6 +31,9 @@ const AnalysisReport: FC<any> = () => {
                 label: "LLM",
                 value: "llm-card"
             }, {
+                label: "Container App",
+                value: "appSessionPage"
+            }, {
                 label: "Parameters",
                 value: "editParamsPanel"
             },
