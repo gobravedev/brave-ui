@@ -9,6 +9,7 @@ import { invoke } from "@/core/ui-system/invokeV2";
 import { deleteProjectReportApi, getProjectReportDetailApi, listProjectReportApi, type ProjectReportDetailItem, type ProjectReportItem } from "@/api/project";
 import { useGlobalMessage } from "@/hooks/useGlobalMessage";
 import { setUserItem } from "@/store/userSlice";
+import { getPathname } from "@/utils/utils";
 const Project: FC<any> = () => {
     const [view, setView] = useState<any>("analysisDocView")
     const { project, activeProjectReportId } = useSelector((state: any) => state.user);
@@ -159,6 +160,9 @@ const Project: FC<any> = () => {
             }}
             variant="borderless" size="small" extra={
                 <Flex gap={"small"}>
+                    <Button size="small" onClick={()=>{
+                        window.open(`${getPathname()}/docs/${project}/`,"_blank")
+                    }}>docs</Button>
                     {reportList.length > 0 && <Space>
                         {renderViewButton(view, setView, "analysisDocView", "View")}
                         {renderViewButton(view, setView, "analysisDocEditor", "Edit")}
