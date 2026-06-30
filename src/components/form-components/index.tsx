@@ -1379,10 +1379,14 @@ export const NestSelectSample: FC<any> = ({ name, append, ...rest }) => {
                                 />
                                 {/* {JSON.stringify(append)} */}
                                 {append && Array.isArray(append) && append.map((item: any, index: any) => {
-                                    const {name,type, ...rest} = item
+                                    const { name, type, ...rest } = item
                                     return <div key={index}>
                                         {/* {JSON.stringify(item)} {index} */}
-                                        {item?.type == "BaseTextAreaNum" && <BaseTextAreaNum name={[listIndex,name]} {...rest} ></BaseTextAreaNum>}
+                                        {item?.type == "BaseTextAreaNum" && <BaseTextAreaNum name={[listIndex, name]} {...rest} ></BaseTextAreaNum>}
+                                        {item?.type == "BaseSelect" && <BaseSelect name={[listIndex, name]} {...rest}></BaseSelect>}
+                                        {item?.type == "BaseInput" && <BaseInput name={[listIndex, name]} {...rest}></BaseInput>}
+
+                                        
                                     </div>
                                 }
 
