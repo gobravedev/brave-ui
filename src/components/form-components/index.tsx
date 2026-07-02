@@ -1385,6 +1385,7 @@ export const NestSelectSample: FC<any> = ({ name, append, ...rest }) => {
                                         {item?.type == "BaseTextAreaNum" && <BaseTextAreaNum name={[listIndex, name]} {...rest} ></BaseTextAreaNum>}
                                         {item?.type == "BaseSelect" && <BaseSelect name={[listIndex, name]} {...rest}></BaseSelect>}
                                         {item?.type == "BaseInput" && <BaseInput name={[listIndex, name]} {...rest}></BaseInput>}
+                                        {item?.type == "BaseInputNumber" && <BaseInputNumber name={[listIndex, name]} {...rest}></BaseInputNumber>}
 
                                         
                                     </div>
