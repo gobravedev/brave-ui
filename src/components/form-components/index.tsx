@@ -244,6 +244,8 @@ const FormJsonComp: FC<any> = memo(({ formJson, dataMap = {}, analysisResultId }
             Component: SelectSample,
         }, NestSelectSample: {
             Component: NestSelectSample
+        },NestSelectSampleV2:{
+            Component: NestSelectSampleV2
         },
         GroupSelectSampleButton: {
             Component: GroupSelectSampleButton,
@@ -1356,6 +1358,230 @@ export const GroupSelectSampleButton: FC<any> = ({ label, projParameter, name, r
     </>
 }
 
+export const NestSelectSampleV2: FC<any> = ({ name, append, ...grest }) => {
+
+    return <>
+        {grest?.label}
+        {/* {JSON.stringify(rest)} */}
+        <Form.List name={name}>
+            {(fields, { add, remove }) => (
+                <>
+                    {fields.map(({ key, name: listIndex, ...restField }) => (
+                        <div key={key} style={{ display: 'flex', marginBottom: 4, width: '100%' }} >
+
+                            {/* <CollectedSampleSelect name={} {...rest}></CollectedSampleSelect> */}
+                            {/* {JSON.stringify(listIndex)} */}
+                            <Card style={{ flex: 1, marginBottom: "0.5rem", marginRight: "0.5rem" }} size="small">
+                               
+                                {append && Array.isArray(append) && append.map((item: any, index: any) => {
+                                    const { name, type, ...rest } = item
+                                    return <div key={index}>
+                                  
+                                        {item?.type == "CollectedSampleSelectV2" && <CollectedSampleSelectV2  {...grest}  {...rest} name={[listIndex,name]} ></CollectedSampleSelectV2>}
+                                        {/* {item?.type == "SelectSample" && <SelectSample name={[name, listIndex]} {...rest} {...grest}></SelectSample>} */}
+                                        {item?.type == "BaseTextAreaNum" && <BaseTextAreaNum name={[listIndex, name]} {...rest} ></BaseTextAreaNum>}
+                                        {item?.type == "BaseSelect" && <BaseSelect name={[listIndex, name]} {...rest}></BaseSelect>}
+                                        {item?.type == "BaseInput" && <BaseInput name={[listIndex, name]} {...rest}></BaseInput>}
+                                        {item?.type == "BaseInputNumber" && <BaseInputNumber name={[listIndex, name]} {...rest}></BaseInputNumber>}
+
+
+                                    </div>
+                                }
+
+                                )}
+                                {/* {append_type == "BaseTextAreaNum" &&
+                                
+                                } */}
+
+                            </Card>
+                            <MinusCircleOutlined onClick={() => remove(listIndex)} />
+                        </div>
+                    ))}
+                    <Form.Item>
+                        <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                            Add field
+                        </Button>
+                    </Form.Item>
+                </>
+            )}
+        </Form.List>
+
+
+
+    </>
+}
+export const CollectedSampleSelectV2: FC<any> = ({ label, modes = [], columns, groups, name: name_, columns_rules = [], rules, data, filter, group, groupField: groupField_, analysisResultId }) => {
+    const [sampleGrouped, setSampleGrouped] = useState<any>()
+    const [options, setOptions] = useState<any>([])
+    const [collectFiles, setCollectFiles] = useState<any>([])
+    const { addColumns } = useStoreForm()
+    let name = name_
+    // if (name_ instanceof Array && name_.length > 1) {
+    //     name = name_[1]
+    // } else {
+    //     name_ = [name_]
+    // }
+    // const {  project } = useOutletContext<any>()
+
+    // const [sampleGroupedOptions, setSampleGroupedOptions] = useState<any>([])
+    const form = Form.useFormInstance();
+    const basePath = Array.isArray(name_) ? [...name_] : [name_]
+    let filterName: any = []
+    if (filter) {
+        filterName = filter.map((it: any) => it.name)
+    }
+    const customFilterValue = Form.useWatch((values) => {
+        const data = Object.entries(values).filter(([key]) => filterName.includes(key))
+        return Object.fromEntries(data)
+    }, form);
+
+    const groupField = Form.useWatch(group, form);
+    const groupFormValues = Form.useWatch(basePath, form);
+
+    const selectCollectFile = Form.useWatch(["abundances_meta",...name_, "file"], form);
+
+
+    // const calculateGroup = (sampleGroup: any, groupField: any) => {
+
+    //     const grouped = sampleGroup.reduce((acc: any, item: any) => {
+    //         const key = item[groupField];
+    //         if (!acc[key]) {
+    //             acc[key] = [];
+    //         }
+    //         acc[key].push(item.value);
+    //         return acc;
+    //     }, {});
+    //     setSampleGrouped(sampleGroup)
+
+
+    // }
+    useEffect(() => {
+        if (data && Array.isArray(data)) {
+            const collectedFiles = data.map((it: any) => ({
+                label: `${it.file_name}`,
+                value: it.id,
+            }))
+            setCollectFiles(collectedFiles)
+        }
+
+    }, [data])
+    useEffect(() => {
+        if (selectCollectFile) {
+            let columnsData = data.find((it: any) => it.id == selectCollectFile)
+            // debugger
+            if (columnsData) {
+                columnsData = columnsData.columns.map((it: any) => ({
+                    label: it.columns_name,
+                    value: it.columns_name,
+                    ...it
+                }))
+                if (filter && customFilterValue) {
+                    columnsData = filter.reduce((result: any, filterHandle: any) => {
+                        return result.filter((item: any) => {
+                            return filterHandle.method(item) === customFilterValue[filterHandle.name];
+                        });
+                    }, columnsData);
+
+                    columnsData = columnsData.map((it: any) => {
+                        const { label, id, value, ...rest } = it
+                        return {
+                            label: `${it.label}(${filter[0].method(it)})`,
+                            value: it.value,
+                            ...rest
+
+                        }
+                    })
+
+                }
+                // console.log(data)
+                // console.log(data)
+                // if (columnsData && groupField_) {
+                //     // console.log(data)
+                //     calculateGroup(columnsData, groupField_)
+                // } else {
+                //     if (columnsData && groupField) {
+                //         calculateGroup(columnsData, groupField)
+                //     }
+                // }
+
+                setOptions(columnsData)
+                addColumns(name, columnsData)
+            }
+
+        }
+
+    }, [data, selectCollectFile, groupField, customFilterValue])
+
+    useEffect(() => {
+        if (!Array.isArray(columns) || columns.length === 0) return
+
+        const nodeName = columns
+            .map((item: any) => groupFormValues?.[`${item}_group`])
+            .filter((value: any) => typeof value === "string" && value.trim() !== "")
+            .map((value: string) => value.trim())
+            .join("_vs_")
+
+        if ((groupFormValues?.node_name ?? "") !== nodeName) {
+            form.setFieldValue([...basePath, "node_name"], nodeName || undefined)
+        }
+    }, [columns, groupFormValues, form, basePath])
+
+    // useEffect(() => {
+    //     if (selectCollectFile) {
+    //         // form.setFieldsValue(requestParam)
+    //         setTimeout(() => {
+    //             form.setFieldsValue(requestParam)
+
+    //         }, 50);
+    //     }
+    // }, [selectCollectFile])
+    return <>
+        {/* {JSON.stringify([...name, "file"])}
+        {JSON.stringify([...name_, "file"])} */}
+        <Form.Item label={`${label} File`} name={[...name, "file"]} rules={rules}>
+            <Select options={collectFiles} ></Select>
+        </Form.Item>
+
+        {/* {JSON.stringify(name)} */}
+        <Form.Item style={{ display: "none" }} label={`Node Name`} name={[name, `node_name`]}>
+            <Input placeholder="Auto generated from group names" />
+        </Form.Item>
+        {(columns && Array.isArray(columns)) && columns.map((item: any, index: any) => (
+            <div key={index}>
+                {/* {JSON.stringify()} */}
+                <Form.Item label={`${item} Columns`} name={[...name, item]} rules={[{
+                    "required": columns_rules[index] ? true : false,
+                    "message": "This field cannot be empty!"
+                }]}>
+                    <Select showSearch
+                        allowClear
+                        mode={modes[index] ? "multiple" : undefined}
+                        filterOption={(input: any, option: any) =>
+                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+                        options={options}></Select>
+                </Form.Item>
+
+                {/* {JSON.stringify(groups)} */}
+                {(groups && groups[index] != 0) && <Form.Item label={`${item} Group Name`} name={[name, `${item}_group`]}
+                // rules={[{
+                //     "required": columns_rules[index] ? true : false,
+                //     "message": "This field cannot be empty!"
+                // }]}
+                >
+                    <Input></Input>
+
+
+                </Form.Item>}
+
+
+            </div >
+
+        ))}
+
+
+
+    </>
+}
 
 export const NestSelectSample: FC<any> = ({ name, append, ...rest }) => {
 
