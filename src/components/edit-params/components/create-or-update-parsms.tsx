@@ -1,4 +1,4 @@
-import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Tooltip, Space, Switch } from "antd";
+import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Tooltip, Space, Select, Switch } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { FC, forwardRef, lazy, Suspense, useEffect, useImperativeHandle, useRef, useState } from "react";
 import Markdown from '@/components/markdown'
@@ -28,6 +28,7 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
     databases, callback, analysisResultId, showCancal = false }) => {
     const { modals, openModals, closeModals } = useModals(["paramsView", "bioDatabases"]);
     const [loading, setLoading] = useState<boolean>(false)
+    const [useControllerV2, setUseControllerV2] = useState<boolean>(true)
     const messageApi = useGlobalMessage()
     const { project } = useSelector((state: any) => state.user);
     const { setAnalysisId, analysisNodeId, formStatus, setFormStatus, analysisId } = useStoreRender()
@@ -102,7 +103,8 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
             //     is_submit: is_submit,
             //     analysis_node_id: analysisNodeId
             // })
-            const resp = await http.post(`/analysis/controller`, {
+            const controllerPath = useControllerV2 ? `/analysis/controllerV2` : `/analysis/controller`
+            const resp = await http.post(controllerPath, {
                 request_param: requestParams,
                 save: save,
                 is_submit: is_submit
@@ -331,13 +333,20 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
 
                         {!analysisNodeId && <Form.Item
                             noStyle
-                            initialValue={false}
-                            label="is cache"
-                            name={`is_cache`}
-                            // tooltip="is cache"
-                            valuePropName="checked"
+                            initialValue={1}
+                            name={`cache_type`}
                         >
-                            <Switch size="small" checkedChildren="cache" unCheckedChildren="no-cache" disabled={formStatus == "running"} />
+                            <Select
+                                size="small"
+                                disabled={formStatus == "running"}
+                                style={{ minWidth: 50 }}
+                                options={[
+                                    { value: 1, label: "RerunAll" },
+                                    { value: 2, label: "ReuseNode" },
+                                    { value: 3, label: "ReuseCode" },
+                                    { value: 4, label: "ReuseBoth" },
+                                ]}
+                            />
                         </Form.Item>}
                         {/* <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid"
                             onClick={async () => {
@@ -429,6 +438,13 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                             })
 
                         }}> debug Parameters</Button>
+                    <Switch
+                        size="small"
+                        checked={useControllerV2}
+                        onChange={setUseControllerV2}
+                        checkedChildren="V2"
+                        unCheckedChildren="V1"
+                    />
                     {/* <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid" onClick={() => {
                         saveUpstreamAnalysisOld(false)
                     }}>Old Parameters</Button> */}
