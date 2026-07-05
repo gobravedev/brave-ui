@@ -150,7 +150,7 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                     invoke.nodeParams.open(
                                         { analysis_node_id: selectedSampleDetail.node?.analysis_node_id },
                                         {
-                                             width: "60%",
+                                            width: "60%",
                                             title: `Params - ${selectedSampleDetail.node?.node_id}`,
                                         }
                                     );
@@ -172,7 +172,7 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                                 },
                                             },
                                             {
-                                                 width: "60%",
+                                                width: "60%",
                                                 title: `Edit - ${selectedSampleDetail.node?.node_id}`,
                                             }
                                         );
@@ -372,6 +372,9 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                 {selectedSampleDetail.node?.sample_id && (
                                     <Typography.Text type="secondary">sample: {selectedSampleDetail.node?.sample_id}</Typography.Text>
                                 )}
+                                {selectedSampleDetail.node?.rerun_reason && (
+                                    <Typography.Text type="secondary">rerun reason: {selectedSampleDetail.node?.rerun_reason}</Typography.Text>
+                                )}
 
                                 {selectedSampleDetail.node?.output_dir && (
                                     <Typography.Paragraph type="secondary" style={{ marginBottom: 0, wordBreak: "break-all" }}>
@@ -509,7 +512,7 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                         <Skeleton active paragraph={{ rows: 6 }} />
                     ) : (
                         <ViewResolver
-                            analsyisResult={selectedSampleDetail.result || { images: [], tables: [], htmls: [] ,files: []}}
+                            analsyisResult={selectedSampleDetail.result || { images: [], tables: [], htmls: [], files: [] }}
                             view={"analysisResultDisplay"}
                         ></ViewResolver>
                     )}

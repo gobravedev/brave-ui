@@ -1,4 +1,4 @@
-import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Tooltip, Space, Select, Switch } from "antd";
+import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Tooltip, Space, Select } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { FC, forwardRef, lazy, Suspense, useEffect, useImperativeHandle, useRef, useState } from "react";
 import Markdown from '@/components/markdown'
@@ -28,7 +28,7 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
     databases, callback, analysisResultId, showCancal = false }) => {
     const { modals, openModals, closeModals } = useModals(["paramsView", "bioDatabases"]);
     const [loading, setLoading] = useState<boolean>(false)
-    const [useControllerV2, setUseControllerV2] = useState<boolean>(true)
+    const [controllerVersion, setControllerVersion] = useState<"V1" | "V2" | "V3">("V2")
     const messageApi = useGlobalMessage()
     const { project } = useSelector((state: any) => state.user);
     const { setAnalysisId, analysisNodeId, formStatus, setFormStatus, analysisId } = useStoreRender()
@@ -103,7 +103,12 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
             //     is_submit: is_submit,
             //     analysis_node_id: analysisNodeId
             // })
-            const controllerPath = useControllerV2 ? `/analysis/controllerV2` : `/analysis/controller`
+            const controllerPathMap: Record<"V1" | "V2" | "V3", string> = {
+                V1: `/analysis/controller`,
+                V2: `/analysis/controllerV2`,
+                V3: `/analysis/controllerV3`,
+            }
+            const controllerPath = controllerPathMap[controllerVersion]
             const resp = await http.post(controllerPath, {
                 request_param: requestParams,
                 save: save,
@@ -438,12 +443,16 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                             })
 
                         }}> debug Parameters</Button>
-                    <Switch
+                    <Select
                         size="small"
-                        checked={useControllerV2}
-                        onChange={setUseControllerV2}
-                        checkedChildren="V2"
-                        unCheckedChildren="V1"
+                        value={controllerVersion}
+                        onChange={setControllerVersion}
+                        style={{ minWidth: 80 }}
+                        options={[
+                            { value: "V1", label: "V1" },
+                            { value: "V2", label: "V2" },
+                            { value: "V3", label: "V3" },
+                        ]}
                     />
                     {/* <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid" onClick={() => {
                         saveUpstreamAnalysisOld(false)
