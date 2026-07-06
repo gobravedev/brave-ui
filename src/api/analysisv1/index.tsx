@@ -1,4 +1,5 @@
 import axios from "axios"
+import { http } from "@/api/client/http";
 
 export const findAnalysisById = async (id: string) => {
     const res = await axios.get(`/find-analysis-by-id/${id}`)
@@ -24,5 +25,10 @@ export const stopAnalysisNodeApi = async (analysis_id   : string,run_type:string
 }
 export const monitorAnalysisApi = async (analysisId: string, type: string) => {
     const resp = await axios.get(`/monitor-analysis/${analysisId}?type=${type}`)
+    return resp
+}
+
+export const getVisualizationNodeTreeV1Api = async (analysisId: string) => {
+    const resp = await http.get(`/analysis/visualization-node-tree/${encodeURIComponent(analysisId)}`)
     return resp
 }

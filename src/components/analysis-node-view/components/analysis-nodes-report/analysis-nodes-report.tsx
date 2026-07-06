@@ -1,11 +1,11 @@
 import { Button, Card, Col, Empty, Flex, Menu, Row, Skeleton, Space, Tooltip, Typography } from "antd";
-import axios from "axios"
 import { FC, useEffect, useMemo, useState } from "react";
 import { RedoOutlined } from '@ant-design/icons'
 import { useStoreRender } from "@/context/render/RenderProvider";
 import AnalysisNodeDetails from "./analysis-node-details";
 import ViewResolver from "@/core/ui-renderer/ViewResolver";
 import { useComponentStore } from "@/store-zustand/components";
+import { getVisualizationNodeTreeV1Api } from "@/api/analysisv1";
 
 type NodeResultAsset = {
     images?: any[];
@@ -207,7 +207,7 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
         }
         setLoading(true)
         try {
-            const res = await axios.get(`/analysis/visualization-node-tree/${analysis_id}`)
+            const res = await getVisualizationNodeTreeV1Api(analysis_id)
 
             const nextData = Array.isArray(res.data?.result) ? res.data.result : [];
             setData(nextData)
@@ -230,10 +230,15 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
     const instance = useMemo(() => {
         // const analysis_node_id = selectedSample?.analysis_node_id
         return {
-            dagStarted: (args: any) => {
-                console.log("AnalysisNodeSnapshot dagStarted", args, data)
+            analysisSubmitted: (args: any) => {
+                console.log("AnalysisNodeSnapshot analysisStarted", args, data)
                 loadData()
-            },reload: () => {
+            },
+            // dagStarted: (args: any) => {
+            //     console.log("AnalysisNodeSnapshot dagStarted", args, data)
+            //     loadData()
+            // },
+            reload: () => {
                 loadData()
             }
         }
