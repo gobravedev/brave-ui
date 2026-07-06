@@ -14,6 +14,7 @@ type NodeResultAsset = {
 };
 
 type AnalysisNodeSample = {
+    id: string;
     analysis_node_id: string;
     analysis_id: string;
     node_id: string;
@@ -101,11 +102,11 @@ const buildReportTreeData = (groups: AnalysisNodeGroup[]): ReportTreeNode[] => {
             tables: assets.tables,
             htmls: assets.htmls,
             children: samples.map((sample) => ({
-                key: makeSampleKey(sample.analysis_node_id),
+                key: makeSampleKey(String(sample.id)),
                 title: sample.node_name || sample.analysis_node_id,
                 nodeType: "sample",
                 scriptId: item.script_id,
-                sampleId: sample.analysis_node_id,
+                sampleId: String(sample.id),
                 status: sample.status,
                 images: sample.result?.images?.length || 0,
                 tables: sample.result?.tables?.length || 0,
@@ -280,7 +281,7 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
         if (!selectedNodeSamples.length) {
             return null;
         }
-        return selectedNodeSamples.find((item) => item.analysis_node_id === selectedSampleId) || selectedNodeSamples[0];
+        return selectedNodeSamples.find((item) => String(item.id) === selectedSampleId) || selectedNodeSamples[0];
     }, [selectedNodeSamples, selectedSampleId]);
 
     useEffect(() => {
@@ -295,11 +296,11 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
 
     useEffect(() => {
         if (!selectedSample && selectedNodeSamples.length) {
-            setSelectedSampleId(selectedNodeSamples[0].analysis_node_id);
+            setSelectedSampleId(String(selectedNodeSamples[0].id));
             return;
         }
-        if (selectedSample && selectedSample.analysis_node_id !== selectedSampleId) {
-            setSelectedSampleId(selectedSample.analysis_node_id);
+        if (selectedSample && String(selectedSample.id) !== selectedSampleId) {
+            setSelectedSampleId(String(selectedSample.id));
         }
     }, [selectedNodeSamples, selectedSample, selectedSampleId]);
 
@@ -314,8 +315,8 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
         }
     }, [selectedNodeId, reportTreeData]);
 
-    const selectedTreeKey = selectedSample?.analysis_node_id
-        ? makeSampleKey(selectedSample.analysis_node_id)
+    const selectedTreeKey = selectedSample?.id
+        ? makeSampleKey(String(selectedSample.id))
         : selectedNode?.script_id
             ? makeNodeKey(selectedNode.script_id)
             : undefined;
@@ -384,7 +385,7 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
                 </Col>
 
                 <Col xs={24} lg={16} xl={17}>
-                    <AnalysisNodeDetails analysis_node_id={selectedSample?.analysis_node_id} />
+                    <AnalysisNodeDetails analysis_node_id={selectedSample?.id ? String(selectedSample.id) : undefined} />
                 </Col>
             </Row>}
 
