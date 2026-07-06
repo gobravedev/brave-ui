@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Button, Card, Empty, Flex, Pagination, Popconfirm, Space, Table, Tag, Tooltip, Typography, message } from "antd";
+import { Button, Card, Empty, Flex, Pagination, Popconfirm, Space, Switch, Table, Tag, Tooltip, Typography, message } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { ReloadOutlined } from "@ant-design/icons";
 import { useAppSessionPageQuery } from "@/hooks/usePaginationV2";
@@ -152,7 +152,7 @@ const columns: ColumnsType<AppSessionItem> = [
 
 const AppSessionPage = ({
   id,
-  project_id,
+  project_id: projectIdProp,
   analysis_node_id,
   analysis_node_name,
   container_template_id,
@@ -169,11 +169,13 @@ const AppSessionPage = ({
   const [selectedId, setSelectedID] = useState<string>();
   const [pendingAction, setPendingAction] = useState<string>("");
   const [creatingFromAnalysisNode, setCreatingFromAnalysisNode] = useState(false);
+  const [onlyCurrentProject, setOnlyCurrentProject] = useState(true);
   const [messageApi, contextHolder] = message.useMessage();
   const selectable = Boolean(onOk || onCancel);
   const activeViewMode = normalizeViewMode(view_mode);
   const isCardMode = activeViewMode === "card";
-  const { containerURL } = useSelector((state: any) => state.user);
+  const { containerURL, project: currentProjectID } = useSelector((state: any) => state.user);
+  const resolvedProjectID = normalizeText(projectIdProp) || normalizeText(currentProjectID);
 
   const {
     data,
@@ -200,14 +202,24 @@ const AppSessionPage = ({
   useEffect(() => {
     setQuery({
       id: normalizeText(id),
-      project_id: normalizeText(project_id),
+      project_id: onlyCurrentProject ? resolvedProjectID : undefined,
       analysis_node_id: normalizeText(analysis_node_id),
       container_template_id: normalizeText(container_template_id),
       name: normalizeText(name),
       status: normalizeText(status),
       workspace_path: normalizeText(workspace_path),
     });
-  }, [id, project_id, analysis_node_id, container_template_id, name, status, workspace_path, setQuery]);
+  }, [
+    id,
+    onlyCurrentProject,
+    resolvedProjectID,
+    analysis_node_id,
+    container_template_id,
+    name,
+    status,
+    workspace_path,
+    setQuery,
+  ]);
 
   const selectedItem = useMemo(() => data.find((item) => item.id === selectedId), [data, selectedId]);
 
@@ -374,6 +386,18 @@ const AppSessionPage = ({
               Create from Analysis Node
             </Button>
           )}
+          <Space size={6}>
+            <Text type="secondary">Only current project</Text>
+            <Switch
+              size="small"
+              checked={onlyCurrentProject}
+              onChange={(checked) => {
+                setOnlyCurrentProject(checked);
+                setPage(1);
+              }}
+              disabled={!resolvedProjectID}
+            />
+          </Space>
           <Text type="secondary">Total: {total}</Text>
           <Button icon={<ReloadOutlined />} onClick={() => refetch()} loading={isFetching}>
             Refresh
