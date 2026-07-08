@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert, Button, Card, Flex, Space, Table, Typography } from "antd";
+import { Alert, Button, Card, Flex, Space, Table, Tooltip, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { ReloadOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux";
@@ -105,7 +105,7 @@ const columns: ColumnsType<DatasetFileItem> = [
     dataIndex: "path",
     key: "path",
     ellipsis: true,
-    render: (value: string) => value || "-",
+    render: (value: string) => <Tooltip placement="left" title={value || "-"} >{value || "-"}</Tooltip>,
   },
   {
     title: "Created At",

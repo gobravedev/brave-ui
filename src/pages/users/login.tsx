@@ -1,7 +1,7 @@
 import { FC, useMemo, useState } from "react";
 import { Button, Card, ConfigProvider, Divider, Form, Input, Select, Space, Tag, Typography, theme as antdTheme } from "antd";
 import { LockOutlined, MailOutlined, MoonOutlined, SunOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import axios from "axios";
@@ -18,6 +18,7 @@ type LoginFormValues = {
 const Login: FC = () => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
+	const [searchParams] = useSearchParams();
 	const { locale, changeLanguage, t } = useI18n();
 	const { theme } = useSelector((state: any) => state.user);
 	const [form] = Form.useForm<LoginFormValues>();
@@ -77,7 +78,15 @@ const Login: FC = () => {
 			axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
 
 			message.success(data.message || "Login successful");
-			navigate("/");
+			
+			// 获取redirect参数，如果存在则跳转到对应页面，否则跳转到首页
+			const redirectUrl = searchParams.get("redirect");
+			if (redirectUrl) {
+				// navigate(redirectUrl);
+				window.location.href = redirectUrl; // 使用window.location.href进行跳转
+			} else {
+				navigate("/");
+			}
 		} catch (error: any) {
 			const serverMessage = error?.response?.data?.message || error?.response?.data?.detail;
 			message.error(serverMessage || "Login failed, please check email and password.");
