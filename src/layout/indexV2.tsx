@@ -32,6 +32,7 @@ import ViewResolver from '@/core/ui-renderer/ViewResolver';
 import { useComponentStore } from '@/store-zustand/components';
 import { useUI } from '@/core/ui-system/useUI';
 import { logoutApi } from '@/api/auth';
+import { getSettingApi } from '@/api/setting';
 
 const { Content, Sider } = Layout;
 
@@ -179,7 +180,7 @@ const App: React.FC = () => {
     }
 
     const getSetting = async () => {
-        const resp: any = await axios.get("/setting/get-setting")
+        const resp = await getSettingApi()
         console.log(resp.data)
         dispatch(setSetting(resp.data))
     }
