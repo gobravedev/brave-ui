@@ -114,6 +114,14 @@ const columns: ColumnsType<AppSessionItem> = [
     render: (value: string) => value || "-",
   },
   {
+    title: "Node Name",
+    dataIndex: "node_name",
+    key: "node_name",
+    width: 180,
+    ellipsis: true,
+    render: (value?: string) => value?.trim() || "-",
+  },
+  {
     title: "Template ID",
     dataIndex: "container_template_id",
     key: "container_template_id",
@@ -449,6 +457,11 @@ const AppSessionPage = ({
                       <Text type="secondary" ellipsis={{ tooltip: record.project_id || "-" }}>
                         Project: {record.project_id || "-"}
                       </Text>
+                      {normalizeText(record.node_name) && (
+                        <Text type="secondary" ellipsis={{ tooltip: record.node_name || "-" }}>
+                          Node: {record.node_name}
+                        </Text>
+                      )}
                       <Text type="secondary" ellipsis={{ tooltip: record.container_template_id || "-" }}>
                         Template: {record.container_template_id || "-"}
                       </Text>

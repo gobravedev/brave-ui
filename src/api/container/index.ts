@@ -40,6 +40,7 @@ export interface AppSessionItem {
     user_id: string;
     project_id: string;
     analysis_node_id: string;
+    node_name: string;
     container_template_id: string;
     name: string;
     app_type: string;
