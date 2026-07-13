@@ -160,9 +160,9 @@ const Project: FC<any> = () => {
             }}
             variant="borderless" size="small" extra={
                 <Flex gap={"small"}>
-                    <Button size="small" onClick={()=>{
+                    {/* <Button size="small" onClick={()=>{
                         window.open(`${getPathname()}/docs/${project}/`,"_blank")
-                    }}>docs</Button>
+                    }}>docs</Button> */}
                     {reportList.length > 0 && <Space>
                         {renderViewButton(view, setView, "analysisDocView", "View")}
                         {renderViewButton(view, setView, "analysisDocEditor", "Edit")}

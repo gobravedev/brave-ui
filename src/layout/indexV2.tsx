@@ -33,6 +33,7 @@ import { useComponentStore } from '@/store-zustand/components';
 import { useUI } from '@/core/ui-system/useUI';
 import { logoutApi } from '@/api/auth';
 import { getSettingApi } from '@/api/setting';
+import { getPathname } from '@/utils/utils';
 
 const { Content, Sider } = Layout;
 
@@ -934,6 +935,9 @@ const App: React.FC = () => {
                     marginLeft: 'auto',
                     width: isMobileLayout ? 'calc(100vw - 156px)' : 'auto'
                 }}>
+                    <Button size="small" onClick={() => {
+                        window.open(`${getPathname()}/docs/${project_id}/`, "_blank")
+                    }}>docs</Button>
                     {projectObj?.project_name && <Tooltip title={`Current Project: ${projectObj.project_id}`} placement="bottom">
                         <Tag onClick={async () => {
                             try {
@@ -1132,7 +1136,7 @@ const App: React.FC = () => {
                                             options={sideOptions} />
                                     }>
 
-                                    <ViewResolver view={sideView}   view_mode={"card"}></ViewResolver>
+                                    <ViewResolver view={sideView} view_mode={"card"}></ViewResolver>
 
                                 </Card>
 
