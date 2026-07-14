@@ -1,637 +1,484 @@
-// // import { FC } from "react"
-// // import { List } from "react-window";
-// // function Example({ names }: { names: string[] }) {
-// //   return (
-// //     <List
-// //       rowComponent={RowComponent}
-// //       rowCount={names.length}
-// //       rowHeight={25}
-// //       rowProps={{ names }}
-// //     />
-// //   );
-// // }
+import { useEffect, useState } from "react";
+import { Button, Card, Input, Space, Typography } from "antd";
+import { sseClient } from "@/sse";
 
-// // import { type RowComponentProps } from "react-window";
-// // function RowComponent({
-// //   index,
-// //   names,
-// //   style
-// // }: RowComponentProps<{
-// //   names: string[];
-// // }>) {
-// //   return (
-// //     <div className="flex items-center justify-between" style={style}>
-// //       {/* {names[index]} */}
-// //       <div className="text-slate-500 text-xs">{`${index + 1} of ${names.length}`}</div>
-// //     </div>
-// //   );
-// // }
-// // const App: FC<any> = () => {
+type WSIncomingEvent = {
+  event: string;
+  data: unknown;
+};
 
-// //   return <div style={{height: '400px'}}>
-// //     <Example names={Array.from({ length: 1000 }, (_, i) => `Item ${i + 1}`)} />
-// //   </div>
-// // }
+type TimelineItem = {
+  id: number;
+  time: string;
+  event: string;
+  raw: string;
+};
 
-// // export default App
+type CommandItem = {
+  id: number;
+  time: string;
+  event: string;
+  command: string;
+};
 
+type PatchItem = {
+  id: number;
+  time: string;
+  event: string;
+  content: string;
+};
 
+type PermissionRequestItem = {
+  id: number;
+  time: string;
+  sessionId: string;
+  requestId: string;
+  kind: string;
+  raw: string;
+};
 
-
-// import {
-//   AppstoreAddOutlined,
-//   CloseOutlined,
-//   CloudUploadOutlined,
-//   CommentOutlined,
-//   CopyOutlined,
-//   DislikeOutlined,
-//   LikeOutlined,
-//   OpenAIFilled,
-//   PaperClipOutlined,
-//   PlusOutlined,
-//   ProductOutlined,
-//   ReloadOutlined,
-//   ScheduleOutlined,
-// } from '@ant-design/icons';
-// import {
-//   Attachments,
-//   type AttachmentsProps,
-//   Bubble,
-//   Conversations,
-//   Prompts,
-//   Sender,
-//   Suggestion,
-//   Welcome,
-//   useXAgent,
-//   useXChat,
-// } from '@ant-design/x';
-// import type { Conversation } from '@ant-design/x/es/conversations';
-// import { Button, GetProp, GetRef, Image, Popover, Space, Spin, message } from 'antd';
-// import { createStyles } from 'antd-style';
-// import dayjs from 'dayjs';
-// import React, { useEffect, useRef, useState } from 'react';
-
-// type BubbleDataType = {
-//   role: string;
-//   content: string;
-// };
-
-// const MOCK_SESSION_LIST = [
-//   {
-//     key: '5',
-//     label: 'New session',
-//     group: 'Today',
-//   },
-//   {
-//     key: '4',
-//     label: 'What has Ant Design X upgraded?',
-//     group: 'Today',
-//   },
-//   {
-//     key: '3',
-//     label: 'New AGI Hybrid Interface',
-//     group: 'Today',
-//   },
-//   {
-//     key: '2',
-//     label: 'How to quickly install and import components?',
-//     group: 'Yesterday',
-//   },
-//   {
-//     key: '1',
-//     label: 'What is Ant Design X?',
-//     group: 'Yesterday',
-//   },
-// ];
-// const MOCK_SUGGESTIONS = [
-//   { label: 'Write a report', value: 'report' },
-//   { label: 'Draw a picture', value: 'draw' },
-//   {
-//     label: 'Check some knowledge',
-//     value: 'knowledge',
-//     icon: <OpenAIFilled />,
-//     children: [
-//       { label: 'About React', value: 'react' },
-//       { label: 'About Ant Design', value: 'antd' },
-//     ],
-//   },
-// ];
-// const MOCK_QUESTIONS = [
-//   'What has Ant Design X upgraded?',
-//   'What components are in Ant Design X?',
-//   'How to quickly install and import components?',
-// ];
-// const AGENT_PLACEHOLDER = 'Generating content, please wait...';
-
-// const useCopilotStyle = createStyles(({ token, css }) => {
-//   return {
-//     copilotChat: css`
-//       display: flex;
-//       flex-direction: column;
-//       background: ${token.colorBgContainer};
-//       color: ${token.colorText};
-//     `,
-//     // chatHeader 样式
-//     chatHeader: css`
-//       height: 52px;
-//       box-sizing: border-box;
-//       border-bottom: 1px solid ${token.colorBorder};
-//       display: flex;
-//       align-items: center;
-//       justify-content: space-between;
-//       padding: 0 10px 0 16px;
-//     `,
-//     headerTitle: css`
-//       font-weight: 600;
-//       font-size: 15px;
-//     `,
-//     headerButton: css`
-//       font-size: 18px;
-//     `,
-//     conversations: css`
-//       width: 300px;
-//       .ant-conversations-list {
-//         padding-inline-start: 0;
-//       }
-//     `,
-//     // chatList 样式
-//     chatList: css`
-//       overflow: auto;
-//       padding-block: 16px;
-//       flex: 1;
-//     `,
-//     chatWelcome: css`
-//       margin-inline: 16px;
-//       padding: 12px 16px;
-//       border-radius: 2px 12px 12px 12px;
-//       background: ${token.colorBgTextHover};
-//       margin-bottom: 16px;
-//     `,
-//     loadingMessage: css`
-//       background-image: linear-gradient(90deg, #ff6b23 0%, #af3cb8 31%, #53b6ff 89%);
-//       background-size: 100% 2px;
-//       background-repeat: no-repeat;
-//       background-position: bottom;
-//     `,
-//     // chatSend 样式
-//     chatSend: css`
-//       padding: 12px;
-//     `,
-//     sendAction: css`
-//       display: flex;
-//       align-items: center;
-//       margin-bottom: 12px;
-//       gap: 8px;
-//     `,
-//     speechButton: css`
-//       font-size: 18px;
-//       color: ${token.colorText} !important;
-//     `,
-//   };
-// });
-
-// interface CopilotProps {
-//   copilotOpen: boolean;
-//   setCopilotOpen: (open: boolean) => void;
-// }
-
-// export const Copilot = (props: CopilotProps) => {
-//   const { copilotOpen, setCopilotOpen } = props;
-//   const { styles } = useCopilotStyle();
-//   const attachmentsRef = useRef<GetRef<typeof Attachments>>(null);
-//   const abortController = useRef<AbortController>(null);
-
-//   // ==================== State ====================
-
-//   const [messageHistory, setMessageHistory] = useState<Record<string, any>>({});
-
-//   const [sessionList, setSessionList] = useState<Conversation[]>(MOCK_SESSION_LIST);
-//   const [curSession, setCurSession] = useState(sessionList[0].key);
-
-//   const [attachmentsOpen, setAttachmentsOpen] = useState(false);
-//   const [files, setFiles] = useState<GetProp<AttachmentsProps, 'items'>>([]);
-
-//   const [inputValue, setInputValue] = useState('');
-
-//   /**
-//    * 🔔 Please replace the BASE_URL, PATH, MODEL, API_KEY with your own values.
-//    */
-
-//   // ==================== Runtime ====================
-
-//   const [agent] = useXAgent<BubbleDataType>({
-//     baseURL: 'https://api.x.ant.design/api/llm_siliconflow_deepSeek-r1-distill-1wen-7b',
-//     model: 'DeepSeek-R1-Distill-Qwen-7B',
-//     dangerouslyApiKey: 'Bearer sk-xxxxxxxxxxxxxxxxxxxx',
-//   });
-
-//   const loading = agent.isRequesting();
-
-//   const { messages, onRequest, setMessages } = useXChat({
-//     agent,
-//     requestFallback: (_, { error }) => {
-//       if (error.name === 'AbortError') {
-//         return {
-//           content: 'Request is aborted',
-//           role: 'assistant',
-//         };
-//       }
-//       return {
-//         content: 'Request failed, please try again!',
-//         role: 'assistant',
-//       };
-//     },
-//     transformMessage: (info) => {
-//       const { originMessage, chunk } = info || {};
-//       let currentContent = '';
-//       let currentThink = '';
-//       try {
-//         if (chunk?.data && !chunk?.data.includes('DONE')) {
-//           const message = JSON.parse(chunk?.data);
-//           currentThink = message?.choices?.[0]?.delta?.reasoning_content || '';
-//           currentContent = message?.choices?.[0]?.delta?.content || '';
-//         }
-//       } catch (error) {
-//         console.error(error);
-//       }
-
-//       let content = '';
-
-//       if (!originMessage?.content && currentThink) {
-//         content = `<think>${currentThink}`;
-//       } else if (
-//         originMessage?.content?.includes('<think>') &&
-//         !originMessage?.content.includes('</think>') &&
-//         currentContent
-//       ) {
-//         content = `${originMessage?.content}</think>${currentContent}`;
-//       } else {
-//         content = `${originMessage?.content || ''}${currentThink}${currentContent}`;
-//       }
-
-//       return {
-//         content: content,
-//         role: 'assistant',
-//       };
-//     },
-//     resolveAbortController: (controller) => {
-//       abortController.current = controller;
-//     },
-//   });
-
-//   // ==================== Event ====================
-//   const handleUserSubmit = (val: string) => {
-//     onRequest({
-//       stream: true,
-//       message: { content: val, role: 'user' },
-//     });
-
-//     // session title mock
-//     if (sessionList.find((i) => i.key === curSession)?.label === 'New session') {
-//       setSessionList(
-//         sessionList.map((i) => (i.key !== curSession ? i : { ...i, label: val?.slice(0, 20) })),
-//       );
-//     }
-//   };
-
-//   const onPasteFile = (_: File, files: FileList) => {
-//     for (const file of files) {
-//       attachmentsRef.current?.upload(file);
-//     }
-//     setAttachmentsOpen(true);
-//   };
-
-//   // ==================== Nodes ====================
-//   const chatHeader = (
-//     <div className={styles.chatHeader}>
-//       <div className={styles.headerTitle}>✨ AI Copilot</div>
-//       <Space size={0}>
-//         <Button
-//           type="text"
-//           icon={<PlusOutlined />}
-//           onClick={() => {
-//             if (agent.isRequesting()) {
-//               message.error(
-//                 'Message is Requesting, you can create a new conversation after request done or abort it right now...',
-//               );
-//               return;
-//             }
-
-//             if (messages?.length) {
-//               const timeNow = dayjs().valueOf().toString();
-//               abortController.current?.abort();
-//               // The abort execution will trigger an asynchronous requestFallback, which may lead to timing issues.
-//               // In future versions, the sessionId capability will be added to resolve this problem.
-//               setTimeout(() => {
-//                 setSessionList([
-//                   { key: timeNow, label: 'New session', group: 'Today' },
-//                   ...sessionList,
-//                 ]);
-//                 setCurSession(timeNow);
-//                 setMessages([]);
-//               }, 100);
-//             } else {
-//               message.error('It is now a new conversation.');
-//             }
-//           }}
-//           className={styles.headerButton}
-//         />
-//         <Popover
-//           placement="bottom"
-//           styles={{ body: { padding: 0, maxHeight: 600 } }}
-//           content={
-//             <Conversations
-//               items={sessionList?.map((i) =>
-//                 i.key === curSession ? { ...i, label: `[current] ${i.label}` } : i,
-//               )}
-//               activeKey={curSession}
-//               groupable
-//               onActiveChange={async (val) => {
-//                 abortController.current?.abort();
-//                 // The abort execution will trigger an asynchronous requestFallback, which may lead to timing issues.
-//                 // In future versions, the sessionId capability will be added to resolve this problem.
-//                 setTimeout(() => {
-//                   setCurSession(val);
-//                   setMessages(messageHistory?.[val] || []);
-//                 }, 100);
-//               }}
-//               styles={{ item: { padding: '0 8px' } }}
-//               className={styles.conversations}
-//             />
-//           }
-//         >
-//           <Button type="text" icon={<CommentOutlined />} className={styles.headerButton} />
-//         </Popover>
-//         <Button
-//           type="text"
-//           icon={<CloseOutlined />}
-//           onClick={() => setCopilotOpen(false)}
-//           className={styles.headerButton}
-//         />
-//       </Space>
-//     </div>
-//   );
-//   const chatList = (
-//     <div className={styles.chatList}>
-//       {messages?.length ? (
-//         /** 消息列表 */
-//         <Bubble.List
-//           style={{ height: '100%', paddingInline: 16 }}
-//           items={messages?.map((i) => ({
-//             ...i.message,
-//             classNames: {
-//               content: i.status === 'loading' ? styles.loadingMessage : '',
-//             },
-//             typing: i.status === 'loading' ? { step: 5, interval: 20, suffix: <>💗</> } : false,
-//           }))}
-//           roles={{
-//             assistant: {
-//               placement: 'start',
-//               footer: (
-//                 <div style={{ display: 'flex' }}>
-//                   <Button type="text" size="small" icon={<ReloadOutlined />} />
-//                   <Button type="text" size="small" icon={<CopyOutlined />} />
-//                   <Button type="text" size="small" icon={<LikeOutlined />} />
-//                   <Button type="text" size="small" icon={<DislikeOutlined />} />
-//                 </div>
-//               ),
-//               loadingRender: () => (
-//                 <Space>
-//                   <Spin size="small" />
-//                   {AGENT_PLACEHOLDER}
-//                 </Space>
-//               ),
-//             },
-//             user: { placement: 'end' },
-//           }}
-//         />
-//       ) : (
-//         /** 没有消息时的 welcome */
-//         <>
-//           <Welcome
-//             variant="borderless"
-//             title="👋 Hello, I'm Ant Design X"
-//             description="Base on Ant Design, AGI product interface solution, create a better intelligent vision~"
-//             className={styles.chatWelcome}
-//           />
-
-//           <Prompts
-//             vertical
-//             title="I can help："
-//             items={MOCK_QUESTIONS.map((i) => ({ key: i, description: i }))}
-//             onItemClick={(info) => handleUserSubmit(info?.data?.description as string)}
-//             style={{
-//               marginInline: 16,
-//             }}
-//             styles={{
-//               title: { fontSize: 14 },
-//             }}
-//           />
-//         </>
-//       )}
-//     </div>
-//   );
-//   const sendHeader = (
-//     <Sender.Header
-//       title="Upload File"
-//       styles={{ content: { padding: 0 } }}
-//       open={attachmentsOpen}
-//       onOpenChange={setAttachmentsOpen}
-//       forceRender
-//     >
-//       <Attachments
-//         ref={attachmentsRef}
-//         beforeUpload={() => false}
-//         items={files}
-//         onChange={({ fileList }) => setFiles(fileList)}
-//         placeholder={(type) =>
-//           type === 'drop'
-//             ? { title: 'Drop file here' }
-//             : {
-//                 icon: <CloudUploadOutlined />,
-//                 title: 'Upload files',
-//                 description: 'Click or drag files to this area to upload',
-//               }
-//         }
-//       />
-//     </Sender.Header>
-//   );
-//   const chatSender = (
-//     <div className={styles.chatSend}>
-//       <div className={styles.sendAction}>
-//         <Button
-//           icon={<ScheduleOutlined />}
-//           onClick={() => handleUserSubmit('What has Ant Design X upgraded?')}
-//         >
-//           Upgrades
-//         </Button>
-//         <Button
-//           icon={<ProductOutlined />}
-//           onClick={() => handleUserSubmit('What component assets are available in Ant Design X?')}
-//         >
-//           Components
-//         </Button>
-//         <Button icon={<AppstoreAddOutlined />}>More</Button>
-//       </div>
-
-//       {/** 输入框 */}
-//       <Suggestion items={MOCK_SUGGESTIONS} onSelect={(itemVal) => setInputValue(`[${itemVal}]:`)}>
-//         {({ onTrigger, onKeyDown }) => (
-//           <Sender
-//             loading={loading}
-//             value={inputValue}
-//             onChange={(v) => {
-//               onTrigger(v === '/');
-//               setInputValue(v);
-//             }}
-//             onSubmit={() => {
-//               handleUserSubmit(inputValue);
-//               setInputValue('');
-//             }}
-//             onCancel={() => {
-//               abortController.current?.abort();
-//             }}
-//             allowSpeech
-//             placeholder="Ask or input / use skills"
-//             onKeyDown={onKeyDown}
-//             header={sendHeader}
-//             prefix={
-//               <Button
-//                 type="text"
-//                 icon={<PaperClipOutlined style={{ fontSize: 18 }} />}
-//                 onClick={() => setAttachmentsOpen(!attachmentsOpen)}
-//               />
-//             }
-//             onPasteFile={onPasteFile}
-//             actions={(_, info) => {
-//               const { SendButton, LoadingButton, SpeechButton } = info.components;
-//               return (
-//                 <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-//                   <SpeechButton className={styles.speechButton} />
-//                   {loading ? <LoadingButton type="default" /> : <SendButton type="primary" />}
-//                 </div>
-//               );
-//             }}
-//           />
-//         )}
-//       </Suggestion>
-//     </div>
-//   );
-
-//   useEffect(() => {
-//     // history mock
-//     if (messages?.length) {
-//       setMessageHistory((prev) => ({
-//         ...prev,
-//         [curSession]: messages,
-//       }));
-//     }
-//   }, [messages]);
-
-//   return (
-//     <div className={styles.copilotChat} style={{ width:"100%" }}>
-//       {/** 对话区 - header */}
-//       {/* {chatHeader} */}
-
-//       {/** 对话区 - 消息列表 */}
-//       {chatList}
-
-//       {/** 对话区 - 输入框 */}
-//       {chatSender}
-//     </div>
-//   );
-// };
-
-// const useWorkareaStyle = createStyles(({ token, css }) => {
-//   return {
-//     copilotWrapper: css`
-//       min-width: 1000px;
-//       height: 100vh;
-//       display: flex;
-//     `,
-//     workarea: css`
-//       flex: 1;
-//       background: ${token.colorBgLayout};
-//       display: flex;
-//       flex-direction: column;
-//     `,
-//     workareaHeader: css`
-//       box-sizing: border-box;
-//       height: 52px;
-//       display: flex;
-//       align-items: center;
-//       justify-content: space-between;
-//       padding: 0 48px 0 28px;
-//       border-bottom: 1px solid ${token.colorBorder};
-//     `,
-//     headerTitle: css`
-//       font-weight: 600;
-//       font-size: 15px;
-//       color: ${token.colorText};
-//       display: flex;
-//       align-items: center;
-//       gap: 8px;
-//     `,
-//     headerButton: css`
-//       background-image: linear-gradient(78deg, #8054f2 7%, #3895da 95%);
-//       border-radius: 12px;
-//       height: 24px;
-//       width: 93px;
-//       display: flex;
-//       align-items: center;
-//       justify-content: center;
-//       color: #fff;
-//       cursor: pointer;
-//       font-size: 12px;
-//       font-weight: 600;
-//       transition: all 0.3s;
-//       &:hover {
-//         opacity: 0.8;
-//       }
-//     `,
-//     workareaBody: css`
-//       flex: 1;
-//       padding: 16px;
-//       background: ${token.colorBgContainer};
-//       border-radius: 16px;
-//       min-height: 0;
-//     `,
-//     bodyContent: css`
-//       overflow: auto;
-//       height: 100%;
-//       padding-right: 10px;
-//     `,
-//     bodyText: css`
-//       color: ${token.colorText};
-//       padding: 8px;
-//     `,
-//   };
-// });
-
-// const CopilotDemo = () => {
-//   const { styles: workareaStyles } = useWorkareaStyle();
-
-//   // ==================== State =================
-//   const [copilotOpen, setCopilotOpen] = useState(true);
-
-//   // ==================== Render =================
-//   return (
-//     <div style={{
-//       height: "100vh",
-//       display: "flex"
-//     }}>
-
-
-//       {/** 右侧对话区 */}
-//       <Copilot copilotOpen={copilotOpen} setCopilotOpen={setCopilotOpen} />
-//     </div>
-//   );
-// };
-
-// export default CopilotDemo;
-
-
-const Test=()=>{
-  return <></>
+function toPrettyJSON(input: unknown): string {
+  try {
+    if (typeof input === "string") {
+      return JSON.stringify(JSON.parse(input), null, 2);
+    }
+    return JSON.stringify(input, null, 2);
+  } catch {
+    return String(input ?? "");
+  }
 }
-export default Test
+
+function extractCommandText(payload: unknown): string {
+  if (payload && typeof payload === "object") {
+    const obj = payload as Record<string, unknown>;
+    const direct = [obj.command, obj.cmd, obj.shellCommand, obj.input].find(
+      (v) => typeof v === "string" && v.trim() !== ""
+    ) as string | undefined;
+    if (direct) {
+      return direct;
+    }
+  }
+
+  const text = toPrettyJSON(payload);
+  const hit = text.match(/"command"\s*:\s*"([^"]+)"/i);
+  return hit?.[1] || "";
+}
+
+function maybePatchContent(event: string, payload: unknown): string {
+  const raw = toPrettyJSON(payload);
+  if (/patch|diff/i.test(event)) {
+    return raw;
+  }
+  if (/"(patch|diff|workspaceEdit|edits|newText|textEdits)"/i.test(raw)) {
+    return raw;
+  }
+  return "";
+}
+
+function toIncomingEvent(raw: unknown): WSIncomingEvent {
+  if (raw && typeof raw === "object") {
+    const obj = raw as Record<string, unknown>;
+    if (typeof obj.event === "string") {
+      return {
+        event: obj.event,
+        data: obj.data,
+      };
+    }
+  }
+
+  return {
+    event: "message",
+    data: raw,
+  };
+}
+
+const Test = () => {
+  const [prompt, setPrompt] = useState("用一句话介绍当前项目");
+  const [sessionId, setSessionId] = useState("");
+  const [streaming, setStreaming] = useState(false);
+  const [deltaText, setDeltaText] = useState("");
+  const [lastEvent, setLastEvent] = useState("");
+  const [errorText, setErrorText] = useState("");
+  const [timeline, setTimeline] = useState<TimelineItem[]>([]);
+  const [commands, setCommands] = useState<CommandItem[]>([]);
+  const [patches, setPatches] = useState<PatchItem[]>([]);
+  const [permissionRequests, setPermissionRequests] = useState<PermissionRequestItem[]>([]);
+  const [rawJson, setRawJson] = useState("");
+
+  useEffect(() => {
+    const unsubscribe = sseClient.onMessage((data: unknown) => {
+      if (!data || typeof data !== "object") {
+        return;
+      }
+
+      const msg = data as Record<string, unknown>;
+      if (msg.type !== "llm.event") {
+        return;
+      }
+
+      const incomingSessionId =
+        typeof msg.session_id === "string" ? msg.session_id : "";
+      if (!incomingSessionId) {
+        return;
+      }
+
+      setSessionId((current) => {
+        if (current && current !== incomingSessionId) {
+          return current;
+        }
+        return incomingSessionId;
+      });
+
+      const currentSessionId = sessionId;
+      if (currentSessionId && incomingSessionId !== currentSessionId) {
+        return;
+      }
+
+      const evtName = typeof msg.event === "string" ? msg.event : "message";
+      handleEvent(toIncomingEvent({ event: evtName, data: msg.data }));
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [sessionId]);
+
+  const handleEvent = (evt: WSIncomingEvent) => {
+    setLastEvent(evt.event);
+    const now = new Date().toLocaleTimeString();
+    const payload = evt.data;
+    const raw = toPrettyJSON(payload);
+    const id = Date.now() + Math.floor(Math.random() * 1000);
+
+    setTimeline((prev) => {
+      const next = [...prev, { id, time: now, event: evt.event, raw }];
+      return next.slice(-300);
+    });
+    setRawJson(raw);
+
+    const commandText = extractCommandText(payload);
+    if (/command/i.test(evt.event) || commandText) {
+      setCommands((prev) => {
+        const next = [
+          ...prev,
+          {
+            id,
+            time: now,
+            event: evt.event,
+            command: commandText || raw,
+          },
+        ];
+        return next.slice(-100);
+      });
+    }
+
+    const patchText = maybePatchContent(evt.event, payload);
+    if (patchText) {
+      setPatches((prev) => {
+        const next = [...prev, { id, time: now, event: evt.event, content: patchText }];
+        return next.slice(-50);
+      });
+    }
+
+    if (evt.event === "permission.request" && payload && typeof payload === "object") {
+      const request = payload as Record<string, unknown>;
+      const requiresWriteConfirm = Boolean(request.requires_write_confirm);
+      const requestId = typeof request.request_id === "string" ? request.request_id : "";
+      const kind = typeof request.kind === "string" ? request.kind : "unknown";
+      const incomingSessionId =
+        typeof request.session_id === "string"
+          ? request.session_id
+          : typeof request.copilot_session_id === "string"
+            ? request.copilot_session_id
+            : sessionId;
+
+      if (requiresWriteConfirm && requestId) {
+        setPermissionRequests((prev) => {
+          if (prev.some((item) => item.requestId === requestId)) {
+            return prev;
+          }
+          const next = [
+            ...prev,
+            {
+              id,
+              time: now,
+              sessionId: incomingSessionId,
+              requestId,
+              kind,
+              raw,
+            },
+          ];
+          return next.slice(-20);
+        });
+      }
+    }
+
+    if (evt.event === "permission.decision" && payload && typeof payload === "object") {
+      const request = payload as Record<string, unknown>;
+      const requestId = typeof request.request_id === "string" ? request.request_id : "";
+      if (requestId) {
+        setPermissionRequests((prev) => prev.filter((item) => item.requestId !== requestId));
+      }
+    }
+
+    if (payload && typeof payload === "object") {
+      const parsed = payload as Record<string, unknown>;
+      const deltaValue =
+        (typeof parsed.delta === "string" && parsed.delta) ||
+        (typeof parsed.delta_content === "string" && parsed.delta_content) ||
+        (typeof parsed.DeltaContent === "string" && parsed.DeltaContent) ||
+        "";
+
+      if ((evt.event === "delta" || evt.event === "assistant.message_delta") && deltaValue) {
+        setDeltaText((prev) => prev + deltaValue);
+      }
+
+      const contentValue =
+        (typeof parsed.content === "string" && parsed.content) ||
+        (typeof parsed.Content === "string" && parsed.Content) ||
+        "";
+      if ((evt.event === "message" || evt.event === "assistant.message") && contentValue && !deltaValue) {
+        setDeltaText(contentValue);
+      }
+
+      if (evt.event === "completed" && contentValue) {
+        setDeltaText(contentValue);
+      }
+      if (evt.event === "completed") {
+        setStreaming(false);
+      }
+
+      if (evt.event === "error") {
+        const detail =
+          (typeof parsed.detail === "string" && parsed.detail) ||
+          (typeof parsed.error === "string" && parsed.error) ||
+          raw;
+        setErrorText(detail);
+        setStreaming(false);
+      }
+    }
+  };
+
+  const submitPermissionDecision = (requestId: string, approved: boolean) => {
+    const pending = permissionRequests.find((item) => item.requestId === requestId);
+    if (!pending) {
+      return;
+    }
+
+    const ok = sseClient.send({
+      type: "llm.permission.decision",
+      session_id: pending.sessionId || sessionId,
+      request_id: requestId,
+      approved,
+      reason: approved ? "" : "rejected by user",
+      require_ack: false,
+    });
+
+    if (!ok) {
+      setErrorText("Realtime WS 未连接，无法提交确认");
+      return;
+    }
+
+    setPermissionRequests((prev) => prev.filter((item) => item.requestId !== requestId));
+  };
+
+  const startStream = async () => {
+    if (!prompt.trim() || streaming) {
+      return;
+    }
+
+    setStreaming(true);
+    setDeltaText("");
+    setErrorText("");
+    setLastEvent("connecting");
+    setTimeline([]);
+    setCommands([]);
+    setPatches([]);
+    setPermissionRequests([]);
+    setRawJson("");
+    const newSessionId =
+      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+    setSessionId(newSessionId);
+
+    try {
+      if (sseClient.getTransport() !== "websocket") {
+        throw new Error("当前 realtime transport 不是 websocket");
+      }
+      if (sseClient.getStatus() !== "open") {
+        throw new Error("realtime websocket 尚未连接，请稍后重试");
+      }
+
+      const sent = sseClient.send({
+        type: "llm.chat.start",
+        session_id: newSessionId,
+        prompt,
+        require_ack: false,
+      });
+      if (!sent) {
+        throw new Error("发送 llm.chat.start 失败");
+      }
+      setLastEvent("started");
+    } catch (error) {
+      setErrorText(error instanceof Error ? error.message : String(error));
+      setStreaming(false);
+    }
+  };
+
+  const stopStream = () => {
+    if (sessionId) {
+      sseClient.send({
+        type: "llm.chat.stop",
+        session_id: sessionId,
+        require_ack: false,
+      });
+    }
+    setStreaming(false);
+    setLastEvent("stopped");
+  };
+
+  return (
+    <div style={{ padding: 24, maxWidth: 1200 }}>
+      <Card title="LLM WebSocket Test" variant="outlined">
+        <Space direction="vertical" style={{ width: "100%" }} size={12}>
+          <Input.TextArea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            rows={4}
+            placeholder="输入 prompt"
+          />
+
+          <Space>
+            <Button type="primary" onClick={startStream} loading={streaming}>
+              Start WS Chat
+            </Button>
+            <Button onClick={stopStream} disabled={!streaming}>
+              Stop
+            </Button>
+            <Typography.Text type="secondary">last event: {lastEvent || "-"}</Typography.Text>
+          </Space>
+
+          <Card size="small" title="Streaming Output">
+            <Typography.Paragraph style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}>
+              {deltaText || "(empty)"}
+            </Typography.Paragraph>
+          </Card>
+
+          <Card
+            size="small"
+            title={`Timeline (${timeline.length})`}
+            extra={<Typography.Text type="secondary">latest 300</Typography.Text>}
+          >
+            <div style={{ maxHeight: 240, overflow: "auto", border: "1px solid #f0f0f0", padding: 8 }}>
+              {timeline.length === 0 ? (
+                <Typography.Text type="secondary">(empty)</Typography.Text>
+              ) : (
+                timeline.map((item) => (
+                  <div key={item.id} style={{ marginBottom: 8 }}>
+                    <Typography.Text strong>{item.time}</Typography.Text>
+                    <Typography.Text style={{ marginLeft: 8 }}>{item.event}</Typography.Text>
+                  </div>
+                ))
+              )}
+            </div>
+          </Card>
+
+          <Card
+            size="small"
+            title={`Write Confirmations (${permissionRequests.length})`}
+            extra={<Typography.Text type="secondary">need approve before file changes</Typography.Text>}
+          >
+            <div style={{ maxHeight: 240, overflow: "auto", border: "1px solid #f0f0f0", padding: 8 }}>
+              {permissionRequests.length === 0 ? (
+                <Typography.Text type="secondary">(empty)</Typography.Text>
+              ) : (
+                permissionRequests.map((item) => (
+                  <div key={item.id} style={{ marginBottom: 12, borderBottom: "1px dashed #f0f0f0", paddingBottom: 10 }}>
+                    <Typography.Text strong>{item.time}</Typography.Text>
+                    <Typography.Text style={{ marginLeft: 8 }}>kind: {item.kind}</Typography.Text>
+                    <Typography.Paragraph
+                      style={{ marginBottom: 8, marginTop: 4, whiteSpace: "pre-wrap", fontFamily: "monospace" }}
+                    >
+                      {item.raw}
+                    </Typography.Paragraph>
+                    <Space>
+                      <Button type="primary" size="small" onClick={() => submitPermissionDecision(item.requestId, true)}>
+                        Approve
+                      </Button>
+                      <Button danger size="small" onClick={() => submitPermissionDecision(item.requestId, false)}>
+                        Deny
+                      </Button>
+                    </Space>
+                  </div>
+                ))
+              )}
+            </div>
+          </Card>
+
+          <Card
+            size="small"
+            title={`Command Events (${commands.length})`}
+            extra={<Typography.Text type="secondary">latest 100</Typography.Text>}
+          >
+            <div style={{ maxHeight: 220, overflow: "auto", border: "1px solid #f0f0f0", padding: 8 }}>
+              {commands.length === 0 ? (
+                <Typography.Text type="secondary">(empty)</Typography.Text>
+              ) : (
+                commands.map((item) => (
+                  <div key={item.id} style={{ marginBottom: 10 }}>
+                    <Typography.Text strong>{item.time}</Typography.Text>
+                    <Typography.Text style={{ marginLeft: 8 }}>{item.event}</Typography.Text>
+                    <Typography.Paragraph
+                      style={{ marginBottom: 0, marginTop: 4, whiteSpace: "pre-wrap", fontFamily: "monospace" }}
+                    >
+                      {item.command}
+                    </Typography.Paragraph>
+                  </div>
+                ))
+              )}
+            </div>
+          </Card>
+
+          <Card
+            size="small"
+            title={`Patch / Diff Events (${patches.length})`}
+            extra={<Typography.Text type="secondary">latest 50</Typography.Text>}
+          >
+            <div style={{ maxHeight: 260, overflow: "auto", border: "1px solid #f0f0f0", padding: 8 }}>
+              {patches.length === 0 ? (
+                <Typography.Text type="secondary">(empty)</Typography.Text>
+              ) : (
+                patches.map((item) => (
+                  <div key={item.id} style={{ marginBottom: 12 }}>
+                    <Typography.Text strong>{item.time}</Typography.Text>
+                    <Typography.Text style={{ marginLeft: 8 }}>{item.event}</Typography.Text>
+                    <Typography.Paragraph
+                      style={{ marginBottom: 0, marginTop: 4, whiteSpace: "pre-wrap", fontFamily: "monospace" }}
+                    >
+                      {item.content}
+                    </Typography.Paragraph>
+                  </div>
+                ))
+              )}
+            </div>
+          </Card>
+
+          <Card size="small" title="Raw JSON (Latest Event)">
+            <Typography.Paragraph
+              style={{ marginBottom: 0, whiteSpace: "pre-wrap", fontFamily: "monospace" }}
+            >
+              {rawJson || "(empty)"}
+            </Typography.Paragraph>
+          </Card>
+
+          {errorText ? (
+            <Typography.Text type="danger">{errorText}</Typography.Text>
+          ) : null}
+        </Space>
+      </Card>
+    </div>
+  );
+};
+
+export default Test;

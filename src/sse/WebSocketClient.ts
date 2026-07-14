@@ -105,6 +105,19 @@ export class WebSocketClient implements RealtimeClient {
     this.connect(this.url);
   }
 
+  send(data: any): boolean {
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+      return false;
+    }
+    try {
+      const payload = typeof data === "string" ? data : JSON.stringify(data);
+      this.ws.send(payload);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   connect(url: string) {
     this.url = url;
     this.manualClosed = false;

@@ -21,6 +21,7 @@ export type RealtimeClient = {
   connect: (url: string) => void;
   close: () => void;
   reconnect: () => void;
+  send: (data: any) => boolean;
   onMessage: (fn: MessageListener) => () => void;
   getStatus: () => RealtimeStatus;
   getTransport: () => RealtimeTransport;

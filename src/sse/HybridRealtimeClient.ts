@@ -33,6 +33,10 @@ export class HybridRealtimeClient implements RealtimeClient {
     this.client.reconnect();
   }
 
+  send(data: any): boolean {
+    return this.client.send(data);
+  }
+
   onMessage(fn: MessageListener) {
     this.listeners.add(fn);
     const unbind = this.client.onMessage(fn);

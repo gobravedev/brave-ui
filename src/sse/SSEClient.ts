@@ -82,6 +82,11 @@ export class SSEClient implements RealtimeClient {
     this.connect(this.url);
   }
 
+  send(_data: any): boolean {
+    // SSE is server-push only and does not support client->server messages.
+    return false;
+  }
+
   /** =============================
    *  内部：连接逻辑
    * ============================= */
