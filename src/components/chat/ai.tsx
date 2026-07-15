@@ -225,6 +225,127 @@ function getStatusIcon(status: ThoughtChainItemType['status']) {
     }
 }
 
+function finalizeLoadingThinkItems(items: any[], status: ThoughtChainItemType['status'] = 'success') {
+    if (!Array.isArray(items) || items.length === 0) {
+        return [];
+    }
+    return items.map((item) => {
+        if (item?.status === 'loading') {
+            return {
+                ...item,
+                status,
+                icon: getStatusIcon(status),
+            };
+        }
+        return item;
+    });
+}
+
+type PersistedLLMEvent = {
+    kind?: string;
+    event?: string;
+    data?: any;
+};
+
+function parsePersistedLLMEvent(content: string): PersistedLLMEvent | null {
+    const raw = String(content || '').trim();
+    if (!raw.startsWith('{')) {
+        return null;
+    }
+    try {
+        const parsed: any = JSON.parse(raw);
+        if (!parsed || typeof parsed !== 'object') {
+            return null;
+        }
+        if (String(parsed.kind || '') !== 'llm_event') {
+            return null;
+        }
+        return parsed as PersistedLLMEvent;
+    } catch {
+        return null;
+    }
+}
+
+function buildThoughtFromPersistedEvent(event: string, data: any): any | null {
+    const safeData = (data && typeof data === 'object') ? data : {};
+
+    if (event === 'assistant.reasoning_delta') {
+        const delta = String(safeData?.deltaContent || '').trim();
+        if (!delta) {
+            return null;
+        }
+        const reasoningId = String(safeData?.reasoningId || '').trim();
+        return {
+            title: 'think',
+            description: delta,
+            status: 'success',
+            icon: getStatusIcon('success'),
+            _reasoningId: reasoningId,
+        };
+    }
+
+    if (event === 'permission.request') {
+        const request = (safeData?.request && typeof safeData.request === 'object') ? safeData.request : {};
+        const kind = String(safeData?.kind || request?.kind || 'unknown');
+        const commandText = Array.isArray(request?.commands)
+            ? request.commands
+                .map((cmd: any) => String(cmd?.identifier || '').trim())
+                .filter(Boolean)
+                .join('\n')
+            : '';
+        const detail = [
+            String(request?.intention || '').trim(),
+            String(request?.fullCommandText || '').trim(),
+            commandText,
+            String(request?.path || '').trim(),
+        ].find((text) => !!text) || 'permission request';
+        return {
+            title: `permission.${kind}`,
+            description: detail,
+            status: 'success',
+            icon: getStatusIcon('success'),
+        };
+    }
+
+    if (event === 'permission.decision') {
+        const kind = String(safeData?.kind || 'unknown');
+        const approved = Boolean(safeData?.approved);
+        const reason = String(safeData?.reason || '').trim();
+        return {
+            title: `permission.${kind}.decision`,
+            description: approved ? 'approved' : (reason || 'rejected'),
+            status: approved ? 'success' : 'error',
+            icon: getStatusIcon(approved ? 'success' : 'error'),
+        };
+    }
+
+    if (event === 'command.queued') {
+        const command = String(safeData?.command || '').trim();
+        if (!command) {
+            return null;
+        }
+        return {
+            title: 'run',
+            description: command,
+            status: 'success',
+            icon: getStatusIcon('success'),
+        };
+    }
+
+    if (event === 'session.plan_changed') {
+        const op = String(safeData?.operation || 'update');
+        const status = op === 'delete' ? 'error' : 'success';
+        return {
+            title: 'planning',
+            description: `plan ${op}`,
+            status,
+            icon: getStatusIcon(status as ThoughtChainItemType['status']),
+        };
+    }
+
+    return null;
+}
+
 
 // 自定义Provider实现：继承AbstractChatProvider实现自定义聊天逻辑
 // Custom Provider implementation: extend AbstractChatProvider to implement custom chat logic
@@ -266,6 +387,189 @@ class CustomProvider<
     transformMessage(info: any): ChatMessage {
         const { originMessage, chunk } = info || {};
         // console.log('stream info:', originMessage, chunk);
+        if (chunk?.event === "permission.request") {
+            const chunkJson: any = typeof chunk?.data === 'string' ? JSON.parse(chunk.data) : (chunk?.data || {});
+            const request = (chunkJson?.request && typeof chunkJson.request === 'object') ? chunkJson.request : {};
+            const kind = String(chunkJson?.kind || request?.kind || 'unknown');
+            const requiresWriteConfirm = Boolean(chunkJson?.requires_write_confirm);
+
+            const commandText = Array.isArray(request?.commands)
+                ? request.commands
+                    .map((cmd: any) => String(cmd?.identifier || '').trim())
+                    .filter(Boolean)
+                    .join('\n')
+                : '';
+
+            const detail = [
+                String(request?.intention || '').trim(),
+                String(request?.fullCommandText || '').trim(),
+                commandText,
+                String(request?.path || '').trim(),
+            ].find((text) => !!text) || 'permission request';
+
+            const settledThink = finalizeLoadingThinkItems(originMessage?.think || [], 'success');
+            return {
+                think: [
+                    ...settledThink,
+                    {
+                        title: `permission.${kind}`,
+                        description: detail,
+                        status: requiresWriteConfirm ? 'loading' : 'success',
+                        icon: getStatusIcon(requiresWriteConfirm ? 'loading' : 'success'),
+                    },
+                ],
+                content: originMessage?.content || '',
+                role: 'assistant',
+            } as ChatMessage;
+        }
+
+        if (chunk?.event === "completed") {
+            return {
+                think: finalizeLoadingThinkItems(originMessage?.think || [], 'success'),
+                content: originMessage?.content || '',
+                role: 'assistant',
+            } as ChatMessage;
+        }
+
+        if (chunk?.event === "error") {
+            return {
+                think: finalizeLoadingThinkItems(originMessage?.think || [], 'error'),
+                content: originMessage?.content || '',
+                role: 'assistant',
+            } as ChatMessage;
+        }
+
+        if (chunk?.event === "assistant.reasoning_delta") {
+            try {
+                const chunkJson: any = typeof chunk?.data === 'string' ? JSON.parse(chunk.data) : (chunk?.data || {});
+                const delta = String(chunkJson?.deltaContent || '');
+                const reasoningId = String(chunkJson?.reasoningId || '').trim();
+                if (!delta.trim()) {
+                    return {
+                        think: originMessage?.think || [],
+                        content: originMessage?.content || '',
+                        role: 'assistant',
+                    } as ChatMessage;
+                }
+
+                const currentThink = Array.isArray(originMessage?.think) ? [...originMessage.think] : [];
+                if (reasoningId) {
+                    for (let i = 0; i < currentThink.length; i++) {
+                        const item = currentThink[i];
+                        if (item?.status === 'loading' && item?._reasoningId && item._reasoningId !== reasoningId) {
+                            currentThink[i] = {
+                                ...item,
+                                status: 'success',
+                                icon: getStatusIcon('success'),
+                            };
+                        }
+                    }
+
+                    const existingIndex = currentThink.findIndex((item: any) => item?._reasoningId === reasoningId);
+                    if (existingIndex >= 0) {
+                        const existing = currentThink[existingIndex] || {};
+                        currentThink[existingIndex] = {
+                            ...existing,
+                            title: existing?.title || 'think',
+                            description: `${String(existing?.description || '')}${delta}`,
+                            status: 'loading',
+                            icon: getStatusIcon('loading'),
+                            _reasoningId: reasoningId,
+                        };
+                    } else {
+                        currentThink.push({
+                            title: 'think',
+                            description: delta,
+                            status: 'loading',
+                            icon: getStatusIcon('loading'),
+                            _reasoningId: reasoningId,
+                        });
+                    }
+                } else {
+                    currentThink.push({
+                        title: 'think',
+                        description: delta,
+                        status: 'loading',
+                        icon: getStatusIcon('loading'),
+                    });
+                }
+
+                return {
+                    think: currentThink,
+                    content: originMessage?.content || '',
+                    role: 'assistant',
+                } as ChatMessage;
+            } catch {
+                return {
+                    think: originMessage?.think || [],
+                    content: originMessage?.content || '',
+                    role: 'assistant',
+                } as ChatMessage;
+            }
+        }
+
+        if (chunk?.event === "command.queued") {
+            try {
+                const chunkJson: any = typeof chunk?.data === 'string' ? JSON.parse(chunk.data) : (chunk?.data || {});
+                const commandText = String(chunkJson?.command || '').trim();
+                if (!commandText) {
+                    return {
+                        think: originMessage?.think || [],
+                        content: originMessage?.content || '',
+                        role: 'assistant',
+                    } as ChatMessage;
+                }
+
+                const settledThink = finalizeLoadingThinkItems(originMessage?.think || [], 'success');
+                return {
+                    think: [
+                        ...settledThink,
+                        {
+                            title: 'run',
+                            description: commandText,
+                            status: 'success',
+                            icon: getStatusIcon('success'),
+                        },
+                    ],
+                    content: originMessage?.content || '',
+                    role: 'assistant',
+                } as ChatMessage;
+            } catch {
+                return {
+                    think: originMessage?.think || [],
+                    content: originMessage?.content || '',
+                    role: 'assistant',
+                } as ChatMessage;
+            }
+        }
+
+        if (chunk?.event === "session.plan_changed") {
+            try {
+                const chunkJson: any = typeof chunk?.data === 'string' ? JSON.parse(chunk.data) : (chunk?.data || {});
+                const op = String(chunkJson?.operation || 'update');
+                const settledThink = finalizeLoadingThinkItems(originMessage?.think || [], 'success');
+                return {
+                    think: [
+                        ...settledThink,
+                        {
+                            title: 'planning',
+                            description: `plan ${op}`,
+                            status: op === 'delete' ? 'error' : 'success',
+                            icon: getStatusIcon(op === 'delete' ? 'error' : 'success'),
+                        },
+                    ],
+                    content: originMessage?.content || '',
+                    role: 'assistant',
+                } as ChatMessage;
+            } catch {
+                return {
+                    think: originMessage?.think || [],
+                    content: originMessage?.content || '',
+                    role: 'assistant',
+                } as ChatMessage;
+            }
+        }
+
         if (chunk?.event == "status") {
             const chunkJson: any = JSON.parse(chunk.data);
             // this.setThoughtChainItems((prev: any) => [
@@ -293,7 +597,7 @@ class CustomProvider<
             // Handle completion marker or empty data
             if (!chunk || !chunk?.data || (chunk?.data && chunk?.data?.includes('[DONE]'))) {
                 return {
-                    think: originMessage?.think || [],
+                    think: finalizeLoadingThinkItems(originMessage?.think || [], 'success'),
                     content: `${originMessage?.content}`,
                     role: 'assistant',
                 } as ChatMessage;
@@ -305,9 +609,12 @@ class CustomProvider<
                 const chunkJson = JSON.parse(chunk.data);
                 console.log('parsed chunk data:', chunkJson);
                 const content = originMessage?.content || '';
+                const deltaContent = typeof chunkJson.deltaContent === 'string' ? chunkJson.deltaContent : '';
                 return {
-                    think: originMessage?.think || [],
-                    content: `${content}${chunkJson.deltaContent || ''}`,
+                    think: deltaContent
+                        ? finalizeLoadingThinkItems(originMessage?.think || [], 'success')
+                        : (originMessage?.think || []),
+                    content: `${content}${deltaContent}`,
                     role: 'assistant',
                 } as ChatMessage;
             } catch (error) {
@@ -579,16 +886,67 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
 
         const resp = await http.get<LLMConversationRecord[]>(`/llm/conversation/list?session_id=${llmSessionID}`);
         const rows = Array.isArray(resp.data) ? resp.data : [];
-        const serverMessages = rows.map((row) => ({
-            id: String(row.id),
-            message: {
-                think: [],
-                content: row.content,
-                role: row.role,
-                chat_history_id: row.id,
-            },
-            status: 'local',
-        }));
+        const serverMessages: any[] = [];
+        rows.forEach((row) => {
+            if (row.role === 'system') {
+                const persisted = parsePersistedLLMEvent(row.content);
+                const eventName = String(persisted?.event || '').trim();
+                const thoughtItem = persisted ? buildThoughtFromPersistedEvent(eventName, persisted.data) : null;
+                if (thoughtItem) {
+                    const lastIndex = serverMessages.length - 1;
+                    const last = lastIndex >= 0 ? serverMessages[lastIndex] : null;
+                    if (last?.message?.role === 'assistant') {
+                        const currentThink = Array.isArray(last.message.think) ? [...last.message.think] : [];
+                        const reasoningId = String(thoughtItem?._reasoningId || '').trim();
+                        if (reasoningId) {
+                            const existingIndex = currentThink.findIndex((item: any) => item?._reasoningId === reasoningId);
+                            if (existingIndex >= 0) {
+                                const existing = currentThink[existingIndex] || {};
+                                currentThink[existingIndex] = {
+                                    ...existing,
+                                    description: `${String(existing?.description || '')}${String(thoughtItem?.description || '')}`,
+                                    status: thoughtItem?.status || existing?.status,
+                                    icon: thoughtItem?.icon || existing?.icon,
+                                };
+                            } else {
+                                currentThink.push(thoughtItem);
+                            }
+                        } else {
+                            currentThink.push(thoughtItem);
+                        }
+                        serverMessages[lastIndex] = {
+                            ...last,
+                            message: {
+                                ...last.message,
+                                think: currentThink,
+                            },
+                        };
+                    } else {
+                        serverMessages.push({
+                            id: `${row.id}-event`,
+                            message: {
+                                think: [thoughtItem],
+                                content: '',
+                                role: 'assistant',
+                            },
+                            status: 'local',
+                        });
+                    }
+                    return;
+                }
+            }
+
+            serverMessages.push({
+                id: String(row.id),
+                message: {
+                    think: [],
+                    content: row.content,
+                    role: row.role,
+                    chat_history_id: row.id,
+                },
+                status: 'local',
+            });
+        });
 
         setMessages((prev: any[]) => {
             if (!Array.isArray(prev) || prev.length === 0) {
@@ -721,7 +1079,16 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
     // const [defaultMessages, setDefaultMessages] = React.useState<any>([])
     const loadHistoryMessage = React.useCallback(async () => {
         await loadSessionList();
-    }, [loadSessionList]);
+
+        const currentKey = activeConversationKeyRef.current;
+        const active = sessionMapRef.current[currentKey];
+        if (!active || !active.id) {
+            return;
+        }
+
+        activeSessionIdRef.current = String(active.id);
+        await loadConversationMessages(active.id);
+    }, [loadSessionList, loadConversationMessages]);
 
 
 
@@ -765,10 +1132,6 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
             return;
         }
 
-        if (isRequesting) {
-            return;
-        }
-
         const active = sessionMapRef.current[activeConversationKey];
         if (!active) {
             return;
@@ -777,7 +1140,7 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
         loadConversationMessages(active.id).catch(() => {
             // ignore load errors here
         });
-    }, [activeConversationKey, loadConversationMessages, isRequesting]);
+    }, [activeConversationKey, loadConversationMessages]);
 
     useImperativeHandle(ref, () => ({
         loadHistoryMessage
