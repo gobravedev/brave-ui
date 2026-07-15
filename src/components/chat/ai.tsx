@@ -1,11 +1,11 @@
 import type { BubbleListProps, ConversationItemType, ThoughtChainItemType, ThoughtChainProps } from '@ant-design/x';
 import { Bubble, Conversations, Sender, ThoughtChain } from '@ant-design/x';
 import { AbstractChatProvider, DefaultMessageInfo, useXChat, XRequest, XRequestOptions } from '@ant-design/x-sdk';
-import { Button, Card, Flex, GetProp, Popconfirm, Space, Tag, Typography } from 'antd';
+import { Button, Card, Flex, GetProp, Popconfirm, Popover, Space, Tag, Typography, theme } from 'antd';
 import React, { FC, forwardRef, useEffect, useImperativeHandle } from 'react';
 import { useSelector } from 'react-redux';
 import XMarkdown from '@ant-design/x-markdown';
-import { CheckCircleOutlined, ClearOutlined, DeleteOutlined, InfoCircleOutlined, LoadingOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, ClearOutlined, CommentOutlined, DeleteOutlined, InfoCircleOutlined, LoadingOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons';
 import { useGlobalMessage } from '@/hooks/useGlobalMessage';
 import { sseClient } from '@/sse';
 import { http } from '@/api/client/http';
@@ -445,6 +445,7 @@ const useLocale = () => {
 
 const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
     const { project, userInfo } = useSelector((state: any) => state.user)
+    const { token } = theme.useToken();
 
     const [content, setContent] = React.useState('');
     const locale = useLocale();
@@ -459,6 +460,7 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
     const [currentProjectId, setCurrentProjectId] = React.useState<string>(project || '');
     const sessionMapRef = React.useRef<Record<string, LLMSessionRecord>>({});
     const activeConversationKeyRef = React.useRef<string>('');
+    const skipNextAutoLoadSessionKeyRef = React.useRef<string>('');
 
     useEffect(() => {
         sessionMapRef.current = sessionMap;
@@ -577,18 +579,48 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
 
         const resp = await http.get<LLMConversationRecord[]>(`/llm/conversation/list?session_id=${llmSessionID}`);
         const rows = Array.isArray(resp.data) ? resp.data : [];
-        setMessages(
-            rows.map((row) => ({
-                id: String(row.id),
-                message: {
-                    think: [],
-                    content: row.content,
-                    role: row.role,
-                    chat_history_id: row.id,
-                },
-                status: 'local',
-            }))
-        );
+        const serverMessages = rows.map((row) => ({
+            id: String(row.id),
+            message: {
+                think: [],
+                content: row.content,
+                role: row.role,
+                chat_history_id: row.id,
+            },
+            status: 'local',
+        }));
+
+        setMessages((prev: any[]) => {
+            if (!Array.isArray(prev) || prev.length === 0) {
+                return serverMessages;
+            }
+
+            // Keep optimistic local user messages that have not been linked to DB rows yet.
+            const pendingLocalUserMessages = prev.filter((item) => (
+                item?.message?.role === 'user' &&
+                !item?.message?.chat_history_id
+            ));
+
+            if (pendingLocalUserMessages.length === 0) {
+                return serverMessages;
+            }
+
+            const serverUserContents = new Set(
+                serverMessages
+                    .filter((item) => item?.message?.role === 'user')
+                    .map((item) => String(item?.message?.content || ''))
+            );
+
+            const mergedPending = pendingLocalUserMessages.filter((item) => (
+                !serverUserContents.has(String(item?.message?.content || ''))
+            ));
+
+            if (mergedPending.length === 0) {
+                return serverMessages;
+            }
+
+            return [...serverMessages, ...mergedPending];
+        });
     }, [setMessages]);
 
     const toConversationItem = React.useCallback((item: LLMSessionRecord): ConversationItemType => {
@@ -646,6 +678,7 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
         setConversationItems((prev) => [toConversationItem(created), ...prev]);
         setActiveConversationKey(String(created.id));
         activeSessionIdRef.current = String(created.id);
+        skipNextAutoLoadSessionKeyRef.current = String(created.id);
         setMessages([]);
         return created;
     }, [resolveProjectId, messageApi, biz_type, toConversationItem, setMessages]);
@@ -726,7 +759,17 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
         if (!activeConversationKey) {
             return;
         }
-        const active = sessionMap[activeConversationKey];
+
+        if (skipNextAutoLoadSessionKeyRef.current === activeConversationKey) {
+            skipNextAutoLoadSessionKeyRef.current = '';
+            return;
+        }
+
+        if (isRequesting) {
+            return;
+        }
+
+        const active = sessionMapRef.current[activeConversationKey];
         if (!active) {
             return;
         }
@@ -734,21 +777,32 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
         loadConversationMessages(active.id).catch(() => {
             // ignore load errors here
         });
-    }, [activeConversationKey, sessionMap, loadConversationMessages]);
+    }, [activeConversationKey, loadConversationMessages, isRequesting]);
 
     useImperativeHandle(ref, () => ({
         loadHistoryMessage
     }))
 
     return (
-        // <Card
-        //     title={`Chat with ${biz_id}`}
-        //     extra={<Space>
-        //         <RedoOutlined style={{ cursor: "pointer" }} onClick={loadHistoryMesage} />
-        //     </Space>}>
-        <>
-            <Flex justify='space-between' align='center'>
-                <Tag>{`LLM - ${biz_type}  ${biz_id}`}</Tag>
+        <Flex
+            vertical
+            style={{
+                height: '100%',
+                minHeight: 0,
+                padding: '4px 2px 2px 2px',
+            }}
+        >
+            <Flex
+                justify='space-between'
+                align='center'
+                style={{
+                    flexShrink: 0,
+                    padding: '2px 4px 8px 4px',
+                    borderBottom: `1px solid ${token.colorBorderSecondary}`,
+                    marginBottom: 8,
+                }}
+            >
+                <Tag color='processing'>{`LLM - ${biz_type} ${biz_id}`}</Tag>
                 <Space>
                     <Button size='small' icon={<PlusOutlined />} onClick={async () => {
                         try {
@@ -757,6 +811,23 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
                             messageApi.error('Failed to create session');
                         }
                     }} />
+                    <Popover
+                        placement='bottomRight'
+                        styles={{ body: { padding: 0, maxHeight: 420, overflow: 'auto' } }}
+                        content={
+                            <Conversations
+                                items={conversationItems}
+                                activeKey={activeConversationKey}
+                                groupable
+                                onActiveChange={(key) => {
+                                    setActiveConversationKey(String(key || ''));
+                                }}
+                                style={{ width: 320 }}
+                            />
+                        }
+                    >
+                        <Button size='small' icon={<CommentOutlined />} disabled={!conversationItems.length} />
+                    </Popover>
                     <Button size='small' icon={<RedoOutlined />} onClick={loadHistoryMessage} />
                     <Popconfirm title="Delete current session?" onConfirm={async () => {
                         try {
@@ -774,137 +845,141 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
                         <Button size='small' icon={<ClearOutlined />} />
                     </Popconfirm> */}
                 </Space>
-
             </Flex>
-            <Flex vertical gap="small">
 
-                <Conversations
-                    items={conversationItems}
-                    activeKey={activeConversationKey}
-                    groupable
-                    onActiveChange={(key) => {
-                        setActiveConversationKey(String(key || ''));
+            <Flex vertical style={{ flex: 1, minHeight: 0 }}>
+                <div
+                    style={{
+                        flex: 1,
+                        minHeight: 0,
+                        overflowY: 'auto',
+                        paddingRight: 4,
+                        marginBottom: 8,
                     }}
-                />
+                >
+                    <Bubble.List
+                        role={roles(setMessage, loadHistoryMessage, thoughtChainItems, expandedKeys, setExpandedKeys)}
+                        items={messages.map(({ id, message, status }) => {
+                            return {
+                                key: id,
+                                loading: status === 'loading',
+                                role: message.role,
+                                content: message,
+                            }
+                        })}
+                    />
 
-                
+                    {permissionRequests.length > 0 && (
+                        <Card size='small' title='Write Permission Requests' style={{ marginTop: 12 }}>
+                            <Flex vertical gap='small'>
+                                {permissionRequests.map((item) => (
+                                    <Card key={item.requestId} size='small' type='inner'>
+                                        <Flex vertical gap='small'>
+                                            <Flex justify='space-between' align='center' wrap='wrap' gap='small'>
+                                                <Space wrap>
+                                                    <Tag color='warning'>{item.kind}</Tag>
+                                                    <Text type='secondary'>{item.requestId}</Text>
+                                                </Space>
+                                                <Space>
+                                                    <Button size='small' type='primary' onClick={() => submitPermissionDecision(item, true)}>
+                                                        Approve
+                                                    </Button>
+                                                    <Button size='small' danger onClick={() => submitPermissionDecision(item, false)}>
+                                                        Deny
+                                                    </Button>
+                                                </Space>
+                                            </Flex>
 
-                <Bubble.List
-                    role={roles(setMessage, loadHistoryMessage, thoughtChainItems, expandedKeys, setExpandedKeys)}
+                                            <Space wrap>
+                                                {!!item.fileName && <Tag color='blue'>file: {item.fileName}</Tag>}
+                                                {!!item.intention && <Tag color='geekblue'>intention: {item.intention}</Tag>}
+                                                {!!item.toolCallId && <Tag color='purple'>toolCallId: {item.toolCallId}</Tag>}
+                                            </Space>
 
-                    style={{ height: "70vh" }}
-                    items={messages.map(({ id, message, status }) => {
-                        // console.log('message item:', message, status);
-                        return {
-                            key: id,
-                            loading: status === 'loading',
-                            role: message.role,
-                            content: message,
-                        }
-                    })}
-                />
+                                            {item.diff && (
+                                                <div>
+                                                    <Text strong>diff</Text>
+                                                    <XMarkdown content={`\n\`\`\`diff\n${item.diff}\n\`\`\``} />
+                                                </div>
+                                            )}
+
+                                            {item.newFileContents && (
+                                                <div>
+                                                    <Text strong>newFileContents</Text>
+                                                    <XMarkdown content={`\n\`\`\`python\n${item.newFileContents}\n\`\`\``} />
+                                                </div>
+                                            )}
+
+                                            <div>
+                                                <Text strong>request</Text>
+                                                <XMarkdown content={`\n\`\`\`json\n${toPrettyJSON(item.request)}\n\`\`\``} />
+                                            </div>
+                                        </Flex>
+                                    </Card>
+                                ))}
+                            </Flex>
+                        </Card>
+                    )}
+                </div>
 
                 {/* 发送器：用户输入区域，支持发送消息和中止请求 */}
                 {/* Sender: user input area, supports sending messages and aborting requests */}
-                <Sender
-                    loading={isRequesting}
-                    value={content}
-                    onChange={setContent}
-                    onCancel={abort}
-                    placeholder={"Please ask me questions related to bioinformatics ..."}
-                    onSubmit={async (nextContent) => {
-                        const trimmed = (nextContent || '').trim();
-                        if (!trimmed) {
-                            return;
-                        }
+                <div
+                    style={{
+                        flexShrink: 0,
+                        position: 'sticky',
+                        bottom: 0,
+                        zIndex: 1,
+                        background: token.colorBgContainer,
+                        borderTop: `1px solid ${token.colorBorderSecondary}`,
+                        paddingTop: 8,
+                    }}
+                >
+                    <Sender
+                        loading={isRequesting}
+                        value={content}
+                        onChange={setContent}
+                        onCancel={abort}
+                        placeholder={"Please ask me questions related to bioinformatics ..."}
+                        onSubmit={async (nextContent) => {
+                            const trimmed = (nextContent || '').trim();
+                            if (!trimmed) {
+                                return;
+                            }
 
-                        let active = sessionMap[activeConversationKey];
-                        if (!active) {
-                            try {
-                                const created = await createSession();
-                                if (!created) {
+                            let active = sessionMap[activeConversationKey];
+                            if (!active) {
+                                try {
+                                    const created = await createSession();
+                                    if (!created) {
+                                        messageApi.error('Unable to create session');
+                                        return;
+                                    }
+                                    active = created;
+                                } catch {
                                     messageApi.error('Unable to create session');
                                     return;
                                 }
-                                active = created;
-                            } catch {
-                                messageApi.error('Unable to create session');
-                                return;
                             }
-                        }
 
-                        setThoughtChainItems([])
-                        setPermissionRequests([])
-                        onRequest({
-                            stream: true,
-                            role: 'user',
-                            message: trimmed,
-                            biz_id: biz_id,
-                            biz_type: biz_type,
-                            project_id: active.project_id || currentProjectId,
-                            session_id: active.id,
-                            is_save_prompt: true,
-                        });
-                        setContent('');
-                    }}
-                />
-
-                {permissionRequests.length > 0 && (
-                    <Card size='small' title='Write Permission Requests'>
-                        <Flex vertical gap='small'>
-                            {permissionRequests.map((item) => (
-                                <Card key={item.requestId} size='small' type='inner'>
-                                    <Flex vertical gap='small'>
-                                        <Flex justify='space-between' align='center' wrap='wrap' gap='small'>
-                                            <Space wrap>
-                                                <Tag color='warning'>{item.kind}</Tag>
-                                                <Text type='secondary'>{item.requestId}</Text>
-                                            </Space>
-                                            <Space>
-                                                <Button size='small' type='primary' onClick={() => submitPermissionDecision(item, true)}>
-                                                    Approve
-                                                </Button>
-                                                <Button size='small' danger onClick={() => submitPermissionDecision(item, false)}>
-                                                    Deny
-                                                </Button>
-                                            </Space>
-                                        </Flex>
-
-                                        <Space wrap>
-                                            {!!item.fileName && <Tag color='blue'>file: {item.fileName}</Tag>}
-                                            {!!item.intention && <Tag color='geekblue'>intention: {item.intention}</Tag>}
-                                            {!!item.toolCallId && <Tag color='purple'>toolCallId: {item.toolCallId}</Tag>}
-                                        </Space>
-
-                                        {item.diff && (
-                                            <div>
-                                                <Text strong>diff</Text>
-                                                <XMarkdown content={`\n\`\`\`diff\n${item.diff}\n\`\`\``} />
-                                            </div>
-                                        )}
-
-                                        {item.newFileContents && (
-                                            <div>
-                                                <Text strong>newFileContents</Text>
-                                                <XMarkdown content={`\n\`\`\`python\n${item.newFileContents}\n\`\`\``} />
-                                            </div>
-                                        )}
-
-                                        <div>
-                                            <Text strong>request</Text>
-                                            <XMarkdown content={`\n\`\`\`json\n${toPrettyJSON(item.request)}\n\`\`\``} />
-                                        </div>
-                                    </Flex>
-                                </Card>
-                            ))}
-                        </Flex>
-                    </Card>
-                )}
+                            setThoughtChainItems([])
+                            setPermissionRequests([])
+                            onRequest({
+                                stream: true,
+                                role: 'user',
+                                message: trimmed,
+                                biz_id: biz_id,
+                                biz_type: biz_type,
+                                project_id: active.project_id || currentProjectId,
+                                session_id: active.id,
+                                is_save_prompt: true,
+                            });
+                            setContent('');
+                        }}
+                    />
+                </div>
             </Flex>
-        </>
-
-        // </Card>
-
+        </Flex>
     );
 })
 

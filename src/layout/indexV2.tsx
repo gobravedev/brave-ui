@@ -83,6 +83,8 @@ const App: React.FC = () => {
     const { t, locale } = useI18n();
     const screens = Grid.useBreakpoint();
     const isMobileLayout = !screens.md;
+    const appHeaderHeight = 64+16;
+    const sidePanelHeight = `calc(100dvh - ${appHeaderHeight}px)`;
 
     const isDark = theme === 'dark';
     const bgColor = isDark ? 'linear-gradient(180deg, #1c1c1c 0%, #141414 100%)' : '#fff';
@@ -1103,14 +1105,14 @@ const App: React.FC = () => {
                                 </Suspense>
                             </Col>
                             <Col lg={6} sm={6} xs={24}
-                                style={isSticky ? {
-                                    overflow: "hidden",
-                                    // marginTop: "1rem",
+                                style={isMobileLayout ? {} : {
                                     position: "sticky",
-                                    top: `${top}px`, // 吸顶距离
-                                    alignSelf: "flex-start", // 避免被stretch
-                                    height: `calc(100vh - ${top}px - 1rem )`, // 可选：固定高度，让内部滚动
-                                } : {}}>
+                                    top: appHeaderHeight,
+                                    alignSelf: "flex-start",
+                                    height: sidePanelHeight,
+                                    maxHeight: sidePanelHeight,
+                                    minHeight: 0,
+                                }}>
                                 <Card
                                     size="small"
                                     title={``}
@@ -1118,13 +1120,17 @@ const App: React.FC = () => {
                                         flex: 1,
                                         display: "flex",
                                         flexDirection: "column",
-                                        height: " 100%"
+                                        height: "100%",
+                                        minHeight: 0,
                                     }}
                                     styles={{
                                         body: {
-                                            // height: "90%",
                                             flex: 1,
-                                            overflowY: "auto"
+                                            minHeight: 0,
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            overflow: 'hidden',
+                                            padding: 8,
                                         }
                                     }}
                                     extra={
@@ -1136,7 +1142,9 @@ const App: React.FC = () => {
                                             options={sideOptions} />
                                     }>
 
-                                    <ViewResolver view={sideView} view_mode={"card"}></ViewResolver>
+                                    <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+                                        <ViewResolver view={sideView} view_mode={"card"}></ViewResolver>
+                                    </div>
 
                                 </Card>
 
