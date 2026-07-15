@@ -1,7 +1,7 @@
 import type { BubbleListProps, ConversationItemType, ThoughtChainItemType, ThoughtChainProps } from '@ant-design/x';
 import { Bubble, Conversations, Sender, ThoughtChain } from '@ant-design/x';
 import { AbstractChatProvider, DefaultMessageInfo, useXChat, XRequest, XRequestOptions } from '@ant-design/x-sdk';
-import { Button, Card, Flex, GetProp, Popconfirm, Popover, Space, Tag, Typography, theme } from 'antd';
+import { Button, Flex, GetProp, Popconfirm, Popover, Space, Tag, Typography, theme } from 'antd';
 import React, { FC, forwardRef, useEffect, useImperativeHandle } from 'react';
 import { useSelector } from 'react-redux';
 import XMarkdown from '@ant-design/x-markdown';
@@ -10,6 +10,7 @@ import { useGlobalMessage } from '@/hooks/useGlobalMessage';
 import { sseClient } from '@/sse';
 import { http } from '@/api/client/http';
 import { getActiveProjectApi } from '@/api/project';
+import { invoke } from '@/core/ui-system/invokeV2';
 const { Text } = Typography;
 
 type LLMSessionRecord = {
@@ -72,14 +73,6 @@ type PermissionRequestItem = {
     newFileContents: string;
     request: Record<string, unknown>;
 };
-
-function toPrettyJSON(value: unknown) {
-    try {
-        return JSON.stringify(value ?? {}, null, 2);
-    } catch {
-        return String(value ?? '');
-    }
-}
 
 function toSSEChunk(event: string, payload: unknown) {
     const safeEvent = (event || 'message').replace(/\n/g, '');
@@ -759,7 +752,7 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
     const messageApi = useGlobalMessage()
     const [expandedKeys, setExpandedKeys] = React.useState<string[]>([]);
     const [thoughtChainItems, setThoughtChainItems] = React.useState<any>([]);
-    const [permissionRequests, setPermissionRequests] = React.useState<PermissionRequestItem[]>([]);
+    const openingPermissionRequestIdsRef = React.useRef<Set<string>>(new Set());
     const activeSessionIdRef = React.useRef('');
     const [conversationItems, setConversationItems] = React.useState<ConversationItemType[]>([]);
     const [sessionMap, setSessionMap] = React.useState<Record<string, LLMSessionRecord>>({});
@@ -776,6 +769,68 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
     useEffect(() => {
         activeConversationKeyRef.current = activeConversationKey;
     }, [activeConversationKey]);
+
+    const submitPermissionDecision = React.useCallback((item: PermissionRequestItem, approved: boolean) => {
+        const ok = sseClient.send({
+            type: 'llm.permission.decision',
+            session_id: item.sessionId || activeSessionIdRef.current,
+            request_id: item.requestId,
+            approved,
+            reason: approved ? '' : 'rejected by user',
+            require_ack: false,
+        });
+
+        if (!ok) {
+            messageApi.error('Realtime WS 未连接，无法提交权限确认');
+        }
+    }, [messageApi]);
+
+    const promptPermissionDecision = React.useCallback(async (item: PermissionRequestItem) => {
+        if (!item.requestId) {
+            return;
+        }
+
+        const openingIds = openingPermissionRequestIdsRef.current;
+        if (openingIds.has(item.requestId)) {
+            return;
+        }
+        openingIds.add(item.requestId);
+
+        try {
+            const result = await invoke.writePermission.openAsync(
+                {
+                    requestId: item.requestId,
+                    sessionId: item.sessionId,
+                    kind: item.kind,
+                    requiresWriteConfirm: item.requiresWriteConfirm,
+                    fileName: item.fileName,
+                    intention: item.intention,
+                    toolCallId: item.toolCallId,
+                    diff: item.diff,
+                    newFileContents: item.newFileContents,
+                    request: item.request,
+                },
+                {
+                    title: `Write Permission: ${item.kind}`,
+                    width: '70vw',
+                    footer: false,
+                    closable: false,
+                    maskClosable: false,
+                },
+            );
+
+            const approved =
+                typeof result === 'boolean'
+                    ? result
+                    : Boolean((result as { approved?: unknown } | undefined)?.approved);
+
+            submitPermissionDecision(item, approved);
+        } catch {
+            submitPermissionDecision(item, false);
+        } finally {
+            openingIds.delete(item.requestId);
+        }
+    }, [submitPermissionDecision]);
 
     const handleBridgeEvent = React.useCallback((evt: WSIncomingEvent, incomingSessionId: string) => {
         if (evt.event === 'permission.request' && evt.data && typeof evt.data === 'object') {
@@ -803,25 +858,19 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
                 return;
             }
 
-            setPermissionRequests((prev) => {
-                if (prev.some((item) => item.requestId === requestId)) {
-                    return prev;
-                }
-                return [
-                    ...prev,
-                    {
-                        requestId,
-                        sessionId,
-                        kind,
-                        requiresWriteConfirm,
-                        fileName,
-                        intention,
-                        toolCallId,
-                        diff,
-                        newFileContents,
-                        request: requestPayload,
-                    },
-                ];
+            promptPermissionDecision({
+                requestId,
+                sessionId,
+                kind,
+                requiresWriteConfirm,
+                fileName,
+                intention,
+                toolCallId,
+                diff,
+                newFileContents,
+                request: requestPayload,
+            }).catch(() => {
+                // no-op: fallback handled in promptPermissionDecision
             });
             return;
         }
@@ -832,11 +881,11 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
             if (!requestId) {
                 return;
             }
-            setPermissionRequests((prev) => prev.filter((item) => item.requestId !== requestId));
+            openingPermissionRequestIdsRef.current.delete(requestId);
             return;
         }
 
-    }, []);
+    }, [promptPermissionDecision]);
 
     // 使用自定义Provider：创建自定义聊天提供者实例
     // Use custom provider: create custom chat provider instance
@@ -1090,32 +1139,6 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
         await loadConversationMessages(active.id);
     }, [loadSessionList, loadConversationMessages]);
 
-
-
-
-
-    const submitPermissionDecision = React.useCallback((item: PermissionRequestItem, approved: boolean) => {
-        const ok = sseClient.send({
-            type: 'llm.permission.decision',
-            session_id: item.sessionId || activeSessionIdRef.current,
-            request_id: item.requestId,
-            approved,
-            reason: approved ? '' : 'rejected by user',
-            require_ack: false,
-        });
-
-        if (!ok) {
-            messageApi.error('Realtime WS 未连接，无法提交权限确认');
-            return;
-        }
-
-        setPermissionRequests((prev) => prev.filter((req) => req.requestId !== item.requestId));
-    }, [messageApi]);
-
-    
-    
-
-
     useEffect(() => {
         loadSessionList().catch(() => {
             // ignore initial load failure; global interceptor already handles messages
@@ -1232,57 +1255,6 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
                         })}
                     />
 
-                    {permissionRequests.length > 0 && (
-                        <Card size='small' title='Write Permission Requests' style={{ marginTop: 12 }}>
-                            <Flex vertical gap='small'>
-                                {permissionRequests.map((item) => (
-                                    <Card key={item.requestId} size='small' type='inner'>
-                                        <Flex vertical gap='small'>
-                                            <Flex justify='space-between' align='center' wrap='wrap' gap='small'>
-                                                <Space wrap>
-                                                    <Tag color='warning'>{item.kind}</Tag>
-                                                    <Text type='secondary'>{item.requestId}</Text>
-                                                </Space>
-                                                <Space>
-                                                    <Button size='small' type='primary' onClick={() => submitPermissionDecision(item, true)}>
-                                                        Approve
-                                                    </Button>
-                                                    <Button size='small' danger onClick={() => submitPermissionDecision(item, false)}>
-                                                        Deny
-                                                    </Button>
-                                                </Space>
-                                            </Flex>
-
-                                            <Space wrap>
-                                                {!!item.fileName && <Tag color='blue'>file: {item.fileName}</Tag>}
-                                                {!!item.intention && <Tag color='geekblue'>intention: {item.intention}</Tag>}
-                                                {!!item.toolCallId && <Tag color='purple'>toolCallId: {item.toolCallId}</Tag>}
-                                            </Space>
-
-                                            {item.diff && (
-                                                <div>
-                                                    <Text strong>diff</Text>
-                                                    <XMarkdown content={`\n\`\`\`diff\n${item.diff}\n\`\`\``} />
-                                                </div>
-                                            )}
-
-                                            {item.newFileContents && (
-                                                <div>
-                                                    <Text strong>newFileContents</Text>
-                                                    <XMarkdown content={`\n\`\`\`python\n${item.newFileContents}\n\`\`\``} />
-                                                </div>
-                                            )}
-
-                                            <div>
-                                                <Text strong>request</Text>
-                                                <XMarkdown content={`\n\`\`\`json\n${toPrettyJSON(item.request)}\n\`\`\``} />
-                                            </div>
-                                        </Flex>
-                                    </Card>
-                                ))}
-                            </Flex>
-                        </Card>
-                    )}
                 </div>
 
                 {/* 发送器：用户输入区域，支持发送消息和中止请求 */}
@@ -1326,7 +1298,6 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
                             }
 
                             setThoughtChainItems([])
-                            setPermissionRequests([])
                             onRequest({
                                 stream: true,
                                 role: 'user',

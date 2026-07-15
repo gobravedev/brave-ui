@@ -55,6 +55,7 @@ const importComponentLoaders = {
     containerInspect: () => import('@/components/container/container-inspect'),
     depContainer: () => import('../../pages/components-relation/workflow/dep-container'),
     remoteStore: () => import('../install-components/components/remote-store'),
+    writePermission: () => import('../chat/write-permission'),
 };
 
 declare module '@/core/component-registry/registry-types' {
