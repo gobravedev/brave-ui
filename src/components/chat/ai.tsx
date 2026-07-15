@@ -1,17 +1,32 @@
-import type { BubbleItemType, BubbleListProps, ThoughtChainItemType, ThoughtChainProps } from '@ant-design/x';
-import { Bubble, Sender, ThoughtChain } from '@ant-design/x';
+import type { BubbleListProps, ConversationItemType, ThoughtChainItemType, ThoughtChainProps } from '@ant-design/x';
+import { Bubble, Conversations, Sender, ThoughtChain } from '@ant-design/x';
 import { AbstractChatProvider, DefaultMessageInfo, useXChat, XRequest, XRequestOptions } from '@ant-design/x-sdk';
 import { Button, Card, Flex, GetProp, Popconfirm, Space, Tag, Typography } from 'antd';
 import React, { FC, forwardRef, useEffect, useImperativeHandle } from 'react';
 import { useSelector } from 'react-redux';
 import XMarkdown from '@ant-design/x-markdown';
-import axios from 'axios';
-import { CheckCircleOutlined, ClearOutlined, CodeOutlined, DeleteOutlined, EditOutlined, InfoCircleOutlined, LoadingOutlined, RedoOutlined } from '@ant-design/icons';
-import { de } from '@faker-js/faker';
+import { CheckCircleOutlined, ClearOutlined, DeleteOutlined, InfoCircleOutlined, LoadingOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons';
 import { useGlobalMessage } from '@/hooks/useGlobalMessage';
-import { Footer } from 'antd/es/layout/layout';
 import { sseClient } from '@/sse';
+import { http } from '@/api/client/http';
+import { getActiveProjectApi } from '@/api/project';
 const { Text } = Typography;
+
+type LLMSessionRecord = {
+    id: number;
+    project_id: string;
+    title?: string;
+    status?: string;
+};
+
+type LLMConversationRecord = {
+    id: number;
+    conversation_id: string;
+    llm_session_id: number;
+    role: 'user' | 'assistant' | 'system';
+    content: string;
+    model?: string;
+};
 
 // 类型定义：自定义聊天系统的输入输出和消息结构
 // Type definitions: custom chat system input/output and message structure
@@ -19,6 +34,7 @@ interface CustomInput {
     message: string;
     role: 'user';
     stream?: boolean;
+    session_id?: number;
     biz_type: string;
     biz_id: string;
     project_id: string;
@@ -65,13 +81,6 @@ function toPrettyJSON(value: unknown) {
     }
 }
 
-function makeSessionId() {
-    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-        return crypto.randomUUID();
-    }
-    return `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
-}
-
 function toSSEChunk(event: string, payload: unknown) {
     const safeEvent = (event || 'message').replace(/\n/g, '');
     const data = typeof payload === 'string' ? payload : JSON.stringify(payload ?? {});
@@ -101,10 +110,15 @@ function createWSFetchAdapter(handlers?: {
 
         const params = (options?.params || {}) as Record<string, unknown>;
         const requestedSessionId =
-            typeof params.session_id === 'string' && params.session_id
-                ? params.session_id
-                : '';
-        const sessionId = requestedSessionId || makeSessionId();
+            typeof params.session_id === 'number'
+                ? String(params.session_id)
+                : typeof params.session_id === 'string' && params.session_id
+                    ? params.session_id
+                    : '';
+        const sessionId = requestedSessionId;
+        if (!sessionId) {
+            throw new Error('session_id is required');
+        }
         activeSessionId = sessionId;
         handlers?.onSessionCreated?.(sessionId);
 
@@ -374,7 +388,7 @@ const roles = (
                     <div style={{ display: 'flex' }}>
                         {content?.chat_history_id && <>
                             <Popconfirm title="Are you sure to delete this message?" onConfirm={async () => {
-                                const resp = await axios.delete(`/llm/chat/history/del-by-chat-history-id/${content?.chat_history_id}`);
+                                await http.post('/llm/conversation/delete', { id: content?.chat_history_id });
                                 loadHistoryMessage()
                             }}>
                                 <Button style={{ color: "red" }} type="text" size="small" icon={<DeleteOutlined />} />
@@ -430,7 +444,7 @@ const useLocale = () => {
 };
 
 const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
-    const { project } = useSelector((state: any) => state.user)
+    const { project, userInfo } = useSelector((state: any) => state.user)
 
     const [content, setContent] = React.useState('');
     const locale = useLocale();
@@ -439,25 +453,20 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
     const [thoughtChainItems, setThoughtChainItems] = React.useState<any>([]);
     const [permissionRequests, setPermissionRequests] = React.useState<PermissionRequestItem[]>([]);
     const activeSessionIdRef = React.useRef('');
-    // const [defaultMessages, setDefaultMessages] = React.useState<any>([])
-    const loadHistoryMessage = async () => {
-        const resp = await axios.post(`/llm/chat/history`, {
-            biz_id: biz_id,
-            // biz_type: biz_type,
-            project_id: project,
-        });
-        const data = resp.data.map((item: any) => {
-            return { id: item.id, message: { think: item.thought_chain, content: item.content, role: item.role ,chat_history_id: item.chat_history_id} , status: 'local' }
-        })
-        // console.log('history message resp:', data);
-        setMessages(data)
-        // setDefaultMessages(data)
+    const [conversationItems, setConversationItems] = React.useState<ConversationItemType[]>([]);
+    const [sessionMap, setSessionMap] = React.useState<Record<string, LLMSessionRecord>>({});
+    const [activeConversationKey, setActiveConversationKey] = React.useState<string>('');
+    const [currentProjectId, setCurrentProjectId] = React.useState<string>(project || '');
+    const sessionMapRef = React.useRef<Record<string, LLMSessionRecord>>({});
+    const activeConversationKeyRef = React.useRef<string>('');
 
-    }
+    useEffect(() => {
+        sessionMapRef.current = sessionMap;
+    }, [sessionMap]);
 
-
-
-
+    useEffect(() => {
+        activeConversationKeyRef.current = activeConversationKey;
+    }, [activeConversationKey]);
 
     const handleBridgeEvent = React.useCallback((evt: WSIncomingEvent, incomingSessionId: string) => {
         if (evt.event === 'permission.request' && evt.data && typeof evt.data === 'object') {
@@ -515,26 +524,10 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
                 return;
             }
             setPermissionRequests((prev) => prev.filter((item) => item.requestId !== requestId));
-        }
-    }, []);
-
-    const submitPermissionDecision = React.useCallback((item: PermissionRequestItem, approved: boolean) => {
-        const ok = sseClient.send({
-            type: 'llm.permission.decision',
-            session_id: item.sessionId || activeSessionIdRef.current,
-            request_id: item.requestId,
-            approved,
-            reason: approved ? '' : 'rejected by user',
-            require_ack: false,
-        });
-
-        if (!ok) {
-            messageApi.error('Realtime WS 未连接，无法提交权限确认');
             return;
         }
 
-        setPermissionRequests((prev) => prev.filter((req) => req.requestId !== item.requestId));
-    }, [messageApi]);
+    }, []);
 
     // 使用自定义Provider：创建自定义聊天提供者实例
     // Use custom provider: create custom chat provider instance
@@ -557,30 +550,191 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
     const { onRequest, messages, abort, isRequesting, setMessages, setMessage } = useXChat({
         provider,
         requestPlaceholder: { content: locale.waiting, role: 'assistant' },
-        // requestFallback: (_, { error, errorInfo, messageInfo }) => {
-        //     console.error('Request failed:', error, errorInfo, messageInfo);
-        //     return { content: locale.mockFailed, role: 'assistant' }
-        // },
-        // defaultMessages: defaultMessages,
-        // defaultMessages: [
-        //     {
-        //         id: '1',
-        //         message: { role: 'user', content: locale.historyUserMessage },
-        //         status: 'success',
-        //     },
-        //     {
-        //         id: '2',
-        //         message: { role: 'assistant', content: locale.historyAIResponse },
-        //         status: 'success',
-        //     },
-        // ]
     });
+
+    const resolveProjectId = React.useCallback(async () => {
+        const projectIdFromStore = (project || '').trim();
+        if (projectIdFromStore) {
+            setCurrentProjectId(projectIdFromStore);
+            return projectIdFromStore;
+        }
+
+        try {
+            const resp = await getActiveProjectApi();
+            const projectId = (resp?.data?.project_id || '').trim();
+            setCurrentProjectId(projectId);
+            return projectId;
+        } catch {
+            return '';
+        }
+    }, [project]);
+
+    const loadConversationMessages = React.useCallback(async (llmSessionID: number) => {
+        if (!llmSessionID) {
+            setMessages([]);
+            return;
+        }
+
+        const resp = await http.get<LLMConversationRecord[]>(`/llm/conversation/list?session_id=${llmSessionID}`);
+        const rows = Array.isArray(resp.data) ? resp.data : [];
+        setMessages(
+            rows.map((row) => ({
+                id: String(row.id),
+                message: {
+                    think: [],
+                    content: row.content,
+                    role: row.role,
+                    chat_history_id: row.id,
+                },
+                status: 'local',
+            }))
+        );
+    }, [setMessages]);
+
+    const toConversationItem = React.useCallback((item: LLMSessionRecord): ConversationItemType => {
+        const title = (item.title || '').trim();
+        return {
+            key: String(item.id),
+            label: title || String(item.id),
+            group: 'Current Project',
+        };
+    }, []);
+
+    const loadSessionList = React.useCallback(async () => {
+        const resp = await http.get<LLMSessionRecord[]>('/llm/session/list');
+        const rows = Array.isArray(resp.data) ? resp.data : [];
+
+        const nextMap: Record<string, LLMSessionRecord> = {};
+        rows.forEach((row) => {
+            nextMap[String(row.id)] = row;
+        });
+        setSessionMap(nextMap);
+        setConversationItems(rows.map(toConversationItem));
+
+        // If the currently active session no longer exists, clear it
+        const currentKey = activeConversationKeyRef.current;
+        if (currentKey && !nextMap[currentKey]) {
+            setActiveConversationKey('');
+            activeSessionIdRef.current = '';
+            setMessages([]);
+        }
+    }, [toConversationItem, setMessages]);
+
+    const createSession = React.useCallback(async () => {
+        const projectId = await resolveProjectId();
+        if (!projectId) {
+            messageApi.error('No active project found.');
+            return null;
+        }
+
+        const payload = {
+            project_id: projectId,
+            title: `${biz_type || 'Chat'} ${new Date().toLocaleString()}`,
+            status: 'ACTIVE',
+        };
+
+        const resp = await http.post<LLMSessionRecord>('/llm/session/create', payload);
+        const created = resp.data;
+        if (!created?.id) {
+            return null;
+        }
+
+        setSessionMap((prev) => ({
+            ...prev,
+            [String(created.id)]: created,
+        }));
+        setConversationItems((prev) => [toConversationItem(created), ...prev]);
+        setActiveConversationKey(String(created.id));
+        activeSessionIdRef.current = String(created.id);
+        setMessages([]);
+        return created;
+    }, [resolveProjectId, messageApi, biz_type, toConversationItem, setMessages]);
+
+    const deleteActiveSession = React.useCallback(async () => {
+        if (!activeConversationKey) {
+            return;
+        }
+
+        const session = sessionMap[activeConversationKey];
+        if (!session) {
+            return;
+        }
+
+        await http.post('/llm/session/delete', { id: session.id });
+
+        setSessionMap((prev) => {
+            const next = { ...prev };
+            delete next[activeConversationKey];
+            return next;
+        });
+        setConversationItems((prev) => prev.filter((item) => String(item.key) !== activeConversationKey));
+
+        const remained = Object.entries(sessionMap)
+            .filter(([key]) => key !== activeConversationKey)
+            .map(([, val]) => val)
+            .sort((a, b) => b.id - a.id);
+
+        if (remained.length > 0) {
+            const next = remained[0];
+            setActiveConversationKey(String(next.id));
+            activeSessionIdRef.current = String(next.id);
+            await loadConversationMessages(next.id);
+        } else {
+            setActiveConversationKey('');
+            activeSessionIdRef.current = '';
+            setMessages([]);
+        }
+    }, [activeConversationKey, sessionMap, loadConversationMessages, setMessages]);
+    // const [defaultMessages, setDefaultMessages] = React.useState<any>([])
+    const loadHistoryMessage = React.useCallback(async () => {
+        await loadSessionList();
+    }, [loadSessionList]);
+
+
+
+
+
+    const submitPermissionDecision = React.useCallback((item: PermissionRequestItem, approved: boolean) => {
+        const ok = sseClient.send({
+            type: 'llm.permission.decision',
+            session_id: item.sessionId || activeSessionIdRef.current,
+            request_id: item.requestId,
+            approved,
+            reason: approved ? '' : 'rejected by user',
+            require_ack: false,
+        });
+
+        if (!ok) {
+            messageApi.error('Realtime WS 未连接，无法提交权限确认');
+            return;
+        }
+
+        setPermissionRequests((prev) => prev.filter((req) => req.requestId !== item.requestId));
+    }, [messageApi]);
+
+    
     
 
 
-    // useEffect(() => {
-    //     loadHistoryMessage();
-    // }, [project])
+    useEffect(() => {
+        loadSessionList().catch(() => {
+            // ignore initial load failure; global interceptor already handles messages
+        });
+    }, [loadSessionList]);
+
+    useEffect(() => {
+        if (!activeConversationKey) {
+            return;
+        }
+        const active = sessionMap[activeConversationKey];
+        if (!active) {
+            return;
+        }
+        activeSessionIdRef.current = String(active.id);
+        loadConversationMessages(active.id).catch(() => {
+            // ignore load errors here
+        });
+    }, [activeConversationKey, sessionMap, loadConversationMessages]);
 
     useImperativeHandle(ref, () => ({
         loadHistoryMessage
@@ -593,43 +747,47 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
         //         <RedoOutlined style={{ cursor: "pointer" }} onClick={loadHistoryMesage} />
         //     </Space>}>
         <>
-            <Flex justify='end'>
+            <Flex justify='space-between' align='center'>
                 <Tag>{`LLM - ${biz_type}  ${biz_id}`}</Tag>
-                <Button size='small' icon={<RedoOutlined />} onClick={loadHistoryMessage} >
-                </Button>
-                <Popconfirm title="Are you sure to clear chat history?" onConfirm={async () => {
-                    const resp = await axios.post(`/llm/chat/history/clear`, {
-                        biz_id: biz_id,
-                        project_id: project,
-                    });
-                    // setMessages([])
-                    messageApi.success('Chat history cleared')
-                    loadHistoryMessage()
-                }}>
-                    <Button size='small' icon={<ClearOutlined />} ></Button>
-                </Popconfirm>
+                <Space>
+                    <Button size='small' icon={<PlusOutlined />} onClick={async () => {
+                        try {
+                            await createSession();
+                        } catch {
+                            messageApi.error('Failed to create session');
+                        }
+                    }} />
+                    <Button size='small' icon={<RedoOutlined />} onClick={loadHistoryMessage} />
+                    <Popconfirm title="Delete current session?" onConfirm={async () => {
+                        try {
+                            await deleteActiveSession();
+                            messageApi.success('Session deleted');
+                        } catch {
+                            messageApi.error('Failed to delete session');
+                        }
+                    }}>
+                        <Button size='small' icon={<DeleteOutlined />} danger disabled={!activeConversationKey} />
+                    </Popconfirm>
+                    {/* <Popconfirm title="Clear current chat view?" onConfirm={() => {
+                        setMessages([]);
+                    }}>
+                        <Button size='small' icon={<ClearOutlined />} />
+                    </Popconfirm> */}
+                </Space>
 
             </Flex>
             <Flex vertical gap="small">
 
-                {/* <div>
-                <h3>{locale.customProviderTitle}</h3>
-                <p>{locale.customProviderDesc}</p>
-            </div> */}
-                {/* <Flex gap="small">
-                <Button disabled={!isRequesting} onClick={abort}>
-                    {locale.abort}
-                </Button>
-                <Button onClick={addUserMessage}>{locale.addUserMessage}</Button>
-                <Button onClick={addAIMessage}>{locale.addAIMessage}</Button>
-                <Button onClick={addSystemMessage}>{locale.addSystemMessage}</Button>
-                <Button disabled={!messages.length} onClick={editLastMessage}>
-                    {locale.editLastMessage}
-                </Button>
-            </Flex> */}
+                <Conversations
+                    items={conversationItems}
+                    activeKey={activeConversationKey}
+                    groupable
+                    onActiveChange={(key) => {
+                        setActiveConversationKey(String(key || ''));
+                    }}
+                />
 
-                {/* 消息列表：显示所有聊天消息 */}
-                {/* Message list: display all chat messages */}
+                
 
                 <Bubble.List
                     role={roles(setMessage, loadHistoryMessage, thoughtChainItems, expandedKeys, setExpandedKeys)}
@@ -654,16 +812,37 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
                     onChange={setContent}
                     onCancel={abort}
                     placeholder={"Please ask me questions related to bioinformatics ..."}
-                    onSubmit={(nextContent) => {
+                    onSubmit={async (nextContent) => {
+                        const trimmed = (nextContent || '').trim();
+                        if (!trimmed) {
+                            return;
+                        }
+
+                        let active = sessionMap[activeConversationKey];
+                        if (!active) {
+                            try {
+                                const created = await createSession();
+                                if (!created) {
+                                    messageApi.error('Unable to create session');
+                                    return;
+                                }
+                                active = created;
+                            } catch {
+                                messageApi.error('Unable to create session');
+                                return;
+                            }
+                        }
+
                         setThoughtChainItems([])
                         setPermissionRequests([])
                         onRequest({
                             stream: true,
                             role: 'user',
-                            message: nextContent,
+                            message: trimmed,
                             biz_id: biz_id,
                             biz_type: biz_type,
-                            project_id: project,
+                            project_id: active.project_id || currentProjectId,
+                            session_id: active.id,
                             is_save_prompt: true,
                         });
                         setContent('');
