@@ -74,6 +74,49 @@ type PermissionRequestItem = {
     request: Record<string, unknown>;
 };
 
+function normalizeChunkPayload(payload: unknown): Record<string, unknown> | undefined {
+    if (!payload) {
+        return undefined;
+    }
+
+    if (typeof payload === 'string') {
+        try {
+            const parsed = JSON.parse(payload);
+            return parsed && typeof parsed === 'object' ? parsed as Record<string, unknown> : undefined;
+        } catch {
+            return undefined;
+        }
+    }
+
+    return typeof payload === 'object' ? payload as Record<string, unknown> : undefined;
+}
+
+function formatErrorEventMessage(payload: unknown): string {
+    if (typeof payload === 'string') {
+        return payload.trim();
+    }
+
+    const data = normalizeChunkPayload(payload);
+    if (!data) {
+        return '';
+    }
+
+    const detail = typeof data.detail === 'string' ? data.detail.trim() : '';
+    const error = typeof data.error === 'string' ? data.error.trim() : '';
+    const event = typeof data.event === 'string' ? data.event.trim() : '';
+
+    const parts = [detail, error, event && `event: ${event}`].filter(Boolean);
+    if (parts.length > 0) {
+        return parts.join('\n');
+    }
+
+    try {
+        return JSON.stringify(data, null, 2);
+    } catch {
+        return '';
+    }
+}
+
 function toSSEChunk(event: string, payload: unknown) {
     const safeEvent = (event || 'message').replace(/\n/g, '');
     const data = typeof payload === 'string' ? payload : JSON.stringify(payload ?? {});
@@ -425,9 +468,15 @@ class CustomProvider<
         }
 
         if (chunk?.event === "error") {
+            const errorMessage = formatErrorEventMessage(chunk?.data);
+            const previousContent = String(originMessage?.content || '');
             return {
                 think: finalizeLoadingThinkItems(originMessage?.think || [], 'error'),
-                content: originMessage?.content || '',
+                content: errorMessage
+                    ? previousContent
+                        ? `${previousContent}\n\n${errorMessage}`
+                        : errorMessage
+                    : previousContent,
                 role: 'assistant',
             } as ChatMessage;
         }
