@@ -10,7 +10,6 @@ import { CheckCircleOutlined, ClearOutlined, CodeOutlined, DeleteOutlined, EditO
 import { de } from '@faker-js/faker';
 import { useGlobalMessage } from '@/hooks/useGlobalMessage';
 import { Footer } from 'antd/es/layout/layout';
-import { sseClient } from '@/sse';
 const { Text } = Typography;
 
 // 类型定义：自定义聊天系统的输入输出和消息结构
@@ -37,164 +36,6 @@ interface CustomMessage {
 }
 interface CustomProviderOptions {
     setThoughtChainItems?: any
-}
-
-type WSIncomingEvent = {
-    event: string;
-    data: unknown;
-};
-
-type PermissionRequestItem = {
-    requestId: string;
-    sessionId: string;
-    kind: string;
-    requiresWriteConfirm: boolean;
-    fileName: string;
-    intention: string;
-    toolCallId: string;
-    diff: string;
-    newFileContents: string;
-    request: Record<string, unknown>;
-};
-
-function toPrettyJSON(value: unknown) {
-    try {
-        return JSON.stringify(value ?? {}, null, 2);
-    } catch {
-        return String(value ?? '');
-    }
-}
-
-function makeSessionId() {
-    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-        return crypto.randomUUID();
-    }
-    return `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
-}
-
-function toSSEChunk(event: string, payload: unknown) {
-    const safeEvent = (event || 'message').replace(/\n/g, '');
-    const data = typeof payload === 'string' ? payload : JSON.stringify(payload ?? {});
-    return `event:${safeEvent}\ndata:${data}\n\n`;
-}
-
-function createWSFetchAdapter(handlers?: {
-    onSessionCreated?: (sessionID: string) => void;
-    onEvent?: (event: WSIncomingEvent, sessionID: string) => void;
-}) {
-    const encoder = new TextEncoder();
-    let activeSessionId = '';
-    let unsubscribe: (() => void) | undefined;
-
-    const cleanup = () => {
-        if (unsubscribe) {
-            unsubscribe();
-            unsubscribe = undefined;
-        }
-    };
-
-    return async (
-        _url: Parameters<typeof fetch>[0],
-        options: XRequestOptions<any, any>,
-    ): Promise<Response> => {
-        cleanup();
-
-        const params = (options?.params || {}) as Record<string, unknown>;
-        const requestedSessionId =
-            typeof params.session_id === 'string' && params.session_id
-                ? params.session_id
-                : '';
-        const sessionId = requestedSessionId || makeSessionId();
-        activeSessionId = sessionId;
-        handlers?.onSessionCreated?.(sessionId);
-
-        const stream = new ReadableStream<Uint8Array>({
-            start(controller) {
-                let closed = false;
-
-                const closeStream = () => {
-                    if (closed) {
-                        return;
-                    }
-                    closed = true;
-                    cleanup();
-                    controller.close();
-                };
-
-                const onAbort = () => {
-                    sseClient.send({
-                        type: 'llm.chat.stop',
-                        session_id: sessionId,
-                        require_ack: false,
-                    });
-                    closeStream();
-                };
-
-                if (options?.signal) {
-                    if (options.signal.aborted) {
-                        onAbort();
-                        return;
-                    }
-                    options.signal.addEventListener('abort', onAbort, { once: true });
-                }
-
-                unsubscribe = sseClient.onMessage((raw: unknown) => {
-                    if (!raw || typeof raw !== 'object') {
-                        return;
-                    }
-
-                    const msg = raw as Record<string, unknown>;
-                    if (msg.type !== 'llm.event') {
-                        return;
-                    }
-
-                    const incomingSessionId =
-                        typeof msg.session_id === 'string' ? msg.session_id : '';
-                    if (!incomingSessionId || incomingSessionId !== activeSessionId) {
-                        return;
-                    }
-
-                    const evtName = typeof msg.event === 'string' ? msg.event : 'message';
-                    const evt: WSIncomingEvent = {
-                        event: evtName,
-                        data: msg.data,
-                    };
-
-                    handlers?.onEvent?.(evt, incomingSessionId);
-
-                    controller.enqueue(encoder.encode(toSSEChunk(evt.event, evt.data)));
-
-                    if (evt.event === 'completed' || evt.event === 'error') {
-                        controller.enqueue(encoder.encode('data:[DONE]\n\n'));
-                        closeStream();
-                    }
-                });
-
-                const sent = sseClient.send({
-                    type: 'llm.chat.start',
-                    session_id: sessionId,
-                    prompt: typeof params.message === 'string' ? params.message : '',
-                    biz_id: params.biz_id,
-                    biz_type: params.biz_type,
-                    project_id: params.project_id,
-                    is_save_prompt: params.is_save_prompt,
-                    require_ack: false,
-                });
-
-                if (!sent) {
-                    controller.error(new Error('Realtime socket is not connected.'));
-                    cleanup();
-                }
-            },
-        });
-
-        return new Response(stream, {
-            status: 200,
-            headers: {
-                'Content-Type': 'text/event-stream',
-            },
-        });
-    };
 }
 
 
@@ -251,7 +92,7 @@ class CustomProvider<
     // Transform message: process streaming response data
     transformMessage(info: any): ChatMessage {
         const { originMessage, chunk } = info || {};
-        // console.log('stream info:', originMessage, chunk);
+        // console.log('stream info:', info);
         if (chunk?.event == "status") {
             const chunkJson: any = JSON.parse(chunk.data);
             // this.setThoughtChainItems((prev: any) => [
@@ -289,11 +130,10 @@ class CustomProvider<
                 // 处理流式数据：解析JSON格式
                 // Process streaming data: parse JSON format
                 const chunkJson = JSON.parse(chunk.data);
-                console.log('parsed chunk data:', chunkJson);
                 const content = originMessage?.content || '';
                 return {
                     think: originMessage?.think || [],
-                    content: `${content}${chunkJson.deltaContent || ''}`,
+                    content: `${content}${chunkJson.content || ''}`,
                     role: 'assistant',
                 } as ChatMessage;
             } catch (error) {
@@ -345,7 +185,7 @@ const roles = (
                     <div style={{ display: 'flex' }}>
                         {/* <Footer content={content} status={status} id={key} /> */}
 
-                        {/* {content?.chat_history_id && <>
+                        {content?.chat_history_id && <>
                             <Popconfirm title="Are you sure to delete this message?" onConfirm={async () => {
                                 const resp = await axios.delete(`/llm/chat/history/del-by-chat-history-id/${content?.chat_history_id}`);
                                 loadHistoryMessage();
@@ -353,7 +193,7 @@ const roles = (
                             }}>
                                 <Button style={{ color: "red" }} type="text" size="small" icon={<DeleteOutlined />} />
                             </Popconfirm>
-                        </>} */}
+                        </>}
 
                         {/* {JSON.stringify(content)} */}
                         {/* <Button type="text" size="small" icon={<ReloadOutlined />} />
@@ -430,16 +270,16 @@ const useLocale = () => {
 };
 
 const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
-    const { project } = useSelector((state: any) => state.user)
+    const { baseURL, project } = useSelector((state: any) => state.user)
 
     const [content, setContent] = React.useState('');
     const locale = useLocale();
     const messageApi = useGlobalMessage()
     const [expandedKeys, setExpandedKeys] = React.useState<string[]>([]);
     const [thoughtChainItems, setThoughtChainItems] = React.useState<any>([]);
-    const [permissionRequests, setPermissionRequests] = React.useState<PermissionRequestItem[]>([]);
-    const activeSessionIdRef = React.useRef('');
     // const [defaultMessages, setDefaultMessages] = React.useState<any>([])
+    const BASE_URL = `${baseURL}/brave-api/llm/chat/stream`
+    // const BASE_URL = 'https://api.x.ant.design/api/custom_chat_provider_stream'
     const loadHistoryMessage = async () => {
         const resp = await axios.post(`/llm/chat/history`, {
             biz_id: biz_id,
@@ -458,96 +298,29 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
 
 
 
-
-    const handleBridgeEvent = React.useCallback((evt: WSIncomingEvent, incomingSessionId: string) => {
-        if (evt.event === 'permission.request' && evt.data && typeof evt.data === 'object') {
-            const request = evt.data as Record<string, unknown>;
-            const requiresWriteConfirm = Boolean(request.requires_write_confirm);
-            const requestId = typeof request.request_id === 'string' ? request.request_id : '';
-            const kind = typeof request.kind === 'string' ? request.kind : 'unknown';
-            const requestPayload =
-                request.request && typeof request.request === 'object'
-                    ? (request.request as Record<string, unknown>)
-                    : {};
-            const fileName = typeof requestPayload.fileName === 'string' ? requestPayload.fileName : '';
-            const intention = typeof requestPayload.intention === 'string' ? requestPayload.intention : '';
-            const toolCallId = typeof requestPayload.toolCallId === 'string' ? requestPayload.toolCallId : '';
-            const diff = typeof requestPayload.diff === 'string' ? requestPayload.diff : '';
-            const newFileContents = typeof requestPayload.newFileContents === 'string' ? requestPayload.newFileContents : '';
-            const sessionId =
-                typeof request.session_id === 'string'
-                    ? request.session_id
-                    : typeof request.copilot_session_id === 'string'
-                        ? request.copilot_session_id
-                        : incomingSessionId;
-
-            if (!requiresWriteConfirm || !requestId) {
-                return;
-            }
-
-            setPermissionRequests((prev) => {
-                if (prev.some((item) => item.requestId === requestId)) {
-                    return prev;
-                }
-                return [
-                    ...prev,
-                    {
-                        requestId,
-                        sessionId,
-                        kind,
-                        requiresWriteConfirm,
-                        fileName,
-                        intention,
-                        toolCallId,
-                        diff,
-                        newFileContents,
-                        request: requestPayload,
-                    },
-                ];
-            });
-            return;
-        }
-
-        if (evt.event === 'permission.decision' && evt.data && typeof evt.data === 'object') {
-            const request = evt.data as Record<string, unknown>;
-            const requestId = typeof request.request_id === 'string' ? request.request_id : '';
-            if (!requestId) {
-                return;
-            }
-            setPermissionRequests((prev) => prev.filter((item) => item.requestId !== requestId));
-        }
-    }, []);
-
-    const submitPermissionDecision = React.useCallback((item: PermissionRequestItem, approved: boolean) => {
-        const ok = sseClient.send({
-            type: 'llm.permission.decision',
-            session_id: item.sessionId || activeSessionIdRef.current,
-            request_id: item.requestId,
-            approved,
-            reason: approved ? '' : 'rejected by user',
-            require_ack: false,
-        });
-
-        if (!ok) {
-            messageApi.error('Realtime WS 未连接，无法提交权限确认');
-            return;
-        }
-
-        setPermissionRequests((prev) => prev.filter((req) => req.requestId !== item.requestId));
-    }, [messageApi]);
-
     // 使用自定义Provider：创建自定义聊天提供者实例
     // Use custom provider: create custom chat provider instance
     const [provider] = React.useState(
         new CustomProvider<CustomMessage, CustomInput, CustomOutput>({
-            request: XRequest('realtime://llm.chat.stream', {
+            // 'https://api.x.ant.design/api/custom_chat_provider_stream'
+            request: XRequest(BASE_URL, {
                 manual: true,
-                fetch: createWSFetchAdapter({
-                    onSessionCreated: (sessionID) => {
-                        activeSessionIdRef.current = sessionID;
-                    },
-                    onEvent: handleBridgeEvent,
-                }),
+                // fetch: async (
+                //     url: Parameters<typeof fetch>[0],
+                //     options: XRequestOptions<any, any>,
+                // ) => {
+                //     const response = await fetch(url, {
+                //         method: 'POST',
+                //         headers: { 'Content-Type': 'application/json' },
+                //         body: JSON.stringify(options.params || '{}'),
+                //     });
+                //     return response;
+                // },
+                // transformStream: new TransformStream<string, any>({
+                //     transform(chunk, controller) {
+                //         controller.enqueue(chunk);
+                //     },
+                // }),
             })
         }, { setThoughtChainItems }),
     );
@@ -575,12 +348,100 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
         //     },
         // ]
     });
-    
+    // console.log('chat messages:', messages);
+
+    // const addUserMessage = () => {
+    //     setMessages([
+    //         ...messages,
+    //         {
+    //             id: Date.now(),
+    //             message: { content: locale.addUserMessage, role: 'user' },
+    //             status: 'local',
+    //         },
+    //     ]);
+    // };
+
+    // const addAIMessage = () => {
+    //     setMessages([
+    //         ...messages,
+    //         {
+    //             id: Date.now(),
+    //             message: { content: locale.addAIMessage, role: 'assistant' },
+    //             status: 'success',
+    //         },
+    //     ]);
+    // };
+
+    // const addSystemMessage = () => {
+    //     setMessages([
+    //         ...messages,
+    //         {
+    //             id: Date.now(),
+    //             message: { role: 'system', content: locale.addSystemMessage },
+    //             status: 'success',
+    //         },
+    //     ]);
+    // };
+
+    // const editLastMessage = () => {
+    //     const lastMessage = messages[messages.length - 1];
+    //     setMessage(lastMessage.id, {
+    //         message: { role: lastMessage.message.role, content: locale.editSystemMessage },
+    //     });
+    // };
+
+    // const buildThoughtChainItems = (messageContent: any) => {
+    //     const items: ThoughtChainProps['items'] = [
+    //         {
+    //             key: 'query_databases',
+    //             title: 'Query Databases',
+    //             icon: false,
+    //             collapsible: true,
+    //             content: (
+    //                 <Flex gap="small" vertical>
+    //                     {messageContent?.map((item: any, index: any) => (
+    //                         <Text key={index} type="secondary">{item}</Text>
+
+    //                     ))}
+    //                     {/* <ThoughtChain.Item
+    //                 variant="solid"
+    //                 icon={<CodeOutlined />}
+    //                 title="Executing command"
+    //                 description="mkdir -p component"
+    //             />
+    //             <Text type="secondary">Creating files needed for new component</Text>
+    //             <ThoughtChain.Item
+    //                 variant="solid"
+    //                 icon={<EditOutlined />}
+    //                 title="Creating file"
+    //                 description="component/index.tsx"
+    //             />
+    //             <Text type="secondary">Creating Chinese description file for new component</Text>
+    //             <ThoughtChain.Item
+    //                 variant="solid"
+    //                 icon={<EditOutlined />}
+    //                 title="Creating file"
+    //                 description="component/index.zh-CN.md"
+    //             />
+    //             <Text type="secondary">Creating English description file for new component</Text>
+    //             <ThoughtChain.Item
+    //                 variant="solid"
+    //                 icon={<EditOutlined />}
+    //                 title="Creating file"
+    //                 description="component/index.en-US.md"
+    //             /> */}
+    //                 </Flex>
+    //             ),
+    //         },
+    //     ];
+
+    //     return items;
+    // }
 
 
-    // useEffect(() => {
-    //     loadHistoryMessage();
-    // }, [project])
+    useEffect(() => {
+        loadHistoryMessage();
+    }, [project])
 
     useImperativeHandle(ref, () => ({
         loadHistoryMessage
@@ -656,7 +517,6 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
                     placeholder={"Please ask me questions related to bioinformatics ..."}
                     onSubmit={(nextContent) => {
                         setThoughtChainItems([])
-                        setPermissionRequests([])
                         onRequest({
                             stream: true,
                             role: 'user',
@@ -669,58 +529,6 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
                         setContent('');
                     }}
                 />
-
-                {permissionRequests.length > 0 && (
-                    <Card size='small' title='Write Permission Requests'>
-                        <Flex vertical gap='small'>
-                            {permissionRequests.map((item) => (
-                                <Card key={item.requestId} size='small' type='inner'>
-                                    <Flex vertical gap='small'>
-                                        <Flex justify='space-between' align='center' wrap='wrap' gap='small'>
-                                            <Space wrap>
-                                                <Tag color='warning'>{item.kind}</Tag>
-                                                <Text type='secondary'>{item.requestId}</Text>
-                                            </Space>
-                                            <Space>
-                                                <Button size='small' type='primary' onClick={() => submitPermissionDecision(item, true)}>
-                                                    Approve
-                                                </Button>
-                                                <Button size='small' danger onClick={() => submitPermissionDecision(item, false)}>
-                                                    Deny
-                                                </Button>
-                                            </Space>
-                                        </Flex>
-
-                                        <Space wrap>
-                                            {!!item.fileName && <Tag color='blue'>file: {item.fileName}</Tag>}
-                                            {!!item.intention && <Tag color='geekblue'>intention: {item.intention}</Tag>}
-                                            {!!item.toolCallId && <Tag color='purple'>toolCallId: {item.toolCallId}</Tag>}
-                                        </Space>
-
-                                        {item.diff && (
-                                            <div>
-                                                <Text strong>diff</Text>
-                                                <XMarkdown content={`\n\`\`\`diff\n${item.diff}\n\`\`\``} />
-                                            </div>
-                                        )}
-
-                                        {item.newFileContents && (
-                                            <div>
-                                                <Text strong>newFileContents</Text>
-                                                <XMarkdown content={`\n\`\`\`python\n${item.newFileContents}\n\`\`\``} />
-                                            </div>
-                                        )}
-
-                                        <div>
-                                            <Text strong>request</Text>
-                                            <XMarkdown content={`\n\`\`\`json\n${toPrettyJSON(item.request)}\n\`\`\``} />
-                                        </div>
-                                    </Flex>
-                                </Card>
-                            ))}
-                        </Flex>
-                    </Card>
-                )}
             </Flex>
         </>
 
