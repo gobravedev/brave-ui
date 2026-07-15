@@ -89,7 +89,7 @@ export const getActiveProjectApi = () => http.get<ActiveProject>("/project/activ
 export const addProjectReportApi = (payload: AddProjectReportRequest) => http.post<ProjectReportDetailItem>("/project/add-project-report", payload)
 export const updateProjectReportApi = (payload: UpdateProjectReportRequest) => http.post<{ message: string }>("/project/update-project-report", payload)
 export const deleteProjectReportApi = (payload: DeleteProjectReportRequest) => http.post<{ message: string }>("/project/delete-project-report", payload)
-export const listProjectReportApi = (project_id: string) => http.get<ProjectReportItem[]>(`/project/list-project-report?project_id=${encodeURIComponent(project_id)}`)
+export const listProjectReportApi = () => http.get<ProjectReportItem[]>(`/project/list-project-report`)
 export const getProjectReportDetailApi = (id: string) => http.get<ProjectReportDetailItem>(`/project/project-report-detail?id=${encodeURIComponent(id)}`)
 export const uploadProjectReportImageApi = (file: File) => {
 	const formData = new FormData()
@@ -100,4 +100,4 @@ export const uploadProjectReportImageApi = (file: File) => {
 		},
 	})
 }
-
+	

@@ -22,9 +22,9 @@ const Project: FC<any> = () => {
     const [activeReportId, setActiveReportId] = useState<string | undefined>(activeProjectReportId || undefined)
 
     const loadProjectReports = async (preferReportID?: string) => {
-        if (!project) return;
+        // if (!project) return;
         setLoading(true)
-        const listResp = await listProjectReportApi(project)
+        const listResp = await listProjectReportApi()
         setLoading(false)
         const listData = Array.isArray(listResp.data) ? listResp.data : []
 
