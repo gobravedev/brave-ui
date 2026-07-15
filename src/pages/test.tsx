@@ -44,6 +44,27 @@ type WSIncomingEvent = {
     data: unknown;
 };
 
+type PermissionRequestItem = {
+    requestId: string;
+    sessionId: string;
+    kind: string;
+    requiresWriteConfirm: boolean;
+    fileName: string;
+    intention: string;
+    toolCallId: string;
+    diff: string;
+    newFileContents: string;
+    request: Record<string, unknown>;
+};
+
+function toPrettyJSON(value: unknown) {
+    try {
+        return JSON.stringify(value ?? {}, null, 2);
+    } catch {
+        return String(value ?? '');
+    }
+}
+
 function makeSessionId() {
     if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
         return crypto.randomUUID();
@@ -57,7 +78,10 @@ function toSSEChunk(event: string, payload: unknown) {
     return `event:${safeEvent}\ndata:${data}\n\n`;
 }
 
-function createWSFetchAdapter() {
+function createWSFetchAdapter(handlers?: {
+    onSessionCreated?: (sessionID: string) => void;
+    onEvent?: (event: WSIncomingEvent, sessionID: string) => void;
+}) {
     const encoder = new TextEncoder();
     let activeSessionId = '';
     let unsubscribe: (() => void) | undefined;
@@ -82,6 +106,7 @@ function createWSFetchAdapter() {
                 : '';
         const sessionId = requestedSessionId || makeSessionId();
         activeSessionId = sessionId;
+        handlers?.onSessionCreated?.(sessionId);
 
         const stream = new ReadableStream<Uint8Array>({
             start(controller) {
@@ -134,6 +159,8 @@ function createWSFetchAdapter() {
                         event: evtName,
                         data: msg.data,
                     };
+
+                    handlers?.onEvent?.(evt, incomingSessionId);
 
                     controller.enqueue(encoder.encode(toSSEChunk(evt.event, evt.data)));
 
@@ -410,6 +437,8 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
     const messageApi = useGlobalMessage()
     const [expandedKeys, setExpandedKeys] = React.useState<string[]>([]);
     const [thoughtChainItems, setThoughtChainItems] = React.useState<any>([]);
+    const [permissionRequests, setPermissionRequests] = React.useState<PermissionRequestItem[]>([]);
+    const activeSessionIdRef = React.useRef('');
     // const [defaultMessages, setDefaultMessages] = React.useState<any>([])
     const loadHistoryMessage = async () => {
         const resp = await axios.post(`/llm/chat/history`, {
@@ -429,13 +458,96 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
 
 
 
+
+    const handleBridgeEvent = React.useCallback((evt: WSIncomingEvent, incomingSessionId: string) => {
+        if (evt.event === 'permission.request' && evt.data && typeof evt.data === 'object') {
+            const request = evt.data as Record<string, unknown>;
+            const requiresWriteConfirm = Boolean(request.requires_write_confirm);
+            const requestId = typeof request.request_id === 'string' ? request.request_id : '';
+            const kind = typeof request.kind === 'string' ? request.kind : 'unknown';
+            const requestPayload =
+                request.request && typeof request.request === 'object'
+                    ? (request.request as Record<string, unknown>)
+                    : {};
+            const fileName = typeof requestPayload.fileName === 'string' ? requestPayload.fileName : '';
+            const intention = typeof requestPayload.intention === 'string' ? requestPayload.intention : '';
+            const toolCallId = typeof requestPayload.toolCallId === 'string' ? requestPayload.toolCallId : '';
+            const diff = typeof requestPayload.diff === 'string' ? requestPayload.diff : '';
+            const newFileContents = typeof requestPayload.newFileContents === 'string' ? requestPayload.newFileContents : '';
+            const sessionId =
+                typeof request.session_id === 'string'
+                    ? request.session_id
+                    : typeof request.copilot_session_id === 'string'
+                        ? request.copilot_session_id
+                        : incomingSessionId;
+
+            if (!requiresWriteConfirm || !requestId) {
+                return;
+            }
+
+            setPermissionRequests((prev) => {
+                if (prev.some((item) => item.requestId === requestId)) {
+                    return prev;
+                }
+                return [
+                    ...prev,
+                    {
+                        requestId,
+                        sessionId,
+                        kind,
+                        requiresWriteConfirm,
+                        fileName,
+                        intention,
+                        toolCallId,
+                        diff,
+                        newFileContents,
+                        request: requestPayload,
+                    },
+                ];
+            });
+            return;
+        }
+
+        if (evt.event === 'permission.decision' && evt.data && typeof evt.data === 'object') {
+            const request = evt.data as Record<string, unknown>;
+            const requestId = typeof request.request_id === 'string' ? request.request_id : '';
+            if (!requestId) {
+                return;
+            }
+            setPermissionRequests((prev) => prev.filter((item) => item.requestId !== requestId));
+        }
+    }, []);
+
+    const submitPermissionDecision = React.useCallback((item: PermissionRequestItem, approved: boolean) => {
+        const ok = sseClient.send({
+            type: 'llm.permission.decision',
+            session_id: item.sessionId || activeSessionIdRef.current,
+            request_id: item.requestId,
+            approved,
+            reason: approved ? '' : 'rejected by user',
+            require_ack: false,
+        });
+
+        if (!ok) {
+            messageApi.error('Realtime WS 未连接，无法提交权限确认');
+            return;
+        }
+
+        setPermissionRequests((prev) => prev.filter((req) => req.requestId !== item.requestId));
+    }, [messageApi]);
+
     // 使用自定义Provider：创建自定义聊天提供者实例
     // Use custom provider: create custom chat provider instance
     const [provider] = React.useState(
         new CustomProvider<CustomMessage, CustomInput, CustomOutput>({
             request: XRequest('realtime://llm.chat.stream', {
                 manual: true,
-                fetch: createWSFetchAdapter(),
+                fetch: createWSFetchAdapter({
+                    onSessionCreated: (sessionID) => {
+                        activeSessionIdRef.current = sessionID;
+                    },
+                    onEvent: handleBridgeEvent,
+                }),
             })
         }, { setThoughtChainItems }),
     );
@@ -544,6 +656,7 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
                     placeholder={"Please ask me questions related to bioinformatics ..."}
                     onSubmit={(nextContent) => {
                         setThoughtChainItems([])
+                        setPermissionRequests([])
                         onRequest({
                             stream: true,
                             role: 'user',
@@ -556,6 +669,58 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
                         setContent('');
                     }}
                 />
+
+                {permissionRequests.length > 0 && (
+                    <Card size='small' title='Write Permission Requests'>
+                        <Flex vertical gap='small'>
+                            {permissionRequests.map((item) => (
+                                <Card key={item.requestId} size='small' type='inner'>
+                                    <Flex vertical gap='small'>
+                                        <Flex justify='space-between' align='center' wrap='wrap' gap='small'>
+                                            <Space wrap>
+                                                <Tag color='warning'>{item.kind}</Tag>
+                                                <Text type='secondary'>{item.requestId}</Text>
+                                            </Space>
+                                            <Space>
+                                                <Button size='small' type='primary' onClick={() => submitPermissionDecision(item, true)}>
+                                                    Approve
+                                                </Button>
+                                                <Button size='small' danger onClick={() => submitPermissionDecision(item, false)}>
+                                                    Deny
+                                                </Button>
+                                            </Space>
+                                        </Flex>
+
+                                        <Space wrap>
+                                            {!!item.fileName && <Tag color='blue'>file: {item.fileName}</Tag>}
+                                            {!!item.intention && <Tag color='geekblue'>intention: {item.intention}</Tag>}
+                                            {!!item.toolCallId && <Tag color='purple'>toolCallId: {item.toolCallId}</Tag>}
+                                        </Space>
+
+                                        {item.diff && (
+                                            <div>
+                                                <Text strong>diff</Text>
+                                                <XMarkdown content={`\n\`\`\`diff\n${item.diff}\n\`\`\``} />
+                                            </div>
+                                        )}
+
+                                        {item.newFileContents && (
+                                            <div>
+                                                <Text strong>newFileContents</Text>
+                                                <XMarkdown content={`\n\`\`\`python\n${item.newFileContents}\n\`\`\``} />
+                                            </div>
+                                        )}
+
+                                        <div>
+                                            <Text strong>request</Text>
+                                            <XMarkdown content={`\n\`\`\`json\n${toPrettyJSON(item.request)}\n\`\`\``} />
+                                        </div>
+                                    </Flex>
+                                </Card>
+                            ))}
+                        </Flex>
+                    </Card>
+                )}
             </Flex>
         </>
 
