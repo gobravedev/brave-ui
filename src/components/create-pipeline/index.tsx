@@ -167,6 +167,7 @@ import { useSelector } from "react-redux"
 import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 import { ActionDispatcher } from "@/llmv2/dispatcher"
 import { invoke } from "@/core/ui-system/invokeV2"
+import { http } from "@/api/client/http"
 const SoftwareContent: FC<any> = ({ data, form }) => {
     const [templete, setTemplete] = useState<any>()
     const [containers, setContainers] = useState<any>([])
@@ -762,7 +763,9 @@ export const CreateOrUpdatePipelineV2: FC<any> = ({ component_id, structure, cal
 
         console.log(params)
         try {
-            const resp = await axios.post("/save-pipeline", params)
+            // const resp = await axios.post("/save-pipeline", params)
+            const resp = await http.post(`/workflow/createscript`,params)
+            
             console.log(resp)
             setLoading(false)
             if (callback) {
@@ -840,7 +843,6 @@ export const CreateOrUpdatePipelineV2: FC<any> = ({ component_id, structure, cal
                 </Button>
             </Flex>
             <Form form={form} >
-
 
                 <Form.Item name={"component_name"} label="Component Name" rules={[{ required: true, message: 'Please input component name!' }]}>
                     <Input ></Input>
