@@ -127,7 +127,7 @@ const EditParamsPanel: FC<any> = () => {
 
 
     return <>
-        {/* {JSON.stringify(relation)} */}
+        {/* {JSON.stringify(requestParam)} */}
         {/* {relationId} */}
         {/* {JSON.stringify(params.formJson)} */}
         {/* {type} - {bizKey} */}

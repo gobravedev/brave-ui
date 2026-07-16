@@ -2,7 +2,7 @@ import axios from "axios"
 import { createContext, FC, useContext, useEffect, useMemo, useRef, useState } from "react"
 import { useSideViewContext } from "../side/SideViewContext"
 import { useComponentStore } from "@/store-zustand/components"
-import { getWorkflowFormApi } from "@/api/workflow"
+import { getScriptFormApi, getWorkflowFormApi } from "@/api/workflow"
 import { useSelector } from "react-redux"
 import { editNodeParamsApi, editParamsV2Api } from "@/api/analysis"
 
@@ -23,6 +23,8 @@ export const RenderProvider: FC<any> = ({ children }) => {
     const [resultTableList, setResultTableList] = useState<any>()
     const [toolsPanelView, setToolsPanelView] = useState<any>("inputFileComponent")
     const [analysisId, setAnalysisId] = useState<any>(null)
+    const [script, setScript] = useState<any>(null)
+
     const [analysisNodeId, setAnalysisNodeId] = useState<any>(null)
 
     // const [formParam, setFormParam] = useState<FromParamType | null>(null)
@@ -101,6 +103,7 @@ export const RenderProvider: FC<any> = ({ children }) => {
 
         }
         const requestParams = {
+            analysis_type:"workflow",
             component_id: relation.component_id,
             data_component_ids: JSON.stringify(dataComponentIds),
             // component_parent_ids_map: componentParentIdsMap,
@@ -115,8 +118,8 @@ export const RenderProvider: FC<any> = ({ children }) => {
     }
     const loadToolsForm = async (tools_id: any) => {
         const resp = await getWorkflowFormApi({
-            workflowId: tools_id,
-            projectId:project_id
+            workflowId: tools_id
+            // projectId: project_id
         })
         // const resp = await axios.get(`/tools/get-from-json/${tools_id}`)
         // return resp.data
@@ -175,7 +178,6 @@ export const RenderProvider: FC<any> = ({ children }) => {
                 if (!data || force) {
                     data = await loadToolsForm(relation.relation_id)
                     // setFormData(data)
-
                 }
                 const params = buildRequestParams()
                 setRequestParam({
@@ -185,27 +187,42 @@ export const RenderProvider: FC<any> = ({ children }) => {
                 })
 
 
+            } else if (script) {
+
+                const resp = await getScriptFormApi(script.component_id)
+                console.log(resp)
+                setRequestParam({
+                    requestParam:{
+                        script_id: script.component_id,
+                        analysis_type:"script"
+                    },
+                    dataMap: { ...resp.data.analysis_result },
+                    formJson: resp.data.formJson,
+                })
+
             }
         }
 
     }
     useEffect(() => {
-        register("forms", "analysis", { reload: () => {
-            // debugger
-            console.log("reload analysis form")
-            loadParams(true)
-         } });
+        register("forms", "analysis", {
+            reload: () => {
+                // debugger
+                console.log("reload analysis form")
+                loadParams(true)
+            }
+        });
         return () => {
             // debugger
             unregister("forms", "analysis");
         }
 
 
-    }, [analysisNodeId, analysisId, sideView,relation]);
+    }, [analysisNodeId, analysisId, sideView, relation]);
 
     useEffect(() => {
         loadParams()
-    }, [relation, sideView, analysisId, analysisNodeId])
+    }, [relation, sideView, analysisId, analysisNodeId, script])
 
     const addOpenAnalysis = (analysis: any) => {
         if (openAnalysis.find((item: any) => item.analysis_id === analysis.analysis_id)) {
@@ -245,7 +262,9 @@ export const RenderProvider: FC<any> = ({ children }) => {
                 setAnalysisNodeId,
                 analysisNodeId,
                 formStatus,
-                setFormStatus
+                setFormStatus,
+                setScript,
+                script
 
             }}
         >

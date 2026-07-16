@@ -31,7 +31,7 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
     const [controllerVersion, setControllerVersion] = useState<"V1" | "V2" | "V3">("V2")
     const messageApi = useGlobalMessage()
     const { project } = useSelector((state: any) => state.user);
-    const { setAnalysisId, analysisNodeId, formStatus, setFormStatus, analysisId } = useStoreRender()
+    const { setAnalysisId, analysisNodeId, formStatus, setFormStatus, analysisId,script } = useStoreRender()
 
     // const [jobStatus, setJobStatus] = useState<string>(job_status )
     // useEffect(() => {
@@ -108,7 +108,8 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                 V2: `/analysis/controllerV2`,
                 V3: `/analysis/controllerV3`,
             }
-            const controllerPath = controllerPathMap[controllerVersion]
+            const controllerPath = script?"/analysis/controller-script" :controllerPathMap[controllerVersion]
+
             const resp = await http.post(controllerPath, {
                 request_param: requestParams,
                 save: save,
@@ -371,13 +372,14 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                         <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid" onClick={() => {
                             saveUpstreamAnalysis(false)
                         }}>Parameters</Button>
-                        {showCreate &&
+
+                        {/* {showCreate &&
                             <Popconfirm title="Are you sure to create a new analysis?"
                                 onConfirm={createAnalysis}
                             >
                                 <Button disabled={formStatus == "running"} size="small" color="orange" variant="solid" onClick={() => form.setFieldValue("analysis_id", undefined)}>Copy</Button>
                             </Popconfirm>
-                        }
+                        } */}
                     </Space>
 
                     {/* <Space>

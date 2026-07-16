@@ -83,7 +83,7 @@ const App: React.FC = () => {
     const { t, locale } = useI18n();
     const screens = Grid.useBreakpoint();
     const isMobileLayout = !screens.md;
-    const appHeaderHeight = 64+16;
+    const appHeaderHeight = 64 + 16;
     const sidePanelHeight = `calc(100dvh - ${appHeaderHeight}px)`;
 
     const isDark = theme === 'dark';
@@ -330,6 +330,13 @@ const App: React.FC = () => {
                 zh_CN: "工具",
                 en_US: "Tools"
             }
+        }, {
+            key: "/c/scripts",
+            icon: "code",
+            label: {
+                zh_CN: "脚本",
+                en_US: "Scripts"
+            }
         },
 
 
@@ -456,13 +463,6 @@ const App: React.FC = () => {
                         zh_CN: "任务",
                         en_US: "Tasks"
                     },
-                }, {
-                    key: "/c/scripts",
-                    icon: "code",
-                    label: {
-                        zh_CN: "脚本",
-                        en_US: "Scripts"
-                    }
                 }, {
                     key: "/c/file",
                     icon: "files",

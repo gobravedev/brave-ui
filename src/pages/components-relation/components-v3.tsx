@@ -8,21 +8,33 @@ import { useModal } from "@/hooks/useModal"
 import axios from "axios"
 import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 import { ApartmentOutlined, CopyOutlined, DeleteOutlined } from "@ant-design/icons"
+import { useSideViewContext } from "@/context/side/SideViewContext"
+import { useStoreRender } from "@/context/render/RenderProvider"
 
 const ComponentsV3: FC<any> = ({ component_type, navigateView }) => {
     const { modal, openModal, closeModal } = useModal();
     // const [segmentedOptions, setSegmentedOptions] = useState<any[]>([])
     // const { component_type } = useParams()
     const tabeRef = useRef<any>(null)
-    const [component, setComponent] = useState<any>()
+    // const [component, setComponent] = useState<any>()
     const loadTable = () => {
         tabeRef.current?.reload()
     }
+    const { setSideView,  setSideOptions } = useSideViewContext();
+    const { script, setScript, clear } = useStoreRender()
+
     let [segmentedOptions, setSegmentedOptions] = useState<any[]>([])
     const [panel, setPanel] = useState<string>()
 
     useEffect(() => {
-        setComponent(undefined)
+
+        return () => {
+            clear()
+        }
+    }, [script])
+
+    useEffect(() => {
+        // setScript(undefined)
         if (component_type == "script") {
             setPanel("scriptView")
             setSegmentedOptions([
@@ -36,6 +48,9 @@ const ComponentsV3: FC<any> = ({ component_type, navigateView }) => {
                 }, {
                     label: "Code",
                     value: "scriptCode"
+                }, {
+                    label: "Analysis",
+                    value: "analysisList"
                 }
             ])
         } else if (component_type == "file") {
@@ -56,7 +71,26 @@ const ComponentsV3: FC<any> = ({ component_type, navigateView }) => {
             ])
         }
     }, [component_type])
-
+    useEffect(() => {
+        setSideOptions([
+            {
+                label: "LLM",
+                value: "llm-card"
+            }, {
+                label: "Container App",
+                value: "appSessionPage"
+            },
+            {
+                label: "Parameters",
+                value: "editParamsPanel"
+            }
+        ])
+        setSideView("editParamsPanel")
+        return () => {
+            setSideOptions([])
+            setSideView("llm-card")
+        }
+    }, [])
     const message = useGlobalMessage()
     // useEffect(() => {
     //     if (!component?.component_id && panel != "structure") {
@@ -70,6 +104,7 @@ const ComponentsV3: FC<any> = ({ component_type, navigateView }) => {
 
 
     return <div >
+        {/* {JSON.stringify(script)} */}
         <Row gutter={[16, 16]}>
             <Col lg={6} sm={6} xs={24}>
                 <Card
@@ -87,7 +122,7 @@ const ComponentsV3: FC<any> = ({ component_type, navigateView }) => {
                             //     }
                             // })
                             setPanel("createOrUpdateComponent")
-                            setComponent({})
+                            setScript({})
                         }}>
                             Create
                         </Button>
@@ -97,24 +132,24 @@ const ComponentsV3: FC<any> = ({ component_type, navigateView }) => {
                     <ComponentsPage
                         ref={tabeRef}
                         component_type={component_type}
-                        setComponent={setComponent} ></ComponentsPage>
+                        setComponent={setScript} ></ComponentsPage>
                 </Card>
 
             </Col>
             <Col lg={18} sm={18} xs={24}>
                 {/* {JSON.stringify(component)} */}
-                {component ? <>
+                {script ? <>
 
 
                     <Card
                         size="small"
                         title={<Space>
-                            {component?.component_name || ''}
-                            {component?.component_id && <>
+                            {script?.component_name || ''}
+                            {script?.component_id && <>
 
                                 <Popconfirm title="Copy component ?" onConfirm={async (e: any) => {
                                     e.stopPropagation()
-                                    await axios.post(`/copy-component/${component.component_id}`)
+                                    await axios.post(`/copy-component/${script.component_id}`)
                                     message.success("Component copied!")
                                     // reload()
                                     loadTable()
@@ -135,7 +170,7 @@ const ComponentsV3: FC<any> = ({ component_type, navigateView }) => {
                             {/* <Button size="small" color="primary" variant="solid" onClick={() => navigateView("toolsCard")}>Back</Button> */}
 
                             <Popconfirm title="Are you sure to delete this component?" onConfirm={async (e: any) => {
-                                await axios.delete(`/delete-component/${component.component_id}`)
+                                await axios.delete(`/delete-component/${script.component_id}`)
                                 message.success("Component deleted!")
                                 setPanel("deleted")
                                 // reload()
@@ -149,13 +184,13 @@ const ComponentsV3: FC<any> = ({ component_type, navigateView }) => {
                             </Popconfirm>
 
 
-                            {component?.component_id &&
+                            {script?.component_id &&
                                 <>
                                     <ApartmentOutlined style={{ cursor: "pointer" }} onClick={(e) => {
                                         e.stopPropagation()
                                         openModal("componentRelation", {
-                                            component_id: component.component_id,
-                                            component_name: component.component_name,
+                                            component_id: script.component_id,
+                                            component_name: script.component_name,
                                         })
                                     }} />
                                     <Segmented size="small" value={panel}
@@ -169,13 +204,13 @@ const ComponentsV3: FC<any> = ({ component_type, navigateView }) => {
                             <ComponentsDetailsRender
                                 callback={loadTable}
                                 view={panel}
-                                component_id={component.component_id}
-                                component={component}
+                                component_id={script.component_id}
+                                component={script}
                                 openModal={openModal}
                                 structure={{
                                     component_type: component_type,
                                 }}
-                                // component_type={component_type}
+                            // component_type={component_type}
                             ></ComponentsDetailsRender>
 
                         </> : <Skeleton active></Skeleton>}

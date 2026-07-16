@@ -209,7 +209,7 @@ const SoftwareContent: FC<any> = ({ data, form }) => {
     </>
 }
 const ScriptContent: FC<any> = ({ data, form }) => {
-    const [templete, setTemplete] = useState<any>()
+    // const [templete, setTemplete] = useState<any>()
     // const [containers, setContainers] = useState<any>([])
 
     // const loadData = async () => {
@@ -219,13 +219,13 @@ const ScriptContent: FC<any> = ({ data, form }) => {
     // }
 
 
-    useEffect(() => {
-        // loadData()
-        if (!data?.componemt_id) {
-            // console.log(scriptTemplete)
-            setTemplete(JSON.stringify(scriptTemplete, null, 2))
-        }
-    }, [])
+    // useEffect(() => {
+    //     // loadData()
+    //     if (!data?.componemt_id) {
+    //         // console.log(scriptTemplete)
+    //         setTemplete(JSON.stringify(scriptTemplete, null, 2))
+    //     }
+    // }, [])
     return <>
         <Form.Item
             name={"container_template_id"}
@@ -267,8 +267,8 @@ const ScriptContent: FC<any> = ({ data, form }) => {
                 { label: "shell", value: "shell" },
                 { label: "R", value: "r" }]}></Select>
         </Form.Item>
-        <Form.Item name={"io_schema"} label="io_schema" rules={[{ required: true, message: 'Please input content!' }]}>
-            <TextAreaComp templete={templete}></TextAreaComp>
+        <Form.Item  name={"io_schema"} label="io_schema">
+            <TextArea ></TextArea>
         </Form.Item>
         <Form.Item name={"content"} label="content" >
             {/* <TextAreaComp templete={""}></TextAreaComp> */}

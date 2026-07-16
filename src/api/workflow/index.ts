@@ -2,7 +2,7 @@ import { http } from "@/api/client/http";
 
 export interface GetWorkflowFormParams {
 	workflowId: string;
-	projectId: string;
+	// projectId: string;
 }
 
 export interface WorkflowFormResponse {
@@ -12,8 +12,12 @@ export interface WorkflowFormResponse {
 }
 
 export const getWorkflowFormApi = (params: GetWorkflowFormParams) => {
-	const { workflowId, projectId } = params;
+	const { workflowId } = params;
 	return http.get<WorkflowFormResponse>(
-		`/workflows/${encodeURIComponent(workflowId)}/form?projectId=${encodeURIComponent(projectId)}`
+		`/workflows/${encodeURIComponent(workflowId)}/form`
 	);
 };
+
+export const getScriptFormApi = (scriptId:any) =>{
+	return http.get(`/script/${scriptId}/form`)
+}
