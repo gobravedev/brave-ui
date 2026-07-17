@@ -37,9 +37,12 @@ const ComponentsV3: FC<any> = ({ component_type, navigateView }) => {
     useEffect(() => {
         // setScript(undefined)
         if (component_type == "script") {
-            setPanel("scriptView")
+            setPanel("analysisNodePage")
             setSegmentedOptions([
                 {
+                    label: "AnalysisNode",
+                    value: "analysisNodePage"
+                },{
                     label: "Script View",
                     value: "scriptView"
                 },
@@ -49,9 +52,6 @@ const ComponentsV3: FC<any> = ({ component_type, navigateView }) => {
                 }, {
                     label: "Code",
                     value: "scriptCode"
-                }, {
-                    label: "AnalysisNode",
-                    value: "analysisNodePage"
                 }
             ])
         } else if (component_type == "file") {

@@ -463,7 +463,7 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                     }
                 ]} />
 
-                <Space>
+                {!script && <Space>
                     <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid"
                         onClick={async () => {
                             const values = await form.validateFields()
@@ -488,7 +488,8 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                         saveUpstreamAnalysisOld(false)
                     }}>Old Parameters</Button> */}
 
-                </Space>
+                </Space>}
+
             </Form>
         </Spin>
 

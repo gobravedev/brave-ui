@@ -1142,7 +1142,7 @@ const App: React.FC = () => {
                                             options={sideOptions} />
                                     }>
 
-                                    <div style={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
+                                    <div style={{ flex: 1, minHeight: 0, overflowY: 'auto',overflowX: 'hidden' }}>
                                         <ViewResolver view={sideView} view_mode={"card"}></ViewResolver>
                                     </div>
 

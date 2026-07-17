@@ -6,6 +6,7 @@ import { useAnalysisNodePageQuery } from "@/hooks/usePaginationV2";
 import type { AnalysisNodeItem } from "@/api/analysis";
 import { useStoreRender } from "@/context/render/RenderProvider";
 import AnalysisNodeDetails from "./analysis-nodes-report/analysis-node-details";
+import { useComponentStore } from "@/store-zustand/components";
 
 const { Text } = Typography;
 
@@ -58,8 +59,8 @@ const AnalysisNodePage = ({
 }: AnalysisNodePageProps) => {
 	const [selectedId, setSelectedID] = useState<string>();
 	const selectable = Boolean(onOk || onCancel);
-	const { setAnalysisNodeId } = useStoreRender()
-	const [nodeID,setNodeId] = useState<any>()
+	const { setAnalysisNodeId, analysisNodeId } = useStoreRender()
+	// const [nodeID,setNodeId] = useState<any>()
 	const columns: ColumnsType<AnalysisNodeItem> = [
 		{
 			title: "Node Name",
@@ -126,8 +127,8 @@ const AnalysisNodePage = ({
 			width: 120,
 			render: (_: unknown, record) => (
 				<Button type="link" onClick={() => {
-					setAnalysisNodeId(record.analysis_node_id)
-					setNodeId(record.id)
+					setAnalysisNodeId(record.id)
+					// setNodeId(record.id)
 				}}>View</Button>
 			)
 		}
@@ -205,6 +206,28 @@ const AnalysisNodePage = ({
 			close();
 		}
 	};
+	const { register, unregister } = useComponentStore();
+
+
+	const instanceNode = useMemo(() => {
+		return {
+			analysisStarted: (args: any) => {
+				refetch()
+			},
+			analysisDone: (args: any) => {
+				refetch()
+			}
+
+		}
+	}, [])
+	useEffect(() => {
+		register("analysis", "*", instanceNode);
+		return () => {
+			unregister("analysis", "*", instanceNode);
+		}
+	}, []);
+
+
 
 	return (
 		<Card
@@ -274,10 +297,14 @@ const AnalysisNodePage = ({
 				</Flex>
 			)}
 
-			{nodeID &&<AnalysisNodeDetails analysis_node_id={nodeID}></AnalysisNodeDetails> }
-			
+			{analysisNodeId && <AnalysisNodeDetails analysis_node_id={analysisNodeId}></AnalysisNodeDetails>}
+
 		</Card>
 	);
 };
 
 export default AnalysisNodePage;
+function setNodeId(id: string) {
+	throw new Error("Function not implemented.");
+}
+

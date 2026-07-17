@@ -360,7 +360,7 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                             <Flex vertical gap={4}>
                                 <Typography.Text type="secondary">node: {selectedSampleDetail.node?.node_id}</Typography.Text>
                                 <Typography.Text type="secondary">
-                                    analysis_node_id: {selectedSampleDetail.node?.analysis_node_id}
+                                    analysis_node_id: {selectedSampleDetail.node?.id}
                                 </Typography.Text>
 
                                 <Typography.Text type="secondary">

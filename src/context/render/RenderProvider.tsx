@@ -54,6 +54,7 @@ export const RenderProvider: FC<any> = ({ children }) => {
         }
     }, [])
     const { register, unregister } = useComponentStore();
+  
     useEffect(() => {
         if (analysisId) {
             register("analysis", analysisId, instance);
