@@ -14,6 +14,11 @@ import type {
 	PageResponse,
 } from "@/api/data";
 import {
+	pageAnalysisNodeByProjectApi,
+	type AnalysisNodeItem,
+	type AnalysisNodePageQuery,
+} from "@/api/analysis";
+import {
 	pageAppSessionApi,
 	pageContainerEventApi,
 	pageContainerImageApi,
@@ -239,6 +244,22 @@ export const useSampleProjectPageQuery = (
 		query,
 		queryFn: async (payload) => {
 			const response = await pageSampleByProjectApi(payload);
+			return response.data;
+		},
+		initialPageSize: 10,
+		...options,
+	});
+};
+
+export const useAnalysisNodePageQuery = (
+	query: AnalysisNodePageQuery,
+	options?: Omit<UsePageQueryOptions<AnalysisNodeItem, AnalysisNodePageQuery>, "queryKey" | "query" | "endpoint" | "queryFn">
+) => {
+	return usePageQuery<AnalysisNodeItem, AnalysisNodePageQuery>({
+		queryKey: ["analysis-node-page"],
+		query,
+		queryFn: async (payload) => {
+			const response = await pageAnalysisNodeByProjectApi(payload);
 			return response.data;
 		},
 		initialPageSize: 10,

@@ -148,6 +148,7 @@ export const RenderProvider: FC<any> = ({ children }) => {
         return {
             requestParam: resp.data.request_param,
             formJson: resp.data.formJson,
+            dataMap:resp.data.analysis_result,
             // databases: resp.data.databases,
             status: resp.data.status,
         }

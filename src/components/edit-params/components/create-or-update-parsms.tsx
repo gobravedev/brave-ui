@@ -31,7 +31,7 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
     const [controllerVersion, setControllerVersion] = useState<"V1" | "V2" | "V3">("V2")
     const messageApi = useGlobalMessage()
     const { project } = useSelector((state: any) => state.user);
-    const { setAnalysisId, analysisNodeId, formStatus, setFormStatus, analysisId,script } = useStoreRender()
+    const { setAnalysisId, analysisNodeId, setAnalysisNodeId, formStatus, setFormStatus, analysisId, script } = useStoreRender()
 
     // const [jobStatus, setJobStatus] = useState<string>(job_status )
     // useEffect(() => {
@@ -53,36 +53,36 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
         }
         return requestParams
     }
-    const createAnalysis = async () => {
-        const values = await form.validateFields()
-        const requestParams = getRequestParams(values)
-        delete requestParams.analysis_id
-        console.log(requestParams)
-        try {
-            setLoading(true)
+    // const createAnalysis = async () => {
+    //     const values = await form.validateFields()
+    //     const requestParams = getRequestParams(values)
+    //     delete requestParams.analysis_id
+    //     console.log(requestParams)
+    //     try {
+    //         setLoading(true)
 
-            const resp: any = await axios.post(`/fast-api/analysis-controller`, {
-                request_param: requestParams,
-                is_report: true,
-                save: true,
-                is_submit: false,
-            })
-            setLoading(false)
-            // setFilePlot(resp.data)
-            // setAnalysisParams(resp.data)
-            console.log(resp)
+    //         const resp: any = await axios.post(`/fast-api/analysis-controller`, {
+    //             request_param: requestParams,
+    //             is_report: true,
+    //             save: true,
+    //             is_submit: false,
+    //         })
+    //         setLoading(false)
+    //         // setFilePlot(resp.data)
+    //         // setAnalysisParams(resp.data)
+    //         console.log(resp)
 
-            messageApi.success("Created Successfully!")
-            if (callback) {
-                callback()
-            }
-        } catch (error: any) {
-            console.log(error)
-            if (error.response?.data) {
-                messageApi.error(error.response.data.detail)
-            }
-        }
-    }
+    //         messageApi.success("Created Successfully!")
+    //         if (callback) {
+    //             callback()
+    //         }
+    //     } catch (error: any) {
+    //         console.log(error)
+    //         if (error.response?.data) {
+    //             messageApi.error(error.response.data.detail)
+    //         }
+    //     }
+    // }
     const saveUpstreamAnalysis = async (save: any, is_submit: any = false) => {
         const values = await form.validateFields()
         const requestParams = getRequestParams(values)
@@ -108,7 +108,7 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                 V2: `/analysis/controllerV2`,
                 V3: `/analysis/controllerV3`,
             }
-            const controllerPath = script?"/analysis/controller-script" :controllerPathMap[controllerVersion]
+            const controllerPath = script ? "/analysis/controller-script" : controllerPathMap[controllerVersion]
 
             const resp = await http.post(controllerPath, {
                 request_param: requestParams,
@@ -128,31 +128,36 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
             if (save) {
                 messageApi.success("save successful!")
                 // setToolsPanelView("analysisList")
-                if (resp.data.analysis_id) {
-                    setAnalysisId(resp.data.analysis_id)
-                }
-                const data = [
-                    {
-                        action: "component.invoke",
-                        payload: {
-                            category: "tables",
-                            id: "analysis-list",
-                            method: "reload",
-                        }
+                if (script) {
+                    setAnalysisNodeId(resp.data.analysis_node_id)
+                } else {
+                    if (resp.data.analysis_id) {
+                        setAnalysisId(resp.data.analysis_id)
                     }
-                ]
-                if (analysisId) {
-                    data.push({
-                        action: "component.invoke",
-                        payload: {
-                            category: "analysis",
-                            id: analysisId,
-                            method: "reload",
+                    const data = [
+                        {
+                            action: "component.invoke",
+                            payload: {
+                                category: "tables",
+                                id: "analysis-list",
+                                method: "reload",
+                            }
                         }
-                    })
+                    ]
+                    if (analysisId) {
+                        data.push({
+                            action: "component.invoke",
+                            payload: {
+                                category: "analysis",
+                                id: analysisId,
+                                method: "reload",
+                            }
+                        })
+                    }
+
+                    ActionDispatcher.dispatchList(data);
                 }
 
-                ActionDispatcher.dispatchList(data);
 
                 if (callback) {
                     callback()
@@ -315,9 +320,32 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                         // </Popconfirm>
                         <Button disabled={formStatus == "stopping"} size="small" color="cyan" variant="solid"
                             onClick={async () => {
-                                // const values = await form.validateFields()
-                                // const requestParams = getRequestParams(values)
-                                await http.post(`/analysis/stop/${analysisId}`)
+                                try {
+                                    if (script) {
+                                        if (!analysisNodeId) {
+                                            messageApi.error("analysis_node_id is required")
+                                            return
+                                        }
+                                        setFormStatus("stopping")
+                                        await http.post(`/analysis/node/stop/${analysisNodeId}`)
+                                        messageApi.success("Node stop requested")
+                                        return
+                                    }
+                                    if (!analysisId) {
+                                        messageApi.error("analysis_id is required")
+                                        return
+                                    }
+                                    setFormStatus("stopping")
+                                    await http.post(`/analysis/stop/${analysisId}`)
+                                    messageApi.success("Analysis stop requested")
+                                } catch (error: any) {
+                                    setFormStatus("running")
+                                    if (error?.response?.data?.detail) {
+                                        messageApi.error(error.response.data.detail)
+                                    } else {
+                                        messageApi.error("Stop request failed")
+                                    }
+                                }
 
                             }}>Go Stop</Button>
                         :

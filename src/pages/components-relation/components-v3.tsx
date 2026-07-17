@@ -10,6 +10,7 @@ import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 import { ApartmentOutlined, CopyOutlined, DeleteOutlined } from "@ant-design/icons"
 import { useSideViewContext } from "@/context/side/SideViewContext"
 import { useStoreRender } from "@/context/render/RenderProvider"
+import ViewResolver from "@/core/ui-renderer/ViewResolver"
 
 const ComponentsV3: FC<any> = ({ component_type, navigateView }) => {
     const { modal, openModal, closeModal } = useModal();
@@ -24,7 +25,7 @@ const ComponentsV3: FC<any> = ({ component_type, navigateView }) => {
     const { script, setScript, clear } = useStoreRender()
 
     let [segmentedOptions, setSegmentedOptions] = useState<any[]>([])
-    const [panel, setPanel] = useState<string>()
+    const [panel, setPanel] = useState<any>()
 
     useEffect(() => {
 
@@ -49,8 +50,8 @@ const ComponentsV3: FC<any> = ({ component_type, navigateView }) => {
                     label: "Code",
                     value: "scriptCode"
                 }, {
-                    label: "Analysis",
-                    value: "analysisList"
+                    label: "AnalysisNode",
+                    value: "analysisNodePage"
                 }
             ])
         } else if (component_type == "file") {
@@ -201,7 +202,7 @@ const ComponentsV3: FC<any> = ({ component_type, navigateView }) => {
 
                     >
                         {panel ? <>
-                            <ComponentsDetailsRender
+                            <ViewResolver
                                 callback={loadTable}
                                 view={panel}
                                 component_id={script.component_id}
@@ -211,7 +212,7 @@ const ComponentsV3: FC<any> = ({ component_type, navigateView }) => {
                                     component_type: component_type,
                                 }}
                             // component_type={component_type}
-                            ></ComponentsDetailsRender>
+                            ></ViewResolver>
 
                         </> : <Skeleton active></Skeleton>}
 

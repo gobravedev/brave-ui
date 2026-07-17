@@ -4,6 +4,7 @@ import type { InferViewRegistryFromLoaders } from "@/core/component-registry/reg
 
 const analysisNodeViewLoaders = {
     analysisNodes: () => import("./components/analysis-nodes"),
+    analysisNodePage: () => import("./components/analysis-node-page"),
     analysisEdges: () => import("./components/analysis-edges"),
     analysisNodesReport: () => import("./components/analysis-nodes-report/analysis-nodes-report"),
     analysisNodePanel: () => import("./analysis-node-panel"),
