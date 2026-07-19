@@ -5,7 +5,7 @@ import { FC, useEffect, useState } from "react"
 import AnalysisResultPage from "@/components/result-list/page";
 
 const CreateOrUpdateComponent: FC<any> = (params) => {
-      const { component_id, structure,callback,onOk } = params
+      const { script_id, structure,callback,onOk } = params
     return <>
 
         <CreateOrUpdatePipelineV2
@@ -15,7 +15,7 @@ const CreateOrUpdateComponent: FC<any> = (params) => {
                 onOk && onOk()
             }}
             structure={structure}
-            component_id={component_id}
+            script_id={script_id}
         ></CreateOrUpdatePipelineV2>
       
     </>

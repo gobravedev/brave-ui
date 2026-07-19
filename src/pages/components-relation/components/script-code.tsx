@@ -1,10 +1,11 @@
 
 import Code from "@/components/module-edit/code"
+import React from "react"
 
 
-const ScriptCode: React.FC<{ component: any }> = ({ component }) => {
+const ScriptCode: React.FC<any> = ({ script_id }) => {
     return <>
-        <Code component_id={component?.component_id}></Code>
+        <Code script_id={script_id}></Code>
     </>
 }
 

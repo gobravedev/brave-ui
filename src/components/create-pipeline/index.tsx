@@ -658,7 +658,7 @@ export const CreateOrUpdatePipelineComponent: FC<any> = ({ visible, onClose, par
         </Drawer>
     </>
 }
-export const CreateOrUpdatePipelineV2: FC<any> = ({ component_id, structure, callback }) => {
+export const CreateOrUpdatePipelineV2: FC<any> = ({ script_id, structure, callback }) => {
     // if (!visible) return null;
 
     // const { data, structure } = params
@@ -671,8 +671,8 @@ export const CreateOrUpdatePipelineV2: FC<any> = ({ component_id, structure, cal
     const content = Form.useWatch((values: any) => values?.content, form);
 
 
-    const getPipeleine = async (componentId: any) => {
-        const resp = await axios.post("/find-pipeline", { component_id: componentId })
+    const getPipeleine = async (script_id: any) => {
+        const resp = await http.get(`/find-script/${script_id}`)
 
         const data = resp.data
         // data['content'] = JSON.parse(data['content']) //JSON.stringify(JSON.parse(data['content']), null, 2)
@@ -700,23 +700,23 @@ export const CreateOrUpdatePipelineV2: FC<any> = ({ component_id, structure, cal
 
 
     useEffect(() => {
-        if (component_id) {
-            getPipeleine(component_id)
+        if (script_id) {
+            getPipeleine(script_id)
         } else {
             setComponent({})
             form.resetFields()
         }
-    }, [component_id])
+    }, [script_id])
     const getParams = (values: any) => {
         const params = {
             ...values,
             ...structure,
 
         }
-        if (component_id) {
+        if (script_id) {
             // params['relation_id'] = pipelineRelation.relation_id
             // params['parent_component_id'] = pipelineRelation.parent_component_id
-            params['component_id'] = component_id
+            params['id'] = script_id
 
 
         }
@@ -764,7 +764,7 @@ export const CreateOrUpdatePipelineV2: FC<any> = ({ component_id, structure, cal
         console.log(params)
         try {
             // const resp = await axios.post("/save-pipeline", params)
-            const resp = await http.post(`/workflow/createscript`,params)
+            const resp = await http.post(`/workflow/save-script`,params)
             
             console.log(resp)
             setLoading(false)
@@ -830,16 +830,16 @@ export const CreateOrUpdatePipelineV2: FC<any> = ({ component_id, structure, cal
         <Spin spinning={loading}>
             {/* {JSON.stringify(component)} */}
             <Flex justify="end" gap="small" style={{ marginBottom: "0.5rem" }}>
-                {component_id &&
+                {script_id &&
                     <Button size="small" color="cyan" variant="solid" onClick={() => {
-                        getPipeleine(component_id)
+                        getPipeleine(script_id)
                     }}>
                         Refresh
                     </Button>
                 }
 
                 <Button size="small" color="cyan" variant="solid" onClick={savePipeline}>
-                    {component_id ? "Update" : "Create"}
+                    {script_id ? "Update" : "Create"}
                 </Button>
             </Flex>
             <Form form={form} >
@@ -865,8 +865,8 @@ export const CreateOrUpdatePipelineV2: FC<any> = ({ component_id, structure, cal
                     <Input ></Input>
                 </Form.Item>
                 {/* valuePropName="fileList"  getValueFromEvent={normFile}*/}
-                {component_id && <Form.Item label="Upload" name={"img"}  >
-                    <UploadComp component_id={component_id}></UploadComp>
+                {script_id && <Form.Item label="Upload" name={"img"}  >
+                    <UploadComp component_id={script_id}></UploadComp>
                 </Form.Item>}
                 <Form.Item label="Order" name={"order_index"} initialValue={0}>
                     <InputNumber ></InputNumber >

@@ -1,17 +1,14 @@
 import { ActionDispatcher } from "@/llmv2/dispatcher";
-import ComponentsPage from "./component/page"
-import { Button, Empty, Flex } from "antd";
+import ScriptPageView from "./script-page";
+import { Empty } from "antd";
 import { useStoreRender } from "@/context/render/RenderProvider";
 import axios from "axios";
-import { invoke } from "@/core/ui-system/invokeV2";
-import { useRef } from "react";
+import type { ScriptItem } from "@/api/workflow";
 
 
-const ScriptPage = () => {
+const ScriptPageSide = () => {
     const { relation } = useStoreRender()
     if (!relation) return <Empty description="No tools found"></Empty>
-
-    const ref = useRef<any>(null)
 
 
     const addScriptToNode = async (scriptId: any) => {
@@ -34,21 +31,13 @@ const ScriptPage = () => {
         }
         ActionDispatcher.dispatch(data.action, data.payload);
     }
-    return <div>
-        {/* <Button onClick={() => {
-
-
-        }}>
-            addNode
-        </Button> */}
-        {/* <Flex justify="end" >
-          
-
-        </Flex> */}
-        <ComponentsPage ref={ref} component_type="script" setComponent={(record: any) => {
-            addScriptToNode(record.component_id)
-            // console.log("Selected component in ScriptPage", record)
-        }} />
-    </div>
+    return (
+        <ScriptPageView
+            title="Script List"
+            onOk={(record: ScriptItem) => {
+                addScriptToNode(record.component_id)
+            }}
+        />
+    )
 }
-export default ScriptPage
+export default ScriptPageSide

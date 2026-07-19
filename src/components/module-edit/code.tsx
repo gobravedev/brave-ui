@@ -5,7 +5,8 @@ import { message as $message } from 'antd';
 import TextArea from "antd/es/input/TextArea";
 import Typography from "antd/es/typography/Typography";
 import { MonacoEditor } from "../react-monaco-editor"
-const Code: FC<any> = ({ component_id }) => {
+import { http } from "@/api/client/http";
+const Code: FC<any> = ({ script_id }) => {
     const [data, setData] = useState<any>()
     const [messageApi, contextHolder] = message.useMessage();
     const [scriptName, setScriptName] = useState("main")
@@ -13,7 +14,7 @@ const Code: FC<any> = ({ component_id }) => {
 
     const getModuleContent = async () => {
         try {
-            const resp = await axios.get(`/get-component-module-content/${component_id}?script_name=${scriptName}`)
+            const resp = await http.get(`/script/${script_id}/content`)
             console.log(resp)
             setData(resp.data)
         } catch (error: any) {
@@ -23,16 +24,16 @@ const Code: FC<any> = ({ component_id }) => {
 
     }
     useEffect(() => {
-        if (component_id) {
+        if (script_id) {
             getModuleContent()
         }
 
-    }, [component_id, scriptName])
+    }, [script_id, scriptName])
     return <>
         {data?.path && <Typography >{data?.path}</Typography>}
         <Flex justify="flex-end" gap={"small"}>
             <Popconfirm title="Whether to generate scripts?" onConfirm={async () => {
-                await axios.post(`/component/convert-ipynb/${component_id}`)
+                await axios.post(`/component/convert-ipynb/${script_id}`)
                 messageApi.success("Generate Script Successful!")
                 getModuleContent()
             }}>

@@ -19,6 +19,11 @@ import {
 	type AnalysisNodePageQuery,
 } from "@/api/analysis";
 import {
+	pageScriptApi,
+	type ScriptItem,
+	type ScriptPageQuery,
+} from "@/api/workflow";
+import {
 	pageAppSessionApi,
 	pageContainerEventApi,
 	pageContainerImageApi,
@@ -260,6 +265,27 @@ export const useAnalysisNodePageQuery = (
 		query,
 		queryFn: async (payload) => {
 			const response = await pageAnalysisNodeByProjectApi(payload);
+			return response.data;
+		},
+		initialPageSize: 10,
+		...options,
+	});
+};
+
+export const useScriptPageQuery = (
+	query: ScriptPageQuery,
+	options?: Omit<UsePageQueryOptions<ScriptItem, ScriptPageQuery>, "queryKey" | "query" | "endpoint" | "queryFn">
+) => {
+	return usePageQuery<ScriptItem, ScriptPageQuery>({
+		queryKey: ["script-page"],
+		query,
+		queryFn: async (payload) => {
+			const { page, page_size, ...queryPayload } = payload;
+			const response = await pageScriptApi({
+				page,
+				page_size,
+				query: queryPayload,
+			});
 			return response.data;
 		},
 		initialPageSize: 10,

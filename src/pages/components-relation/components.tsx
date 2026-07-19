@@ -1,6 +1,6 @@
 import { Button, Card, Col, Empty, Modal, Popconfirm, Row, Segmented, Skeleton, Space, Table } from "antd"
 import { FC, use, useEffect, useRef, useState } from "react"
-import ComponentsPage from "../../components/component-page/component/page"
+import ComponentsPage from "../../components/script-page/component/page"
 import { useParams } from "react-router"
 import ComponentsDetailsRender from "../../core/ui-renderer/ComponentsDetailsRender"
 import { CreateOrUpdatePipelineComponent } from "@/components/create-pipeline"

@@ -1,6 +1,6 @@
 import { Button, Card, Col, Empty, Modal, Popconfirm, Row, Segmented, Skeleton, Space, Table } from "antd"
 import { FC, use, useEffect, useRef, useState } from "react"
-import ComponentsPage from "../../components/component-page/component/page"
+import ComponentsPage from "../../components/script-page/component/page"
 import { useParams } from "react-router"
 import ComponentsDetailsRender from "../../core/ui-renderer/ComponentsDetailsRender"
 import { CreateOrUpdatePipelineComponent } from "@/components/create-pipeline"
@@ -11,6 +11,7 @@ import { ApartmentOutlined, CopyOutlined, DeleteOutlined } from "@ant-design/ico
 import { useSideViewContext } from "@/context/side/SideViewContext"
 import { useStoreRender } from "@/context/render/RenderProvider"
 import ViewResolver from "@/core/ui-renderer/ViewResolver"
+import ScriptPage from "@/components/script-page/script-page"
 
 const ComponentsV3: FC<any> = ({ component_type, navigateView }) => {
     const { modal, openModal, closeModal } = useModal();
@@ -42,10 +43,11 @@ const ComponentsV3: FC<any> = ({ component_type, navigateView }) => {
                 {
                     label: "AnalysisNode",
                     value: "analysisNodePage"
-                },{
-                    label: "Script View",
-                    value: "scriptView"
                 },
+                // {
+                //     label: "Script View",
+                //     value: "scriptView"
+                // },
                 {
                     label: "structure",
                     value: "createOrUpdateComponent"
@@ -130,10 +132,11 @@ const ComponentsV3: FC<any> = ({ component_type, navigateView }) => {
                     </>}
                     size="small"
                 >
-                    <ComponentsPage
+                    {/* <ComponentsPage
                         ref={tabeRef}
                         component_type={component_type}
-                        setComponent={setScript} ></ComponentsPage>
+                        setComponent={setScript} ></ComponentsPage> */}
+                        <ScriptPage onOk={setScript}></ScriptPage>
                 </Card>
 
             </Col>
@@ -205,7 +208,7 @@ const ComponentsV3: FC<any> = ({ component_type, navigateView }) => {
                             <ViewResolver
                                 callback={loadTable}
                                 view={panel}
-                                component_id={script.component_id}
+                                script_id={script.id}
                                 component={script}
                                 openModal={openModal}
                                 structure={{

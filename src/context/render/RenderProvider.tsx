@@ -190,8 +190,8 @@ export const RenderProvider: FC<any> = ({ children }) => {
 
 
             } else if (script) {
-
-                const resp = await getScriptFormApi(script.component_id)
+                console.log("script", script)
+                const resp = await getScriptFormApi(script.id)
                 console.log(resp)
                 setRequestParam({
                     requestParam:{
