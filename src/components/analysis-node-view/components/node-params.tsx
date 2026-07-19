@@ -1,3 +1,4 @@
+import { http } from "@/api/client/http";
 import { Button, Drawer, Spin, Typography } from "antd";
 import axios from "axios";
 import { FC, useEffect, useState } from "react";
@@ -14,7 +15,7 @@ const NodeParams: FC<Props> = ({ analysis_node_id, close }) => {
     const loadData = async () => {
         // /analysis/node-params/{analysis_node_id}
         setLoading(true);
-        const res = await axios.get(`/analysis/node-params/${analysis_node_id}`);
+        const res = await http.get(`/analysis/${analysis_node_id}/node-params`);
         setData(res.data);
         setLoading(false);
     }

@@ -148,15 +148,30 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                 variant="solid"
                                 onClick={() => {
                                     invoke.nodeParams.open(
-                                        { analysis_node_id: selectedSampleDetail.node?.analysis_node_id },
+                                        { analysis_node_id: selectedSampleDetail.node?.id },
                                         {
                                             width: "60%",
-                                            title: `Params - ${selectedSampleDetail.node?.node_id}`,
+                                            title: `Params - ${selectedSampleDetail.node?.id}`,
                                         }
                                     );
                                 }}
                             >
                                 Params
+                            </Button>
+                            <Button
+                                size="small"
+                                color="cyan"
+                                variant="solid"
+                                onClick={() => {
+                                    invoke.nodeLogs.open({ analysis_node_id: selectedSampleDetail.node?.id },
+                                        {
+                                            title: `Logs - ${selectedSampleDetail.node?.node_name}`,
+                                            width: 800,
+                                            footer: null,
+                                        })
+                                }}
+                            >
+                                Logs
                             </Button>
                             <Tooltip title={`Edit Script ${selectedSampleDetail.node?.script_id}`}>
                                 <Button
@@ -166,7 +181,7 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                     onClick={async () => {
                                         await invoke.createOrUpdateComponent.openAsync(
                                             {
-                                                component_id: selectedSampleDetail.node?.script_id,
+                                                script_id: selectedSampleDetail.node?.script_id,
                                                 structure: {
                                                     component_type: "script",
                                                 },
@@ -191,9 +206,10 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                     color="cyan"
                                     variant="solid"
                                     onClick={() => {
+                                        console.log("selectedSampleDetail: ", selectedSampleDetail)
                                         invoke.scriptCodeEdit.openAsync(
                                             {
-                                                component_id: selectedSampleDetail.node?.script_id,
+                                                script_id: selectedSampleDetail.node?.script_id,
                                             },
                                             {
                                                 width: "60%",
@@ -351,6 +367,7 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                 </Space>
             }
         >
+
             {!analysis_node_id || !selectedSampleDetail ? (
                 <Skeleton active paragraph={{ rows: 2 }} />
             ) : (
@@ -492,7 +509,7 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
 
 
 
-
+                                {/* 
                                 <Tag
                                     style={{ cursor: "pointer" }}
                                     onClick={() => {
@@ -503,7 +520,7 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                                 width: 800,
                                                 footer: null,
                                             })
-                                    }}>Logs</Tag>
+                                    }}>Logs</Tag> */}
                             </Space>
                         </Flex>
                     </Card>

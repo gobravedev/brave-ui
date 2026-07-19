@@ -1,7 +1,8 @@
-import { Button, Flex, Skeleton, Space, Typography } from "antd";
+import { Button, Flex, Skeleton, Space, Typography, Spin, Empty } from "antd";
 import axios from "axios";
 import { FC, useEffect, useState } from "react";
 import { ReloadOutlined } from '@ant-design/icons'
+import { http } from "@/api/client/http";
 const NodeLogs:FC<any> = ({ analysis_node_id }) => {
 
     const [data,setData] = useState<any>(null)  
@@ -10,16 +11,16 @@ const NodeLogs:FC<any> = ({ analysis_node_id }) => {
     const loadData = async () => {
         // /analysis/node-logs/{analysis_node_id}
         setLoading(true)
-        const resp = await axios.get(`/analysis/node-logs/${analysis_node_id}`)
+        const resp = await http.get(`/analysis/${analysis_node_id}/node-logs`)
         setData(resp.data)
         setLoading(false)
     }
     
     useEffect(() => {
         loadData()
-    },[])
+    },[analysis_node_id])
 
-    return <>
+    return <Spin spinning={loading}>
         <Flex justify="end">
             <Space>
                 <Button size="small" onClick={loadData} loading={loading} icon={<ReloadOutlined />}></Button>
@@ -31,8 +32,8 @@ const NodeLogs:FC<any> = ({ analysis_node_id }) => {
                 <div key={index}>{line}</div>
             ))}
         </Typography>
-        </>:<Skeleton active></Skeleton>}
-    </>
+        </>:<Empty></Empty>}
+    </Spin>
 }
 
 export default NodeLogs
