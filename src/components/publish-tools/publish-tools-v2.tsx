@@ -6,6 +6,7 @@ import { RedoOutlined } from '@ant-design/icons'
 import TextArea from "antd/es/input/TextArea"
 import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 import { ur } from "@faker-js/faker"
+import { http } from "@/api/client/http"
 const PublishToolsV2: FC<any> = ({ relation_id, callback }) => {
     // const [force, setForce] = useState(true)
     const [data, setData] = useState<any>(null)
@@ -39,10 +40,10 @@ const PublishToolsV2: FC<any> = ({ relation_id, callback }) => {
 
             <Button size="small" color="cyan" variant="solid" onClick={async () => {
                 // /generate-tools-json
-                const resp = await axios.post(`/generate-tools-json/${relation_id}`)
+                const resp = await http.post(`/workflow/${relation_id}/generate-workflow-json`)
                 message.success("Generated successfully")
             }}> Generate </Button>
-
+    
 
 
             <Button size="small" color="cyan" variant="solid" onClick={async () => {
