@@ -302,14 +302,6 @@ const App: React.FC = () => {
                 en_US: "Dashboard"
             }
 
-        }, {
-            key: "/explore",
-            icon: "explore",
-            label: {
-                zh_CN: "探索",
-                en_US: "Explore"
-            }
-
         },
         // {
         //     key: "/doc",
@@ -324,13 +316,6 @@ const App: React.FC = () => {
         //     label: "检测样本"
         // }, 
         {
-            key: "/c/tools",
-            icon: "tools",
-            label: {
-                zh_CN: "工具",
-                en_US: "Tools"
-            }
-        }, {
             key: "/c/scripts",
             icon: "code",
             label: {
@@ -338,7 +323,14 @@ const App: React.FC = () => {
                 en_US: "Scripts"
             }
         },
-
+{
+            key: "/c/tools",
+            icon: "tools",
+            label: {
+                zh_CN: "工具",
+                en_US: "Tools"
+            }
+        }, 
 
 
         // {
@@ -457,6 +449,14 @@ const App: React.FC = () => {
                 //     ]
                 // }, 
                 {
+                    key: "/explore",
+                    icon: "explore",
+                    label: {
+                        zh_CN: "探索",
+                        en_US: "Explore"
+                    }
+
+                }, {
                     key: `/tasks`,
                     icon: "apps",
                     label: {
@@ -1142,7 +1142,7 @@ const App: React.FC = () => {
                                             options={sideOptions} />
                                     }>
 
-                                    <div style={{ flex: 1, minHeight: 0, overflowY: 'auto',overflowX: 'hidden' }}>
+                                    <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden' }}>
                                         <ViewResolver view={sideView} view_mode={"card"}></ViewResolver>
                                     </div>
 

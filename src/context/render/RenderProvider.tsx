@@ -26,6 +26,8 @@ export const RenderProvider: FC<any> = ({ children }) => {
     const [script, setScript] = useState<any>(null)
     const [loading, setLoading] = useState<boolean>(false)
 
+    const [workflow, setWorkflow] = useState<any>()
+
     const [analysisNodeId, setAnalysisNodeId] = useState<any>(null)
 
     // const [formParam, setFormParam] = useState<FromParamType | null>(null)
@@ -274,7 +276,9 @@ export const RenderProvider: FC<any> = ({ children }) => {
                 setScript,
                 script,
                 loading,
-                setLoading
+                setLoading,
+                workflow,
+                setWorkflow
 
             }}
         >

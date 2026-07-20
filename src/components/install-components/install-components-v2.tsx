@@ -97,6 +97,7 @@ const InstallComponents: FC<any> = ({ relation_type, onOk, onCancel }) => {
         <div style={{ marginBottom: "1rem" }}></div>
         <StorePages
             ref={pageRef}
+            storeType={relation_type === "tools" ? "workflow" : relation_type}
             onOk={onOk}
             onCancel={onCancel}
         ></StorePages>

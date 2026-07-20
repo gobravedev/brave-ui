@@ -15,7 +15,7 @@ export interface WorkflowFormResponse {
 export const getWorkflowFormApi = (params: GetWorkflowFormParams) => {
 	const { workflowId } = params;
 	return http.get<WorkflowFormResponse>(
-		`/workflows/${encodeURIComponent(workflowId)}/form`
+		`/workflow/${encodeURIComponent(workflowId)}/form`
 	);
 };
 
@@ -59,5 +59,55 @@ export interface ScriptPageRequest {
 }
 
 export const pageScriptApi = (payload: ScriptPageRequest) => {
-	return http.post<PageResponse<ScriptItem>>("/page-script", payload);
+	return http.post<PageResponse<ScriptItem>>("/workflow/page-script", payload);
+};
+
+export interface WorkflowItem {
+	id: number;
+	relation_id: string;
+	name: string;
+	img?: string;
+	tags?: string;
+	url?: string;
+	category?: string;
+	description?: string;
+	prompt?: string;
+	dag_definition?: string;
+	relation_type?: string;
+	install_key?: string;
+	component_id?: string;
+	container_id?: string;
+	parent_component_id?: string;
+	input_component_ids?: string;
+	output_component_ids?: string;
+	order_index?: number;
+	version?: string;
+	update_info?: string;
+	created_at?: string;
+	updated_at?: string;
+}
+
+export interface WorkflowPageQuery {
+	id?: number;
+	ids?: number[];
+	workflow_id?: string;
+	name?: string;
+	category?: string;
+	install_key?: string;
+	module_id?: string;
+	relation_type?: string;
+	tags?: string;
+	keywords?: string;
+	sort_by?: string;
+	sort_order?: "ASC" | "DESC";
+}
+
+export interface WorkflowPageRequest {
+	page?: number;
+	page_size?: number;
+	query?: WorkflowPageQuery;
+}
+
+export const pageWorkflowApi = (payload: WorkflowPageRequest) => {
+	return http.post<PageResponse<WorkflowItem>>("/workflow/page-workflow", payload);
 };

@@ -19,7 +19,10 @@ import {
 	type AnalysisNodePageQuery,
 } from "@/api/analysis";
 import {
+	pageWorkflowApi,
 	pageScriptApi,
+	type WorkflowItem,
+	type WorkflowPageQuery,
 	type ScriptItem,
 	type ScriptPageQuery,
 } from "@/api/workflow";
@@ -282,6 +285,27 @@ export const useScriptPageQuery = (
 		queryFn: async (payload) => {
 			const { page, page_size, ...queryPayload } = payload;
 			const response = await pageScriptApi({
+				page,
+				page_size,
+				query: queryPayload,
+			});
+			return response.data;
+		},
+		initialPageSize: 10,
+		...options,
+	});
+};
+
+export const useWorkflowPageQuery = (
+	query: WorkflowPageQuery,
+	options?: Omit<UsePageQueryOptions<WorkflowItem, WorkflowPageQuery>, "queryKey" | "query" | "endpoint" | "queryFn">
+) => {
+	return usePageQuery<WorkflowItem, WorkflowPageQuery>({
+		queryKey: ["workflow-page"],
+		query,
+		queryFn: async (payload) => {
+			const { page, page_size, ...queryPayload } = payload;
+			const response = await pageWorkflowApi({
 				page,
 				page_size,
 				query: queryPayload,

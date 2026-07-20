@@ -146,9 +146,9 @@ const Tools: FC<any> = ({ components }) => {
         {/* <Form.Item name={"component_id"} label="Script" >
             <Select showSearch optionFilterProp="label" options={components?.scripts} ></Select>
         </Form.Item> */}
-        <Form.Item name={"container_id"} label="Container" rules={[{ required: true, message: 'Please select container!' }]}>
+        {/* <Form.Item name={"container_id"} label="Container" rules={[{ required: true, message: 'Please select container!' }]}>
             <SelectContainer mode="none" containers={containers}></SelectContainer>
-        </Form.Item>
+        </Form.Item> */}
         <Form.Item name={"input_component_ids"} label="Input File">
             <Select showSearch optionFilterProp="label" options={components?.files} mode="multiple"></Select>
         </Form.Item>
@@ -1336,7 +1336,7 @@ export const CreateORUpdateRelationComp: FC<any> = (params) => {
 
         console.log(params)
         try {
-            const resp = await axios.post("/save-pipeline-relation", params)
+            const resp = await http.post("/workflow/save-workflow", params)
             console.log(resp)
             setLoaidng(false)
             if (callback) {

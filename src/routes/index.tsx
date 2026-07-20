@@ -82,9 +82,9 @@ const InteractiveTools = lazy(() => import('@/pages/interactive-tools'));
 const ToolsPage = lazy(() => import('@/pages/tools-page'))
 
 const ToolsCard = lazy(() => import("../pages/pipeline-components-card-v2/index-component"));
-const ToolsDetail = lazy(() => import("../pages/components-relation/index-component"));
+const ToolsDetail = lazy(() => import("../pages/components-relation/workflow-panel"));
 
-const ComponentsV3 = lazy(() => import("../pages/components-relation/components-v3"));
+const ComponentsV3 = lazy(() => import("../pages/components-relation/script-panel"));
 const Login = lazy(() => import("@/pages/users/login"));
 const Explore = lazy(() => import("@/pages/explore"))
 const DatasetProjectPage = lazy(() => import("@/components/data-dataset-page/dataset-project-page"))
@@ -109,33 +109,33 @@ if (appType == "index") {
     const children = [
 
         {
-            path:"dataset",
-            element:<DatasetProjectPage />
-        },{
-            path:"dataset-file",
-            element:<DatasetFilePage />
-        },{
-            path:"app-session",
-            element:<AppSessionPage />
-        },{
-            path:"container-instance",
-            element:<ContainerInstancePage />
-        },{
-            path:"container-event",
-            element:<ContainerEventPage />
-        },{
-            path:"outbox-event",
-            element:<OutboxEventPage />
-        },{
-            path:"sample-project",
-            element:<SampleProjectPage />
-        },{
-            path:"container-image",
-            element:<ContainerImagePage />
-        },{
-            path:"container-template",
-            element:<ContainerTemplatePage />
-        },{
+            path: "dataset",
+            element: <DatasetProjectPage />
+        }, {
+            path: "dataset-file",
+            element: <DatasetFilePage />
+        }, {
+            path: "app-session",
+            element: <AppSessionPage />
+        }, {
+            path: "container-instance",
+            element: <ContainerInstancePage />
+        }, {
+            path: "container-event",
+            element: <ContainerEventPage />
+        }, {
+            path: "outbox-event",
+            element: <OutboxEventPage />
+        }, {
+            path: "sample-project",
+            element: <SampleProjectPage />
+        }, {
+            path: "container-image",
+            element: <ContainerImagePage />
+        }, {
+            path: "container-template",
+            element: <ContainerTemplatePage />
+        }, {
             path: "/",
             element: <Project />
         }, {
@@ -172,16 +172,21 @@ if (appType == "index") {
             path: "/explore",
             element: <Explore />
         },
-        {
-            path: "/c/tools",
-            element: <ToolsCard relation_type={"tools"} />
-        },
+
         {
             path: "/c/scripts",
             element: <ComponentsV3 component_type={"script"} />
         }, {
             path: "/c/file",
             element: <ComponentsV3 component_type={"file"} />
+        },
+        // {
+        //     path: "/c/tools",
+        //     element: <ToolsCard relation_type={"tools"} />
+        // },
+        {
+            path: "/c/tools",
+            element: <ToolsDetail />
         },
         {
             path: "/c/tools/:relation_id",
@@ -351,9 +356,9 @@ if (appType == "index") {
         {
             path: "/login",
             element: <Login />
-        },{
-            path:"/office",
-            element:<OnlyOffice />
+        }, {
+            path: "/office",
+            element: <OnlyOffice />
         },
         {
             path: "/doc",

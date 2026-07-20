@@ -1,18 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert, Button, Card, Flex, Input, Select, Space, Table, Tag, Typography } from "antd";
+import { Alert, Button, Card, Input, Select, Space, Table, Tag, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { ReloadOutlined, SearchOutlined } from "@ant-design/icons";
-import { useScriptPageQuery } from "@/hooks/usePaginationV2";
-import type { ScriptItem } from "@/api/workflow";
+import { useWorkflowPageQuery } from "@/hooks/usePaginationV2";
+import type { WorkflowItem } from "@/api/workflow";
 
 const { Text } = Typography;
 
-export interface ScriptPageProps {
-	script_type?: string;
+export interface WorkflowPageProps {
 	category?: string;
+	relation_type?: string;
 	page_size?: number | string;
 	title?: string;
-	onOk?: (script: ScriptItem) => void;
+	onOk?: (workflow: WorkflowItem) => void;
 	onCancel?: () => void;
 	close?: () => void;
 }
@@ -37,19 +37,17 @@ const normalizePageSize = (value?: number | string) => {
 	return 10;
 };
 
-const ScriptPage = ({
-	script_type,
+const WorkflowPage = ({
 	category,
+	relation_type,
 	page_size,
 	title,
 	onOk,
-	onCancel,
-	close,
-}: ScriptPageProps) => {
-	const [selectedId, setSelectedID] = useState<string>();
+}: WorkflowPageProps) => {
+	const [selectedId, setSelectedID] = useState<number>();
 	const [keywords, setKeywords] = useState<string>("");
-	const [scriptTypeValue, setScriptTypeValue] = useState<string | undefined>(normalizeText(script_type));
-	const selectable = Boolean(onOk || onCancel);
+	const [relationTypeValue, setRelationTypeValue] = useState<string | undefined>(normalizeText(relation_type));
+	const selectable = Boolean(onOk);
 
 	const {
 		data,
@@ -63,7 +61,7 @@ const ScriptPage = ({
 		isFetching,
 		error,
 		refetch,
-	} = useScriptPageQuery(
+	} = useWorkflowPageQuery(
 		{},
 		{
 			enabled: true,
@@ -75,21 +73,19 @@ const ScriptPage = ({
 	);
 
 	useEffect(() => {
-		setScriptTypeValue(normalizeText(script_type));
+		setRelationTypeValue(normalizeText(relation_type));
 		setQuery({
-			script_type: normalizeText(script_type),
+			relation_type: normalizeText(relation_type),
 			category: normalizeText(category),
-			sort_by: "updated_at",
+			sort_by: "created_at",
 			sort_order: "DESC",
 		});
-	}, [script_type, category, setQuery]);
+	}, [relation_type, category, setQuery]);
 
-	const selectedItem = useMemo(() => data.find((item) => item.id === selectedId), [data, selectedId]);
-
-	const scriptTypeOptions = useMemo(() => {
+	const relationTypeOptions = useMemo(() => {
 		const values = new Set<string>();
 		for (const item of data) {
-			const value = item.script_type?.trim();
+			const value = item.relation_type?.trim();
 			if (value) {
 				values.add(value);
 			}
@@ -97,27 +93,28 @@ const ScriptPage = ({
 		return Array.from(values).map((value) => ({ label: value, value }));
 	}, [data]);
 
-	const columns: ColumnsType<ScriptItem> = [
+	const columns: ColumnsType<WorkflowItem> = [
 		{
-			title: "Script Name",
-			dataIndex: "component_name",
-			key: "component_name",
+			title: "Workflow Name",
+			dataIndex: "name",
+			key: "name",
 			ellipsis: true,
+			width:300,
 			render: (value: string) => value || "-",
 		},
 		{
-			title: "Script ID",
-			dataIndex: "component_id",
-			key: "component_id",
+			title: "Workflow ID",
+			dataIndex: "relation_id",
+			key: "relation_id",
 			width: 220,
 			ellipsis: true,
 			render: (value: string) => value || "-",
 		},
 		{
-			title: "Script Type",
-			dataIndex: "script_type",
-			key: "script_type",
-			width: 120,
+			title: "Relation Type",
+			dataIndex: "relation_type",
+			key: "relation_type",
+			width: 140,
 			render: (value: string) => (value ? <Tag color="blue">{value}</Tag> : "-"),
 		},
 		{
@@ -128,10 +125,19 @@ const ScriptPage = ({
 			render: (value: string) => value || "-",
 		},
 		{
-			title: "Container Template",
-			dataIndex: "container_template_id",
-			key: "container_template_id",
+			title: "Module ID",
+			dataIndex: "component_id",
+			key: "component_id",
+			width: 200,
+			ellipsis: true,
+			render: (value: string) => value || "-",
+		},
+		{
+			title: "Install Key",
+			dataIndex: "install_key",
+			key: "install_key",
 			width: 180,
+			ellipsis: true,
 			render: (value: string) => value || "-",
 		},
 		{
@@ -150,7 +156,7 @@ const ScriptPage = ({
 		},
 	];
 
-	const selectColumns = useMemo<ColumnsType<ScriptItem>>(() => {
+	const selectColumns = useMemo<ColumnsType<WorkflowItem>>(() => {
 		if (!selectable) {
 			return columns;
 		}
@@ -167,38 +173,21 @@ const ScriptPage = ({
 						type={record.id === selectedId ? "primary" : "default"}
 						size="small"
 						onClick={() => {
-                            setSelectedID(record.id)
-                            onOk && onOk(record)
-                        }}
+							setSelectedID(record.id);
+							onOk && onOk(record);
+						}}
 					>
 						{record.id === selectedId ? "Selected" : "Select"}
 					</Button>
 				),
 			},
 		];
-	}, [columns, selectable, selectedId]);
-
-	// const handleConfirm = () => {
-	// 	if (!selectedItem || !onOk) {
-	// 		return;
-	// 	}
-	// 	onOk(selectedItem);
-	// };
-
-	// const handleCancel = () => {
-	// 	if (onCancel) {
-	// 		onCancel();
-	// 		return;
-	// 	}
-	// 	if (close) {
-	// 		close();
-	// 	}
-	// };
+	}, [columns, selectable, selectedId, onOk]);
 
 	const applyKeywordSearch = () => {
 		setQuery({
 			keywords: normalizeText(keywords),
-			script_type: normalizeText(scriptTypeValue),
+			relation_type: normalizeText(relationTypeValue),
 			category: normalizeText(category),
 			sort_by: "updated_at",
 			sort_order: "DESC",
@@ -208,7 +197,7 @@ const ScriptPage = ({
 	return (
 		<Card
 			size="small"
-			title={title || "Script List"}
+			title={title || "Workflow List"}
 			extra={
 				<Space>
 					<Text type="secondary">Total: {total}</Text>
@@ -221,7 +210,7 @@ const ScriptPage = ({
 			<Space wrap style={{ marginBottom: 12 }}>
 				<Input
 					allowClear
-					placeholder="Search by name/description/tags/script id"
+					placeholder="Search by name/description/tags/workflow id"
 					value={keywords}
 					onChange={(event) => setKeywords(event.target.value)}
 					onPressEnter={applyKeywordSearch}
@@ -229,18 +218,18 @@ const ScriptPage = ({
 				/>
 				<Select
 					allowClear
-					placeholder="Script type"
-					value={scriptTypeValue}
+					placeholder="Relation type"
+					value={relationTypeValue}
 					onChange={(value) => {
-						setScriptTypeValue(value);
+						setRelationTypeValue(value);
 						setQuery({
-							script_type: normalizeText(value),
+							relation_type: normalizeText(value),
 							category: normalizeText(category),
 							sort_by: "updated_at",
 							sort_order: "DESC",
 						});
 					}}
-					options={scriptTypeOptions}
+					options={relationTypeOptions}
 					style={{ width: 180 }}
 				/>
 				<Button type="primary" icon={<SearchOutlined />} onClick={applyKeywordSearch}>
@@ -248,23 +237,23 @@ const ScriptPage = ({
 				</Button>
 			</Space>
 
-			{error ? <Alert type="error" showIcon message="Failed to load scripts" style={{ marginBottom: 12 }} /> : null}
+			{error ? <Alert type="error" showIcon message="Failed to load workflows" style={{ marginBottom: 12 }} /> : null}
 
-			<Table<ScriptItem>
+			<Table<WorkflowItem>
 				rowKey="id"
 				columns={selectColumns}
 				dataSource={data}
 				loading={isLoading || isFetching}
 				size="small"
-				scroll={{ x: 1300 }}
-				locale={{ emptyText: error ? "Failed to load scripts" : "No scripts" }}
+				scroll={{ x: 1500 }}
+				locale={{ emptyText: error ? "Failed to load workflows" : "No workflows" }}
 				rowSelection={
 					selectable
 						? {
 							type: "radio",
 							selectedRowKeys: selectedId ? [selectedId] : [],
 							onChange: (selectedRowKeys) => {
-								setSelectedID(String(selectedRowKeys[0] || ""));
+								setSelectedID(Number(selectedRowKeys[0] || 0));
 							},
 						}
 						: undefined
@@ -291,17 +280,8 @@ const ScriptPage = ({
 					showTotal: (value) => `Total ${value} items`,
 				}}
 			/>
-
-			{/* {selectable && (
-				<Flex justify="end" gap="small" style={{ marginTop: 12 }}>
-					<Button onClick={handleCancel}>Cancel</Button>
-					<Button type="primary" disabled={!selectedItem} onClick={handleConfirm}>
-						Confirm
-					</Button>
-				</Flex>
-			)} */}
 		</Card>
 	);
 };
 
-export default ScriptPage;
+export default WorkflowPage;

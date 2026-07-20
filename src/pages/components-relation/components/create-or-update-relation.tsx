@@ -1,12 +1,14 @@
 import { CreateORUpdateRelationComp } from "@/components/create-pipeline"
 import { FC } from "react"
 
-const CreateOrUpdateRelation:FC<any> = (params)=>{
-    const { component, structure,callback } = params
+const CreateOrUpdateRelation: FC<any> = (params) => {
+    const { component, structure, callback } = params
 
-    return <CreateORUpdateRelationComp 
+    return <CreateORUpdateRelationComp
         data={component}
-        pipelineStructure={structure}
+        pipelineStructure={{
+            relation_type: "tools",
+        }}
         callback={callback}
     ></CreateORUpdateRelationComp>
 }

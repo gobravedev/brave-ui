@@ -1,6 +1,6 @@
 import { Button, Card, Col, Empty, Modal, Popconfirm, Row, Segmented, Skeleton, Space, Table } from "antd"
 import { FC, use, useEffect, useRef, useState } from "react"
-import ComponentsPage from "../../components/script-page/component/page"
+import ComponentsPage from "../../components/workflow-page/component/page"
 import { useParams } from "react-router"
 import ComponentsDetailsRender from "../../core/ui-renderer/ComponentsDetailsRender"
 import { CreateOrUpdatePipelineComponent } from "@/components/create-pipeline"
@@ -11,7 +11,8 @@ import { ApartmentOutlined, CopyOutlined, DeleteOutlined } from "@ant-design/ico
 import { useSideViewContext } from "@/context/side/SideViewContext"
 import { useStoreRender } from "@/context/render/RenderProvider"
 import ViewResolver from "@/core/ui-renderer/ViewResolver"
-import ScriptPage from "@/components/script-page/script-page"
+import ScriptPage from "@/components/workflow-page/script-page"
+import { invoke } from "@/core/ui-system/invokeV2"
 
 const ComponentsV3: FC<any> = ({ component_type, navigateView }) => {
     const { modal, openModal, closeModal } = useModal();
@@ -116,15 +117,17 @@ const ComponentsV3: FC<any> = ({ component_type, navigateView }) => {
                         }
                     }}
                     extra={<>
-                        <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        <Button size="small" color="cyan" variant="solid" onClick={async () => {
                             // openModal("createOrUpdatePipelineComponent", {
                             //     data: undefined,
                             //     structure: {
                             //         component_type: component_type,
                             //     }
                             // })
-                            setPanel("createOrUpdateComponent")
-                            setScript({})
+                            // setPanel("createOrUpdateComponent")
+                            // setScript(null)
+                            await invoke.createOrUpdateComponent.openAsync({})
+                            
                         }}>
                             Create
                         </Button>

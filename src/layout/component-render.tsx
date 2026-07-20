@@ -5,8 +5,8 @@ import { FC, lazy, memo, Suspense } from 'react';
 const LLM = lazy(() => import("./components/llm"));
 const LLMCard = lazy(() => import("./components/llm-card"));
 const ToolsCard = lazy(() => import("../pages/pipeline-components-card-v2/index-component"));
-const ToolsDetail = lazy(() => import("../pages/components-relation/index-component"));
-const ComponentsV3 = lazy(() => import("../pages/components-relation/components-v3"));
+const ToolsDetail = lazy(() => import("../pages/components-relation/workflow-panel"));
+const ComponentsV3 = lazy(() => import("../pages/components-relation/script-panel"));
 const Md = lazy(() => import("./components/md"));
 const AnalysisTree = lazy(() => import("../pages/analysis-report/analysis-tree"));
 const viewMapping: {

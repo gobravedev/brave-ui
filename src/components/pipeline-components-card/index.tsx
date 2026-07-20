@@ -603,10 +603,10 @@ const InstallComponents: FC<any> = ({ visible, onClose, params, callback }) => {
                     <Segmented<string>
                         value={address}
                         options={[
-                          {
+                            {
                                 label: "Local",
                                 value: "local"
-                            },{
+                            }, {
                                 label: "Github",
                                 value: "github"
                             }

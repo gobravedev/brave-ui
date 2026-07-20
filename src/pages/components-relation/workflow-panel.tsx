@@ -39,6 +39,7 @@ import { renderCloseViewButton, renderViewButton } from "@/utils/render-view-btn
 import { useSideViewContext } from "@/context/side/SideViewContext"
 import ViewResolver from "@/core/ui-renderer/ViewResolver"
 import { invoke } from "@/core/ui-system/invokeV2"
+import WorkflowPage from "@/components/workflow-page/workflow-page"
 
 const Pipeline: FC<any> = ({ }) => {
 
@@ -46,9 +47,14 @@ const Pipeline: FC<any> = ({ }) => {
     // const queryParams = new URLSearchParams(location.search);
     // const key = queryParams.get("key");
     // debugger
+    const { openAnalysis, analysisId, setAnalysisId, clear, toolsPanelView, setRelation, setToolsPanelView, closeAnalysis, workflow, setWorkflow } = useStoreRender()
+
+    const { setSideView, sideView, sideOptions, setSideOptions } = useSideViewContext();
+
 
     console.log("Pipeline")
-    const { relation_id } = useParams()
+    // const { relation_id: relation_id_ } = useParams()
+    // const [relation_id, setRelationId] = useState<any>(relation_id_ ? relation_id_ : workflow?.relation_id)
     const relation_type = "tools"
     // const [leftPanel, setLeftPanel] = useState<any>("analysisTools")
     const component_type = ""
@@ -61,6 +67,7 @@ const Pipeline: FC<any> = ({ }) => {
     const [messageApi, contextHolder] = message.useMessage();
     const [component, setComponent] = useState<any>()
     const [rightPanel, setRightPanel] = useState<any>("llmTools")
+
     const [size, setSize] = useState<any>((component_type && ["script111"].includes(component_type)) ? [18, 6] : [20, 0])
     const tableRef = {
         inputFile: useRef<HTMLInputElement>(null),
@@ -104,13 +111,7 @@ const Pipeline: FC<any> = ({ }) => {
         return null;
     };
 
-    //  当 menuKey 改变时，自动展开它的父菜单
-    // useEffect(() => {
-    //     if (menuKey) {
-    //         const parents = findParentKeys(menus, menuKey);
-    //         if (parents) setOpenKeys(parents);
-    //     }
-    // }, [menuKey, menus]);
+
 
     const updateQueryParam = (paramName: string, newValue: string) => {
         const { pathname, search, hash } = window.location;
@@ -183,7 +184,7 @@ const Pipeline: FC<any> = ({ }) => {
         })
     }
 
-    const getData = async () => {
+    const getData = async (relation_id: any) => {
         // let api = `/get-pipeline-v2/${name}?component_type=${component_type}`
         // if (component_type == "script") {
         //     api = `/get-component-parent/${name}?component_type=${component_type}`
@@ -202,11 +203,11 @@ const Pipeline: FC<any> = ({ }) => {
         return pipeline
     }
     const loadData = async () => {
-        setLoading(true)
-        const pipeline = await getData()
-        setComponent(pipeline)
-
-
+        if (workflow?.relation_id) {
+            setLoading(true)
+            const pipeline = await getData(workflow?.relation_id)
+            setComponent(pipeline)
+        }
 
 
     }
@@ -258,14 +259,13 @@ const Pipeline: FC<any> = ({ }) => {
     //         setOpenKeys([]);
     //     }
     // };
-    const { openAnalysis, analysisId, setAnalysisId, clear, toolsPanelView, setRelation, setToolsPanelView, closeAnalysis, setFormParam } = useStoreRender()
-
-    const { setSideView, sideView, sideOptions, setSideOptions } = useSideViewContext();
-
-
 
     useEffect(() => {
         loadData()
+    }, [workflow])
+
+    useEffect(() => {
+
         setSideOptions([
             {
                 label: "LLM",
@@ -273,7 +273,7 @@ const Pipeline: FC<any> = ({ }) => {
             }, {
                 label: "Container App",
                 value: "appSessionPage"
-            },{
+            }, {
                 label: "Script",
                 value: "scriptPage"
             },
@@ -328,7 +328,7 @@ const Pipeline: FC<any> = ({ }) => {
                 loadData()
             }
         };
-    }, [relation_id]);
+    }, [workflow]);
 
 
     useEffect(() => {
@@ -343,52 +343,98 @@ const Pipeline: FC<any> = ({ }) => {
 
 
     return <div >
-        <Card size="small"
-            style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                height: " 100%"
-            }}
-            styles={{
-                body: {
-                    padding: 0,
-                    // height: "90%",
-                    flex: 1,
-                    // overflowY: "auto"
-                }
-            }}
-            title={<Space>
-                <Tooltip title={component?.category}>
-                    {component?.name}
-                </Tooltip>
-                {component?.store_origin && <Tag color="blue">{component?.store_origin}</Tag>}
-                {/* <Tag color="blue">{component?.script_type}</Tag> */}
-                {/* {component?.category &&
+        <Row gutter={[16, 16]}>
+            <Col lg={6} sm={6} xs={24}>
+                <Card
+                    styles={{
+                        body: {
+                            padding: "0"
+                        }
+                    }}
+                    extra={<Space>
+                        {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
+                        
+                            setPanel("createOrUpdateComponent")
+                            setScript({})
+                        }}>
+                            Create
+                        </Button> */}
+
+                        <Button size="small" color="cyan" variant="solid" onClick={async () => {
+                            // openModal("installComponents", { relation_type: "tools" })
+                            await invoke.installComponentsV2.openAsync({
+                                relation_type: "tools",
+                            }, {
+                                width: "80%",
+                                title: `Install ${relation_type}`,
+                                footer: null,
+                            })
+                            loadData()
+                        }}>Intsall</Button>
+
+                        <Button size="small" color="cyan" variant="solid" onClick={() => {
+                            invoke.createOrUpdateRelation.openAsync({})
+                            // openModal("createORUpdateCompnentRelation", {
+                            //     data: undefined,
+                            // pipelineStructure: {
+                            //     relation_type: relation_type,
+                            // }
+                            // })
+                        }}>Create</Button>
+                    </Space>}
+                    size="small"
+                >
+
+                    <WorkflowPage onOk={setWorkflow}></WorkflowPage>
+                </Card>
+            </Col>
+            <Col lg={18} sm={18} xs={24}>
+                <Card size="small"
+                    style={{
+                        flex: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        height: " 100%"
+                    }}
+                    styles={{
+                        body: {
+                            padding: 0,
+                            // height: "90%",
+                            flex: 1,
+                            // overflowY: "auto"
+                        }
+                    }}
+                    title={<Space>
+                        <Tooltip title={component?.category}>
+                            {component?.name}
+                        </Tooltip>
+                        {component?.store_origin && <Tag color="blue">{component?.store_origin}</Tag>}
+                        {/* <Tag color="blue">{component?.script_type}</Tag> */}
+                        {/* {component?.category &&
                     <Tag style={{ marginLeft: "0.5rem" }} color="blue">{component?.category}</Tag>
                 } */}
-                {component && <>
-                    {!component?.store_version ? <>
-                        <Tag color="red"> {component?.version} (unpublished)</Tag>
-                    </> : <Tooltip title={component?.store_url}>
-                        {component?.store_version === component?.version ?
-                            <Tag style={{ cursor: "pointer" }} onClick={() => {
-                                window.open(component?.store_url, "_blank")
-                            }}> {component.version}</Tag> :
-                            <Tag color="red" style={{ cursor: "pointer" }} onClick={() => {
-                                window.open(component?.store_url, "_blank")
-                            }}>store/current: {component?.store_version}/{component?.version}</Tag>
-                        }
+                        {component && <>
+                            {!component?.store_version ? <>
+                                <Tag color="red"> {component?.version} (unpublished)</Tag>
+                            </> : <Tooltip title={component?.store_url}>
+                                {component?.store_version === component?.version ?
+                                    <Tag style={{ cursor: "pointer" }} onClick={() => {
+                                        window.open(component?.store_url, "_blank")
+                                    }}> {component.version}</Tag> :
+                                    <Tag color="red" style={{ cursor: "pointer" }} onClick={() => {
+                                        window.open(component?.store_url, "_blank")
+                                    }}>store/current: {component?.store_version}/{component?.version}</Tag>
+                                }
 
-                    </Tooltip>}
+                            </Tooltip>}
 
-                </>}
+                        </>}
 
 
 
-                {component?.store_url &&
-                    <Space>
-                        {/* <Tooltip title={<>
+                        {component?.store_url &&
+                            <Space>
+                                {/* <Tooltip title={<>
                             {component.store_update_info && <>Last Update: {component.store_update_info} <br />
                             </>}
                         </>}>
@@ -405,62 +451,62 @@ const Pipeline: FC<any> = ({ }) => {
 
 
 
-                        <Popconfirm title="Reinstall?" onConfirm={async () => {
-                            // /reinstall-relation/{relation_id}
-                            await axios.post(`/reinstall-relation/${component.relation_id}`)
-                            messageApi.success("ReInstalled successfully!")
-                            loadData()
-
-                        }}>
-                            <Button variant="solid" size="small" style={{ cursor: "pointer" }}>ReInstall</Button>
-
-                        </Popconfirm>
-
-                        <Popconfirm title={`Git pull ${component?.store_url} ?`} onConfirm={async () => {
-                            // /reinstall-relation/{relation_id}
-                            await axios.post(`/git-pull/${component?.store_id}`);
-                            message.success("Git pull submitted!");
-                            loadData()
-
-                        }}>
-                            <Button variant="solid" size="small" style={{ cursor: "pointer" }}>Check Update</Button>
-
-                        </Popconfirm>
-
-                        {component?.store_status != "done" &&
-                            <Button size="small"
-                                variant="solid"
-                                icon={<Spin size="small" />}
-                                color="red"
-                                style={{ cursor: "pointer" }}
-                                onClick={async () => {
-                                    await axios.post(`/git-stop/${component?.store_id}`);
-                                    message.success("Stop success!");
+                                <Popconfirm title="Reinstall?" onConfirm={async () => {
+                                    // /reinstall-relation/{relation_id}
+                                    await axios.post(`/reinstall-relation/${component.relation_id}`)
+                                    messageApi.success("ReInstalled successfully!")
                                     loadData()
-                                }}
-                            >
-                                Stop ({component?.store_status})
-                            </Button>
 
+                                }}>
+                                    <Button variant="solid" size="small" style={{ cursor: "pointer" }}>ReInstall</Button>
+
+                                </Popconfirm>
+
+                                <Popconfirm title={`Git pull ${component?.store_url} ?`} onConfirm={async () => {
+                                    // /reinstall-relation/{relation_id}
+                                    await axios.post(`/git-pull/${component?.store_id}`);
+                                    message.success("Git pull submitted!");
+                                    loadData()
+
+                                }}>
+                                    <Button variant="solid" size="small" style={{ cursor: "pointer" }}>Check Update</Button>
+
+                                </Popconfirm>
+
+                                {component?.store_status != "done" &&
+                                    <Button size="small"
+                                        variant="solid"
+                                        icon={<Spin size="small" />}
+                                        color="red"
+                                        style={{ cursor: "pointer" }}
+                                        onClick={async () => {
+                                            await axios.post(`/git-stop/${component?.store_id}`);
+                                            message.success("Stop success!");
+                                            loadData()
+                                        }}
+                                    >
+                                        Stop ({component?.store_status})
+                                    </Button>
+
+                                }
+                            </Space>
                         }
-                    </Space>
-                }
 
-            </Space>}
-            extra={<Flex justify={"space-between"} align={"center"} gap="small">
-                <Space wrap>
-                    <QuestionCircleOutlined
-                        onClick={() => {
-                            // setSize([14, 6])
-                            invoke.markdown.open({introduction:component?.description},{
-                                title: `Description - ${component?.name}`,
-                                footer: null,
-                                width: "60%",
-                            })
-                        }}
-                        style={{ color: "#1890ff" }} />
+                    </Space>}
+                    extra={<Flex justify={"space-between"} align={"center"} gap="small">
+                        <Space wrap>
+                            <QuestionCircleOutlined
+                                onClick={() => {
+                                    // setSize([14, 6])
+                                    invoke.markdown.open({ introduction: component?.description }, {
+                                        title: `Description - ${component?.name}`,
+                                        footer: null,
+                                        width: "60%",
+                                    })
+                                }}
+                                style={{ color: "#1890ff" }} />
 
-                    {/* {component?.component_type != "pipeline" && <>
+                            {/* {component?.component_type != "pipeline" && <>
 
                                     <Popconfirm title="Whether to remove?" onConfirm={() => {
                                         operatePipeline.deletePipelineRelation(component.relation_id)
@@ -472,7 +518,7 @@ const Pipeline: FC<any> = ({ }) => {
                                 </>} */}
 
 
-                    {/* {
+                            {/* {
                                     component?.component_type == "software" && <>
 
                                         <Popconfirm title="Whether to remove Tools?" onConfirm={() => {
@@ -483,58 +529,58 @@ const Pipeline: FC<any> = ({ }) => {
                                     </>
                                 } */}
 
-                    {renderViewButton(view, setView, "datasetFilePage", "Input File")}
-                    {renderViewButton(view, setView, "sampleProjectPage", "Input Sample")}
+                            {renderViewButton(view, setView, "datasetFilePage", "Input File")}
+                            {renderViewButton(view, setView, "sampleProjectPage", "Input Sample")}
 
-                    {renderViewButton(view, setView, "analysisList", "Analysis")}
-                    {renderViewButton(view, setView, "outputFileComponent", "Output")}
+                            {renderViewButton(view, setView, "analysisList", "Analysis")}
+                            {renderViewButton(view, setView, "outputFileComponent", "Output")}
 
-                    {/* {renderViewButton(view, setView, "analysisTools", "Tools Panel")} */}
+                            {/* {renderViewButton(view, setView, "analysisTools", "Tools Panel")} */}
 
-                    {renderViewButton(view, setView, "workflowComponent", "Workflow")}
-                    {renderViewButton(view, setView, "depContainer", "Container")}
+                            {renderViewButton(view, setView, "workflowComponent", "Workflow")}
+                            {renderViewButton(view, setView, "depContainer", "Container")}
 
 
-                    {renderViewButton(view, (view) => {
-                        setView(view)
-                        setParams({
-                            structure: {
-                                relation_type: relation_type,
-                            }
-                        })
-                    }, "createOrUpdateRelation", "Edit Tools")}
-                    {/* {(leftPanel != "workflowComponent") ? <Button size="small" color="cyan" variant="solid" onClick={() => {
+                            {renderViewButton(view, (view) => {
+                                setView(view)
+                                setParams({
+                                    structure: {
+                                        relation_type: relation_type,
+                                    }
+                                })
+                            }, "createOrUpdateRelation", "Edit Tools")}
+                            {/* {(leftPanel != "workflowComponent") ? <Button size="small" color="cyan" variant="solid" onClick={() => {
                         setLeftPanel("workflowComponent")
                     }}>Workflow</Button> : <>
                         <Button size="small" color="blue" variant="solid" icon={<CloseOutlined />} onClick={() => {
                             setLeftPanel("analysisTools")
                         }}>Close</Button>
                     </>} */}
-                    {renderViewButton(view, setView, "PublishToolsV2", "Publish")}
-                    {/* {renderViewButton(view, setView, "publishToolsComponents", "Publish")} */}
+                            {renderViewButton(view, setView, "PublishToolsV2", "Publish")}
+                            {/* {renderViewButton(view, setView, "publishToolsComponents", "Publish")} */}
 
 
-                    {/* <Button size="small" color="cyan" variant="outlined" onClick={() => {
+                            {/* <Button size="small" color="cyan" variant="outlined" onClick={() => {
                         openModal("publishModal", { ...component, relation_type: relation_type })
                     }}>Publish</Button> */}
 
-                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
+                            {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                         openModal("preview-relation-example", { ...component, relation_type: relation_type })
                     }}>Example</Button> */}
-                    {/* 
+                            {/* 
                     <Button size="small" color="cyan" variant="outlined" onClick={() => {
                         operatePipeline.openModal("projectForm", { project_id: project_id })
                     }}>Edit Project</Button> */}
 
-                    {/* <Button size="small" color="cyan" variant="outlined" onClick={() => {
+                            {/* <Button size="small" color="cyan" variant="outlined" onClick={() => {
                         operatePipeline.openModal("modalG", pipeline)
                     }}>Dependencies</Button> */}
 
-                    <Button size="small" color="cyan" variant="outlined" onClick={() => {
-                        openModals("metadataModal", { ...component, operatePipeline: operatePipeline })
-                    }}>Metadata</Button>
+                            <Button size="small" color="cyan" variant="outlined" onClick={() => {
+                                openModals("metadataModal", { ...component, operatePipeline: operatePipeline })
+                            }}>Metadata</Button>
 
-                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
+                            {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                         openModal("createORUpdateCompnentRelation", {
                             // data: component, structure: {
                             //     component_type: component?.component_type,
@@ -549,7 +595,7 @@ const Pipeline: FC<any> = ({ }) => {
                     }}>Edit {component?.relation_type}</Button> */}
 
 
-                    {/* {(leftPanel != "createOrUpdateRelation") ? <Button size="small" color="cyan" variant="solid" onClick={() => {
+                            {/* {(leftPanel != "createOrUpdateRelation") ? <Button size="small" color="cyan" variant="solid" onClick={() => {
                         setLeftPanel("createOrUpdateRelation")
                         setParams({
                             structure: {
@@ -564,7 +610,7 @@ const Pipeline: FC<any> = ({ }) => {
 
 
 
-                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
+                            {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                         // openModal("createOrUpdatePipelineComponent", {
                         //     data: { component_id: component?.component_id }, structure: {
                         //         component_type: "script",
@@ -584,24 +630,24 @@ const Pipeline: FC<any> = ({ }) => {
 
 
 
-                    {component?.databases && <>
-                        <Button size="small" color="cyan" variant="outlined" onClick={() => {
-                            operatePipeline.openModal("modalE", component.databases)
-                        }}>Database</Button>
-                    </>}
-                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
+                            {/* {component?.databases && <>
+                                <Button size="small" color="cyan" variant="outlined" onClick={() => {
+                                    operatePipeline.openModal("modalE", component.databases)
+                                }}>Database</Button>
+                            </>} */}
+                            {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                                     operatePipeline.openModal("modalB", {
                                         component_id: component?.component_id,
                                     })
                                 }}>Component Code</Button> */}
 
 
-                    {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
+                            {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                                     setLeftPanel("component-structure")
                                 }}>Structure</Button> */}
 
 
-                    {/* {component_type == "pipeline" && <>
+                            {/* {component_type == "pipeline" && <>
                                     <Dropdown menu={{
                                         onClick: (val: any) => {
                                             const key = val.key
@@ -662,71 +708,74 @@ const Pipeline: FC<any> = ({ }) => {
                                     </Dropdown>
                                 </>} */}
 
-                    <Button size="small" color="cyan" variant="outlined" icon={<RedoOutlined />} onClick={loadData}></Button>
+                            <Button size="small" color="cyan" variant="outlined" icon={<RedoOutlined />} onClick={loadData}></Button>
 
-                    <Button icon={<ArrowLeftOutlined />} size="small" color="primary" variant="outlined" onClick={() => navigate("/c/tools")}>Back</Button>
-                </Space>
-                {/* <Flex gap="small" wrap>
+                            {/* <Button icon={<ArrowLeftOutlined />} size="small" color="primary" variant="outlined" onClick={() => navigate("/c/tools")}>Back</Button> */}
+                        </Space>
+                        {/* <Flex gap="small" wrap>
                                
                             </Flex> */}
 
-            </Flex>}
-        >
-            {/* {JSON.stringify(component)} */}
+                    </Flex>}
+                >
+                    {/* {JSON.stringify(component)} */}
 
 
-            {openAnalysis && openAnalysis.length > 0 &&
-                <>
+                    {openAnalysis && openAnalysis.length > 0 &&
+                        <>
 
-                    <Flex style={{ marginTop: "0.5rem", marginLeft: "0.5rem" }} >
+                            <Flex style={{ marginTop: "0.5rem", marginLeft: "0.5rem" }} >
 
-                        <Space>
-                            {openAnalysis.map((item: any) => (
-                                renderCloseViewButton(`${view}-${analysisId}`, (view) => {
-                                    setView("analysisNodePanel")
-                                    setAnalysisId(item.analysis_id)
-                                }, `${view}-${item.analysis_id}`, item.analysis_name ? item.analysis_name : "Analysis",
-                                    () => {
-                                        closeAnalysis(item.analysis_id)
-                                        setView("analysisList")
+                                <Space>
+                                    {openAnalysis.map((item: any) => (
+                                        renderCloseViewButton(`${view}-${analysisId}`, (view) => {
+                                            setView("analysisNodePanel")
+                                            setAnalysisId(item.analysis_id)
+                                        }, `${view}-${item.analysis_id}`, item.analysis_name ? item.analysis_name : "Analysis",
+                                            () => {
+                                                closeAnalysis(item.analysis_id)
+                                                setView("analysisList")
 
-                                    })
+                                            })
 
-                            ))}
-                        </Space>
-                    </Flex>
-                    <Divider></Divider>
+                                    ))}
+                                </Space>
+                            </Flex>
+                            <Divider></Divider>
 
-                </>
+                        </>
 
-            }
+                    }
 
-            {(component) ? <>
-                <ViewResolver
-                    setView={setView}
-                    ref={leftRef}
-                    store_id={component?.store_id}
-                    relation_id={component?.relation_id}
-                    callback={loadData}
-                    component_id={component?.component_id}
-                    component={component}
-                    operatePipeline={operatePipeline}
-                    project={project_id}
-                    componentLayout={componentLayout}
-                    view={view}
-                    {...parsms}
-                />
-            </> : <Skeleton active></Skeleton>}
-            {/* component-structure */}
+                    {(component) ? <>
+                        <ViewResolver
+                            setView={setView}
+                            ref={leftRef}
+                            store_id={component?.store_id}
+                            relation_id={component?.relation_id}
+                            callback={loadData}
+                            component_id={component?.component_id}
+                            component={component}
+                            operatePipeline={operatePipeline}
+                            project={project_id}
+                            componentLayout={componentLayout}
+                            view={view}
+                            {...parsms}
+                        />
+                    </> : <Empty></Empty>}
+                    {/* component-structure */}
 
-            {/* <MemoizedComponentsRender
+                    {/* <MemoizedComponentsRender
                             setMenus={setMenus}
                             componentLayout={componentLayout}
                             component_type={component_type || ""}
                             component={pipeline}
                             tableRef={tableRef}
                             operatePipeline={operatePipeline} /> */}
-        </Card>
+                </Card>
+            </Col>
+        </Row>
+
         {contextHolder}
 
         {/* {
@@ -745,6 +794,7 @@ const Pipeline: FC<any> = ({ }) => {
             onClose={closeModal}
             callback={loadData}
         ></ComponentsDetailsRender> */}
+
 
 
         <ModuleEdit
