@@ -61,6 +61,10 @@ export default defineConfig({
         target: `http://localhost:8084`,
         ws: true,
         changeOrigin: true,
+      }, "/data-analysis": {
+        target: `http://localhost:8084`,
+        ws: true,
+        changeOrigin: true,
       }
     }
   }

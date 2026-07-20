@@ -1,7 +1,7 @@
 // yarn add @monaco-editor/react
 // yarn add monaco-editor
 
-import type { FC } from 'react'
+import { useEffect, type FC } from 'react'
 import Editor from '@monaco-editor/react';
 import { loader } from '@monaco-editor/react';
 import * as monaco from 'monaco-editor';
@@ -15,31 +15,33 @@ import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
 import { Drawer } from 'antd';
 import { useSelector } from 'react-redux';
 
-const MonacoEditorComp: FC<any> = ({onChange, value, editorRef, defaultLanguage, format, height, onEditorMount }) => {
+const MonacoEditorComp: FC<any> = ({ onChange, value, editorRef, defaultLanguage, format, height, onEditorMount }) => {
     // const editorRef = useRef<any>(null);
     const { theme } = useSelector((state: any) => state.user);
 
-    self.MonacoEnvironment = {
-        getWorker(_, label) {
-            if (label === 'json') {
-                return new jsonWorker();
-            }
-            if (label === 'css' || label === 'scss' || label === 'less') {
-                return new cssWorker();
-            }
-            if (label === 'html' || label === 'handlebars' || label === 'razor') {
-                return new htmlWorker();
-            }
-            if (label === 'typescript' || label === 'javascript') {
-                return new tsWorker();
-            }
-            // if (label === 'python') {
-            //     return new pythonWorker();
-            // }
-            return new editorWorker();
-        },
-    };
-    loader.config({ monaco });
+    useEffect(() => {
+        self.MonacoEnvironment = {
+            getWorker(_, label) {
+                if (label === 'json') {
+                    return new jsonWorker();
+                }
+                if (label === 'css' || label === 'scss' || label === 'less') {
+                    return new cssWorker();
+                }
+                if (label === 'html' || label === 'handlebars' || label === 'razor') {
+                    return new htmlWorker();
+                }
+                if (label === 'typescript' || label === 'javascript') {
+                    return new tsWorker();
+                }
+                // if (label === 'python') {
+                //     return new pythonWorker();
+                // }
+                return new editorWorker();
+            },
+        };
+        loader.config({ monaco });
+    }, [])
     // loader.init().then(/* ... */);
     function handleEditorDidMount(editor: any, monaco: any) {
         if (editorRef) {
@@ -48,7 +50,7 @@ const MonacoEditorComp: FC<any> = ({onChange, value, editorRef, defaultLanguage,
                 editor.onDidChangeModelDecorations(async () => {
                     await editorRef.current.getAction('editor.action.formatDocument').run();
                 });
-               
+
             }
         }
         onEditorMount?.(editor, monaco);

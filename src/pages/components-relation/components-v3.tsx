@@ -33,7 +33,7 @@ const ComponentsV3: FC<any> = ({ component_type, navigateView }) => {
         return () => {
             clear()
         }
-    }, [script])
+    }, [])
 
     useEffect(() => {
         // setScript(undefined)
@@ -107,7 +107,6 @@ const ComponentsV3: FC<any> = ({ component_type, navigateView }) => {
 
 
     return <div >
-        {/* {JSON.stringify(script)} */}
         <Row gutter={[16, 16]}>
             <Col lg={6} sm={6} xs={24}>
                 <Card

@@ -242,6 +242,7 @@ const AnalysisNodePage = ({
 				</Space>
 			}
 		>
+			
 			{error ? (
 				<Alert type="error" showIcon message="Failed to load analysis nodes" style={{ marginBottom: 12 }} />
 			) : null}

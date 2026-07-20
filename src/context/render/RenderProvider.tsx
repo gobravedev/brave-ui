@@ -24,6 +24,7 @@ export const RenderProvider: FC<any> = ({ children }) => {
     const [toolsPanelView, setToolsPanelView] = useState<any>("inputFileComponent")
     const [analysisId, setAnalysisId] = useState<any>(null)
     const [script, setScript] = useState<any>(null)
+    const [loading, setLoading] = useState<boolean>(false)
 
     const [analysisNodeId, setAnalysisNodeId] = useState<any>(null)
 
@@ -54,7 +55,7 @@ export const RenderProvider: FC<any> = ({ children }) => {
         }
     }, [])
     const { register, unregister } = useComponentStore();
-  
+
     useEffect(() => {
         if (analysisId) {
             register("analysis", analysisId, instance);
@@ -96,6 +97,8 @@ export const RenderProvider: FC<any> = ({ children }) => {
         setRequestParam(null)
         setOpenAnalysis([])
         setFormData(null)
+        setScript(null)
+        setAnalysisNodeId(null)
     }
     const buildRequestParams = () => {
         let dataComponentIds: any = []
@@ -104,7 +107,7 @@ export const RenderProvider: FC<any> = ({ children }) => {
 
         }
         const requestParams = {
-            analysis_type:"workflow",
+            analysis_type: "workflow",
             component_id: relation.component_id,
             data_component_ids: JSON.stringify(dataComponentIds),
             // component_parent_ids_map: componentParentIdsMap,
@@ -149,15 +152,17 @@ export const RenderProvider: FC<any> = ({ children }) => {
         return {
             requestParam: resp.data.request_param,
             formJson: resp.data.formJson,
-            dataMap:resp.data.analysis_result,
+            dataMap: resp.data.analysis_result,
             // databases: resp.data.databases,
             status: resp.data.status,
         }
     }
     const loadParams = async (force = false) => {
         console.log("sideView", sideView)
+
         // debugger
         if (sideView == "editParamsPanel") {
+            setLoading(true)
             if (analysisNodeId) {
                 const data = await loadNodeAnalysis(analysisNodeId)
                 setFormStatus(data.status)
@@ -194,15 +199,16 @@ export const RenderProvider: FC<any> = ({ children }) => {
                 const resp = await getScriptFormApi(script.id)
                 console.log(resp)
                 setRequestParam({
-                    requestParam:{
+                    requestParam: {
                         script_id: script.component_id,
-                        analysis_type:"script"
+                        analysis_type: "script"
                     },
                     dataMap: { ...resp.data.analysis_result },
                     formJson: resp.data.formJson,
                 })
 
             }
+            setLoading(false)
         }
 
     }
@@ -266,7 +272,9 @@ export const RenderProvider: FC<any> = ({ children }) => {
                 formStatus,
                 setFormStatus,
                 setScript,
-                script
+                script,
+                loading,
+                setLoading
 
             }}
         >

@@ -1,4 +1,4 @@
-import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Tooltip, Space } from "antd";
+import { Button, Input, Popover, Spin, Table, Image, Typography, Collapse, Flex, Card, Skeleton, Tag, Tabs, Row, Col, Popconfirm, Drawer, Form, Tooltip, Space, Empty } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { FC, forwardRef, lazy, Suspense, useEffect, useImperativeHandle, useRef, useState } from "react";
 import axios from "axios";
@@ -11,7 +11,7 @@ import { useStoreRender } from "@/context/render/RenderProvider";
 import { useSideViewContext } from "@/context/side/SideViewContext";
 const EditParamsPanel: FC<any> = () => {
     const [form] = Form.useForm()
-    const { requestParam, analysisNodeId, formStatus, setAnalysisNodeId, relation, setAnalysisId, loadParams, analysisId } = useStoreRender()
+    const { requestParam, analysisNodeId, formStatus, setAnalysisNodeId, relation, setAnalysisId, loadParams, analysisId,loading } = useStoreRender()
     const { setSideView, sideView, sideOptions, setSideOptions } = useSideViewContext();
 
     // const addedProject = Form.useWatch((values: any) => values?.addedProject, form);
@@ -45,7 +45,7 @@ const EditParamsPanel: FC<any> = () => {
     const [resultData, setResultData] = useState<any>()
 
     // const navigate = useNavigate()
-    const [loading, setLoading] = useState<any>()
+    // const [loading, setLoading] = useState<any>()
 
     // const loadData = async () => {
     //     // if (type && bizKey) {
@@ -64,36 +64,36 @@ const EditParamsPanel: FC<any> = () => {
     //     })
     //     setResultData(resp.data)
     // }
-    const loadAnalysis = async (analysisId: any) => {
-        setLoading(true)
-        const resp = await axios.post(`/analysis/edit-params/${analysisId}`)
-        jobStatus.current = resp.data?.job_status
+    // const loadAnalysis = async (analysisId: any) => {
+    //     setLoading(true)
+    //     const resp = await axios.post(`/analysis/edit-params/${analysisId}`)
+    //     jobStatus.current = resp.data?.job_status
 
-        setData(resp.data)
-        setParsms({
-            requestParam: resp.data.request_param,
-            dataMap: { ...resp.data.analysis_result, first_data_key: getFirstKey(resp.data.analysis_result) },
-            formJson: resp.data.formJson,
-            databases: resp.data.databases,
-            upstreamFormJson: resp.data.upstreamFormJson,
-            status: resp.data.status,
-        })
+    //     setData(resp.data)
+    //     setParsms({
+    //         requestParam: resp.data.request_param,
+    //         dataMap: { ...resp.data.analysis_result, first_data_key: getFirstKey(resp.data.analysis_result) },
+    //         formJson: resp.data.formJson,
+    //         databases: resp.data.databases,
+    //         upstreamFormJson: resp.data.upstreamFormJson,
+    //         status: resp.data.status,
+    //     })
 
-        // await loadAnalysisResult(JSON.parse(resp.data.request_param.data_component_ids))
-        setResultData(resp.data.analysis_result)
-        form.resetFields()
-        // console.log(resp.data.request_param)
-        form.setFieldsValue(resp.data.request_param)
-        form.setFieldValue("anno", 6491)
-        // console.log([...resp.data.content?.formJson || [],...resp.data?.inputFormJson || []])
-        // console.log(resp.data.content?.formJson)
-        // console.log(resp.data?.inputFormJson)
-        // setTimeout(() => {
-        //     form.setFieldsValue(resp.data.request_param)
+    //     // await loadAnalysisResult(JSON.parse(resp.data.request_param.data_component_ids))
+    //     setResultData(resp.data.analysis_result)
+    //     form.resetFields()
+    //     // console.log(resp.data.request_param)
+    //     form.setFieldsValue(resp.data.request_param)
+    //     form.setFieldValue("anno", 6491)
+    //     // console.log([...resp.data.content?.formJson || [],...resp.data?.inputFormJson || []])
+    //     // console.log(resp.data.content?.formJson)
+    //     // console.log(resp.data?.inputFormJson)
+    //     // setTimeout(() => {
+    //     //     form.setFieldsValue(resp.data.request_param)
 
-        // }, 50);
-        setLoading(false)
-    }
+    //     // }, 50);
+    //     setLoading(false)
+    // }
 
 
 
@@ -126,7 +126,7 @@ const EditParamsPanel: FC<any> = () => {
 
 
 
-    return <>
+    return <Spin spinning={loading}>
         {/* {JSON.stringify(requestParam)} */}
         {/* {relationId} */}
         {/* {JSON.stringify(params.formJson)} */}
@@ -193,8 +193,8 @@ const EditParamsPanel: FC<any> = () => {
                     // callback && callback()
                 }} ></CreateOrUpdateParsms>
 
-        </> : <Skeleton active></Skeleton>}
-    </>
+        </> : <Empty ></Empty>}
+    </Spin>
 }
 
 export default EditParamsPanel
