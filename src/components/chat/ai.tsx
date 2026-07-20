@@ -11,6 +11,7 @@ import { sseClient } from '@/sse';
 import { http } from '@/api/client/http';
 import { getActiveProjectApi } from '@/api/project';
 import { invoke } from '@/core/ui-system/invokeV2';
+import { useStoreRender } from '@/context/render/RenderProvider';
 const { Text } = Typography;
 
 type LLMSessionRecord = {
@@ -40,6 +41,7 @@ interface CustomInput {
     biz_id: string;
     project_id: string;
     is_save_prompt?: boolean;
+    env?:any
 
 }
 
@@ -229,6 +231,7 @@ function createWSFetchAdapter(handlers?: {
                     project_id: params.project_id,
                     is_save_prompt: params.is_save_prompt,
                     require_ack: false,
+                    env: params.env,
                 });
 
                 if (!sent) {
@@ -810,6 +813,7 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
     const sessionMapRef = React.useRef<Record<string, LLMSessionRecord>>({});
     const activeConversationKeyRef = React.useRef<string>('');
     const skipNextAutoLoadSessionKeyRef = React.useRef<string>('');
+    const { script, setScript, clear } = useStoreRender()
 
     useEffect(() => {
         sessionMapRef.current = sessionMap;
@@ -1356,6 +1360,12 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
                                 project_id: active.project_id || currentProjectId,
                                 session_id: active.id,
                                 is_save_prompt: true,
+                                ...(script ? {
+                                    env: {
+                                        script_id: script?.id,
+                                        type:"script",
+                                    }
+                                } : {})
                             });
                             setContent('');
                         }}
