@@ -227,11 +227,11 @@ const StorePages = forwardRef<any, any>(({ onOk, onCancel, storeType = "workflow
                                                     okText="Install"
                                                     title={`Install ${item.name} ?`}
                                                     onConfirm={async () => {
-                                                        await axios.post(
-                                                            `/install-relation`,
+                                                        await http.post(
+                                                            `/workflow/install-workflow/${item.store_id}`,
                                                             {
-                                                                force: true,
-                                                                store_id: item.store_id,
+                                                                // force: true,
+                                                                // store_id: item.store_id,
                                                             },
                                                             {
                                                                 timeout: 60000,

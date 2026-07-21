@@ -7,7 +7,7 @@ import TextArea from "antd/es/input/TextArea"
 import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 import { ur } from "@faker-js/faker"
 import { http } from "@/api/client/http"
-const PublishToolsV2: FC<any> = ({ relation_id, callback }) => {
+const PublishToolsV2: FC<any> = ({ workflow_id, callback }) => {
     // const [force, setForce] = useState(true)
     const [data, setData] = useState<any>(null)
     const [loading, setLoading] = useState(false)
@@ -16,7 +16,7 @@ const PublishToolsV2: FC<any> = ({ relation_id, callback }) => {
 
     const loadData = async () => {
         setLoading(true)
-        const resp = await axios.post(`/find-tools-publish/${relation_id}`)
+        const resp = await axios.post(`/find-tools-publish/${workflow_id}`)
         setData(resp.data)
         form.setFieldsValue({
             version: resp.data.version,
@@ -30,7 +30,7 @@ const PublishToolsV2: FC<any> = ({ relation_id, callback }) => {
 
     useEffect(() => {
         loadData()
-    }, [relation_id])
+    }, [workflow_id])
 
     return <Card size="small"
         extra={<Space>
@@ -40,7 +40,7 @@ const PublishToolsV2: FC<any> = ({ relation_id, callback }) => {
 
             <Button size="small" color="cyan" variant="solid" onClick={async () => {
                 // /generate-tools-json
-                const resp = await http.post(`/workflow/${relation_id}/generate-workflow-json`)
+                const resp = await http.post(`/workflow/${workflow_id}/generate-workflow-json`)
                 message.success("Generated successfully")
             }}> Generate </Button>
     
@@ -50,9 +50,9 @@ const PublishToolsV2: FC<any> = ({ relation_id, callback }) => {
                 // publishToStore(relation_id, record.store_id)
                 // callback && callback()
                 const values = await form.validateFields()
-                const resp = await axios.post(`/publish-relation`, {
+                const resp = await http.post(`/workflow/publish-workflow`, {
                     ...values,
-                    relation_id: relation_id,
+                    workflow_id: workflow_id,
                     // force: force
                 })
                 message.success("Published successfully")
@@ -86,12 +86,12 @@ const PublishToolsV2: FC<any> = ({ relation_id, callback }) => {
                 <Form.Item name={"version"} label="Version" rules={[{ required: true, message: 'Please input version!' }]}>
                     <Input ></Input>
                 </Form.Item>
-                <Form.Item label="Update Info" name="update_info">
+                <Form.Item label="message" name="update_info">
                     <TextArea placeholder="Update Info" />
                 </Form.Item>
-                <Form.Item label="Force" name="force" initialValue={true} >
+                {/* <Form.Item label="Force" name="force" initialValue={true} >
                     <Switch size="small" checkedChildren="Force" unCheckedChildren="Force" />
-                </Form.Item>
+                </Form.Item> */}
             </Form>
         </Flex>
 

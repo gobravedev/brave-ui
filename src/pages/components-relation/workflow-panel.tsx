@@ -753,6 +753,7 @@ const Pipeline: FC<any> = ({ }) => {
                             ref={leftRef}
                             store_id={component?.store_id}
                             relation_id={component?.relation_id}
+                            workflow_id={workflow?.id}
                             callback={loadData}
                             component_id={component?.component_id}
                             component={component}
