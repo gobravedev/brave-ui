@@ -202,7 +202,7 @@ export const RenderProvider: FC<any> = ({ children }) => {
                 console.log(resp)
                 setRequestParam({
                     requestParam: {
-                        script_id: script.component_id,
+                        script_id: script.id,
                         analysis_type: "script"
                     },
                     dataMap: { ...resp.data.analysis_result },

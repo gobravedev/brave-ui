@@ -40,6 +40,7 @@ import { useSideViewContext } from "@/context/side/SideViewContext"
 import ViewResolver from "@/core/ui-renderer/ViewResolver"
 import { invoke } from "@/core/ui-system/invokeV2"
 import WorkflowPage from "@/components/workflow-page/workflow-page"
+import { http } from "@/api/client/http"
 
 const Pipeline: FC<any> = ({ }) => {
 
@@ -184,12 +185,12 @@ const Pipeline: FC<any> = ({ }) => {
         })
     }
 
-    const getData = async (relation_id: any) => {
+    const getData = async (workflowId: any) => {
         // let api = `/get-pipeline-v2/${name}?component_type=${component_type}`
         // if (component_type == "script") {
         //     api = `/get-component-parent/${name}?component_type=${component_type}`
         // }
-        const resp = await axios.get(`/component/get-components-v2/${relation_id}`)
+        const resp = await http.get(`/workflow/${workflowId}/get-workflow`)
         // console.log(resp.data)
         let pipeline = resp.data
         if ("content" in pipeline) {
@@ -203,9 +204,9 @@ const Pipeline: FC<any> = ({ }) => {
         return pipeline
     }
     const loadData = async () => {
-        if (workflow?.relation_id) {
+        if (workflow?.id) {
             setLoading(true)
-            const pipeline = await getData(workflow?.relation_id)
+            const pipeline = await getData(workflow?.id)
             setComponent(pipeline)
         }
 
@@ -576,9 +577,9 @@ const Pipeline: FC<any> = ({ }) => {
                         operatePipeline.openModal("modalG", pipeline)
                     }}>Dependencies</Button> */}
 
-                            <Button size="small" color="cyan" variant="outlined" onClick={() => {
+                            {/* <Button size="small" color="cyan" variant="outlined" onClick={() => {
                                 openModals("metadataModal", { ...component, operatePipeline: operatePipeline })
-                            }}>Metadata</Button>
+                            }}>Metadata</Button> */}
 
                             {/* <Button size="small" color="cyan" variant="solid" onClick={() => {
                         openModal("createORUpdateCompnentRelation", {
@@ -754,6 +755,7 @@ const Pipeline: FC<any> = ({ }) => {
                             store_id={component?.store_id}
                             relation_id={component?.relation_id}
                             workflow_id={workflow?.id}
+                            workflow={workflow}
                             callback={loadData}
                             component_id={component?.component_id}
                             component={component}

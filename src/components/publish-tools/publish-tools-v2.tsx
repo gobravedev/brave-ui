@@ -7,42 +7,41 @@ import TextArea from "antd/es/input/TextArea"
 import { useGlobalMessage } from "@/hooks/useGlobalMessage"
 import { ur } from "@faker-js/faker"
 import { http } from "@/api/client/http"
-const PublishToolsV2: FC<any> = ({ workflow_id, callback }) => {
+const PublishToolsV2: FC<any> = ({ workflow, callback }) => {
     // const [force, setForce] = useState(true)
-    const [data, setData] = useState<any>(null)
+    // const [data, setData] = useState<any>(null)
     const [loading, setLoading] = useState(false)
     const [form] = Form.useForm()
     const message = useGlobalMessage()
 
-    const loadData = async () => {
-        setLoading(true)
-        const resp = await axios.post(`/find-tools-publish/${workflow_id}`)
-        setData(resp.data)
-        form.setFieldsValue({
-            version: resp.data.version,
-            update_info: resp.data.update_info,
-            url: resp.data.url,
-        })
-        setLoading(false)
+    // const loadData = async () => {
+    //     setLoading(true)
+    //     const resp = await axios.post(`/find-tools-publish/${workflow_id}`)
+    //     setData(resp.data)
+    //     form.setFieldsValue({
+    //         version: resp.data.version,
+    //         update_info: resp.data.update_info,
+    //         url: resp.data.url,
+    //     })
+    //     setLoading(false)
 
-    }
+    // }
 
 
     useEffect(() => {
-        loadData()
-    }, [workflow_id])
+        form.setFieldsValue(workflow)
+    }, [workflow])
 
     return <Card size="small"
         extra={<Space>
-            {data?.store_status && <Tag>
-                {data?.store_status}
+            {workflow?.store_id && <Tag>
+                {workflow?.store_id }
             </Tag>}
 
-            <Button size="small" color="cyan" variant="solid" onClick={async () => {
-                // /generate-tools-json
-                const resp = await http.post(`/workflow/${workflow_id}/generate-workflow-json`)
+            {/* <Button size="small" color="cyan" variant="solid" onClick={async () => {
+                const resp = await http.post(`/workflow/${workflow?.id}/generate-workflow-json`)
                 message.success("Generated successfully")
-            }}> Generate </Button>
+            }}> Generate </Button> */}
     
 
 
@@ -52,17 +51,17 @@ const PublishToolsV2: FC<any> = ({ workflow_id, callback }) => {
                 const values = await form.validateFields()
                 const resp = await http.post(`/workflow/publish-workflow`, {
                     ...values,
-                    workflow_id: workflow_id,
+                    workflow_id: workflow?.id,
                     // force: force
                 })
                 message.success("Published successfully")
                 callback && callback()
-                loadData()
+                // loadData()
 
             }}>Publish Store</Button>
 
-            {data?.store_status && <Button size="small" color="cyan" variant="solid" onClick={() => {
-                invoke.publishStore.open(data, {
+            {workflow?.store_id && <Button size="small" color="cyan" variant="solid" onClick={() => {
+                invoke.publishStore.open(workflow, {
                     footer: null,
                     width: 640,
                     title: "Publish Store"
@@ -70,10 +69,11 @@ const PublishToolsV2: FC<any> = ({ workflow_id, callback }) => {
             }}>Publish Remote</Button>
             }
 
-            <Button size="small" color="cyan" variant="solid" icon={<RedoOutlined />} onClick={loadData}></Button>
+            {/* <Button size="small" color="cyan" variant="solid" icon={<RedoOutlined />} onClick={loadData}></Button> */}
 
         </Space>}
     >
+        {/* {JSON.stringify(workflow)} */}
         <Flex justify="center">
             <Form form={form} layout="vertical" style={{ width: "50%" }} disabled={loading}>
                 <Form.Item
