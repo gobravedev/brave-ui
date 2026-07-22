@@ -265,6 +265,7 @@ const ScriptContent: FC<any> = ({ data, form }) => {
                 [{ label: "python", value: "python" },
                 { label: "nextflow", value: "nextflow" },
                 { label: "shell", value: "shell" },
+                 { label: "qmd", value: "qmd" },
                 { label: "R", value: "r" }]}></Select>
         </Form.Item>
         <Form.Item  name={"io_schema"} label="io_schema">
