@@ -343,7 +343,7 @@ const AnalysisNodesReport: FC<AnalysisNodesReportProps> = ({ analysis_id }) => {
                 <Col xs={24} lg={8} xl={7}>
                     <Card
                         size="small"
-                        title={`Analysis (${analysis_id && analysis_id?.slice(-4)})`}
+                        title={`Analysis (${analysis_id})`}
                         styles={{ body: { padding: "8px" } }}
                         extra={<Space>
                             <Button loading={loading} onClick={loadData} icon={<RedoOutlined />} size="small"></Button>

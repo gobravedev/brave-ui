@@ -51,6 +51,7 @@ export const RenderProvider: FC<any> = ({ children }) => {
             dagStarted: (args: any) => {
                 updateFormStatus(args)
             }, dagDone: (args: any) => {
+                console.log(args)
                 updateFormStatus(args)
             }
 
@@ -60,6 +61,7 @@ export const RenderProvider: FC<any> = ({ children }) => {
 
     useEffect(() => {
         if (analysisId) {
+            console.log(analysisId)
             register("analysis", analysisId, instance);
             return () => {
                 // debugger

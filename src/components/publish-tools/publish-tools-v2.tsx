@@ -34,6 +34,7 @@ const PublishToolsV2: FC<any> = ({ workflow, callback }) => {
 
     return <Card size="small"
         extra={<Space>
+         
             {workflow?.store_id && <Tag>
                 {workflow?.store_id }
             </Tag>}
@@ -43,7 +44,6 @@ const PublishToolsV2: FC<any> = ({ workflow, callback }) => {
                 message.success("Generated successfully")
             }}> Generate </Button> */}
     
-
 
             <Button size="small" color="cyan" variant="solid" onClick={async () => {
                 // publishToStore(relation_id, record.store_id)
@@ -73,6 +73,8 @@ const PublishToolsV2: FC<any> = ({ workflow, callback }) => {
 
         </Space>}
     >
+           {/* {JSON.stringify(workflow)} */}
+
         {/* {JSON.stringify(workflow)} */}
         <Flex justify="center">
             <Form form={form} layout="vertical" style={{ width: "50%" }} disabled={loading}>

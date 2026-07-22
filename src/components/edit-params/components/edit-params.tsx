@@ -147,7 +147,7 @@ const EditParamsPanel: FC<any> = () => {
                     <Tag color="green" closable onClose={() => {
                         setAnalysisId(null)
                         form.resetFields()
-                    }}>Analysis</Tag>
+                    }}>Analysis({analysisId})</Tag>
                 </Tooltip>}
                 {analysisNodeId && <Tooltip title={analysisNodeId}>
                     <Tag color="blue" closable onClose={() => {

@@ -92,8 +92,8 @@ const AnalysisPage = ({
 		},
 		{
 			title: "Analysis ID",
-			dataIndex: "analysis_id",
-			key: "analysis_id",
+			dataIndex: "id",
+			key: "id",
 			width: 220,
 			ellipsis: true,
 			render: (value: string) => value || "-",

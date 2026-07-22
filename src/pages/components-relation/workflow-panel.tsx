@@ -755,7 +755,7 @@ const Pipeline: FC<any> = ({ }) => {
                             store_id={component?.store_id}
                             relation_id={component?.relation_id}
                             workflow_id={workflow?.id}
-                            workflow={workflow}
+                            workflow={component}
                             callback={loadData}
                             component_id={component?.component_id}
                             component={component}
