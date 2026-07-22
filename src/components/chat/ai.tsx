@@ -3,13 +3,14 @@ import { Bubble, Conversations, Sender, ThoughtChain } from '@ant-design/x';
 import { AbstractChatProvider, DefaultMessageInfo, useXChat, XRequest, XRequestOptions } from '@ant-design/x-sdk';
 import { Button, Flex, GetProp, Popconfirm, Popover, Space, Tag, Typography, theme } from 'antd';
 import React, { FC, forwardRef, useEffect, useImperativeHandle } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import XMarkdown from '@ant-design/x-markdown';
 import { CheckCircleOutlined, ClearOutlined, CommentOutlined, DeleteOutlined, InfoCircleOutlined, LoadingOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons';
 import { useGlobalMessage } from '@/hooks/useGlobalMessage';
 import { sseClient } from '@/sse';
 import { http } from '@/api/client/http';
 import { getActiveProjectApi } from '@/api/project';
+import { setUserItem } from '@/store/userSlice';
 import { invoke } from '@/core/ui-system/invokeV2';
 import { useStoreRender } from '@/context/render/RenderProvider';
 const { Text } = Typography;
@@ -41,7 +42,7 @@ interface CustomInput {
     biz_id: string;
     project_id: string;
     is_save_prompt?: boolean;
-    env?:any
+    env?: any
 
 }
 
@@ -796,7 +797,8 @@ const useLocale = () => {
 };
 
 const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
-    const { project, userInfo } = useSelector((state: any) => state.user)
+    const { project, userInfo, activeLLMSessionId } = useSelector((state: any) => state.user)
+    const dispatch = useDispatch()
     const { token } = theme.useToken();
 
     const [content, setContent] = React.useState('');
@@ -813,7 +815,7 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
     const sessionMapRef = React.useRef<Record<string, LLMSessionRecord>>({});
     const activeConversationKeyRef = React.useRef<string>('');
     const skipNextAutoLoadSessionKeyRef = React.useRef<string>('');
-    const { script, setScript, clear } = useStoreRender()
+    const { script, analysisNodeId } = useStoreRender()
 
     useEffect(() => {
         sessionMapRef.current = sessionMap;
@@ -982,9 +984,12 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
 
     const loadConversationMessages = React.useCallback(async (llmSessionID: number) => {
         if (!llmSessionID) {
+            dispatch(setUserItem({ activeLLMSessionId: null }))
             setMessages([]);
             return;
         }
+
+        dispatch(setUserItem({ activeLLMSessionId: String(llmSessionID) }))
 
         const resp = await http.get<LLMConversationRecord[]>(`/llm/conversation/list?session_id=${llmSessionID}`);
         const rows = Array.isArray(resp.data) ? resp.data : [];
@@ -1081,7 +1086,7 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
 
             return [...serverMessages, ...mergedPending];
         });
-    }, [setMessages]);
+    }, [dispatch, setMessages]);
 
     const toConversationItem = React.useCallback((item: LLMSessionRecord): ConversationItemType => {
         const title = (item.title || '').trim();
@@ -1108,9 +1113,25 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
         if (currentKey && !nextMap[currentKey]) {
             setActiveConversationKey('');
             activeSessionIdRef.current = '';
+            dispatch(setUserItem({ activeLLMSessionId: null }))
             setMessages([]);
+            return;
         }
-    }, [toConversationItem, setMessages]);
+
+        // Restore the previously active session on init if it still exists.
+        if (!currentKey) {
+            const storedKey = String(activeLLMSessionId || '').trim();
+            if (storedKey && nextMap[storedKey]) {
+                setActiveConversationKey(storedKey);
+                activeSessionIdRef.current = storedKey;
+                return;
+            }
+
+            if (storedKey && !nextMap[storedKey]) {
+                dispatch(setUserItem({ activeLLMSessionId: null }))
+            }
+        }
+    }, [activeLLMSessionId, dispatch, toConversationItem, setMessages]);
 
     const createSession = React.useCallback(async () => {
         const projectId = await resolveProjectId();
@@ -1175,9 +1196,10 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
         } else {
             setActiveConversationKey('');
             activeSessionIdRef.current = '';
+            dispatch(setUserItem({ activeLLMSessionId: null }))
             setMessages([]);
         }
-    }, [activeConversationKey, sessionMap, loadConversationMessages, setMessages]);
+    }, [activeConversationKey, dispatch, sessionMap, loadConversationMessages, setMessages]);
     // const [defaultMessages, setDefaultMessages] = React.useState<any>([])
     const loadHistoryMessage = React.useCallback(async () => {
         await loadSessionList();
@@ -1221,6 +1243,28 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
     useImperativeHandle(ref, () => ({
         loadHistoryMessage
     }))
+    const env = React.useMemo(() => {
+        if (analysisNodeId) {
+            return {
+                id: analysisNodeId,
+                type: "analsyisNode"
+            }
+        } else if (script) {
+            return {
+                id: script?.id,
+                type: "script"
+            }
+        }
+        return {}
+    }, [script,analysisNodeId])
+
+    const EnvTag = React.useMemo(() => {
+        if (!env) return <></>
+        // if (env?.type == "script") {
+        //     return <Tag color='processing'>{`${env?.type}`}({env?.id})</Tag>
+        // }
+        return  <Tag color='processing'>{`${env?.type}`}({env?.id})</Tag>
+    }, [env])
 
     return (
         <Flex
@@ -1241,7 +1285,12 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
                     marginBottom: 8,
                 }}
             >
-                <Tag color='processing'>{`LLM - ${biz_type} ${biz_id}`}</Tag>
+                {/* {JSON.stringify(env)} */}
+                <div>
+                    {EnvTag}
+
+
+                </div>
                 <Space>
                     <Button size='small' icon={<PlusOutlined />} onClick={async () => {
                         try {
@@ -1360,12 +1409,13 @@ const App = forwardRef<any, any>(({ biz_id, biz_type }, ref) => {
                                 project_id: active.project_id || currentProjectId,
                                 session_id: active.id,
                                 is_save_prompt: true,
-                                ...(script ? {
-                                    env: {
-                                        script_id: script?.id,
-                                        type:"script",
-                                    }
-                                } : {})
+                                env: env
+                                // ...(script ? {
+                                //     env: {
+                                //         script_id: script?.id,
+                                //         type: "script",
+                                //     }
+                                // } : {})
                             });
                             setContent('');
                         }}

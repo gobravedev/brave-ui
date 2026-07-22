@@ -14,6 +14,7 @@ const storeRepos = localStorage.getItem('storeRepos')
 const scmOrigin = localStorage.getItem('scmOrigin')
 const userInfo = localStorage.getItem('userInfo')
 const activeProjectReportId = localStorage.getItem('activeProjectReportId')
+const activeLLMSessionId = localStorage.getItem('activeLLMSessionId')
 
 export const loadActiveProject = createAsyncThunk(
     'user/loadActiveProject',
@@ -53,6 +54,7 @@ interface UserState {
     storeRepos:any;
     scmOrigin:any;
     activeProjectReportId:string | null;
+    activeLLMSessionId:string | null;
     userInfo: LoginUserInfo | null;
     componentLayout:"simple"|"complex",
     network:"UNKNOW" | "CONNECT" | "NOT_CONNECT"
@@ -76,6 +78,7 @@ const contextSlice = createSlice({
         githubToken:githubToken,
         storeRepos:storeRepos?storeRepos:"[]",
         activeProjectReportId:activeProjectReportId?activeProjectReportId:null,
+        activeLLMSessionId:activeLLMSessionId?activeLLMSessionId:null,
         userInfo: userInfo ? JSON.parse(userInfo) : null,
         componentLayout:"simple",
         network:"UNKNOW",
@@ -134,6 +137,13 @@ const contextSlice = createSlice({
                     localStorage.removeItem('activeProjectReportId')
                 }
             }
+            if (action.payload.activeLLMSessionId !== undefined) {
+                if (action.payload.activeLLMSessionId) {
+                    localStorage.setItem('activeLLMSessionId', action.payload.activeLLMSessionId)
+                } else {
+                    localStorage.removeItem('activeLLMSessionId')
+                }
+            }
             if (action.payload.userInfo !== undefined) {
                 if (action.payload.userInfo) {
                     localStorage.setItem('userInfo', JSON.stringify(action.payload.userInfo))
@@ -149,11 +159,13 @@ const contextSlice = createSlice({
             state.userInfo = null;
             state.project = "";
             state.projectObj = {};
+            state.activeLLMSessionId = null;
             localStorage.removeItem('Authorization');
             localStorage.removeItem('authorization');
             localStorage.removeItem('RefreshToken');
             localStorage.removeItem('userInfo');
             localStorage.removeItem('activeProjectReportId');
+            localStorage.removeItem('activeLLMSessionId');
         },
     },
     extraReducers: (builder) => {
