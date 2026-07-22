@@ -36,6 +36,7 @@ const importComponentLoaders = {
     outputFileComponent: () => import('@/components/result-list/output-file-component'),
     analysisResultView: () => import('@/components/analysis-result-view/analysis-reuslt-view'),
     analysisList: () => import('@/components/analysis-list'),
+    analysisPage: () => import('@/components/analysis-list/analysis-page'),
     relationDefinitionDAG: () => import('../../pages/components-relation/components/relation-definition-dag'),
 
     'workflow-input': () => import('../../pages/components-relation/pipeline/components/pipeline-input'),

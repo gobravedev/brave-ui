@@ -63,3 +63,40 @@ export const pageAnalysisNodeByProjectApi = (payload: PageRequest<AnalysisNodePa
 	return http.post<PageResponse<AnalysisNodeItem>>("/analysis/node/list-by-project-page", payload);
 };
 
+export interface AnalysisItem {
+	id: string;
+	project_id: string;
+	analysis_id: string;
+	relation_id: string;
+	analysis_name: string;
+	job_status: string;
+	server_status: string;
+	is_report: boolean;
+	cache_type: number;
+	created_at: string;
+	updated_at: string;
+}
+
+export interface AnalysisPageQuery {
+	id?: string;
+	analysis_id?: string;
+	analysis_name?: string;
+	relation_id?: string;
+	job_status?: string;
+	server_status?: string;
+	is_report?: boolean;
+	cache_type?: number;
+	sort_by?: string;
+	sort_order?: "ASC" | "DESC";
+}
+
+export interface AnalysisPageRequest {
+	page?: number;
+	page_size?: number;
+	query?: AnalysisPageQuery;
+}
+
+export const pageAnalysisByProjectApi = (payload: AnalysisPageRequest) => {
+	return http.post<PageResponse<AnalysisItem>>("/analysis/list-by-project-page", payload);
+};
+

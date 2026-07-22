@@ -14,6 +14,9 @@ import type {
 	PageResponse,
 } from "@/api/data";
 import {
+	pageAnalysisByProjectApi,
+	type AnalysisItem,
+	type AnalysisPageQuery,
 	pageAnalysisNodeByProjectApi,
 	type AnalysisNodeItem,
 	type AnalysisNodePageQuery,
@@ -268,6 +271,27 @@ export const useAnalysisNodePageQuery = (
 		query,
 		queryFn: async (payload) => {
 			const response = await pageAnalysisNodeByProjectApi(payload);
+			return response.data;
+		},
+		initialPageSize: 10,
+		...options,
+	});
+};
+
+export const useAnalysisPageQuery = (
+	query: AnalysisPageQuery,
+	options?: Omit<UsePageQueryOptions<AnalysisItem, AnalysisPageQuery>, "queryKey" | "query" | "endpoint" | "queryFn">
+) => {
+	return usePageQuery<AnalysisItem, AnalysisPageQuery>({
+		queryKey: ["analysis-page"],
+		query,
+		queryFn: async (payload) => {
+			const { page, page_size, ...queryPayload } = payload;
+			const response = await pageAnalysisByProjectApi({
+				page,
+				page_size,
+				query: queryPayload,
+			});
 			return response.data;
 		},
 		initialPageSize: 10,

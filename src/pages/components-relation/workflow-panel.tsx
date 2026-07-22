@@ -94,7 +94,7 @@ const Pipeline: FC<any> = ({ }) => {
 
     const [menus, setMenus] = useState<any[]>([])
     // const [menuKey, setMenuKey] = useState<string | null>(key)
-    const [view, setView] = useState<string>("analysisList")
+    const [view, setView] = useState<string>("analysisPage")
     const [openKeys, setOpenKeys] = useState<string[]>([]);
 
     const [componentMap, setComponentMap] = useState<any>({})
@@ -533,7 +533,7 @@ const Pipeline: FC<any> = ({ }) => {
                             {renderViewButton(view, setView, "datasetFilePage", "Input File")}
                             {renderViewButton(view, setView, "sampleProjectPage", "Input Sample")}
 
-                            {renderViewButton(view, setView, "analysisList", "Analysis")}
+                            {renderViewButton(view, setView, "analysisPage", "Analysis")}
                             {renderViewButton(view, setView, "outputFileComponent", "Output")}
 
                             {/* {renderViewButton(view, setView, "analysisTools", "Tools Panel")} */}
