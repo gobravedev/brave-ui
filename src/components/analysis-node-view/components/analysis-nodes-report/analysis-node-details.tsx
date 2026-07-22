@@ -230,7 +230,8 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                                 <Popconfirm
                                                     title={"Whether or not to stop?"}
                                                     onConfirm={async () => {
-                                                        await stopAnalysisNodeApi(selectedSampleDetail.node?.analysis_node_id, "node");
+                                                        // await stopAnalysisNodeApi(selectedSampleDetail.node?.analysis_node_id, "node");
+                                                         await http.post(`/analysis/node/stop/${analysisNodeId}`)
                                                         message.success("Stop Success");
                                                     }}
                                                 >
@@ -242,7 +243,7 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                                 <Popconfirm
                                                     title={"Whether or not to run?"}
                                                     onConfirm={async () => {
-                                                        await runAnalysisNodeApi(selectedSampleDetail.node?.analysis_node_id, "node");
+                                                        await http.post(`/analysis/${analysisNodeId}/run-node`)
                                                         message.success("run successfully");
                                                     }}
                                                 >
