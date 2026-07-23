@@ -141,7 +141,18 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                 <Space>
                     {selectedSampleDetail && (
                         <Space>
-
+                            
+                            <Button
+                                size="small"
+                                color="cyan"
+                                variant="solid"
+                                onClick={async () => {
+                                    await http.post(`/analysis-node/${selectedSampleDetail.node?.id}/publish-to-doc`)
+                                    message.success("copy success!")
+                                }}
+                            >
+                                Publish Doc
+                            </Button>
                             <Button
                                 size="small"
                                 color="cyan"
@@ -231,7 +242,7 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                                                     title={"Whether or not to stop?"}
                                                     onConfirm={async () => {
                                                         // await stopAnalysisNodeApi(selectedSampleDetail.node?.analysis_node_id, "node");
-                                                         await http.post(`/analysis/node/stop/${analysisNodeId}`)
+                                                        await http.post(`/analysis/node/stop/${analysisNodeId}`)
                                                         message.success("Stop Success");
                                                     }}
                                                 >
