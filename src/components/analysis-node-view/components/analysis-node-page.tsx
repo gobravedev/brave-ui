@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Alert, App, Button, Card, Flex, Popconfirm, Space, Table, Tag, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { DeleteOutlined, ReloadOutlined } from "@ant-design/icons";
+import { DeleteOutlined, ReloadOutlined, FileTextOutlined } from "@ant-design/icons";
 import { useAnalysisNodePageQuery } from "@/hooks/usePaginationV2";
 import type { AnalysisNodeItem } from "@/api/analysis";
 import { deleteAnalysisNodeApi } from "@/api/analysis";
@@ -9,6 +9,7 @@ import { useStoreRender } from "@/context/render/RenderProvider";
 import AnalysisNodeDetails from "./analysis-nodes-report/analysis-node-details";
 import { useComponentStore } from "@/store-zustand/components";
 import { useGlobalMessage } from "@/hooks/useGlobalMessage";
+import { http } from "@/api/client/http";
 
 const { Text } = Typography;
 
@@ -182,6 +183,25 @@ const AnalysisNodePage = ({
 		}
 	};
 
+	const [publishing, setPublishing] = useState(false);
+
+	const handlePublishToDoc = async () => {
+		if (!script_id) {
+			message.warning("No script_id available");
+			return;
+		}
+		setPublishing(true);
+		try {
+			await http.post(`/script/${script_id}/publish-to-doc`);
+			message.success("Published to doc successfully");
+			refetch();
+		} catch {
+			message.error("Failed to publish to doc");
+		} finally {
+			setPublishing(false);
+		}
+	};
+
 	useEffect(() => {
 		setQuery({
 			script_id: normalizeText(script_id),
@@ -261,6 +281,14 @@ const AnalysisNodePage = ({
 			extra={
 				<Space>
 					<Text type="secondary">Total: {total}</Text>
+					<Button
+						icon={<FileTextOutlined />}
+						onClick={handlePublishToDoc}
+						loading={publishing}
+						disabled={!script_id}
+					>
+						Publish to Doc
+					</Button>
 					<Button icon={<ReloadOutlined />} onClick={() => refetch()} loading={isFetching}>
 						Refresh
 					</Button>
