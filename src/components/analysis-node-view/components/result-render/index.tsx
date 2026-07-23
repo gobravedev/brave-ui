@@ -611,7 +611,7 @@ const HtmlPreview: FC<any> = ({ visible, onClose, params, baseURL }) => {
 }
 // export default AnalysisResultViewComp
 
-const AnalysisResultDisplay: FC<any> = ({ analsyisResult }) => {
+const AnalysisResultDisplay: FC<any> = ({ analsyisResult, prefix = "" }) => {
     const { baseURL } = useSelector((state: any) => state.user)
     const { projectObj } = useSelector((state: any) => state.user);
 
@@ -738,7 +738,7 @@ const AnalysisResultDisplay: FC<any> = ({ analsyisResult }) => {
             <div >
                 {analsyisResult.tables && Array.isArray(analsyisResult.tables) && <>
                     {analsyisResult.tables.map((item: any, index: any) => (
-                        <ComponentsRender projectObj={projectObj} key={index} {...item} baseURL={baseURL}></ComponentsRender>
+                        <ComponentsRender prefix={prefix} projectObj={projectObj} key={index} {...item} baseURL={baseURL}></ComponentsRender>
 
 
                     ))}

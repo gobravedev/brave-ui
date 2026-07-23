@@ -269,9 +269,10 @@ const MermaidBlock: FC<{ chart: string; isDarkTheme: boolean }> = ({ chart, isDa
   )
 }
 
-const Markdown: FC<any> = ({ data }) => {
+const Markdown: FC<any> = ({ data ,prefix=""}) => {
 
   const { baseURL, project, theme } = useSelector((state: any) => state.user)
+  
   const parsedResult = useMemo(() => {
     if (!data || typeof data !== 'string') return data
     const reportReplaced = data.replace(/@report:([A-Za-z0-9-]+)/g, (_match, key) => {
@@ -331,8 +332,9 @@ const Markdown: FC<any> = ({ data }) => {
         },
         img: ({ node, src, ...props }) => (
           <div className="markdown-image">
+            {src}
             <Image
-              src={resolveImageSrc(baseURL, src)}
+              src={resolveImageSrc(baseURL, `${prefix}${src}`)}
               className="markdown-image__img"
               style={{ width: '100%', height: 'auto', display: 'block' }}
               alt={props.alt || ''}

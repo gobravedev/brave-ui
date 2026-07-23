@@ -258,11 +258,11 @@ const InfoView: FC<any> = ({ data }) => {
     </div>
 }
 
-const MdView: FC<any> = ({ data }) => {
+const MdView: FC<any> = ({ data,prefix }) => {
 
     return <div >
         {/* <Alert closable message={data} type="info" /> */}
-        <Markdown data={data}></Markdown>
+        <Markdown data={data} prefix={prefix}></Markdown>
         {/* <Typography>
             <pre style={{ margin: 0 }}>
                 {data}

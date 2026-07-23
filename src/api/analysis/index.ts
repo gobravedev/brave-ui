@@ -63,6 +63,10 @@ export const pageAnalysisNodeByProjectApi = (payload: PageRequest<AnalysisNodePa
 	return http.post<PageResponse<AnalysisNodeItem>>("/analysis/node/list-by-project-page", payload);
 };
 
+export const deleteAnalysisNodeApi = (analysisNodeId: string) => {
+	return http.post<{ message: string }>(`/analysis/node/delete/${encodeURIComponent(analysisNodeId)}`);
+};
+
 export interface AnalysisItem {
 	id: string;
 	project_id: string;

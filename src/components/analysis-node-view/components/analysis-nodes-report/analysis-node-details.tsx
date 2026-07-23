@@ -141,7 +141,7 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                 <Space>
                     {selectedSampleDetail && (
                         <Space>
-                            
+
                             <Button
                                 size="small"
                                 color="cyan"
@@ -541,6 +541,7 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                         <Skeleton active paragraph={{ rows: 6 }} />
                     ) : (
                         <ViewResolver
+                            prefix={selectedSampleDetail?.url_prefix || ""}
                             analsyisResult={selectedSampleDetail.result || { images: [], tables: [], htmls: [], files: [] }}
                             view={"analysisResultDisplay"}
                         ></ViewResolver>

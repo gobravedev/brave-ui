@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert, Button, Card, Flex, Space, Table, Tag, Typography } from "antd";
+import { Alert, App, Button, Card, Flex, Popconfirm, Space, Table, Tag, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { ReloadOutlined } from "@ant-design/icons";
+import { DeleteOutlined, ReloadOutlined } from "@ant-design/icons";
 import { useAnalysisNodePageQuery } from "@/hooks/usePaginationV2";
 import type { AnalysisNodeItem } from "@/api/analysis";
+import { deleteAnalysisNodeApi } from "@/api/analysis";
 import { useStoreRender } from "@/context/render/RenderProvider";
 import AnalysisNodeDetails from "./analysis-nodes-report/analysis-node-details";
 import { useComponentStore } from "@/store-zustand/components";
+import { useGlobalMessage } from "@/hooks/useGlobalMessage";
 
 const { Text } = Typography;
 
@@ -60,6 +62,8 @@ const AnalysisNodePage = ({
 	const [selectedId, setSelectedID] = useState<string>();
 	const selectable = Boolean(onOk || onCancel);
 	const { setAnalysisNodeId, analysisNodeId } = useStoreRender()
+	const message =useGlobalMessage()
+
 	// const [nodeID,setNodeId] = useState<any>()
 	const columns: ColumnsType<AnalysisNodeItem> = [
 		{
@@ -124,12 +128,23 @@ const AnalysisNodePage = ({
 			title: "action",
 			key: "action",
 			fixed: "right",
-			width: 120,
+			width: 160,
 			render: (_: unknown, record) => (
-				<Button type="link" onClick={() => {
-					setAnalysisNodeId(record.id)
-					// setNodeId(record.id)
-				}}>View</Button>
+				<Space size="small">
+					<Button type="link" size="small" onClick={() => {
+						setAnalysisNodeId(record.id)
+					}}>View</Button>
+					<Popconfirm
+						title="Delete analysis node"
+						description="Are you sure you want to delete this analysis node?"
+						onConfirm={() => handleDelete(record.id)}
+						okText="Delete"
+						cancelText="Cancel"
+						okButtonProps={{ danger: true }}
+					>
+						<Button type="link" size="small" danger icon={<DeleteOutlined />} />
+					</Popconfirm>
+				</Space>
 			)
 		}
 	];
@@ -156,6 +171,16 @@ const AnalysisNodePage = ({
 			cacheTime: 5 * 60_000,
 		}
 	);
+
+	const handleDelete = async (id: string) => {
+		try {
+			await deleteAnalysisNodeApi(id);
+			message.success("Analysis node deleted successfully");
+			refetch();
+		} catch {
+			message.error("Failed to delete analysis node");
+		}
+	};
 
 	useEffect(() => {
 		setQuery({
@@ -305,7 +330,4 @@ const AnalysisNodePage = ({
 };
 
 export default AnalysisNodePage;
-function setNodeId(id: string) {
-	throw new Error("Function not implemented.");
-}
 
