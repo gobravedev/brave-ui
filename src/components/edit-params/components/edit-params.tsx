@@ -152,7 +152,7 @@ const EditParamsPanel: FC<any> = () => {
                 {analysisNodeId && <Tooltip title={analysisNodeId}>
                     <Tag color="blue" closable onClose={() => {
                         setAnalysisNodeId(null)
-                    }} >Node Analysis</Tag>
+                    }} >Node Analysis ({analysisNodeId})</Tag>
                 </Tooltip>}
                 {params && <>
                     <Button onClick={() => loadParams(true)} size="small" icon={<RedoOutlined></RedoOutlined>}></Button>
