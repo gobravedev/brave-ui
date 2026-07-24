@@ -536,7 +536,6 @@ const AnalysisNodeDetails: FC<AnalysisNodeDetailsProps> = ({ analysis_node_id })
                             </Space>
                         </Flex>
                     </Card>
-
                     {selectedSampleDetail.status == "running" || detailLoading ? (
                         <Skeleton active paragraph={{ rows: 6 }} />
                     ) : (

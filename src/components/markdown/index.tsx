@@ -288,6 +288,7 @@ const Markdown: FC<any> = ({ data ,prefix=""}) => {
   const markdownThemeClass = isDarkTheme ? 'markdown-theme-dark' : 'markdown-theme-light'
 
   return <div className={`markdown-wrapper ${markdownThemeClass}`}>
+    {/* {prefix} */}
     <ReactMarkdown
       children={parsedData}
       rehypePlugins={[rehypeKatex]}
@@ -332,9 +333,9 @@ const Markdown: FC<any> = ({ data ,prefix=""}) => {
         },
         img: ({ node, src, ...props }) => (
           <div className="markdown-image">
-            {src}
+            {/* {src} */}
             <Image
-              src={resolveImageSrc(baseURL, `${prefix}${src}`)}
+              src={resolveImageSrc(baseURL, `${prefix}${src}?timestamp=${Date.now()}`)}
               className="markdown-image__img"
               style={{ width: '100%', height: 'auto', display: 'block' }}
               alt={props.alt || ''}
