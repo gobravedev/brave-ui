@@ -394,8 +394,9 @@ const CreateOrUpdateParsms: FC<any> = ({ form, showCreate = false,
                                 })
                             }}>
                             {requestParam?.analysis_id ? <>Update </> : <>Create</>}</Button> */}
+                            {/* {JSON.stringify(requestParam)} */}
                         <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid" onClick={() => saveUpstreamAnalysis(true)}>
-                            {requestParam?.analysis_id ? <>Update </> : <>Create</>}</Button>
+                            {requestParam?.analysis_id || requestParam?.analysis_node_id ? <>Update </> : <>Create</>}</Button>
 
                         <Button disabled={formStatus == "running"} size="small" color="cyan" variant="solid" onClick={() => {
                             saveUpstreamAnalysis(false)

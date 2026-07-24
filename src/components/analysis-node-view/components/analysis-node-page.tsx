@@ -63,7 +63,7 @@ const AnalysisNodePage = ({
 	const [selectedId, setSelectedID] = useState<string>();
 	const selectable = Boolean(onOk || onCancel);
 	const { setAnalysisNodeId, analysisNodeId } = useStoreRender()
-	const message =useGlobalMessage()
+	const message = useGlobalMessage()
 
 	// const [nodeID,setNodeId] = useState<any>()
 	const columns: ColumnsType<AnalysisNodeItem> = [
@@ -71,6 +71,8 @@ const AnalysisNodePage = ({
 			title: "Node Name",
 			dataIndex: "node_name",
 			key: "node_name",
+			width: 150,
+
 			ellipsis: true,
 			render: (value: string) => value || "-",
 		},
@@ -295,7 +297,7 @@ const AnalysisNodePage = ({
 				</Space>
 			}
 		>
-			
+
 			{error ? (
 				<Alert type="error" showIcon message="Failed to load analysis nodes" style={{ marginBottom: 12 }} />
 			) : null}

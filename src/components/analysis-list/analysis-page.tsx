@@ -79,7 +79,7 @@ const AnalysisPage = ({
 }: AnalysisPageProps) => {
 	const [selectedId, setSelectedID] = useState<string>();
 	const selectable = Boolean(onOk || onCancel);
-	const { setAnalysisId,analysisId } = useStoreRender();
+	const { setAnalysisId, analysisId } = useStoreRender();
 	const { register, unregister } = useComponentStore();
 
 	const columns: ColumnsType<AnalysisItem> = [
@@ -87,6 +87,8 @@ const AnalysisPage = ({
 			title: "Analysis Name",
 			dataIndex: "analysis_name",
 			key: "analysis_name",
+			width: 150,
+
 			ellipsis: true,
 			render: (value: string) => value || "-",
 		},
@@ -326,10 +328,10 @@ const AnalysisPage = ({
 				</Flex>
 			)}
 
-            {analysisId && <>
-            
-                <AnalysisNodePanel></AnalysisNodePanel>
-            </>}
+			{analysisId && <>
+
+				<AnalysisNodePanel></AnalysisNodePanel>
+			</>}
 		</Card>
 	);
 };

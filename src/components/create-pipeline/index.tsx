@@ -269,7 +269,8 @@ const ScriptContent: FC<any> = ({ data, form }) => {
                 { label: "R", value: "r" }]}></Select>
         </Form.Item>
         <Form.Item  name={"io_schema"} label="io_schema">
-            <TextArea ></TextArea>
+            {/* <TextArea ></TextArea> */}
+            <TextAreaComp templete={""}></TextAreaComp>
         </Form.Item>
         <Form.Item name={"content"} label="content" >
             {/* <TextAreaComp templete={""}></TextAreaComp> */}
